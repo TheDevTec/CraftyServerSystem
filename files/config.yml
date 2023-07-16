@@ -19,6 +19,7 @@ warp:
   - "oopoxonoo"
   # placeholder: {page}, {nextPage}, {previousPage}
   # actions: WARP_PLACE, PREVIOUS_PAGE, NEXT_PAGE
+  # https://github.com/TheDevTec/TheAPI/wiki/ItemMaker
   items:
     o:
       icon: "BLACK_STAINED_GLASS_PANE"

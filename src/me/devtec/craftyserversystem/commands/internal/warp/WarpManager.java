@@ -9,6 +9,7 @@ import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
 import me.devtec.craftyserversystem.Loader;
+import me.devtec.craftyserversystem.commands.internal.Warp;
 import me.devtec.craftyserversystem.managers.cooldown.CooldownHolder;
 import me.devtec.shared.dataholder.Config;
 import me.devtec.theapi.bukkit.game.Position;
@@ -82,11 +83,16 @@ public class WarpManager {
 		WarpInfo info;
 		warps.put(name.toLowerCase(), info = new WarpInfo(pos));
 		info.setIcon(new ItemStack(Material.STONE));
+		Warp.callMenuUpdate();
 		return info;
 	}
 
 	public boolean delete(String name) {
-		return warps.remove(name.toLowerCase()) != null;
+		try {
+			return warps.remove(name.toLowerCase()) != null;
+		} finally {
+			Warp.callMenuUpdate();
+		}
 	}
 
 	public Set<String> getWarps() {
