@@ -1,5 +1,76 @@
 prefix: "&6&lS&f&lerver &8&l» &7"
+
 fly:
   anti-fall-damage-listener: true
+
 god:
   anti-void-damage-listener: true
+
+warp:
+  # When you use command /warp as Player, menu with warps will be opened to you instead of help message
+  enable-menu: true
+  # placeholder: {page}, {totalPages}
+  title: "&6&lW&f&larps &7{page}/{totalPages}"
+  # Space is warp place.
+  slots:
+  - "ooooooooo"
+  - "         "
+  - "         "
+  - "oopoxonoo"
+  # placeholder: {page}, {nextPage}, {previousPage}
+  # actions: WARP_PLACE, PREVIOUS_PAGE, NEXT_PAGE
+  items:
+    o:
+      icon: "BLACK_STAINED_GLASS_PANE"
+      displayName: "&c"
+    p:
+      action: PREVIOUS
+      empty:
+        icon: "BLACK_STAINED_GLASS_PANE"
+        displayName: "&c"
+      available:
+        icon: "PLAYER_HEAD"
+        displayName: "&8&l« &7Previous Page"
+        head:
+          owner: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvN2EyYzEyY2IyMjkxODM4NGUwYTgxYzgyYTFlZDk5YWViZGNlOTRiMmVjMjc1NDgwMDk3MjMxOWI1NzkwMGFmYiJ9fX0="
+          type: "VALUES"
+    n:
+      action: NEXT
+      empty:
+        icon: "BLACK_STAINED_GLASS_PANE"
+        displayName: "&c"
+      available:
+        icon: "PLAYER_HEAD"
+        displayName: "&7Next Page &8&l»"
+        head:
+          owner: "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMjkxYWM0MzJhYTQwZDdlN2E2ODdhYTg1MDQxZGU2MzY3MTJkNGYwMjI2MzJkZDUzNTZjODgwNTIxYWYyNzIzYSJ9fX0="
+          type: "VALUES"
+    x:
+      action: CLOSE
+      icon: "BARRIER"
+      displayName: "&cClose"
+  warp_lore:
+    # placeholder: {warp}, {permission}
+    withPerm:
+    - ""
+    - " &8&l» &cRequire permission"
+    - " &8&l» &7Click to warp"
+    - ""
+    # placeholder: {warp}, {cost}
+    withCost:
+    - ""
+    - " &8&l» &cCost: &e${cost}"
+    - " &8&l» &7Click to warp"
+    - ""
+    # placeholder: {warp}, {permission}, {cost}
+    withBoth:
+    - ""
+    - " &8&l» &cRequire permission"
+    - " &8&l» &cCost: &e${cost}"
+    - " &8&l» &7Click to warp"
+    - ""
+    # placeholder: {warp}
+    clear:
+    - ""
+    - " &8&l» &7Click to warp"
+    - ""

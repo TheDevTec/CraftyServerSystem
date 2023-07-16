@@ -1,6 +1,7 @@
 package me.devtec.craftyserversystem.placeholders;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.UUID;
@@ -56,5 +57,10 @@ public class PlaceholdersExecutor {
 		for (Entry<String, String> entry : placeholders.entrySet())
 			container.replace(entry.getKey(), entry.getValue());
 		return PlaceholderAPI.apply(ColorUtils.colorize(container.toString()), target);
+	}
+
+	public List<String> apply(List<String> lore) {
+		lore.replaceAll(this::apply);
+		return lore;
 	}
 }
