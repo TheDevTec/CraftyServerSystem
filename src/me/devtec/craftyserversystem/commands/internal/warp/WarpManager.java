@@ -24,6 +24,7 @@ public class WarpManager {
 	}
 
 	private WarpManager() {
+		load();
 	}
 
 	private Map<String, WarpInfo> warps = new HashMap<>();
