@@ -1,0 +1,7 @@
+name: CraftyServerSystem
+main: me.devtec.craftyserversystem.Loader
+authors: [Straikerinos]
+softdepend: [TheAPI,Vault,LuckPerms]
+web: https://spigotmc.org/resources/71147/
+version: 1.0
+api-version: '1.20'

@@ -1,0 +1,68 @@
+# global: {prefix}
+
+fly:
+  # placeholder: {admin}, {target}
+  other:
+    true:
+      target: "{prefix} Fly turned on by {admin}"
+      admin: "{prefix} Fly of {target} turned on"
+    false:
+      target: "{prefix} Fly turned off by {admin}"
+      admin: "{prefix} Fly of {target} turned off"
+  self:
+    true: "{prefix} Fly turned on"
+    false: "{prefix} Fly turned off"
+
+god:
+  # placeholder: {admin}, {target}
+  other:
+    true:
+      target: "{prefix} Immortality turned on by {admin}"
+      admin: "{prefix} Immortality of {target} turned on"
+    false:
+      target: "{prefix} Immortality turned off by {admin}"
+      admin: "{prefix} Immortality of {target} turned off"
+  self:
+    true: "{prefix} Immortality turned on"
+    false: "{prefix} Immortality turned off"
+
+heal:
+  # placeholder: {admin}, {target}
+  other:
+    target: "{prefix} You've been healed by  {admin}"
+    admin: "{prefix} You healed {target}"
+  self: "{prefix} You've been healed"
+
+feed:
+  # placeholder: {admin}, {target}
+  other:
+    target: "{prefix} You've been fed by {admin}"
+    admin: "{prefix} You've fed {target}"
+  self: "{prefix} You've been fed"
+
+warp:
+  # placeholder: {admin}, {target}, {warp}, {cost}
+  other:
+    success:
+      target: "{prefix} Warping on warp {warp} by {admin}"
+      admin: "{prefix} Warping {target} on warp {warp}"
+    failed:
+      money:
+        target: "{prefix} You don't have enough money. Teleporting to warp {warp} costs ${cost}"
+        admin: "{prefix} {target} don't have enough money. Teleporting to warp {warp} costs ${cost}"
+      perm:
+        target: "{prefix} You don't have permission to teleport to the warp {warp}"
+        admin: "{prefix} {target} don't have permission to teleport to the warp {warp}"
+  self:
+    success: "{prefix} Warping on warp {warp}"
+    failed:
+      money: "{prefix} You don't have enough money. Teleporting to warp {warp} costs ${cost}"
+      perm: "{prefix} You don't have permission to teleport to the warp {warp}"
+
+setwarp:
+  # placeholder: {admin}, {target}, {warp}, {world}, {x}, {y}, {z}, {yaw}, {pitch}
+  created: "{prefix} Created a warp {warp} on your position"
+  moved: "{prefix} Moved a warp {warp} on your position"
+
+delwarp:
+  deleted: "{prefix} Deleted a warp {warp}"

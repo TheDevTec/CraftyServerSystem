@@ -1,0 +1,25 @@
+# WARNING! These groups are shared between all commands on which they are set
+# So if you set one group on all commands, all commands will have the same cooldown as the command used. (Example)
+
+# group name
+healing:
+  # Cooldown time
+  time: 5min
+  
+  # !! Require permissions plugin like LuckPerms !!
+  # !! The value in the "time" section (see above) must be set to "per-group" !!
+  # Groups that are absent will follow "default" group time
+  per-group:
+    default: 5min
+    vip: 2min30s
+    sponzor: 1min
+  
+  # Cooldown per player or global for all
+  # Set to "true" if you want this cooldown to be global
+  isGlobal: false
+  # Permission name to bypass this cooldown
+  # Leave an empty string (bypass-perm: "") for no permissions
+  # - Cooldown cannot be bypassed by anyone or anything.
+  bypass-perm: "css.cooldown.healing"
+  
+  cooldown-message: "{prefix} Please wait {time} before using this command."

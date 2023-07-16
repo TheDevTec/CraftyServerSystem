@@ -1,0 +1,59 @@
+fly:
+  usage:
+    other: "/fly [player] {true/false}"
+  cmd: [fly]
+  perms:
+    cmd: "css.cmd.fly"
+    other: "css.cmd.fly.other"
+
+god:
+  usage:
+    other: "/god [player] {true/false}"
+  cmd: [god]
+  perms:
+    cmd: "css.cmd.god"
+    other: "css.cmd.god.other"
+
+heal:
+  usage:
+    other: "/heal {player}"
+  cmd: [heal]
+  cooldown: "healing" # group name from the cooldowns.yml file
+  perms:
+    cmd: "css.heal.god"
+    other: "css.heal.god.other"
+
+feed:
+  usage:
+    other: "/feed {player}"
+  cmd: [feed]
+  cooldown: "healing" # group name from the cooldowns.yml file
+  perms:
+    cmd: "css.cmd.feed"
+    other: "css.cmd.feed.other"
+
+warp:
+  usage:
+    cmd: "/warp [warp]"
+    other: "/warp [warp] {player}"
+  cmd: [warp]
+  perms:
+    cmd: "css.cmd.warp"
+    other: "css.cmd.warp.other"
+    # -i or -si (silent & instant)
+    instant: "css.cmd.warp.instant"
+    other-instant: "css.cmd.warp.instant"
+
+setwarp:
+  usage:
+    cmd: "/setwarp [name]"
+  cmd: [setwarp]
+  perms:
+    cmd: "css.cmd.setwarp"
+
+delwarp:
+  usage:
+    cmd: "/delwarp [warp]"
+  cmd: [delwarp]
+  perms:
+    cmd: "css.cmd.delwarp"
