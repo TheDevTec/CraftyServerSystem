@@ -5,7 +5,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.RegisteredServiceProvider;
 
-import me.devtec.craftyserversystem.Loader;
+import me.devtec.craftyserversystem.API;
 import me.devtec.shared.scheduler.Tasker;
 import net.milkbowl.vault.permission.Permission;
 
@@ -16,7 +16,7 @@ public class VaultPermissionHook implements PermissionHook {
 		new Tasker() {
 			@Override
 			public void run() {
-				if (!Loader.getPlugin().getPermissionHook().equals(VaultPermissionHook.this) || getVault())
+				if (!API.get().getPermissionHook().equals(VaultPermissionHook.this) || getVault())
 					cancel();
 			}
 		}.runRepeatingTimes(5, 5, 480);

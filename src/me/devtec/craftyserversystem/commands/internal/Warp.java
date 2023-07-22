@@ -9,7 +9,7 @@ import java.util.Map.Entry;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import me.devtec.craftyserversystem.Loader;
+import me.devtec.craftyserversystem.API;
 import me.devtec.craftyserversystem.commands.CssCommand;
 import me.devtec.craftyserversystem.commands.internal.warp.WarpInfo;
 import me.devtec.craftyserversystem.commands.internal.warp.WarpManager;
@@ -55,7 +55,7 @@ public class Warp implements CssCommand {
 
 		CommandExecutor<CommandSender> main;
 
-		Config config = Loader.getPlugin().getConfigManager().getMain();
+		Config config = API.get().getConfigManager().getMain();
 		if (config.getBoolean("warp.enable-menu")) {
 			updateMenu(config);
 			main = (sender, structure, args) -> {

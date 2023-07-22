@@ -4,7 +4,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import me.devtec.craftyserversystem.Loader;
+import me.devtec.craftyserversystem.API;
 import me.devtec.craftyserversystem.managers.cooldown.CooldownHolder;
 import me.devtec.theapi.bukkit.BukkitLoader;
 import me.devtec.theapi.bukkit.game.Position;
@@ -72,10 +72,10 @@ public class WarpInfo {
 			if (!player.hasPermission(permission))
 				return WarpResult.FAILED_NO_PERMISSION;
 		if (cost > 0)
-			if (!Loader.getPlugin().getEconomyHook().has(player.getName(), cost))
+			if (!API.get().getEconomyHook().has(player.getName(), cost))
 				return WarpResult.FAILED_NO_PERMISSION;
 			else
-				Loader.getPlugin().getEconomyHook().withdraw(player.getName(), cost);
+				API.get().getEconomyHook().withdraw(player.getName(), cost);
 		if (Bukkit.isPrimaryThread())
 			player.teleport(position.toLocation());
 		else

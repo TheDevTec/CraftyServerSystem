@@ -11,7 +11,7 @@ import org.bukkit.command.BlockCommandSender;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import me.devtec.craftyserversystem.Loader;
+import me.devtec.craftyserversystem.API;
 import me.devtec.craftyserversystem.managers.cooldown.CooldownHolder;
 import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
 import me.devtec.shared.commands.manager.PermissionChecker;
@@ -26,7 +26,7 @@ public interface CssCommand {
 			return sender.hasPermission(permission);
 		if (sender.hasPermission(permission))
 			return true;
-		Loader.getPlugin().getMsgManager().sendMessageTrans("other.no-perms", PlaceholdersExecutor.i().add("permission", permission), sender);
+		API.get().getMsgManager().sendMessageTrans("other.no-perms", PlaceholdersExecutor.i().add("permission", permission), sender);
 		return false;
 	};
 
@@ -35,7 +35,7 @@ public interface CssCommand {
 			return sender.hasPermission(permission);
 		if (sender.hasPermission(permission))
 			return true;
-		Loader.getPlugin().getMsgManager().sendMessageTrans("other.no-perms", PlaceholdersExecutor.i().add("permission", permission), sender);
+		API.get().getMsgManager().sendMessageTrans("other.no-perms", PlaceholdersExecutor.i().add("permission", permission), sender);
 		return false;
 	};
 
@@ -48,13 +48,13 @@ public interface CssCommand {
 	boolean isRegistered();
 
 	default List<String> getCommands() {
-		return Loader.getPlugin().getConfigManager().getCommands().getStringList(section() + ".cmd");
+		return API.get().getConfigManager().getCommands().getStringList(section() + ".cmd");
 	}
 
 	default <T> CommandStructure<T> addBypassSettings(CommandStructure<T> cmd) {
-		String cdGroup = Loader.getPlugin().getConfigManager().getCommands().getString(section() + ".cooldown");
+		String cdGroup = API.get().getConfigManager().getCommands().getString(section() + ".cooldown");
 		if (cdGroup != null) {
-			CooldownHolder cdHolder = Loader.getPlugin().getCdManager().getOrPrepare(cdGroup);
+			CooldownHolder cdHolder = API.get().getCooldownManager().getOrPrepare(cdGroup);
 			if (cdHolder != null)
 				cmd.first().cooldownDetection((sender, structure, args) -> !cdHolder.accept((CommandSender) sender));
 		}
@@ -66,7 +66,7 @@ public interface CssCommand {
 	}
 
 	default String getPerm(String path) {
-		return Loader.getPlugin().getConfigManager().getCommands().getString(section() + ".perms." + path);
+		return API.get().getConfigManager().getCommands().getString(section() + ".perms." + path);
 	}
 
 	default void msg(CommandSender sender, String path) {
@@ -74,7 +74,7 @@ public interface CssCommand {
 	}
 
 	default void msg(CommandSender sender, String path, PlaceholdersExecutor ex) {
-		Loader.getPlugin().getMsgManager().sendMessageTrans(section() + "." + path, ex, sender);
+		API.get().getMsgManager().sendMessageTrans(section() + "." + path, ex, sender);
 	}
 
 	default void msgOut(CommandSender sender, String path) {
@@ -82,11 +82,11 @@ public interface CssCommand {
 	}
 
 	default void msgOut(CommandSender sender, String path, PlaceholdersExecutor ex) {
-		Loader.getPlugin().getMsgManager().sendMessageTrans(path, ex, sender);
+		API.get().getMsgManager().sendMessageTrans(path, ex, sender);
 	}
 
 	default void msgUsage(CommandSender sender, String path) {
-		Loader.getPlugin().getMsgManager().sendMessageFromFile(Loader.getPlugin().getConfigManager().getCommands(), section() + ".usage." + path, PlaceholdersExecutor.EMPTY, sender);
+		API.get().getMsgManager().sendMessageFromFile(API.get().getConfigManager().getCommands(), section() + ".usage." + path, PlaceholdersExecutor.EMPTY, sender);
 	}
 
 	default Collection<? extends Player> selector(CommandSender sender, String selector) {

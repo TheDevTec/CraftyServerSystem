@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.UUID;
 
-import me.devtec.craftyserversystem.Loader;
+import me.devtec.craftyserversystem.API;
 import me.devtec.shared.dataholder.StringContainer;
 import me.devtec.shared.placeholders.PlaceholderAPI;
 import me.devtec.shared.utility.ColorUtils;
@@ -16,12 +16,12 @@ public class PlaceholdersExecutor {
 	public static final PlaceholdersExecutor EMPTY = new PlaceholdersExecutor() {
 		@Override
 		public String apply(String text) {
-			return PlaceholderAPI.apply(ColorUtils.colorize(text.replace("{prefix}", Loader.getPlugin().getConfigManager().getPrefix())), null);
+			return PlaceholderAPI.apply(ColorUtils.colorize(text.replace("{prefix}", API.get().getConfigManager().getPrefix())), null);
 		}
 	};
 
 	public static PlaceholdersExecutor i() {
-		return new PlaceholdersExecutor().add("prefix", Loader.getPlugin().getConfigManager().getPrefix());
+		return new PlaceholdersExecutor().add("prefix", API.get().getConfigManager().getPrefix());
 	}
 
 	private final Map<String, String> placeholders = new HashMap<>();

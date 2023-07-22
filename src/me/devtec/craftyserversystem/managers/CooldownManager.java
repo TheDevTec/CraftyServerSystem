@@ -7,10 +7,10 @@ import javax.annotation.Nullable;
 
 import org.bukkit.command.CommandSender;
 
+import me.devtec.craftyserversystem.API;
 import me.devtec.craftyserversystem.Loader;
 import me.devtec.craftyserversystem.managers.cooldown.CooldownHolder;
 import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
-import me.devtec.shared.API;
 import me.devtec.shared.dataholder.Config;
 import me.devtec.shared.utility.StringUtils;
 import me.devtec.shared.utility.StringUtils.FormatType;
@@ -28,7 +28,7 @@ public class CooldownManager {
 	public CooldownHolder getOrPrepare(String id) {
 		CooldownHolder cd = map.get(id);
 		if (cd == null) {
-			Config cdConfig = Loader.getPlugin().getConfigManager().getCooldowns();
+			Config cdConfig = API.get().getConfigManager().getCooldowns();
 			if (cdConfig.exists(id)) {
 				String timeInString = cdConfig.getString(id + ".time", "0");
 				if (timeInString.equalsIgnoreCase("per-group")) {
@@ -55,9 +55,9 @@ public class CooldownManager {
 								return true; // Skip whole cooldown checker
 
 							long currentTime = System.currentTimeMillis() / 1000;
-							Config file = API.getUser(sender.getName());
+							Config file = me.devtec.shared.API.getUser(sender.getName());
 
-							String userGroup = Loader.getPlugin().getPermissionHook().getGroup(sender);
+							String userGroup = API.get().getPermissionHook().getGroup(sender);
 
 							long lastUsedTime = file.getLong("css.cd." + id());
 							long nextUsageIn = lastUsedTime - currentTime;
@@ -69,7 +69,7 @@ public class CooldownManager {
 								return true;
 							}
 							if (sendMessage)
-								Loader.getPlugin().getMsgManager().sendMessageFromFile(cdConfig, id + ".cooldown-message",
+								API.get().getMsgManager().sendMessageFromFile(cdConfig, id + ".cooldown-message",
 										PlaceholdersExecutor.i().add("time", StringUtils.formatDouble(FormatType.NORMAL, nextUsageIn)), sender);
 							return false;
 						}
@@ -101,7 +101,7 @@ public class CooldownManager {
 									return true;
 								}
 								if (sendMessage)
-									Loader.getPlugin().getMsgManager().sendMessageFromFile(cdConfig, id + ".cooldown-message",
+									API.get().getMsgManager().sendMessageFromFile(cdConfig, id + ".cooldown-message",
 											PlaceholdersExecutor.i().add("time", StringUtils.formatDouble(FormatType.NORMAL, nextUsageIn)), sender);
 								return false;
 							}
@@ -115,7 +115,7 @@ public class CooldownManager {
 									return true; // Skip whole cooldown checker
 
 								long currentTime = System.currentTimeMillis() / 1000;
-								Config file = API.getUser(sender.getName());
+								Config file = me.devtec.shared.API.getUser(sender.getName());
 								long lastUsedTime = file.getLong("css.cd." + id());
 								long nextUsageIn = lastUsedTime - currentTime;
 								if (nextUsageIn <= 0) {
@@ -123,7 +123,7 @@ public class CooldownManager {
 									return true;
 								}
 								if (sendMessage)
-									Loader.getPlugin().getMsgManager().sendMessageFromFile(cdConfig, id + ".cooldown-message",
+									API.get().getMsgManager().sendMessageFromFile(cdConfig, id + ".cooldown-message",
 											PlaceholdersExecutor.i().add("time", StringUtils.formatDouble(FormatType.NORMAL, nextUsageIn)), sender);
 								return false;
 							}

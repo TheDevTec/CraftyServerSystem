@@ -12,6 +12,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 
+import me.devtec.craftyserversystem.API;
 import me.devtec.craftyserversystem.Loader;
 import me.devtec.craftyserversystem.commands.CssCommand;
 import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
@@ -34,7 +35,7 @@ public class God implements CssCommand {
 		if (isRegistered())
 			return;
 
-		if (Loader.getPlugin().getConfigManager().getMain().getBoolean("god.anti-void-damage-listener")) {
+		if (API.get().getConfigManager().getMain().getBoolean("god.anti-void-damage-listener")) {
 			listener = new Listener() {
 
 				@EventHandler

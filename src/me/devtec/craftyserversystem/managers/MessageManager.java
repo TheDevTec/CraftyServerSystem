@@ -7,6 +7,7 @@ import java.util.List;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import me.devtec.craftyserversystem.API;
 import me.devtec.craftyserversystem.Loader;
 import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
 import me.devtec.shared.components.ComponentAPI;
@@ -18,7 +19,7 @@ import me.devtec.theapi.bukkit.nms.NmsProvider.ChatType;
 public class MessageManager {
 
 	public void sendMessageTrans(String pathToTranslation, PlaceholdersExecutor ex, CommandSender... receivers) {
-		sendMessageFromFile(Loader.getPlugin().getConfigManager().getTranslations(), pathToTranslation, ex, receivers);
+		sendMessageFromFile(API.get().getConfigManager().getTranslations(), pathToTranslation, ex, receivers);
 	}
 
 	public void sendMessageFromFile(Config transFile, String pathToTranslation, PlaceholdersExecutor ex, CommandSender... receivers) {

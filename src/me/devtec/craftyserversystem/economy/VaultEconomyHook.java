@@ -3,7 +3,7 @@ package me.devtec.craftyserversystem.economy;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.RegisteredServiceProvider;
 
-import me.devtec.craftyserversystem.Loader;
+import me.devtec.craftyserversystem.API;
 import me.devtec.shared.scheduler.Tasker;
 import net.milkbowl.vault.economy.Economy;
 
@@ -14,7 +14,7 @@ public class VaultEconomyHook implements EconomyHook {
 		new Tasker() {
 			@Override
 			public void run() {
-				if (!Loader.getPlugin().getEconomyHook().equals(VaultEconomyHook.this) || getVault())
+				if (!API.get().getEconomyHook().equals(VaultEconomyHook.this) || getVault())
 					cancel();
 			}
 		}.runRepeatingTimes(5, 5, 480);

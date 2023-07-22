@@ -8,7 +8,7 @@ import java.util.Set;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
-import me.devtec.craftyserversystem.Loader;
+import me.devtec.craftyserversystem.API;
 import me.devtec.craftyserversystem.commands.internal.Warp;
 import me.devtec.craftyserversystem.managers.cooldown.CooldownHolder;
 import me.devtec.shared.dataholder.Config;
@@ -35,7 +35,7 @@ public class WarpManager {
 		if (isLoaded())
 			return;
 		isLoaded = true;
-		Config file = Loader.getPlugin().getConfigManager().getWarpsStorage();
+		Config file = API.get().getConfigManager().getWarpsStorage();
 		for (String name : file.getKeys()) {
 			WarpInfo info;
 			warps.put(name, info = new WarpInfo(file.getAs(name + ".pos", Position.class)));
@@ -43,7 +43,7 @@ public class WarpManager {
 			info.setIcon(file.getAs(name + ".icon", ItemStack.class, new ItemStack(Material.STONE)));
 			String cd = file.getString(name + ".cd");
 			if (cd != null) {
-				CooldownHolder cooldown = Loader.getPlugin().getCdManager().getOrPrepare(cd);
+				CooldownHolder cooldown = API.get().getCooldownManager().getOrPrepare(cd);
 				if (cooldown != null)
 					info.setCooldown(cooldown);
 			}
@@ -56,7 +56,7 @@ public class WarpManager {
 			return;
 		isLoaded = false;
 		if (save) {
-			Config file = Loader.getPlugin().getConfigManager().getWarpsStorage().clear();
+			Config file = API.get().getConfigManager().getWarpsStorage().clear();
 			for (Entry<String, WarpInfo> entry : warps.entrySet()) {
 				if (entry.getValue().getCost() > 0)
 					file.set(entry.getKey() + ".cost", entry.getValue().getCost());

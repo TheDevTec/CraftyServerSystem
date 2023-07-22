@@ -18,29 +18,14 @@ import org.bukkit.plugin.InvalidPluginException;
 import org.bukkit.plugin.UnknownDependencyException;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import me.devtec.craftyserversystem.economy.EconomyHook;
-import me.devtec.craftyserversystem.economy.EmptyEconomyHook;
 import me.devtec.craftyserversystem.economy.VaultEconomyHook;
-import me.devtec.craftyserversystem.managers.CommandManager;
-import me.devtec.craftyserversystem.managers.ConfigurationManager;
-import me.devtec.craftyserversystem.managers.CooldownManager;
-import me.devtec.craftyserversystem.managers.MessageManager;
-import me.devtec.craftyserversystem.permission.EmptyPermissionHook;
 import me.devtec.craftyserversystem.permission.LuckPermsPermissionHook;
-import me.devtec.craftyserversystem.permission.PermissionHook;
 import me.devtec.craftyserversystem.permission.VaultPermissionHook;
 
 public class Loader extends JavaPlugin implements Listener {
 
 	private static Loader plugin;
-
-	private ConfigurationManager cfgManager;
-	private CommandManager cmdManager;
-	private CooldownManager cdManager;
-	private MessageManager msgManager;
-
-	private PermissionHook permissionHook;
-	private EconomyHook economyHook;
+	private static boolean enabled;
 
 	// TODO check list:
 	// Heal - freeze ticks
@@ -52,13 +37,10 @@ public class Loader extends JavaPlugin implements Listener {
 		if (!checkOrInstallTheAPI())
 			return; // Error
 
+		enabled = true;
+
 		// Init managers
-		permissionHook = new EmptyPermissionHook();
-		economyHook = new EmptyEconomyHook();
-		cfgManager = new ConfigurationManager("config.yml", "translations.yml", "commands.yml", "cooldowns.yml").initFromJar();
-		cmdManager = new CommandManager(cfgManager);
-		cdManager = new CooldownManager();
-		msgManager = new MessageManager();
+		API.get();
 	}
 
 	private boolean checkOrInstallTheAPI() {
@@ -109,56 +91,24 @@ public class Loader extends JavaPlugin implements Listener {
 
 	@Override
 	public void onEnable() {
-		if (cmdManager != null)
-			cmdManager.register();
+		if (enabled)
+			API.get().getCommandManager().register();
 	}
 
 	@Override
 	public void onDisable() {
-		if (cmdManager != null)
-			cmdManager.unregister();
+		if (enabled)
+			API.get().getCommandManager().unregister();
 	}
 
 	@EventHandler
 	public void onPluginEnable(PluginEnableEvent e) {
 		if (e.getPlugin().getName().equals("Vault")) {
-			permissionHook = new VaultPermissionHook();
-			economyHook = new VaultEconomyHook();
+			API.get().setPermissionHook(new VaultPermissionHook());
+			API.get().setEconomyHook(new VaultEconomyHook());
 		}
 		if (e.getPlugin().getName().equals("LuckPerms"))
-			permissionHook = new LuckPermsPermissionHook();
-	}
-
-	/**
-	 *
-	 * @return ConfigurationManager
-	 */
-	public ConfigurationManager getConfigManager() {
-		return cfgManager;
-	}
-
-	/**
-	 *
-	 * @return CommandManager
-	 */
-	public CommandManager getCmdManager() {
-		return cmdManager;
-	}
-
-	/**
-	 *
-	 * @return CooldownManager
-	 */
-	public CooldownManager getCdManager() {
-		return cdManager;
-	}
-
-	/**
-	 *
-	 * @return MessageManager
-	 */
-	public MessageManager getMsgManager() {
-		return msgManager;
+			API.get().setPermissionHook(new LuckPermsPermissionHook());
 	}
 
 	/**
@@ -168,13 +118,5 @@ public class Loader extends JavaPlugin implements Listener {
 	 */
 	public static Loader getPlugin() {
 		return plugin;
-	}
-
-	public PermissionHook getPermissionHook() {
-		return permissionHook;
-	}
-
-	public EconomyHook getEconomyHook() {
-		return economyHook;
 	}
 }
