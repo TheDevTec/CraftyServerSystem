@@ -57,3 +57,18 @@ delwarp:
   cmd: [delwarp]
   perms:
     cmd: "css.cmd.delwarp"
+
+spawn:
+  usage:
+    cmd: "/spawn {player}"
+  cmd: [spawn]
+  perms:
+    cmd: "css.cmd.spawn"
+    other: "css.cmd.spawn.other"
+
+setspawn:
+  usage:
+    cmd: "/setspawn"
+  cmd: [setspawn]
+  perms:
+    cmd: "css.cmd.setspawn"

@@ -1,6 +1,9 @@
 # global: {prefix}
 
 fly:
+  self:
+    true: "{prefix} Fly turned on"
+    false: "{prefix} Fly turned off"
   # placeholder: {admin}, {target}
   other:
     true:
@@ -9,11 +12,11 @@ fly:
     false:
       target: "{prefix} Fly turned off by {admin}"
       admin: "{prefix} Fly of {target} turned off"
-  self:
-    true: "{prefix} Fly turned on"
-    false: "{prefix} Fly turned off"
 
 god:
+  self:
+    true: "{prefix} Immortality turned on"
+    false: "{prefix} Immortality turned off"
   # placeholder: {admin}, {target}
   other:
     true:
@@ -22,26 +25,29 @@ god:
     false:
       target: "{prefix} Immortality turned off by {admin}"
       admin: "{prefix} Immortality of {target} turned off"
-  self:
-    true: "{prefix} Immortality turned on"
-    false: "{prefix} Immortality turned off"
 
 heal:
+  self: "{prefix} You've been healed"
   # placeholder: {admin}, {target}
   other:
     target: "{prefix} You've been healed by  {admin}"
     admin: "{prefix} You healed {target}"
-  self: "{prefix} You've been healed"
 
 feed:
+  self: "{prefix} You've been fed"
   # placeholder: {admin}, {target}
   other:
     target: "{prefix} You've been fed by {admin}"
     admin: "{prefix} You've fed {target}"
-  self: "{prefix} You've been fed"
 
 warp:
-  # placeholder: {admin}, {target}, {warp}, {cost}
+  # placeholder: {warp}, {cost}, {permission}
+  self:
+    success: "{prefix} Warping on warp {warp}"
+    failed:
+      money: "{prefix} You don't have enough money. Teleporting to warp {warp} costs ${cost}"
+      perm: "{prefix} You don't have permission to teleport to the warp {warp}"
+  # placeholder: {admin}, {target}, {warp}, {cost}, {permission}
   other:
     success:
       target: "{prefix} Warping on warp {warp} by {admin}"
@@ -53,11 +59,6 @@ warp:
       perm:
         target: "{prefix} You don't have permission to teleport to the warp {warp}"
         admin: "{prefix} {target} don't have permission to teleport to the warp {warp}"
-  self:
-    success: "{prefix} Warping on warp {warp}"
-    failed:
-      money: "{prefix} You don't have enough money. Teleporting to warp {warp} costs ${cost}"
-      perm: "{prefix} You don't have permission to teleport to the warp {warp}"
 
 setwarp:
   # placeholder: {admin}, {target}, {warp}, {world}, {x}, {y}, {z}, {yaw}, {pitch}
@@ -65,4 +66,16 @@ setwarp:
   moved: "{prefix} Moved a warp {warp} on your position"
 
 delwarp:
+  # placeholder: {warp}
   deleted: "{prefix} Deleted a warp {warp}"
+
+spawn:
+  self: "{prefix} Teleporting to a server spawn"
+  # placeholder: {admin}, {target}
+  other:
+    target: "{prefix} You were teleported to a server spawn by {admin}"
+    admin: "{prefix} You teleported {target} to a server spawn"
+
+setspawn:
+  # placeholder: {world}, {x}, {y}, {z}, {yaw}, {pitch}
+  set: "{prefix} Server spawn set on your position"
