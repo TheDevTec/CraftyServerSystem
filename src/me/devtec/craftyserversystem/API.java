@@ -25,12 +25,6 @@ public class API {
 
 	// Private constructor
 	private API() {
-		permissionHook = new EmptyPermissionHook();
-		economyHook = new EmptyEconomyHook();
-		cfgManager = new ConfigurationManager("config.yml", "translations.yml", "commands.yml", "cooldowns.yml").initFromJar();
-		cmdManager = new CommandManager(cfgManager);
-		cdManager = new CooldownManager();
-		msgManager = new MessageManager();
 	}
 
 	/**
@@ -112,5 +106,12 @@ public class API {
 
 	public void setEconomyHook(EconomyHook hook) {
 		economyHook = hook;
+	}
+
+	protected void init() {
+		cfgManager = new ConfigurationManager("config.yml", "translations.yml", "commands.yml", "cooldowns.yml").initFromJar();
+		cmdManager = new CommandManager(cfgManager);
+		cdManager = new CooldownManager();
+		msgManager = new MessageManager();
 	}
 }

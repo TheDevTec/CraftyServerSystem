@@ -25,7 +25,6 @@ import me.devtec.craftyserversystem.permission.VaultPermissionHook;
 public class Loader extends JavaPlugin implements Listener {
 
 	private static Loader plugin;
-	private static boolean enabled;
 
 	// TODO check list:
 	// Heal - freeze ticks
@@ -37,10 +36,8 @@ public class Loader extends JavaPlugin implements Listener {
 		if (!checkOrInstallTheAPI())
 			return; // Error
 
-		enabled = true;
-
 		// Init managers
-		API.get();
+		API.get().init();
 	}
 
 	private boolean checkOrInstallTheAPI() {
@@ -91,13 +88,13 @@ public class Loader extends JavaPlugin implements Listener {
 
 	@Override
 	public void onEnable() {
-		if (enabled)
+		if (API.get().getCommandManager() != null)
 			API.get().getCommandManager().register();
 	}
 
 	@Override
 	public void onDisable() {
-		if (enabled)
+		if (API.get().getCommandManager() != null)
 			API.get().getCommandManager().unregister();
 	}
 
