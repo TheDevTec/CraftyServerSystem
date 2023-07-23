@@ -114,24 +114,24 @@ public class Warp implements CssCommand {
 
 		// other
 		cmd = cmd.selector(Selector.ENTITY_SELECTOR, (sender, structure, args) -> {
-			for (Player player : selector(sender, args[0]))
+			for (Player player : selector(sender, args[1]))
 				warp(player, args[0].toLowerCase(), true, false, sender);
 		}).permission(getPerm("other"));
 
 		// silent
 		cmd.argument("-s", (sender, structure, args) -> {
-			for (Player player : selector(sender, args[0]))
+			for (Player player : selector(sender, args[1]))
 				warp(player, args[0].toLowerCase(), false, false, sender);
 		});
 		// instant
 		cmd.argument("-i", (sender, structure, args) -> {
-			for (Player player : selector(sender, args[0]))
+			for (Player player : selector(sender, args[1]))
 				warp(player, args[0].toLowerCase(), true, true, sender);
 		}).permission(getPerm("other-instant"));
 
 		// silent & instant
 		cmd.argument("-si", (sender, structure, args) -> {
-			for (Player player : selector(sender, args[0]))
+			for (Player player : selector(sender, args[1]))
 				warp(player, args[0].toLowerCase(), false, true, sender);
 		}).permission(getPerm("other-instant"));
 

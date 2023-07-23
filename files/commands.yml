@@ -72,3 +72,56 @@ setspawn:
   cmd: [setspawn]
   perms:
     cmd: "css.cmd.setspawn"
+
+gamemode:
+  usage:
+    cmd: "/gamemode {s/c/a/sp} [player]"
+    survival: "/gamemode survival {player}"
+    creative: "/gamemode creative {player}"
+    adventure: "/gamemode adventure {player}"
+    spectator: "/gamemode spectator {player}"
+  cmd: [gamemode,gm]
+  perms:
+    cmd: "css.cmd.gamemode"
+    survival: "css.cmd.gamemode.survival"
+    creative: "css.cmd.gamemode.creative"
+    adventure: "css.cmd.gamemode.adventure"
+    spectator: "css.cmd.gamemode.spectator"
+    other:
+      survival: "css.cmd.gamemode.other"
+      creative: "css.cmd.gamemode.other"
+      adventure: "css.cmd.gamemode.other"
+      spectator: "css.cmd.gamemode.other"
+
+gamemodesurvival:
+  usage:
+    cmd: "/gms {player}"
+  cmd: [gms]
+  perms:
+    cmd: "css.cmd.gamemode.survival"
+    other: "css.cmd.gamemode.other"
+
+gamemodecreative:
+  usage:
+    cmd: "/gmc {player}"
+  cmd: [gmc]
+  perms:
+    cmd: "css.cmd.gamemode.creative"
+    other: "css.cmd.gamemode.other"
+
+gamemodeadventure:
+  usage:
+    cmd: "/gma {player}"
+  cmd: [gma]
+  perms:
+    cmd: "css.cmd.gamemode.adventure"
+    other: "css.cmd.gamemode.other"
+
+gamemodespectator:
+  usage:
+    cmd: "/gmsp {player}"
+  cmd: [gmsp]
+  perms:
+    cmd: "css.cmd.gamemode.spectator"
+    other: "css.cmd.gamemode.other"
+    

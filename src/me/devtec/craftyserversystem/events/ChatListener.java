@@ -55,10 +55,9 @@ public class ChatListener implements Listener {
 				worlds.add(player.getLocation().getWorld().getName());
 		}
 
-		// ChatType - removing players
+		// Removing players which can't see message
 		while (targets.hasNext()) {
 			Player target = targets.next();
-			// sender je target
 			// TODO - ignore
 
 			if (target.equals(player) || target.hasPermission("SCR.Other.ChatTypeBypass") || !player.canSee(target))
