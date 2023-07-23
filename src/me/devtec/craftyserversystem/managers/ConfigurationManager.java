@@ -15,14 +15,20 @@ public class ConfigurationManager {
 	private Config translations;
 	private Config commands;
 	private Config cooldowns;
+	private Config join;
+	private Config quit;
+	private Config chat;
 	private String prefix = "";
 	private Position spawn;
 
-	public ConfigurationManager(String main, String translations, String commands, String cooldowns) {
+	public ConfigurationManager(String main, String translations, String commands, String cooldowns, String join, String quit, String chat) {
 		this.main = new Config(FILES_PATH + main);
 		this.translations = new Config(FILES_PATH + translations);
 		this.commands = new Config(FILES_PATH + commands);
 		this.cooldowns = new Config(FILES_PATH + cooldowns);
+		this.join = new Config(FILES_PATH + join);
+		this.quit = new Config(FILES_PATH + quit);
+		this.chat = new Config(FILES_PATH + chat);
 	}
 
 	public ConfigurationManager initFromJar() {
@@ -34,10 +40,13 @@ public class ConfigurationManager {
 			commands.save("yaml");
 		if (cooldowns.merge(new Config().reload(StreamUtils.fromStream(Loader.getPlugin().getClass().getClassLoader().getResourceAsStream("files/cooldowns.yml"))), MergeStandards.DEFAULT))
 			cooldowns.save("yaml");
+		if (join.merge(new Config().reload(StreamUtils.fromStream(Loader.getPlugin().getClass().getClassLoader().getResourceAsStream("files/join.yml"))), MergeStandards.DEFAULT))
+			join.save("yaml");
+		if (quit.merge(new Config().reload(StreamUtils.fromStream(Loader.getPlugin().getClass().getClassLoader().getResourceAsStream("files/quit.yml"))), MergeStandards.DEFAULT))
+			quit.save("yaml");
+		if (chat.merge(new Config().reload(StreamUtils.fromStream(Loader.getPlugin().getClass().getClassLoader().getResourceAsStream("files/chat.yml"))), MergeStandards.DEFAULT))
+			chat.save("yaml");
 		prefix = main.getString("prefix", "");
-
-		Config data = new Config(FILES_PATH + "spawn.yml");
-		spawn = data.getAs("spawn", Position.class, Position.fromLocation(Bukkit.getWorlds().get(0).getSpawnLocation()));
 		return this;
 	}
 
@@ -54,6 +63,11 @@ public class ConfigurationManager {
 		Config data = new Config(FILES_PATH + "spawn.yml");
 		data.set("spawn", position);
 		data.save("yaml");
+	}
+
+	public void loadSpawn() {
+		Config data = new Config(FILES_PATH + "spawn.yml");
+		spawn = data.getAs("spawn", Position.class, Position.fromLocation(Bukkit.getWorlds().get(0).getSpawnLocation()));
 	}
 
 	public Config getMain() {
@@ -80,5 +94,17 @@ public class ConfigurationManager {
 
 	public String getPrefix() {
 		return prefix;
+	}
+
+	public Config getJoin() {
+		return join;
+	}
+
+	public Config getQuit() {
+		return quit;
+	}
+
+	public Config getChat() {
+		return chat;
 	}
 }

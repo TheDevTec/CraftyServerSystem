@@ -8,6 +8,7 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 import me.devtec.craftyserversystem.Loader;
+import me.devtec.craftyserversystem.annotations.IgnoredClass;
 import me.devtec.craftyserversystem.commands.CssCommand;
 import me.devtec.shared.dataholder.Config;
 
@@ -51,7 +52,10 @@ public class CommandManager {
 				JarEntry entry = entries.nextElement();
 				if (entry.getName().endsWith(".class") && entry.getName().startsWith("me/devtec/craftyserversystem/commands/internal/") && entry.getName().indexOf('$') == -1) {
 					String className = entry.getName().substring(0, entry.getName().length() - 6).replace('/', '.');
-					CssCommand css = (CssCommand) Class.forName(className).newInstance();
+					Class<?> clazz = Class.forName(className);
+					if (clazz.getAnnotation(IgnoredClass.class) != null)
+						continue;
+					CssCommand css = (CssCommand) clazz.newInstance();
 					lookup.put(css.section(), css);
 				}
 			}

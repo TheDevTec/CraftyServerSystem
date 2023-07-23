@@ -109,7 +109,7 @@ public class API {
 	}
 
 	protected void init() {
-		cfgManager = new ConfigurationManager("config.yml", "translations.yml", "commands.yml", "cooldowns.yml").initFromJar();
+		cfgManager = new ConfigurationManager("config.yml", "translations.yml", "commands.yml", "cooldowns.yml", "join.yml", "quit.yml", "chat.yml").initFromJar();
 		cmdManager = new CommandManager(cfgManager);
 		cdManager = new CooldownManager();
 		msgManager = new MessageManager();

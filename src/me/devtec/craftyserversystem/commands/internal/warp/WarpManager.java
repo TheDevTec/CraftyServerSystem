@@ -9,11 +9,13 @@ import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 
 import me.devtec.craftyserversystem.API;
+import me.devtec.craftyserversystem.annotations.IgnoredClass;
 import me.devtec.craftyserversystem.commands.internal.Warp;
 import me.devtec.craftyserversystem.managers.cooldown.CooldownHolder;
 import me.devtec.shared.dataholder.Config;
 import me.devtec.theapi.bukkit.game.Position;
 
+@IgnoredClass
 public class WarpManager {
 
 	private static WarpManager instance;
