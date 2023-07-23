@@ -46,12 +46,12 @@ public class GamemodeSpectator implements CssCommand {
 		});
 		// other
 		cmd.selector(Selector.ENTITY_SELECTOR, (sender, structure, args) -> {
-			for (Player player : selector(sender, args[1]))
+			for (Player player : selector(sender, args[0]))
 				changeGameMode(player, true, sender);
 		}).permission(getPerm("other"))
 				// silent
 				.argument("-s", (sender, structure, args) -> {
-					for (Player player : selector(sender, args[1]))
+					for (Player player : selector(sender, args[0]))
 						changeGameMode(player, false, sender);
 				});
 

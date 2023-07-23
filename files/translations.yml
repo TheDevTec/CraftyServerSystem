@@ -79,3 +79,35 @@ spawn:
 setspawn:
   # placeholder: {world}, {x}, {y}, {z}, {yaw}, {pitch}
   set: "{prefix} Server spawn set on your position"
+  
+sudo: "{prefix} You performed for the player &e{player}&7: &e{value}"
+
+gamemode:
+  self: "{prefix} Changed GameMode to &e{gamemode}"
+  other:
+    target: "{prefix} Your GameMode changed to &e{gamemode} &7by &e{admin}"
+    admin: "{prefix} You changed GameMode of &e{target} &7to &e{gamemode}"
+
+gamemodecreative:
+  self: "{prefix} Changed GameMode to &e{gamemode}"
+  other:
+    target: "{prefix} Your GameMode changed to &e{gamemode} &7by &e{admin}"
+    admin: "{prefix} You changed GameMode of &e{target} &7to &e{gamemode}"
+
+gamemodesurvival:
+  self: "{prefix} Changed GameMode to &e{gamemode}"
+  other:
+    target: "{prefix} Your GameMode changed to &e{gamemode} &7by &e{admin}"
+    admin: "{prefix} You changed GameMode of &e{target} &7to &e{gamemode}"
+
+gamemodespectator:
+  self: "{prefix} Changed GameMode to &e{gamemode}"
+  other:
+    target: "{prefix} Your GameMode changed to &e{gamemode} &7by &e{admin}"
+    admin: "{prefix} You changed GameMode of &e{target} &7to &e{gamemode}"
+
+gamemodeadventure:
+  self: "{prefix} Changed GameMode to &e{gamemode}"
+  other:
+    target: "{prefix} Your GameMode changed to &e{gamemode} &7by &e{admin}"
+    admin: "{prefix} You changed GameMode of &e{target} &7to &e{gamemode}"

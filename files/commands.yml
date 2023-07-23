@@ -124,4 +124,11 @@ gamemodespectator:
   perms:
     cmd: "css.cmd.gamemode.spectator"
     other: "css.cmd.gamemode.other"
+
+sudo:
+  usage:
+    other: "/sudo {player} {/command or message without slash}"
+  cmd: [sudo]
+  perms:
+    cmd: "css.cmd.sudo"
     

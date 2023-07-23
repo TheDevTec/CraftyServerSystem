@@ -74,7 +74,7 @@ public interface CssCommand {
 	}
 
 	default void msg(CommandSender sender, String path, PlaceholdersExecutor ex) {
-		API.get().getMsgManager().sendMessageTrans(section() + "." + path, ex, sender);
+		API.get().getMsgManager().sendMessageTrans(section() + (path.isEmpty() ? "" : "." + path), ex, sender);
 	}
 
 	default void msgOut(CommandSender sender, String path) {
