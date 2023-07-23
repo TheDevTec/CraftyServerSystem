@@ -1,0 +1,13 @@
+enabled: true
+
+force-spawn-location: false
+join:
+  first:
+    text: "{prefix} Welcome player {player} on the server!"
+    broadcast: []
+    commands:
+    - "kit firstJoin {player}"
+  next:
+    text: "{prefix} Player {player} joined the server"
+    broadcast: []
+    commands: []

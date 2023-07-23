@@ -19,6 +19,9 @@ import org.bukkit.plugin.UnknownDependencyException;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import me.devtec.craftyserversystem.economy.VaultEconomyHook;
+import me.devtec.craftyserversystem.events.ChatListener;
+import me.devtec.craftyserversystem.events.JoinListener;
+import me.devtec.craftyserversystem.events.QuitListener;
 import me.devtec.craftyserversystem.permission.LuckPermsPermissionHook;
 import me.devtec.craftyserversystem.permission.VaultPermissionHook;
 
@@ -88,14 +91,24 @@ public class Loader extends JavaPlugin implements Listener {
 
 	@Override
 	public void onEnable() {
-		if (API.get().getCommandManager() != null)
-			API.get().getCommandManager().register();
+		if (API.get().getCommandManager() == null)
+			return;
+		API.get().getCommandManager().register();
+		API.get().getConfigManager().loadSpawn();
+
+		if (API.get().getConfigManager().getChat().getBoolean("enabled"))
+			Bukkit.getPluginManager().registerEvents(new ChatListener(), plugin);
+		if (API.get().getConfigManager().getJoin().getBoolean("enabled"))
+			Bukkit.getPluginManager().registerEvents(new JoinListener(), plugin);
+		if (API.get().getConfigManager().getQuit().getBoolean("enabled"))
+			Bukkit.getPluginManager().registerEvents(new QuitListener(), plugin);
 	}
 
 	@Override
 	public void onDisable() {
-		if (API.get().getCommandManager() != null)
-			API.get().getCommandManager().unregister();
+		if (API.get().getCommandManager() == null)
+			return;
+		API.get().getCommandManager().unregister();
 	}
 
 	@EventHandler

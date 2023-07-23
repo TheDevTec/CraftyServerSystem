@@ -1,0 +1,43 @@
+enabled: true
+
+options:
+  # types: GLOBAL, PER_WORLD, DISTANCE
+  type: GLOBAL
+  # If type is DISTANCE, distance is in blocks
+  distance: 60
+  # If type is PER_WORLD, create world groups in which players can write between:
+  per_world:
+    group0:
+    - world
+    - trade_world
+    group1:
+    - world_nether
+    group2:
+    - world_the_end
+    # etc.
+    
+notification:
+  color: "§c" # RGB (#RRGGBB) or default vanilla color (§<colorChar>)
+  sound:
+    # https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/Sound.html
+    name: "ENTITY_PLAYER_LEVELUP"
+    pitch: 1
+    volume: 1
+  # placeholders: %player% - target, {pinger} - Name of player who pinger target
+  commands: []
+  messages: []
+
+formats:
+  default:
+    chat: "{player} &7» {message}"
+    message: "&f{message}"
+    name: "&7Player &f{player}"
+  # Vault group name
+  vip:
+    chat: "{player} &7» {message}"
+    message: "&a{message}"
+    name: "&aVIP &e{player}"
+  anotherGroup:
+    chat: "{player} &7» {message}"
+    message: "&3{message}"
+    name: "&4Admin &6{player}"

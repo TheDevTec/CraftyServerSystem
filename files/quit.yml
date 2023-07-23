@@ -1,0 +1,6 @@
+enabled: true
+
+quit:
+  text: "{prefix} Player {player} left the game"
+  broadcast: []
+  commands: []
