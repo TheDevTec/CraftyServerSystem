@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.regex.Pattern;
+import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
@@ -12,30 +12,115 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.bukkit.plugin.java.JavaPlugin;
 
 import me.devtec.craftyserversystem.API;
+import me.devtec.craftyserversystem.Loader;
 import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
+import me.devtec.craftyserversystem.utils.ChatHandlers;
 import me.devtec.shared.Ref;
 import me.devtec.shared.dataholder.Config;
 import me.devtec.shared.dataholder.StringContainer;
+import me.devtec.shared.dataholder.cache.TempMap;
 import me.devtec.shared.utility.ColorUtils;
+import me.devtec.shared.utility.TimeUtils;
 import me.devtec.theapi.bukkit.BukkitLoader;
 
 public class ChatListener implements Listener {
 
+	// AntiSpam
+	private boolean antiSpamEnabled;
+	private TempMap<UUID, Object[]> prevMsgs;
+	private int maxMessages;
+	private boolean bypassAntiSpam;
+
+	// AntiFlood
+	private boolean antiFloodEnabled;
+	private int floodMaxChars;
+	private int floodMaxNumbers;
+	private boolean bypassAntiFlood;
+
+	// AntiSwear
+	private boolean antiSwearEnabled;
+	private String replacement;
+	private List<String> words;
+	private boolean bypassAntiSwear;
+
+	// AntiAd pattern
+	private boolean antiAdEnabled;
+	private boolean bypassAntiAd;
+	private List<String> antiAdWhitelist;
+
+	public ChatListener() {
+		reload();
+	}
+
+	public void reload() {
+		Config chat = API.get().getConfigManager().getChat();
+		antiSpamEnabled = chat.getBoolean("antiSpam.enabled");
+		if (prevMsgs == null)
+			prevMsgs = new TempMap<>(TimeUtils.timeFromString(chat.getString("antiSpam.cache")) * 20);
+		else {
+			prevMsgs.clear();
+			prevMsgs.setCacheTime(TimeUtils.timeFromString(chat.getString("antiSpam.cache")) * 20);
+		}
+		maxMessages = chat.getInt("antiSpam.maximum-messages") + 1;
+		bypassAntiSpam = chat.getBoolean("antiSpam.bypass-enabled");
+		antiFloodEnabled = chat.getBoolean("antiFlood.enabled");
+		floodMaxChars = chat.getInt("antiFlood.maximum-chars");
+		floodMaxNumbers = chat.getInt("antiFlood.maximum-numbers");
+		bypassAntiFlood = chat.getBoolean("antiFlood.bypass-enabled");
+		antiSwearEnabled = chat.getBoolean("antiSwear.enabled");
+		replacement = chat.getString("antiSwear.replacement");
+		words = chat.getStringList("antiSwear.words");
+		bypassAntiSwear = chat.getBoolean("antiSwear.bypass-enabled");
+		antiAdEnabled = chat.getBoolean("antiAd.enabled");
+		bypassAntiAd = chat.getBoolean("antiAd.bypass-enabled");
+		antiAdWhitelist = chat.getStringList("antiAd.whitelist");
+	}
+
 	@EventHandler
 	public void onChat(AsyncPlayerChatEvent e) {
-		PlaceholdersExecutor placeholders = PlaceholdersExecutor.i().add("player", e.getPlayer().getName()).papi(e.getPlayer().getUniqueId());
-
 		Config chat = API.get().getConfigManager().getChat();
+		String[] playerNames = playerNames(e.getPlayer());
+
+		String modifiedMessage = antiFloodEnabled && (bypassAntiFlood ? !e.getPlayer().hasPermission("gk.chat.bypass.antiflood") : true)
+				? ChatHandlers.antiFlood(e.getMessage(), ChatHandlers.match(e.getMessage(), playerNames), floodMaxNumbers, floodMaxChars)
+				: e.getMessage();
+
+		if (antiSpamEnabled && (bypassAntiSpam ? !e.getPlayer().hasPermission("gk.chat.bypass.antispam") : true)
+				&& ChatHandlers.processAntiSpam(e.getPlayer().getUniqueId(), modifiedMessage, prevMsgs, maxMessages)) {
+			e.setCancelled(true);
+			API.get().getMsgManager().sendMessageFromFile(chat, "translations.antiSpam", PlaceholdersExecutor.i().add("player", e.getPlayer().getName()), e.getPlayer());
+			return;
+
+		}
+		if (antiSwearEnabled && (bypassAntiSwear ? !e.getPlayer().hasPermission("gk.chat.bypass.antiswear") : true))
+			if (chat.getBoolean("antiSwear.block-event")) {
+				if (ChatHandlers.antiSwear(modifiedMessage, words, ChatHandlers.match(modifiedMessage, playerNames))) {
+					e.setCancelled(true);
+					API.get().getMsgManager().sendMessageFromFile(chat, "translations.antiSwear", PlaceholdersExecutor.i().add("player", e.getPlayer().getName()), e.getPlayer());
+					return;
+				}
+			} else
+				modifiedMessage = ChatHandlers.antiSwearReplace(modifiedMessage, words, ChatHandlers.match(modifiedMessage, playerNames), replacement);
+		if (antiAdEnabled && (bypassAntiAd ? !e.getPlayer().hasPermission("gk.chat.bypass.antiad") : true) && ChatHandlers.antiAd(modifiedMessage, antiAdWhitelist)) {
+			e.setCancelled(true);
+			API.get().getMsgManager().sendMessageFromFile(chat, "translations.antiAd", PlaceholdersExecutor.i().add("player", e.getPlayer().getName()), e.getPlayer());
+			API.get().getMsgManager().sendMessageFromFile(chat, "translations.antiAd-admin", PlaceholdersExecutor.i().add("player", e.getPlayer().getName()).add("message", modifiedMessage),
+					"gh.chat.antiad");
+			return;
+		}
+
+		PlaceholdersExecutor placeholders = PlaceholdersExecutor.i().add("player", e.getPlayer().getName()).papi(e.getPlayer().getUniqueId());
 
 		String userGroup = API.get().getPermissionHook().getGroup(e.getPlayer());
 		if (!chat.exists("formats." + userGroup))
 			userGroup = "default";
 
 		placeholders.add("player", placeholders.apply(chat.getString("formats." + userGroup + ".name")));
-		placeholders.add("message", e.getMessage());
-		placeholders.add("message", placeholders.applyWithoutColors(chat.getString("formats." + userGroup + ".message")));
+		placeholders.add("message", modifiedMessage);
+		placeholders.add("message", placeholders.applyAfterColorize(chat.getString("formats." + userGroup + ".message")));
 
 		Player player = e.getPlayer();
 
@@ -58,13 +143,12 @@ public class ChatListener implements Listener {
 		// Removing players which can't see message
 		while (targets.hasNext()) {
 			Player target = targets.next();
-			// TODO - ignore
 
-			if (target.equals(player) || target.hasPermission("SCR.Other.ChatTypeBypass") || !player.canSee(target))
+			if (target.equals(player))
 				continue;
 
 			// PER_WORLD type
-			if (type.equals("PER_WORLD")) {
+			if (worlds != null) {
 				if (!worlds.contains(target.getLocation().getWorld().getName())) // If group of worlds contains target world
 					targets.remove();
 				continue;
@@ -80,59 +164,55 @@ public class ChatListener implements Listener {
 		}
 
 		players.add(e.getPlayer().getName());
-		// TODO - flood, antispam, ...
 
 		// Chat notigications & colors
-		placeholders.add("message", notificationReplace(player, colorize(player, placeholders.get("{message}"), players), e.getRecipients()));
 
-		e.setMessage(placeholders.get("{message}")); // for console
-		API.get().getMsgManager().sendMessageFromFile(chat, "formats." + userGroup + ".chat", placeholders, BukkitLoader.getOnlinePlayers());
-		e.getRecipients().clear();
+		placeholders.add("message", notificationReplace(player, colorize(player, placeholders.get("{message}"), players), e.getRecipients())); // notifikace!
+		e.setMessage(placeholders.get("{message}")); // pro pluginy
+		e.setFormat(API.get().getMsgManager().sendMessageFromFileWithResult(chat, "formats." + userGroup + ".chat", placeholders, BukkitLoader.getOnlinePlayers()).replace("%", "%%")); // pro konzoli a
+																																														// hrace
+		e.getRecipients().clear(); // mame vlastni json zpravy (viz metoda vyse)
 	}
 
-	public static String notificationReplace(Player pinger, String msg, Set<Player> targets) {
+	public String notificationReplace(Player pinger, String msg, Set<Player> targets) {
+		StringContainer builder = new StringContainer(msg);
+		String notificationColor = API.get().getConfigManager().getChat().getString("notification.color", "§c");
 		for (Player player : targets)
-			if (player != pinger && msg.contains(player.getName()) && pinger.canSee(player)) {
-				boolean endsWithName = msg.endsWith(player.getName());
-
-				String notificationColor = API.get().getConfigManager().getChat().getString("notification.color", "§c");
-
-				notify(pinger, player);
-
-				String[] split = Pattern.compile(player.getName(), Pattern.CASE_INSENSITIVE).split(msg);
-				if (split.length == 0) // Just Player
-					return notificationColor + player.getName();
-
-				String lastColors = ColorUtils.getLastColors(split[0]);
-				if (lastColors.isEmpty())
-					lastColors = "§f";
-				else {
-					char[] chars = lastColors.toCharArray();
-					lastColors = "";
-					for (char c : chars)
-						lastColors += "§" + c;
-				}
-				StringContainer builder = new StringContainer(split[0]);
-				for (int i = 1; i < split.length; ++i) {
-					builder.append(notificationColor).append(player.getName()).append(lastColors).append(split[i]);
-					lastColors = ColorUtils.getLastColors(lastColors + split[i]);
+			if (!player.equals(pinger) && pinger.canSee(player)) {
+				int startAt = builder.indexOfIgnoreCase(player.getName());
+				if (startAt != -1) {
+					notify(pinger, player);
+					if (msg.length() == player.getName().length()) // Just Player
+						return notificationColor + player.getName();
+					String lastColors = ColorUtils.getLastColors(builder.substring(0, startAt));
 					if (lastColors.isEmpty())
-						lastColors = "&f";
+						lastColors = "§f";
 					else {
 						char[] chars = lastColors.toCharArray();
 						lastColors = "";
 						for (char c : chars)
 							lastColors += "§" + c;
 					}
+					while ((startAt = builder.indexOfIgnoreCase(player.getName(), startAt)) != -1) {
+						String nextColors = ColorUtils.getLastColors(lastColors + builder.substring(startAt + player.getName().length()));
+						builder.replace(startAt, startAt + player.getName().length(), notificationColor + player.getName() + lastColors);
+						lastColors = nextColors;
+						if (lastColors.isEmpty())
+							lastColors = "§f";
+						else {
+							char[] chars = lastColors.toCharArray();
+							lastColors = "";
+							for (char c : chars)
+								lastColors += "§" + c;
+						}
+						startAt += player.getName().length();
+					}
 				}
-				if (endsWithName)
-					builder.append(notificationColor).append(player.getName());
-				msg = builder.toString();
 			}
-		return msg;
+		return builder.toString();
 	}
 
-	private static void notify(Player pinger, Player target) {
+	private void notify(Player pinger, Player target) {
 		Config chat = API.get().getConfigManager().getChat();
 		if (!chat.getString("notification.sound.name").isEmpty()) {
 			Sound sound = Sound.valueOf(chat.getString("notification.sound.name"));
@@ -143,7 +223,7 @@ public class ChatListener implements Listener {
 		PlaceholdersExecutor placeholders = PlaceholdersExecutor.i().papi(target.getUniqueId()).add("pinger", pinger.getName());
 
 		// CMDS
-		BukkitLoader.getNmsProvider().postToMainThread(() -> {
+		Bukkit.getScheduler().runTask(JavaPlugin.getPlugin(Loader.class), () -> {
 			for (String cmd : chat.getStringList("notification.commands"))
 				Bukkit.dispatchCommand(Bukkit.getConsoleSender(), placeholders.apply(cmd));
 		});
@@ -151,7 +231,7 @@ public class ChatListener implements Listener {
 		API.get().getMsgManager().sendMessageFromFile(chat, "notification.messages", placeholders, target);
 	}
 
-	public static String colorize(Player sender, final String original, final List<String> protectedStrings) {
+	public String colorize(Player sender, final String original, final List<String> protectedStrings) {
 		if (original == null || original.trim().isEmpty()
 				|| !sender.hasPermission("css.chat.colors") && !sender.hasPermission("css.chat.gradient") && !sender.hasPermission("css.chat.hex") && !sender.hasPermission("css.chat.rainbow"))
 			return original;
@@ -186,31 +266,21 @@ public class ChatListener implements Listener {
 		return msg;
 	}
 
-	private static boolean isColorChar(final int c) {
+	private boolean isColorChar(final int c) {
 		return c <= 102 && c >= 97 || c <= 57 && c >= 48 || c <= 70 && c >= 65 || c <= 79 && c >= 75 || c <= 111 && c >= 107 || c == 114 || c == 82 || c == 120;
 	}
 
-	private static char toLowerCase(final int c) {
-		switch (c) {
-		case 65:
-		case 66:
-		case 67:
-		case 68:
-		case 69:
-		case 70:
-		case 75:
-		case 76:
-		case 77:
-		case 78:
-		case 79:
-		case 82:
-		case 85:
-		case 88: {
+	private char toLowerCase(final int c) {
+		if (c >= 65 && c <= 79 || c == 82 || c == 85 || c == 88)
 			return (char) (c + 32);
-		}
-		default: {
-			return (char) c;
-		}
-		}
+		return (char) c;
+	}
+
+	private String[] playerNames(Player player) {
+		List<String> names = new ArrayList<>();
+		for (Player target : BukkitLoader.getOnlinePlayers())
+			if (player.canSee(target))
+				names.add(target.getName());
+		return names.toArray(new String[0]);
 	}
 }

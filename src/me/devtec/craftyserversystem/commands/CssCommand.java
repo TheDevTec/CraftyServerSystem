@@ -26,7 +26,7 @@ public interface CssCommand {
 			return sender.hasPermission(permission);
 		if (sender.hasPermission(permission))
 			return true;
-		API.get().getMsgManager().sendMessageTrans("other.no-perms", PlaceholdersExecutor.i().add("permission", permission), sender);
+		API.get().getMsgManager().sendMessageFromFile(API.get().getConfigManager().getTranslations(), "other.no-perms", PlaceholdersExecutor.i().add("permission", permission), sender);
 		return false;
 	};
 
@@ -35,7 +35,7 @@ public interface CssCommand {
 			return sender.hasPermission(permission);
 		if (sender.hasPermission(permission))
 			return true;
-		API.get().getMsgManager().sendMessageTrans("other.no-perms", PlaceholdersExecutor.i().add("permission", permission), sender);
+		API.get().getMsgManager().sendMessageFromFile(API.get().getConfigManager().getTranslations(), "other.no-perms", PlaceholdersExecutor.i().add("permission", permission), sender);
 		return false;
 	};
 
@@ -74,7 +74,7 @@ public interface CssCommand {
 	}
 
 	default void msg(CommandSender sender, String path, PlaceholdersExecutor ex) {
-		API.get().getMsgManager().sendMessageTrans(section() + (path.isEmpty() ? "" : "." + path), ex, sender);
+		API.get().getMsgManager().sendMessageFromFile(API.get().getConfigManager().getTranslations(), section() + (path.isEmpty() ? "" : "." + path), ex, sender);
 	}
 
 	default void msgOut(CommandSender sender, String path) {
@@ -82,7 +82,7 @@ public interface CssCommand {
 	}
 
 	default void msgOut(CommandSender sender, String path, PlaceholdersExecutor ex) {
-		API.get().getMsgManager().sendMessageTrans(path, ex, sender);
+		API.get().getMsgManager().sendMessageFromFile(API.get().getConfigManager().getTranslations(), path, ex, sender);
 	}
 
 	default void msgUsage(CommandSender sender, String path) {
@@ -110,12 +110,15 @@ public interface CssCommand {
 					pos = new Location(Bukkit.getWorlds().get(0), 0, 0, 0);
 				double distance = -1;
 				Player nearestPlayer = null;
-				for (Player sameWorld : pos.getWorld().getPlayers())
-					if (distance == -1 || distance < sameWorld.getLocation().distance(pos)) {
-						distance = sameWorld.getLocation().distance(pos);
+				for (Player sameWorld : pos.getWorld().getPlayers()) {
+					double distanceRange = sameWorld.getLocation().distance(pos);
+					if (distance == -1 || distance < distanceRange) {
+						distance = distanceRange;
 						nearestPlayer = sameWorld;
 					}
-				return BukkitLoader.getOnlinePlayers().isEmpty() ? Collections.emptyList() : Arrays.asList(nearestPlayer == null ? BukkitLoader.getOnlinePlayers().iterator().next() : nearestPlayer);
+				}
+				Collection<? extends Player> players = BukkitLoader.getOnlinePlayers();
+				return players.isEmpty() ? Collections.emptyList() : Arrays.asList(nearestPlayer == null ? players.iterator().next() : nearestPlayer);
 			}
 		Player target = Bukkit.getPlayer(selector);
 		return target == null ? Collections.emptyList() : Arrays.asList(target);
