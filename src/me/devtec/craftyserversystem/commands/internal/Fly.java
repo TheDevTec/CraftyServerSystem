@@ -19,13 +19,11 @@ import me.devtec.craftyserversystem.API;
 import me.devtec.craftyserversystem.Loader;
 import me.devtec.craftyserversystem.commands.CssCommand;
 import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
-import me.devtec.shared.commands.holder.CommandHolder;
 import me.devtec.shared.commands.selectors.Selector;
 import me.devtec.shared.commands.structures.CommandStructure;
 
-public class Fly implements CssCommand {
+public class Fly extends CssCommand {
 
-	private CommandHolder<CommandSender> cmd;
 	private Listener listener;
 	private List<UUID> fallDamageCancel = new ArrayList<>();
 
@@ -122,20 +120,12 @@ public class Fly implements CssCommand {
 
 	@Override
 	public void unregister() {
-		if (!isRegistered())
-			return;
-		cmd.unregister();
-		cmd = null;
+		super.unregister();
 		if (listener != null) {
 			HandlerList.unregisterAll(listener);
 			fallDamageCancel.clear();
 			listener = null;
 		}
-	}
-
-	@Override
-	public boolean isRegistered() {
-		return cmd != null;
 	}
 
 }

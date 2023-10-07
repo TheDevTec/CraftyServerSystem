@@ -9,15 +9,12 @@ import me.devtec.craftyserversystem.commands.CssCommand;
 import me.devtec.craftyserversystem.commands.internal.warp.WarpInfo;
 import me.devtec.craftyserversystem.commands.internal.warp.WarpManager;
 import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
-import me.devtec.shared.commands.holder.CommandHolder;
 import me.devtec.shared.commands.structures.CommandStructure;
 import me.devtec.shared.utility.StringUtils;
 import me.devtec.shared.utility.StringUtils.FormatType;
 import me.devtec.theapi.bukkit.game.Position;
 
-public class SetWarp implements CssCommand {
-
-	private CommandHolder<Player> cmd;
+public class SetWarp extends CssCommand {
 
 	@Override
 	public String section() {
@@ -56,19 +53,6 @@ public class SetWarp implements CssCommand {
 					.add("yaw", StringUtils.formatDouble(FormatType.NORMAL, pos.getYaw())).add("pitch", StringUtils.formatDouble(FormatType.NORMAL, pos.getPitch()));
 			msg(sender, "created", placeholders);
 		}
-	}
-
-	@Override
-	public void unregister() {
-		if (!isRegistered())
-			return;
-		cmd.unregister();
-		cmd = null;
-	}
-
-	@Override
-	public boolean isRegistered() {
-		return cmd != null;
 	}
 
 }

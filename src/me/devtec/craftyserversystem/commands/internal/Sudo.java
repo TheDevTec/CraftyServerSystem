@@ -8,14 +8,12 @@ import org.bukkit.entity.Player;
 
 import me.devtec.craftyserversystem.commands.CssCommand;
 import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
-import me.devtec.shared.commands.holder.CommandHolder;
 import me.devtec.shared.commands.selectors.Selector;
 import me.devtec.shared.commands.structures.CommandStructure;
 import me.devtec.shared.utility.StringUtils;
+import me.devtec.theapi.bukkit.BukkitLoader;
 
-public class Sudo implements CssCommand {
-
-	private CommandHolder<CommandSender> cmd;
+public class Sudo extends CssCommand {
 
 	@Override
 	public String section() {
@@ -35,30 +33,30 @@ public class Sudo implements CssCommand {
 		}).argument(null, -1, (sender, structure, args) -> {
 			Player target = Bukkit.getPlayer(args[0]);
 			String value = StringUtils.buildString(1, args);
-			if (value.charAt(0) == '/')
-				Bukkit.dispatchCommand(target, value.substring(1));
-			else
-				target.chat(value);
-			msg(sender, "", PlaceholdersExecutor.i().add("target", target.getName()).add("value", value));
+			boolean silent = value.endsWith("-s");
+			boolean command = value.charAt(0) == '/';
+			if (silent)
+				value = value.substring(command ? 1 : 0, value.length() - 2).trim();
+			else if (command)
+				value = value.substring(1);
+
+			final String finalValue = value;
+
+			// It's async!!
+			BukkitLoader.getNmsProvider().postToMainThread(() -> {
+				if (command)
+					Bukkit.dispatchCommand(target, finalValue);
+				else
+					target.chat(finalValue);
+			});
+			if (!silent)
+				msg(sender, "", PlaceholdersExecutor.i().add("target", target.getName()).add("value", value));
 		});
 
 		// register
 		List<String> cmds = getCommands();
 		if (!cmds.isEmpty())
 			this.cmd = addBypassSettings(cmd).build().register(cmds.remove(0), cmds.toArray(new String[0]));
-	}
-
-	@Override
-	public void unregister() {
-		if (!isRegistered())
-			return;
-		cmd.unregister();
-		cmd = null;
-	}
-
-	@Override
-	public boolean isRegistered() {
-		return cmd != null;
 	}
 
 }

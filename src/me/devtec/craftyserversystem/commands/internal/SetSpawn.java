@@ -8,15 +8,12 @@ import org.bukkit.entity.Player;
 import me.devtec.craftyserversystem.API;
 import me.devtec.craftyserversystem.commands.CssCommand;
 import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
-import me.devtec.shared.commands.holder.CommandHolder;
 import me.devtec.shared.commands.structures.CommandStructure;
 import me.devtec.shared.utility.StringUtils;
 import me.devtec.shared.utility.StringUtils.FormatType;
 import me.devtec.theapi.bukkit.game.Position;
 
-public class SetSpawn implements CssCommand {
-
-	private CommandHolder<Player> cmd;
+public class SetSpawn extends CssCommand {
 
 	@Override
 	public String section() {
@@ -44,19 +41,6 @@ public class SetSpawn implements CssCommand {
 				.add("y", StringUtils.formatDouble(FormatType.NORMAL, pos.getY())).add("z", StringUtils.formatDouble(FormatType.NORMAL, pos.getZ()))
 				.add("yaw", StringUtils.formatDouble(FormatType.NORMAL, pos.getYaw())).add("pitch", StringUtils.formatDouble(FormatType.NORMAL, pos.getPitch()));
 		msg(sender, "set", placeholders);
-	}
-
-	@Override
-	public void unregister() {
-		if (!isRegistered())
-			return;
-		cmd.unregister();
-		cmd = null;
-	}
-
-	@Override
-	public boolean isRegistered() {
-		return cmd != null;
 	}
 
 }

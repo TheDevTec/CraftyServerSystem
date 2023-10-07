@@ -10,14 +10,11 @@ import org.bukkit.entity.Player;
 import me.devtec.craftyserversystem.commands.CssCommand;
 import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
 import me.devtec.shared.Ref;
-import me.devtec.shared.commands.holder.CommandHolder;
 import me.devtec.shared.commands.selectors.Selector;
 import me.devtec.shared.commands.structures.CommandStructure;
 import me.devtec.theapi.bukkit.BukkitLoader;
 
-public class Gamemode implements CssCommand {
-
-	private CommandHolder<CommandSender> cmd;
+public class Gamemode extends CssCommand {
 
 	@Override
 	public String section() {
@@ -164,19 +161,6 @@ public class Gamemode implements CssCommand {
 			BukkitLoader.getNmsProvider().postToMainThread(() -> target.setGameMode(mode));
 		else
 			target.setGameMode(mode);
-	}
-
-	@Override
-	public void unregister() {
-		if (!isRegistered())
-			return;
-		cmd.unregister();
-		cmd = null;
-	}
-
-	@Override
-	public boolean isRegistered() {
-		return cmd != null;
 	}
 
 }

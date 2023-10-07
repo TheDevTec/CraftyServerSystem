@@ -9,14 +9,11 @@ import org.bukkit.entity.Player;
 import me.devtec.craftyserversystem.API;
 import me.devtec.craftyserversystem.commands.CssCommand;
 import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
-import me.devtec.shared.commands.holder.CommandHolder;
 import me.devtec.shared.commands.selectors.Selector;
 import me.devtec.shared.commands.structures.CommandStructure;
 import me.devtec.theapi.bukkit.BukkitLoader;
 
-public class Spawn implements CssCommand {
-
-	private CommandHolder<CommandSender> cmd;
+public class Spawn extends CssCommand {
 
 	@Override
 	public String section() {
@@ -77,19 +74,6 @@ public class Spawn implements CssCommand {
 			BukkitLoader.getNmsProvider().postToMainThread(() -> target.teleport(API.get().getConfigManager().getSpawn().toLocation()));
 		else
 			target.teleport(API.get().getConfigManager().getSpawn().toLocation());
-	}
-
-	@Override
-	public void unregister() {
-		if (!isRegistered())
-			return;
-		cmd.unregister();
-		cmd = null;
-	}
-
-	@Override
-	public boolean isRegistered() {
-		return cmd != null;
 	}
 
 }

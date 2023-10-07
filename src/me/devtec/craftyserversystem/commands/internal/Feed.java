@@ -7,13 +7,10 @@ import org.bukkit.entity.Player;
 
 import me.devtec.craftyserversystem.commands.CssCommand;
 import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
-import me.devtec.shared.commands.holder.CommandHolder;
 import me.devtec.shared.commands.selectors.Selector;
 import me.devtec.shared.commands.structures.CommandStructure;
 
-public class Feed implements CssCommand {
-
-	private CommandHolder<CommandSender> cmd;
+public class Feed extends CssCommand {
 
 	@Override
 	public String section() {
@@ -68,19 +65,6 @@ public class Feed implements CssCommand {
 				msg(sender, "other.admin", placeholders);
 			} else
 				msg(target, "self", PlaceholdersExecutor.i().add("target", target.getName()));
-	}
-
-	@Override
-	public void unregister() {
-		if (!isRegistered())
-			return;
-		cmd.unregister();
-		cmd = null;
-	}
-
-	@Override
-	public boolean isRegistered() {
-		return cmd != null;
 	}
 
 }

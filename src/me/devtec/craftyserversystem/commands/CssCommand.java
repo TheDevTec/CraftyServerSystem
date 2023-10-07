@@ -14,12 +14,13 @@ import org.bukkit.entity.Player;
 import me.devtec.craftyserversystem.API;
 import me.devtec.craftyserversystem.managers.cooldown.CooldownHolder;
 import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
+import me.devtec.shared.commands.holder.CommandHolder;
 import me.devtec.shared.commands.manager.PermissionChecker;
 import me.devtec.shared.commands.structures.CommandStructure;
 import me.devtec.shared.utility.StringUtils;
 import me.devtec.theapi.bukkit.BukkitLoader;
 
-public interface CssCommand {
+public abstract class CssCommand {
 
 	public static final PermissionChecker<CommandSender> DEFAULT_PERMS_CHECKER = (sender, permission, tablist) -> {
 		if (tablist)
@@ -39,19 +40,29 @@ public interface CssCommand {
 		return false;
 	};
 
-	String section();
+	// Internal
+	protected CommandHolder<? extends CommandSender> cmd;
 
-	void register();
+	public abstract String section();
 
-	void unregister();
+	public abstract void register();
 
-	boolean isRegistered();
+	public void unregister() {
+		if (!isRegistered())
+			return;
+		cmd.unregister();
+		cmd = null;
+	}
 
-	default List<String> getCommands() {
+	public boolean isRegistered() {
+		return cmd != null;
+	}
+
+	public List<String> getCommands() {
 		return API.get().getConfigManager().getCommands().getStringList(section() + ".cmd");
 	}
 
-	default <T> CommandStructure<T> addBypassSettings(CommandStructure<T> cmd) {
+	public <T> CommandStructure<T> addBypassSettings(CommandStructure<T> cmd) {
 		String cdGroup = API.get().getConfigManager().getCommands().getString(section() + ".cooldown");
 		if (cdGroup != null) {
 			CooldownHolder cdHolder = API.get().getCooldownManager().getOrPrepare(cdGroup);
@@ -61,35 +72,35 @@ public interface CssCommand {
 		return cmd;
 	}
 
-	default boolean perm(CommandSender sender, String path) {
+	public boolean perm(CommandSender sender, String path) {
 		return sender.hasPermission(getPerm(path));
 	}
 
-	default String getPerm(String path) {
+	public String getPerm(String path) {
 		return API.get().getConfigManager().getCommands().getString(section() + ".perms." + path);
 	}
 
-	default void msg(CommandSender sender, String path) {
+	public void msg(CommandSender sender, String path) {
 		msg(sender, path, PlaceholdersExecutor.EMPTY);
 	}
 
-	default void msg(CommandSender sender, String path, PlaceholdersExecutor ex) {
+	public void msg(CommandSender sender, String path, PlaceholdersExecutor ex) {
 		API.get().getMsgManager().sendMessageFromFile(API.get().getConfigManager().getTranslations(), section() + (path.isEmpty() ? "" : "." + path), ex, sender);
 	}
 
-	default void msgOut(CommandSender sender, String path) {
+	public void msgOut(CommandSender sender, String path) {
 		msgOut(sender, path, PlaceholdersExecutor.EMPTY);
 	}
 
-	default void msgOut(CommandSender sender, String path, PlaceholdersExecutor ex) {
+	public void msgOut(CommandSender sender, String path, PlaceholdersExecutor ex) {
 		API.get().getMsgManager().sendMessageFromFile(API.get().getConfigManager().getTranslations(), path, ex, sender);
 	}
 
-	default void msgUsage(CommandSender sender, String path) {
+	public void msgUsage(CommandSender sender, String path) {
 		API.get().getMsgManager().sendMessageFromFile(API.get().getConfigManager().getCommands(), section() + ".usage." + path, PlaceholdersExecutor.EMPTY, sender);
 	}
 
-	default Collection<? extends Player> selector(CommandSender sender, String selector) {
+	public Collection<? extends Player> selector(CommandSender sender, String selector) {
 		char lowerCase = selector.charAt(0) == '*' ? '*' : selector.charAt(0) == '@' && selector.length() == 2 ? Character.toLowerCase(selector.charAt(1)) : 0;
 		if (lowerCase != 0)
 			switch (lowerCase) {

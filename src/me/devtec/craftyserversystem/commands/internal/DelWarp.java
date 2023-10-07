@@ -7,13 +7,10 @@ import org.bukkit.command.CommandSender;
 import me.devtec.craftyserversystem.commands.CssCommand;
 import me.devtec.craftyserversystem.commands.internal.warp.WarpManager;
 import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
-import me.devtec.shared.commands.holder.CommandHolder;
 import me.devtec.shared.commands.structures.CommandStructure;
 import me.devtec.shared.utility.StringUtils;
 
-public class DelWarp implements CssCommand {
-
-	private CommandHolder<CommandSender> cmd;
+public class DelWarp extends CssCommand {
 
 	@Override
 	public String section() {
@@ -42,19 +39,6 @@ public class DelWarp implements CssCommand {
 			PlaceholdersExecutor placeholders = PlaceholdersExecutor.i().add("warp", warpName);
 			msg(sender, "deleted", placeholders);
 		}
-	}
-
-	@Override
-	public void unregister() {
-		if (!isRegistered())
-			return;
-		cmd.unregister();
-		cmd = null;
-	}
-
-	@Override
-	public boolean isRegistered() {
-		return cmd != null;
 	}
 
 }

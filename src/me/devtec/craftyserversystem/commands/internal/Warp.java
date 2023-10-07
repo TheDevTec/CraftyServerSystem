@@ -16,7 +16,6 @@ import me.devtec.craftyserversystem.commands.internal.warp.WarpManager;
 import me.devtec.craftyserversystem.commands.internal.warp.WarpResult;
 import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
 import me.devtec.shared.commands.holder.CommandExecutor;
-import me.devtec.shared.commands.holder.CommandHolder;
 import me.devtec.shared.commands.selectors.Selector;
 import me.devtec.shared.commands.structures.CommandStructure;
 import me.devtec.shared.dataholder.Config;
@@ -28,9 +27,8 @@ import me.devtec.theapi.bukkit.gui.GUI.ClickType;
 import me.devtec.theapi.bukkit.gui.HolderGUI;
 import me.devtec.theapi.bukkit.gui.ItemGUI;
 
-public class Warp implements CssCommand {
+public class Warp extends CssCommand {
 
-	private CommandHolder<CommandSender> cmd;
 	private GUI warpMenu;
 
 	protected static boolean requireUpdateMenu;
@@ -44,7 +42,7 @@ public class Warp implements CssCommand {
 		return "warp";
 	}
 
-	private interface MenuItem {
+	public interface MenuItem {
 		ItemGUI makeItem(GUI prev, GUI next, int currentPage, int totalPages);
 	}
 
@@ -323,19 +321,6 @@ public class Warp implements CssCommand {
 					break;
 				}
 			}
-	}
-
-	@Override
-	public void unregister() {
-		if (!isRegistered())
-			return;
-		cmd.unregister();
-		cmd = null;
-	}
-
-	@Override
-	public boolean isRegistered() {
-		return cmd != null;
 	}
 
 }
