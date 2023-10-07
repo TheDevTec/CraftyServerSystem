@@ -16,6 +16,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import me.devtec.craftyserversystem.API;
 import me.devtec.craftyserversystem.Loader;
+import me.devtec.craftyserversystem.annotations.Nonnull;
 import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
 import me.devtec.craftyserversystem.utils.ChatHandlers;
 import me.devtec.shared.Ref;
@@ -30,6 +31,7 @@ public class ChatListener implements Listener {
 
 	// AntiSpam
 	private boolean antiSpamEnabled;
+	@Nonnull
 	private TempMap<UUID, Object[]> prevMsgs;
 	private int maxMessages;
 	private boolean bypassAntiSpam;
@@ -42,13 +44,16 @@ public class ChatListener implements Listener {
 
 	// AntiSwear
 	private boolean antiSwearEnabled;
+	@Nonnull
 	private String replacement;
+	@Nonnull
 	private List<String> words;
 	private boolean bypassAntiSwear;
 
 	// AntiAd pattern
 	private boolean antiAdEnabled;
 	private boolean bypassAntiAd;
+	@Nonnull
 	private List<String> antiAdWhitelist;
 
 	public ChatListener() {
@@ -178,7 +183,7 @@ public class ChatListener implements Listener {
 		StringContainer builder = new StringContainer(msg);
 		String notificationColor = API.get().getConfigManager().getChat().getString("notification.color", "§c");
 		for (Player player : targets)
-			if (!player.equals(pinger) && pinger.canSee(player)) {
+			if (!player.getUniqueId().equals(pinger.getUniqueId()) && pinger.canSee(player)) {
 				int startAt = builder.indexOfIgnoreCase(player.getName());
 				if (startAt != -1) {
 					notify(pinger, player);

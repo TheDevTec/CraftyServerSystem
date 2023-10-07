@@ -12,6 +12,8 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import me.devtec.craftyserversystem.API;
+import me.devtec.craftyserversystem.annotations.Nonnull;
+import me.devtec.craftyserversystem.annotations.Nullable;
 import me.devtec.craftyserversystem.managers.cooldown.CooldownHolder;
 import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
 import me.devtec.shared.commands.holder.CommandHolder;
@@ -40,9 +42,10 @@ public abstract class CssCommand {
 		return false;
 	};
 
-	// Internal
+	@Nonnull
 	protected CommandHolder<? extends CommandSender> cmd;
 
+	@Nonnull
 	public abstract String section();
 
 	public abstract void register();
@@ -58,10 +61,12 @@ public abstract class CssCommand {
 		return cmd != null;
 	}
 
+	@Nonnull
 	public List<String> getCommands() {
 		return API.get().getConfigManager().getCommands().getStringList(section() + ".cmd");
 	}
 
+	@Nonnull
 	public <T> CommandStructure<T> addBypassSettings(CommandStructure<T> cmd) {
 		String cdGroup = API.get().getConfigManager().getCommands().getString(section() + ".cooldown");
 		if (cdGroup != null) {
@@ -73,9 +78,11 @@ public abstract class CssCommand {
 	}
 
 	public boolean perm(CommandSender sender, String path) {
-		return sender.hasPermission(getPerm(path));
+		String perm = getPerm(path);
+		return perm == null ? true : sender.hasPermission(perm);
 	}
 
+	@Nullable
 	public String getPerm(String path) {
 		return API.get().getConfigManager().getCommands().getString(section() + ".perms." + path);
 	}
@@ -100,6 +107,7 @@ public abstract class CssCommand {
 		API.get().getMsgManager().sendMessageFromFile(API.get().getConfigManager().getCommands(), section() + ".usage." + path, PlaceholdersExecutor.EMPTY, sender);
 	}
 
+	@Nonnull
 	public Collection<? extends Player> selector(CommandSender sender, String selector) {
 		char lowerCase = selector.charAt(0) == '*' ? '*' : selector.charAt(0) == '@' && selector.length() == 2 ? Character.toLowerCase(selector.charAt(1)) : 0;
 		if (lowerCase != 0)

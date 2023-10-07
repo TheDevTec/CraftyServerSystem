@@ -1,6 +1,9 @@
 package me.devtec.craftyserversystem.events;
 
+import java.util.Collection;
+
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -20,8 +23,9 @@ public class JoinListener implements Listener {
 		PlaceholdersExecutor placeholders = PlaceholdersExecutor.i().add("player", e.getPlayer().getName()).papi(e.getPlayer().getUniqueId());
 		// Send json message
 		Config join = API.get().getConfigManager().getJoin();
-		API.get().getMsgManager().sendMessageFromFile(join, "join." + time + ".text", placeholders, BukkitLoader.getOnlinePlayers());
-		API.get().getMsgManager().sendMessageFromFile(join, "join." + time + ".broadcast", placeholders, BukkitLoader.getOnlinePlayers());
+		Collection<? extends Player> onlinePlayers = BukkitLoader.getOnlinePlayers();
+		API.get().getMsgManager().sendMessageFromFile(join, "join." + time + ".text", placeholders, onlinePlayers);
+		API.get().getMsgManager().sendMessageFromFile(join, "join." + time + ".broadcast", placeholders, onlinePlayers);
 		for (String cmd : placeholders.apply(join.getStringList("join." + time + ".commands")))
 			Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd);
 	}

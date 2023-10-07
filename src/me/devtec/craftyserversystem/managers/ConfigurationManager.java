@@ -32,19 +32,21 @@ public class ConfigurationManager {
 	}
 
 	public ConfigurationManager initFromJar() {
-		if (main.merge(new Config().reload(StreamUtils.fromStream(Loader.getPlugin().getClass().getClassLoader().getResourceAsStream("files/config.yml"))), MergeStandards.DEFAULT))
+		ClassLoader classLoader = Loader.getPlugin().getClass().getClassLoader();
+
+		if (main.merge(new Config().reload(StreamUtils.fromStream(classLoader.getResourceAsStream("files/config.yml"))), MergeStandards.DEFAULT))
 			main.save("yaml");
-		if (translations.merge(new Config().reload(StreamUtils.fromStream(Loader.getPlugin().getClass().getClassLoader().getResourceAsStream("files/translations.yml"))), MergeStandards.DEFAULT))
+		if (translations.merge(new Config().reload(StreamUtils.fromStream(classLoader.getResourceAsStream("files/translations.yml"))), MergeStandards.DEFAULT))
 			translations.save("yaml");
-		if (commands.merge(new Config().reload(StreamUtils.fromStream(Loader.getPlugin().getClass().getClassLoader().getResourceAsStream("files/commands.yml"))), MergeStandards.DEFAULT))
+		if (commands.merge(new Config().reload(StreamUtils.fromStream(classLoader.getResourceAsStream("files/commands.yml"))), MergeStandards.DEFAULT))
 			commands.save("yaml");
-		if (cooldowns.merge(new Config().reload(StreamUtils.fromStream(Loader.getPlugin().getClass().getClassLoader().getResourceAsStream("files/cooldowns.yml"))), MergeStandards.DEFAULT))
+		if (cooldowns.merge(new Config().reload(StreamUtils.fromStream(classLoader.getResourceAsStream("files/cooldowns.yml"))), MergeStandards.DEFAULT))
 			cooldowns.save("yaml");
-		if (join.merge(new Config().reload(StreamUtils.fromStream(Loader.getPlugin().getClass().getClassLoader().getResourceAsStream("files/join.yml"))), MergeStandards.DEFAULT))
+		if (join.merge(new Config().reload(StreamUtils.fromStream(classLoader.getResourceAsStream("files/join.yml"))), MergeStandards.DEFAULT))
 			join.save("yaml");
-		if (quit.merge(new Config().reload(StreamUtils.fromStream(Loader.getPlugin().getClass().getClassLoader().getResourceAsStream("files/quit.yml"))), MergeStandards.DEFAULT))
+		if (quit.merge(new Config().reload(StreamUtils.fromStream(classLoader.getResourceAsStream("files/quit.yml"))), MergeStandards.DEFAULT))
 			quit.save("yaml");
-		if (chat.merge(new Config().reload(StreamUtils.fromStream(Loader.getPlugin().getClass().getClassLoader().getResourceAsStream("files/chat.yml"))), MergeStandards.DEFAULT))
+		if (chat.merge(new Config().reload(StreamUtils.fromStream(classLoader.getResourceAsStream("files/chat.yml"))), MergeStandards.DEFAULT))
 			chat.save("yaml");
 		prefix = main.getString("prefix", "");
 		return this;

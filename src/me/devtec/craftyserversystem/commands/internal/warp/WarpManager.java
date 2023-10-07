@@ -10,6 +10,7 @@ import org.bukkit.inventory.ItemStack;
 
 import me.devtec.craftyserversystem.API;
 import me.devtec.craftyserversystem.annotations.IgnoredClass;
+import me.devtec.craftyserversystem.annotations.Nonnull;
 import me.devtec.craftyserversystem.commands.internal.Warp;
 import me.devtec.craftyserversystem.managers.cooldown.CooldownHolder;
 import me.devtec.shared.dataholder.Config;
@@ -18,8 +19,10 @@ import me.devtec.theapi.bukkit.game.Position;
 @IgnoredClass
 public class WarpManager {
 
+	@Nonnull
 	private static WarpManager instance;
 
+	@Nonnull
 	public static WarpManager getProvider() {
 		if (instance == null)
 			instance = new WarpManager();
@@ -30,7 +33,8 @@ public class WarpManager {
 		load();
 	}
 
-	private Map<String, WarpInfo> warps = new HashMap<>();
+	@Nonnull
+	public static Map<String, WarpInfo> warps = new HashMap<>();
 	private boolean isLoaded;
 
 	public void load() {
