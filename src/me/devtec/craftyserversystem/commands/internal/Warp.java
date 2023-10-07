@@ -29,7 +29,7 @@ import me.devtec.theapi.bukkit.gui.ItemGUI;
 
 public class Warp extends CssCommand {
 
-	private GUI warpMenu;
+	public static GUI warpMenu;
 
 	protected static boolean requireUpdateMenu;
 
