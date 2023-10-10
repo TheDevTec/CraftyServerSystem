@@ -6,6 +6,7 @@ import me.devtec.craftyserversystem.Loader;
 import me.devtec.shared.dataholder.Config;
 import me.devtec.shared.dataholder.merge.MergeStandards;
 import me.devtec.shared.utility.StreamUtils;
+import me.devtec.shared.utility.TimeUtils;
 import me.devtec.theapi.bukkit.game.Position;
 
 public class ConfigurationManager {
@@ -20,6 +21,7 @@ public class ConfigurationManager {
 	private Config chat;
 	private String prefix = "";
 	private Position spawn;
+	private long teleportRequestTime;
 
 	public ConfigurationManager(String main, String translations, String commands, String cooldowns, String join, String quit, String chat) {
 		this.main = new Config(FILES_PATH + main);
@@ -49,7 +51,16 @@ public class ConfigurationManager {
 		if (chat.merge(new Config().reload(StreamUtils.fromStream(classLoader.getResourceAsStream("files/chat.yml"))), MergeStandards.DEFAULT))
 			chat.save("yaml");
 		prefix = main.getString("prefix", "");
+		teleportRequestTime = TimeUtils.timeFromString(getMain().getString("teleport-request-time"));
 		return this;
+	}
+
+	public long getTeleportRequestTime() {
+		return teleportRequestTime;
+	}
+
+	public void setTeleportRequestTime(long time) {
+		teleportRequestTime = time;
 	}
 
 	public Config getWarpsStorage() {
@@ -92,6 +103,7 @@ public class ConfigurationManager {
 		getMain().reload();
 		getTranslations().reload();
 		getCommands().reload();
+		teleportRequestTime = TimeUtils.timeFromString(getMain().getString("teleport-request-time"));
 	}
 
 	public String getPrefix() {

@@ -6,6 +6,8 @@ fly:
 god:
   anti-void-damage-listener: true
 
+teleport-request-time: 5min
+
 warp:
   # When you use command /warp as Player, menu with warps will be opened to you instead of help message
   enable-menu: true

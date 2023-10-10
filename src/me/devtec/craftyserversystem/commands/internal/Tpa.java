@@ -5,6 +5,7 @@ import java.util.List;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
+import me.devtec.craftyserversystem.API;
 import me.devtec.craftyserversystem.commands.CssCommand;
 import me.devtec.craftyserversystem.commands.internal.tprequest.Result;
 import me.devtec.craftyserversystem.commands.internal.tprequest.TpaManager;
@@ -19,8 +20,6 @@ public class Tpa extends CssCommand {
 	public String section() {
 		return "tpa";
 	}
-
-	private long time = 60 * 5; // 5min
 
 	@Override
 	public void register() {
@@ -46,7 +45,8 @@ public class Tpa extends CssCommand {
 			msg(sender, "failed.self", PlaceholdersExecutor.EMPTY);
 			return;
 		}
-		Result result = TpaManager.getProvider().sendRequest(new TpaRequest(sender.getUniqueId(), target.getUniqueId(), System.currentTimeMillis() / 1000 + time, true));
+		Result result = TpaManager.getProvider()
+				.sendRequest(new TpaRequest(sender.getUniqueId(), target.getUniqueId(), System.currentTimeMillis() / 1000 + API.get().getConfigManager().getTeleportRequestTime(), true));
 		switch (result) {
 		case SUCCESS:
 			PlaceholdersExecutor placeholders = PlaceholdersExecutor.i().add("sender", sender.getName()).add("target", target.getName());
