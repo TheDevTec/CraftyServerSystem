@@ -111,3 +111,60 @@ gamemodeadventure:
   other:
     target: "{prefix} Your GameMode changed to &e{gamemode} &7by &e{admin}"
     admin: "{prefix} You changed GameMode of &e{target} &7to &e{gamemode}"
+
+tpa:
+  # {sender}, {target}
+  success:
+    sender: "{prefix} You sent a teleport request to player &e{target}"
+    target: "{prefix} Player &e{sender} &7has sent you a request to teleport to you"
+  # {target}
+  failed:
+    self: "{prefix} You can't send teleport request to yourself"
+    invalid: "{prefix} Player &e{target} &7is offline"
+    denied_toggled: "{prefix} Player &e{target} &7doesn't accept teleport requests"
+    sender: "{prefix} You have a pending teleport request from this player"
+    target: "{prefix} This player already has a pending teleport request from you"
+
+tpahere:
+  # {sender}, {target}
+  success:
+    sender: "{prefix} You sent a teleport request to player &e{target}"
+    target: "{prefix} Player &e{sender} &7has sent you a request to teleport to him"
+  # {target}
+  failed:
+    self: "{prefix} You can't send teleport request to yourself"
+    invalid: "{prefix} Player &e{target} &7is offline"
+    denied_toggled: "{prefix} Player &e{target} &7doesn't accept teleport requests"
+    sender: "{prefix} You have a pending teleport request from this player"
+    target: "{prefix} This player already has a pending teleport request from you"
+
+tpaccept:
+  # {sender}, {target}
+  tpahere:
+    sender: "{prefix} You have accepted a request to teleport to player &e{target}"
+    target: "{prefix} Player &e{sender} &7has accepted your request to teleport to you"
+  # {sender}, {target}
+  tpa:
+    sender: "{prefix} You have accepted a request to teleport a player &e{target} &7to you"
+    target: "{prefix} Player &e{sender} &7has accepted your request to teleport to him"
+  no-requests: "{prefix} You don't have any teleport requests"
+
+tpdeny:
+  # {sender}, {target}
+  sender: "{prefix} You denied a teleport request from player &e{target}"
+  target: "{prefix} Player &e{sender} &7has denied your request to teleport"
+  no-requests: "{prefix} You don't have any teleport requests"
+
+tpcancel:
+  # {sender}, {target}
+  sender: "{prefix} You cancelled your teleport request to player &e{target}"
+  no-requests: "{prefix} You don't have any teleport requests"
+
+tptoggle:
+  never-joined: "{prefix} Player &e{target} &7not found."
+  global:
+    enabled: "{prefix} Enabled global toggle of all teleport requests"
+    disabled: "{prefix} Disabled global toggle of all teleport requests"
+  user:
+    added: "{prefix} Added player &e{target} &7to the toggle list of teleport requests"
+    removed: "{prefix} Removed player &e{target} &7from the toggle list of teleport requests"

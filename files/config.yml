@@ -11,7 +11,8 @@ warp:
   enable-menu: true
   # placeholder: {page}, {totalPages}
   title: "&6&lW&f&larps &7{page}/{totalPages}"
-  # Space is warp place.
+  # Empty slot (space) is warp place.
+  # Max 6 rows - 9 slots in every row
   slots:
   - "ooooooooo"
   - "         "

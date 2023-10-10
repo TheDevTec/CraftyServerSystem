@@ -127,8 +127,41 @@ gamemodespectator:
 
 sudo:
   usage:
-    other: "/sudo {player} {/command or message without slash}"
+    other: "/sudo {player} {message or /command}"
   cmd: [sudo]
   perms:
     cmd: "css.cmd.sudo"
-    
+
+tpa:
+  usage:
+    cmd: "/tpa {player}"
+  cmd: [tpa]
+  perms:
+    cmd: "css.cmd.tpa"
+
+tpahere:
+  usage:
+    cmd: "/tpahere {player}"
+  cmd: [tpahere]
+  perms:
+    cmd: "css.cmd.tpahere"
+
+tpaccept:
+  cmd: [tpaccept]
+  perms:
+    cmd: "css.cmd.tpaccept"
+
+tpdeny:
+  cmd: [tpdeny]
+  perms:
+    cmd: "css.cmd.tpdeny"
+
+tpcancel:
+  cmd: [tpcancel]
+  perms:
+    cmd: "css.cmd.tpcancel"
+
+tptoggle:
+  cmd: [tptoggle]
+  perms:
+    cmd: "css.cmd.tptoggle"
