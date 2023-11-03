@@ -165,3 +165,16 @@ tptoggle:
   cmd: [tptoggle]
   perms:
     cmd: "css.cmd.tptoggle"
+
+tp:
+  cmd: [tp,teleport]
+  usage:
+    cmd:
+    - "/tp {player} - Teleport you to player"
+    - "/tp {x y z} - Teleport you to x y z coords"
+    - "/tp {player1} {player2} - Teleport player1 to player2"
+    - "/tp {player} {x y z} - Teleport player to x y z coords"
+    loc: "/tp {player} {x} {y} {z} [yaw] [pitch]"
+    self-loc: "/tp {x} {y} {z} [yaw] [pitch]"
+  perms:
+    cmd: "css.cmd.teleport"

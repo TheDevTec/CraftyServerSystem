@@ -13,6 +13,8 @@ import me.devtec.shared.components.ComponentAPI;
 import me.devtec.shared.dataholder.StringContainer;
 import me.devtec.shared.placeholders.PlaceholderAPI;
 import me.devtec.shared.utility.ColorUtils;
+import me.devtec.shared.utility.StringUtils;
+import me.devtec.shared.utility.StringUtils.FormatType;
 
 public class PlaceholdersExecutor {
 
@@ -35,7 +37,7 @@ public class PlaceholdersExecutor {
 	}
 
 	public PlaceholdersExecutor add(String sequence, Number replacement) {
-		return addSpec('{' + sequence + '}', replacement.toString());
+		return addSpec('{' + sequence + '}', StringUtils.formatDouble(FormatType.NORMAL, replacement.doubleValue()));
 	}
 
 	public PlaceholdersExecutor addSpec(String sequence, String replacement) {
