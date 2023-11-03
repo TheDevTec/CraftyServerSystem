@@ -466,7 +466,7 @@ public class ChatHandlers {
 						if (before.length() == 0 && after.length() == 0 || pos - before.length() < 0 || pos + after.length() > filtered.length()
 								|| filtered.indexOf(phrase, pos - before.length()) != pos - before.length()) {
 							pos = filtered.indexOf(word, posStart);
-							continue;
+							return true;
 						}
 						posStart += after.length();
 						found = false;
