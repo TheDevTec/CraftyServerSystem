@@ -445,7 +445,7 @@ public class ChatHandlers {
 		for (String word : words) {
 			int pos = filtered.indexOf(word);
 			if (pos != -1) {
-				if (word.equals("kund")) {
+				if (word.equals("kund")) { // TODO Implement this function to be configurable
 					if (pos < 1)
 						return true;
 					return !(filtered.charAt(pos - 2) == 's' && filtered.charAt(pos - 1) == 'e');
