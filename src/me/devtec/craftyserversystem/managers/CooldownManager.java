@@ -73,6 +73,20 @@ public class CooldownManager {
 										PlaceholdersExecutor.i().add("time", StringUtils.formatDouble(FormatType.NORMAL, nextUsageIn)), sender);
 							return false;
 						}
+
+						@Override
+						public boolean tryWithoutWriting(CommandSender sender) {
+							if (bypassPerm != null && sender.hasPermission(bypassPerm))
+								return true; // Skip whole cooldown checker
+
+							long currentTime = System.currentTimeMillis() / 1000;
+							Config file = me.devtec.shared.API.getUser(sender.getName());
+							long lastUsedTime = file.getLong("css.cd." + id());
+							long nextUsageIn = lastUsedTime - currentTime;
+							if (nextUsageIn <= 0)
+								return true;
+							return false;
+						}
 					};
 				} else {
 					long time = TimeUtils.timeFromString(timeInString);
@@ -105,6 +119,20 @@ public class CooldownManager {
 											PlaceholdersExecutor.i().add("time", StringUtils.formatDouble(FormatType.NORMAL, nextUsageIn)), sender);
 								return false;
 							}
+
+							@Override
+							public boolean tryWithoutWriting(CommandSender sender) {
+								if (bypassPerm != null && sender.hasPermission(bypassPerm))
+									return true; // Skip whole cooldown checker
+
+								long currentTime = System.currentTimeMillis() / 1000;
+								Config file = me.devtec.shared.API.getUser(sender.getName());
+								long lastUsedTime = file.getLong("css.cd." + id());
+								long nextUsageIn = lastUsedTime - currentTime;
+								if (nextUsageIn <= 0)
+									return true;
+								return false;
+							}
 						};
 					else
 						cd = new CooldownHolder(id) {
@@ -125,6 +153,20 @@ public class CooldownManager {
 								if (sendMessage)
 									API.get().getMsgManager().sendMessageFromFile(cdConfig, id + ".cooldown-message",
 											PlaceholdersExecutor.i().add("time", StringUtils.formatDouble(FormatType.NORMAL, nextUsageIn)), sender);
+								return false;
+							}
+
+							@Override
+							public boolean tryWithoutWriting(CommandSender sender) {
+								if (bypassPerm != null && sender.hasPermission(bypassPerm))
+									return true; // Skip whole cooldown checker
+
+								long currentTime = System.currentTimeMillis() / 1000;
+								Config file = me.devtec.shared.API.getUser(sender.getName());
+								long lastUsedTime = file.getLong("css.cd." + id());
+								long nextUsageIn = lastUsedTime - currentTime;
+								if (nextUsageIn <= 0)
+									return true;
 								return false;
 							}
 						};

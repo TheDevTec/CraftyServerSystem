@@ -181,6 +181,20 @@ tp:
     target: "{prefix} Teleporting to the player &e{destination}"
   # {sender}, {target}, {x}, {y}, {z}, {yaw}, {pitch}, {world}
   loc:
-    self: "{prefix} Teleporting to the coords &cX:&e{x}&7, &aY:&e{y}&7, &9Z:&e{z}&7, &eYaw:&e{yaw}&7, &6Pitch:&e{pitch} &7&0({world})"
-    sender: "{prefix} Teleporting player &e{target} &7to the coords &cX:&e{x}&7, &aY:&e{y}&7, &9Z:&e{z}&7, &eYaw:&e{yaw}&7, &6Pitch:&e{pitch} &7&0({world})"
-    target: "{prefix} Teleporting to the coords &cX:&e{x}&7, &aY:&e{y}&7, &9Z:&e{z}&7, &eYaw:&e{yaw}&7, &6Pitch:&e{pitch} &7&0({world})"
+    self: "{prefix} Teleporting to the coords &e{x}&7, &e{y}&7, &e{z}&7, &e{yaw}&7, &e{pitch} &8&o({world})"
+    sender: "{prefix} Teleporting player &e{target} &7to the coords &e{x}&7, &e{y}&7, &e{z}&7, &e{yaw}&7, &e{pitch} &8&o({world})"
+    target: "{prefix} Teleporting to the coords &e{x}&7, &e{y}&7, &e{z}&7, &e{yaw}&7, &e{pitch} &8&o({world})"
+
+kit:
+  in-cooldown:
+    self: "{prefix} Before using this kit again, please wait &e{time}"
+    target: "{prefix} Before using this kit again, please wait &e{time}"
+    sender: "{prefix} &cFAILED! &7Player &e{target} &7can you this kit after &e{time}"
+  enough-money:
+    self: "{prefix} No money, no servis! You need at least &e${cost}"
+    target: "{prefix} No money, no servis! You need at least &e${cost}"
+    sender: "{prefix} &cFAILED! &7Player &e{target} &7doesn't have enough money. Kit cost &e${cost}"
+  used:
+    self: "{prefix} Used kit &e{kit}"
+    target: "{prefix} Used kit &e{kit}"
+    sender: "{prefix} &aSUCCESS! &7Player &e{target} &7used kit &e{kit}"

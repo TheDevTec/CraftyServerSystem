@@ -16,4 +16,6 @@ public abstract class CooldownHolder {
 
 	public abstract boolean accept(CommandSender sender);
 
+	public abstract boolean tryWithoutWriting(CommandSender sender);
+
 }

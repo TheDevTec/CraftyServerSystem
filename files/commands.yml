@@ -178,3 +178,14 @@ tp:
     self-loc: "/tp {x} {y} {z} [yaw] [pitch]"
   perms:
     cmd: "css.cmd.teleport"
+  
+kit:
+  cmd: [kit,kits]
+  usage:
+    cmd: "/kit {kit}"
+    console: "/kit {kit} {player}"
+  perms:
+    cmd: "css.cmd.kit"
+    no-cooldown: "css.cmd.kit.other"
+    no-cooldown: "css.cmd.kit.no-cooldown"
+    no-cost: "css.cmd.kit.no-cost"

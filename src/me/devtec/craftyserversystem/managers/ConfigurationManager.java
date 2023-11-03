@@ -19,11 +19,12 @@ public class ConfigurationManager {
 	private Config join;
 	private Config quit;
 	private Config chat;
+	private Config kits;
 	private String prefix = "";
 	private Position spawn;
 	private long teleportRequestTime;
 
-	public ConfigurationManager(String main, String translations, String commands, String cooldowns, String join, String quit, String chat) {
+	public ConfigurationManager(String main, String translations, String commands, String cooldowns, String join, String quit, String chat, String kits) {
 		this.main = new Config(FILES_PATH + main);
 		this.translations = new Config(FILES_PATH + translations);
 		this.commands = new Config(FILES_PATH + commands);
@@ -31,6 +32,7 @@ public class ConfigurationManager {
 		this.join = new Config(FILES_PATH + join);
 		this.quit = new Config(FILES_PATH + quit);
 		this.chat = new Config(FILES_PATH + chat);
+		this.kits = new Config(FILES_PATH + kits);
 	}
 
 	public ConfigurationManager initFromJar() {
@@ -50,7 +52,9 @@ public class ConfigurationManager {
 			quit.save("yaml");
 		if (chat.merge(new Config().reload(StreamUtils.fromStream(classLoader.getResourceAsStream("files/chat.yml"))), MergeStandards.DEFAULT))
 			chat.save("yaml");
-		prefix = main.getString("prefix", "");
+		if (kits.merge(new Config().reload(StreamUtils.fromStream(classLoader.getResourceAsStream("files/kits.yml"))), MergeStandards.DEFAULT))
+			kits.save("yaml");
+		prefix = getMain().getString("prefix", "");
 		teleportRequestTime = TimeUtils.timeFromString(getMain().getString("teleport-request-time"));
 		return this;
 	}
@@ -91,6 +95,10 @@ public class ConfigurationManager {
 		return translations;
 	}
 
+	public Config getKits() {
+		return kits;
+	}
+
 	public Config getCommands() {
 		return commands;
 	}
@@ -103,6 +111,9 @@ public class ConfigurationManager {
 		getMain().reload();
 		getTranslations().reload();
 		getCommands().reload();
+		getKits().reload();
+		getCooldowns().reload();
+		prefix = getMain().getString("prefix", "");
 		teleportRequestTime = TimeUtils.timeFromString(getMain().getString("teleport-request-time"));
 	}
 

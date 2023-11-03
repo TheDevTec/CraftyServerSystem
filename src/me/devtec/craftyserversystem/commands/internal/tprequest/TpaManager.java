@@ -7,11 +7,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import me.devtec.craftyserversystem.annotations.IgnoredClass;
 import me.devtec.craftyserversystem.annotations.Nonnull;
 import me.devtec.craftyserversystem.annotations.Nullable;
 import me.devtec.shared.API;
 import me.devtec.shared.dataholder.Config;
 
+@IgnoredClass
 public class TpaManager {
 
 	@Nonnull

@@ -4,6 +4,9 @@ import java.util.UUID;
 
 import org.bukkit.Bukkit;
 
+import me.devtec.craftyserversystem.annotations.IgnoredClass;
+
+@IgnoredClass
 public class TpaRequest {
 	private UUID sender;
 	private UUID target;

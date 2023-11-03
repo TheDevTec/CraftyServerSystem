@@ -1,5 +1,7 @@
 package me.devtec.craftyserversystem;
 
+import org.bukkit.Bukkit;
+
 import me.devtec.craftyserversystem.commands.CssCommand;
 import me.devtec.craftyserversystem.economy.EconomyHook;
 import me.devtec.craftyserversystem.economy.EmptyEconomyHook;
@@ -10,6 +12,10 @@ import me.devtec.craftyserversystem.managers.MessageManager;
 import me.devtec.craftyserversystem.permission.EmptyPermissionHook;
 import me.devtec.craftyserversystem.permission.PermissionHook;
 import me.devtec.shared.dataholder.Config;
+import me.devtec.shared.json.Json;
+import me.devtec.shared.json.modern.ModernJsonReader;
+import me.devtec.shared.json.modern.ModernJsonWriter;
+import me.devtec.shared.utility.StringUtils;
 
 public class API {
 
@@ -109,9 +115,13 @@ public class API {
 	}
 
 	protected void init() {
-		cfgManager = new ConfigurationManager("config.yml", "translations.yml", "commands.yml", "cooldowns.yml", "join.yml", "quit.yml", "chat.yml").initFromJar();
+		cfgManager = new ConfigurationManager("config.yml", "translations.yml", "commands.yml", "cooldowns.yml", "join.yml", "quit.yml", "chat.yml", "kits.yml").initFromJar();
 		cmdManager = new CommandManager(cfgManager);
 		cdManager = new CooldownManager();
 		msgManager = new MessageManager();
+
+		if (Json.reader().getClass() == ModernJsonReader.class && Json.writer().getClass() == ModernJsonWriter.class)
+			Bukkit.getConsoleSender().sendMessage(StringUtils.colorize(
+					"&0[&eCSS&0] &eWe recommend to change Json reader & writer from &nGuava&r&e to our own &nTheAPI&r&e in &cplugins/TheAPI/config.yml &eon line &c\"default-json-handler\""));
 	}
 }

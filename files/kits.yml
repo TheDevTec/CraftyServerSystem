@@ -1,0 +1,75 @@
+first-join:
+  permission: css.kit.first-join
+  settings:
+    cost: 0.0
+    override-contents-in-slots: false
+    drop-items-when-full-inv: true
+    cooldown:
+      # Leave an empty string (bypass-perm: "") for no permissions
+      # - Cooldown cannot be bypassed by anyone or anything.
+      bypass-perm: "css.cooldown.kits"
+      time: 0s
+  messages:
+  - "Welcome on our server, sir &e{player}"
+  - "Read rules! /rules"
+  - "Teleport to the world with /rtp"
+  commands:
+  - "spawn {target}"
+      
+  # MATERIAL{variable nbt tags}
+  #
+  # Nbt tags (In the json format!!):
+  #
+  # type:MATERIAL (In the case of contents - shulker or bundle)
+  # displayName:"text"
+  # lore:["first line"]
+  # amount:NUMBER
+  # durability:NUMBER
+  # customModel:NUMBER
+  # enchants:{enchantName:level}
+  # itemFlags:[flagName, anotherFlagName]
+  # unbreakable:TRUE/FALSE
+  #
+  # In the case of PLAYER_HEAD or SKULL_ITEM:
+  #
+  # head.type:VALUES, URL, PLAYER or HDB (HeadDatabase) 
+  # head.owner:<value insert here>
+  # 
+  # 
+  # In the case of WRITTEN_BOOK or WRITTABLE_BOOK:
+  #
+  # book.author:"authorHere"
+  # book.title:"authorHere"
+  # book.generation:ORIGINAL, COPY_OF_ORIGINAL, COPY_OF_COPY or TATTERED
+  #
+  # In case of pages you can use simple text format or json format
+  #
+  # book.pages:["first page with some contentts", "second page"]
+  # or
+  # book.pages:[{"text":"first page","hoverEvent":{"action":"show_text","value":"&eFirst page"}}]
+  #
+  # 
+  # In the case of LEATHER armor (of any type):
+  # leather.color:#RRGGBB
+  #
+  # 
+  # In the case of POTION, SPLATH_POTION or LINGERING_POTION:
+  # potion.color:#RRGGBB
+  # potion.effects:["potionEffectType:durability:amplifier:ambient:hasParticles"]
+  #       <--- ambient and hasParticles is boolean = true or false --->
+  # 
+  # 
+  # In the case of SHULKER_BOX (of any color):
+  # shulker.name:"text"
+  # shulker.contents:[{type:STONE,amount:1}] # list of maps
+  # <--- contents are in the same structure as items in the kits (nbt tags), but with type inside map --->
+  # 
+  # 
+  # In the case of BUNDLE:
+  # bundle.contents:[{type:STONE,amount:1}] # list of maps
+  # <--- contents are in the same structure as items in the kits (nbt tags), but with type inside map --->
+  #
+  contents:
+  - STONE_SWORD{displayName:"&cOMFG SWORD",lore:["","&7» &eVery cool sword",""],enchants:{unbreaking:3}}
+  - SHULKER_BOX{displayName:"&bBeatiful box",lore:["","&7» &ePlace and open it!",""],shulker.contents:[{type:DIAMOND,amount:1},null,null,null,{type:DIAMOND,amount:1},null,{type:DIAMOND,amount:1},null,null,null,{type:DIAMOND,amount:1}]}
+  
