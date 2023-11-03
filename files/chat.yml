@@ -1,5 +1,32 @@
 enabled: true
 
+antiSwear:
+  enabled: true
+  words: ["kkt", "kokot", "kreten", "devko", "devki", "devka", "curak", "curac", "kund", "mrd", "penis", "vagin", "kurv", "idiot", "pica", "pico", "fuck", "suck","dick"]
+  block-event: false
+  replacement: "****" # pokud je block-event nastaven na false
+  # gk.chat.bypass.antiswear
+  bypass-enabled: false
+  allowed-phrases: ["sekund"]
+antiSpam:
+  enabled: true
+  cache: 5min
+  maximum-messages: 3
+  # gk.chat.bypass.antispam
+  bypass-enabled: false
+antiFlood:
+  enabled: true
+  maximum-chars: 2
+  maximum-numbers: 12
+  # gk.chat.bypass.antiflood
+  bypass-enabled: false
+antiAd:
+  enabled: true
+  whitelist:
+  - "example.com"
+  # gk.chat.bypass.antiad
+  bypass-enabled: false
+  
 options:
   # types: GLOBAL, PER_WORLD, DISTANCE
   type: GLOBAL
@@ -17,15 +44,22 @@ options:
     # etc.
     
 notification:
-  color: "§c" # RGB (#RRGGBB) or default vanilla color (§<colorChar>)
+  color: "§e@" # RGB (#RRGGBB) or default vanilla color (§<colorChar>)
   sound:
     # https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/Sound.html
     name: "ENTITY_PLAYER_LEVELUP"
     pitch: 1
     volume: 1
-  # placeholders: %player% - target, {pinger} - Name of player who pinger target
+  # placeholders: %player% - target, {pinger} - Name of player who pinged target
   commands: []
   messages: []
+
+translations:
+  antiSwear: "&f&lServer &8&l> &eNebuď vulgární, jsou mezi námi i děti!"
+  antiSpam: "&f&lServer &8&l> &eProsím, nespamuj chat."
+  antiAd: "&f&lServer &8&l> &eZde je reklama zakázaná."
+  # gh.chat.antiad
+  antiAd-admin: "&f&lServer &8&l> &cHráč &e{player} &cse snažil napsat reklamu: &e{message}"
 
 formats:
   default:
@@ -38,6 +72,6 @@ formats:
     message: "&a{message}"
     name: "&aVIP &e{player}"
   anotherGroup:
-    chat: "{player} &7» {message}"
+    chat: ["", {"text":"{player} &7» "}, {"text":"{message}", "hoverEvent":{"action":"show_text", "value":"&aZpráva odeslána v %server_time%"}}]
     message: "&3{message}"
     name: "&4Admin &6{player}"

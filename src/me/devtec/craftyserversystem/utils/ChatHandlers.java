@@ -367,7 +367,7 @@ public class ChatHandlers {
 	}
 
 	// return true - pokud nalezne vulgarismy
-	public static boolean antiSwear(String input, List<String> words, int[][] ignoredSections) {
+	public static boolean antiSwear(String input, List<String> words, List<String> allowedPhrases, int[][] ignoredSections) {
 		StringContainer filtered = new StringContainer(input.length());
 		int posOfSection = 0;
 		int[] currentSection = ignoredSections == null ? null : ignoredSections[posOfSection];
@@ -443,21 +443,44 @@ public class ChatHandlers {
 			prev = c;
 		}
 		for (String word : words) {
-			int pos = filtered.indexOf(word);
+			int posStart = 0;
+			int pos = filtered.indexOf(word, posStart);
 			if (pos != -1) {
-				if (word.equals("kund")) { // TODO Implement this function to be configurable
-					if (pos < 1)
-						return true;
-					return !(filtered.charAt(pos - 2) == 's' && filtered.charAt(pos - 1) == 'e');
+				String phrase = null;
+				int startAt = -1;
+				for (String fphrase : allowedPhrases) {
+					startAt = fphrase.indexOf(word);
+					if (startAt != -1) {
+						phrase = fphrase;
+						break;
+					}
 				}
-				return true;
+				boolean found = true;
+				while (pos != -1) {
+					found = true;
+					posStart = pos + word.length();
+					if (startAt != -1) {
+						String before = startAt == 0 ? "" : phrase.substring(0, startAt);
+						String after = startAt + word.length() == phrase.length() ? "" : phrase.substring(startAt + word.length());
+
+						if (before.length() == 0 && after.length() == 0 || pos - before.length() < 0 || pos + after.length() > filtered.length()
+								|| filtered.indexOf(phrase, pos - before.length()) != pos - before.length()) {
+							pos = filtered.indexOf(word, posStart);
+							continue;
+						}
+						posStart += after.length();
+						found = false;
+					}
+					pos = filtered.indexOf(word, posStart);
+				}
+				return found;
 			}
 		}
 		return false;
 	}
 
 	// Nalezne vulgarismy a nahradi za replacement
-	public static String antiSwearReplace(String input, List<String> words, int[][] ignoredSections, String replacement) {
+	public static String antiSwearReplace(String input, List<String> words, List<String> allowedPhrases, int[][] ignoredSections, String replacement) {
 		StringContainerWithPositions filtered = new StringContainerWithPositions(input.length());
 		int posOfSection = 0;
 		int[] currentSection = ignoredSections == null ? null : ignoredSections[posOfSection];
@@ -538,26 +561,45 @@ public class ChatHandlers {
 		Map<Integer, Integer> positionAndLength = null;
 
 		for (String word : words) {
-			int start = 0;
-			int pos;
-			while ((pos = filtered.indexOf(word, start)) != -1) {
-				start = pos + word.length();
-				if (word.equals("kund") && (pos < 1 || !(filtered.charAt(pos - 2) == 's' && filtered.charAt(pos - 1) == 'e'))) {
-					if (container == null)
-						container = new StringContainer(input);
-					if (positionAndLength == null)
-						positionAndLength = new HashMap<>();
-					int realPos = filtered.posAt(pos);
-					positionAndLength.put(realPos, realPos + word.length());
-					continue;
+			int posStart = 0;
+			int pos = filtered.indexOf(word, posStart);
+			if (pos != -1) {
+				String phrase = null;
+				int startAt = -1;
+				for (String fphrase : allowedPhrases) {
+					startAt = fphrase.indexOf(word);
+					if (startAt != -1) {
+						phrase = fphrase;
+						break;
+					}
 				}
-				if (container == null)
-					container = new StringContainer(input);
-				if (positionAndLength == null)
-					positionAndLength = new HashMap<>();
-				int realPos = filtered.posAt(pos);
-				positionAndLength.put(realPos, realPos + word.length());
-				continue;
+				while (pos != -1) {
+					posStart = pos + word.length();
+					if (startAt != -1) {
+						String before = startAt == 0 ? "" : phrase.substring(0, startAt);
+						String after = startAt + word.length() == phrase.length() ? "" : phrase.substring(startAt + word.length());
+						if (before.length() == 0 && after.length() == 0 || pos - before.length() < 0 || pos + after.length() > filtered.length()
+								|| filtered.indexOf(phrase, pos - before.length()) != pos - before.length()) {
+							if (container == null)
+								container = new StringContainer(input);
+							if (positionAndLength == null)
+								positionAndLength = new HashMap<>();
+							int realPos = filtered.posAt(pos);
+							positionAndLength.put(realPos, realPos + word.length());
+							pos = filtered.indexOf(word, posStart);
+							continue;
+						}
+						posStart += after.length();
+					} else {
+						if (container == null)
+							container = new StringContainer(input);
+						if (positionAndLength == null)
+							positionAndLength = new HashMap<>();
+						int realPos = filtered.posAt(pos);
+						positionAndLength.put(realPos, realPos + word.length());
+					}
+					pos = filtered.indexOf(word, posStart);
+				}
 			}
 		}
 

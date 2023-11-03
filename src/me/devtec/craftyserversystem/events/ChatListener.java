@@ -49,6 +49,7 @@ public class ChatListener implements Listener {
 	@Nonnull
 	private List<String> words;
 	private boolean bypassAntiSwear;
+	private List<String> allowedPhrases;
 
 	// AntiAd pattern
 	private boolean antiAdEnabled;
@@ -78,6 +79,7 @@ public class ChatListener implements Listener {
 		antiSwearEnabled = chat.getBoolean("antiSwear.enabled");
 		replacement = chat.getString("antiSwear.replacement");
 		words = chat.getStringList("antiSwear.words");
+		allowedPhrases = chat.getStringList("antiSwear.allowed-phrases");
 		bypassAntiSwear = chat.getBoolean("antiSwear.bypass-enabled");
 		antiAdEnabled = chat.getBoolean("antiAd.enabled");
 		bypassAntiAd = chat.getBoolean("antiAd.bypass-enabled");
@@ -102,13 +104,13 @@ public class ChatListener implements Listener {
 		}
 		if (antiSwearEnabled && (bypassAntiSwear ? !e.getPlayer().hasPermission("gk.chat.bypass.antiswear") : true))
 			if (chat.getBoolean("antiSwear.block-event")) {
-				if (ChatHandlers.antiSwear(modifiedMessage, words, ChatHandlers.match(modifiedMessage, playerNames))) {
+				if (ChatHandlers.antiSwear(modifiedMessage, words, allowedPhrases, ChatHandlers.match(modifiedMessage, playerNames))) {
 					e.setCancelled(true);
 					API.get().getMsgManager().sendMessageFromFile(chat, "translations.antiSwear", PlaceholdersExecutor.i().add("player", e.getPlayer().getName()), e.getPlayer());
 					return;
 				}
 			} else
-				modifiedMessage = ChatHandlers.antiSwearReplace(modifiedMessage, words, ChatHandlers.match(modifiedMessage, playerNames), replacement);
+				modifiedMessage = ChatHandlers.antiSwearReplace(modifiedMessage, words, allowedPhrases, ChatHandlers.match(modifiedMessage, playerNames), replacement);
 		if (antiAdEnabled && (bypassAntiAd ? !e.getPlayer().hasPermission("gk.chat.bypass.antiad") : true) && ChatHandlers.antiAd(modifiedMessage, antiAdWhitelist)) {
 			e.setCancelled(true);
 			API.get().getMsgManager().sendMessageFromFile(chat, "translations.antiAd", PlaceholdersExecutor.i().add("player", e.getPlayer().getName()), e.getPlayer());
