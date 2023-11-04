@@ -2,8 +2,10 @@ package me.devtec.craftyserversystem.economy;
 
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.RegisteredServiceProvider;
+import org.bukkit.plugin.ServicePriority;
 
 import me.devtec.craftyserversystem.API;
+import me.devtec.craftyserversystem.Loader;
 import me.devtec.shared.scheduler.Tasker;
 import net.milkbowl.vault.economy.Economy;
 
@@ -31,22 +33,26 @@ public class VaultEconomyHook implements EconomyHook {
 		}
 	}
 
+	public static void registerOurEconomy() {
+		Bukkit.getServicesManager().register(Economy.class, (CssEconomyVaultImplementation) ((CssEconomyHook) API.get().getEconomyHook()).economy, Loader.getPlugin(), ServicePriority.Normal);
+	}
+
 	@Override
-	public double getBalance(String name) {
+	public double getBalance(String name, String world) {
 		if (economy == null)
 			return 0;
-		return economy.getBalance(name);
+		return economy.getBalance(name, world);
 	}
 
 	@Override
-	public void deposit(String name, double balance) {
+	public void deposit(String name, String world, double balance) {
 		if (economy != null)
-			economy.depositPlayer(name, balance);
+			economy.depositPlayer(name, world, balance);
 	}
 
 	@Override
-	public void withdraw(String name, double balance) {
+	public void withdraw(String name, String world, double balance) {
 		if (economy != null)
-			economy.withdrawPlayer(name, balance);
+			economy.withdrawPlayer(name, world, balance);
 	}
 }

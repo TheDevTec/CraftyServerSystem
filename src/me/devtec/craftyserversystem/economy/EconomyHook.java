@@ -1,15 +1,16 @@
 package me.devtec.craftyserversystem.economy;
 
 import me.devtec.craftyserversystem.annotations.Nonnull;
+import me.devtec.craftyserversystem.annotations.Nullable;
 
 public interface EconomyHook {
-	public double getBalance(@Nonnull String name);
+	public double getBalance(@Nonnull String name, @Nullable String world);
 
-	public void deposit(@Nonnull String name, double balance);
+	public void deposit(@Nonnull String name, @Nullable String world, double balance);
 
-	public void withdraw(@Nonnull String name, double balance);
+	public void withdraw(@Nonnull String name, @Nullable String world, double balance);
 
-	public default boolean has(@Nonnull String name, double balance) {
-		return getBalance(name) >= balance;
+	public default boolean has(@Nonnull String name, @Nullable String world, double balance) {
+		return getBalance(name, world) >= balance;
 	}
 }

@@ -6,17 +6,17 @@ public class EmptyEconomyHook implements EconomyHook {
 	}
 
 	@Override
-	public double getBalance(String name) {
+	public double getBalance(String name, String world) {
 		return 0;
 	}
 
 	@Override
-	public void deposit(String name, double balance) {
+	public void deposit(String name, String world, double balance) {
 
 	}
 
 	@Override
-	public void withdraw(String name, double balance) {
+	public void withdraw(String name, String world, double balance) {
 
 	}
 }

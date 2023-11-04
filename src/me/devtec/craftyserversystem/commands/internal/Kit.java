@@ -156,7 +156,7 @@ public class Kit extends CssCommand {
 			}
 			return;
 		}
-		if (!ignoreCost && kit.getCost() > 0 && API.get().getEconomyHook().has(target.getName(), kit.getCost())) {
+		if (!ignoreCost && kit.getCost() > 0 && API.get().getEconomyHook().has(target.getName(), target.getWorld().getName(), kit.getCost())) {
 			if (sender.equals(target)) {
 				if (sendMessage)
 					msg(target, "enough-money.self", placeholders);

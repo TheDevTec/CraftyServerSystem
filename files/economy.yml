@@ -1,0 +1,23 @@
+enabled: true
+
+settings:
+  startup-money: 100.0
+  # Player's balance can't be below $0
+  # Set to UNLIMITED to disable this check
+  minimum-money: 0
+  maximum-money: UNLIMITED
+  per-world-economy: false
+  balance-top:
+    # Set to true to enable %theapi_css_baltop_{POSITION}% placeholder in the PlaceholderAPI
+    # This will start updating balance top every 1 hour
+    enable-global-placeholder: false
+    entries-per-page: 10 # 10 players per page
+    minimum-money: 100.0 # startup-money balance
+
+per-world-groups:
+  default:
+  - "world"
+  - "world_nether"
+  - "world_the_end"
+  other:
+  - "worldNameHere"

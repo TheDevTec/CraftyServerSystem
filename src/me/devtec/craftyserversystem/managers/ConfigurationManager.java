@@ -10,7 +10,7 @@ import me.devtec.shared.utility.TimeUtils;
 import me.devtec.theapi.bukkit.game.Position;
 
 public class ConfigurationManager {
-	private static final String FILES_PATH = "plugins/CraftyServerSystem/";
+	protected static final String FILES_PATH = "plugins/CraftyServerSystem/";
 
 	private Config main;
 	private Config translations;
@@ -20,43 +20,42 @@ public class ConfigurationManager {
 	private Config quit;
 	private Config chat;
 	private Config kits;
+	private Config economy;
 	private String prefix = "";
 	private Position spawn;
 	private long teleportRequestTime;
 
-	public ConfigurationManager(String main, String translations, String commands, String cooldowns, String join, String quit, String chat, String kits) {
-		this.main = new Config(FILES_PATH + main);
-		this.translations = new Config(FILES_PATH + translations);
-		this.commands = new Config(FILES_PATH + commands);
-		this.cooldowns = new Config(FILES_PATH + cooldowns);
-		this.join = new Config(FILES_PATH + join);
-		this.quit = new Config(FILES_PATH + quit);
-		this.chat = new Config(FILES_PATH + chat);
-		this.kits = new Config(FILES_PATH + kits);
+	public ConfigurationManager() {
+		main = new Config(FILES_PATH + "config.yml");
+		translations = new Config(FILES_PATH + "translations.yml");
+		commands = new Config(FILES_PATH + "commands.yml");
+		cooldowns = new Config(FILES_PATH + "cooldowns.yml");
+		join = new Config(FILES_PATH + "events/join.yml");
+		quit = new Config(FILES_PATH + "events/quit.yml");
+		chat = new Config(FILES_PATH + "events/chat.yml");
+		kits = new Config(FILES_PATH + "kits.yml");
+		economy = new Config(FILES_PATH + "economy.yml");
 	}
 
 	public ConfigurationManager initFromJar() {
-		ClassLoader classLoader = Loader.getPlugin().getClass().getClassLoader();
-
-		if (main.merge(new Config().reload(StreamUtils.fromStream(classLoader.getResourceAsStream("files/config.yml"))), MergeStandards.DEFAULT))
-			main.save("yaml");
-		if (translations.merge(new Config().reload(StreamUtils.fromStream(classLoader.getResourceAsStream("files/translations.yml"))), MergeStandards.DEFAULT))
-			translations.save("yaml");
-		if (commands.merge(new Config().reload(StreamUtils.fromStream(classLoader.getResourceAsStream("files/commands.yml"))), MergeStandards.DEFAULT))
-			commands.save("yaml");
-		if (cooldowns.merge(new Config().reload(StreamUtils.fromStream(classLoader.getResourceAsStream("files/cooldowns.yml"))), MergeStandards.DEFAULT))
-			cooldowns.save("yaml");
-		if (join.merge(new Config().reload(StreamUtils.fromStream(classLoader.getResourceAsStream("files/join.yml"))), MergeStandards.DEFAULT))
-			join.save("yaml");
-		if (quit.merge(new Config().reload(StreamUtils.fromStream(classLoader.getResourceAsStream("files/quit.yml"))), MergeStandards.DEFAULT))
-			quit.save("yaml");
-		if (chat.merge(new Config().reload(StreamUtils.fromStream(classLoader.getResourceAsStream("files/chat.yml"))), MergeStandards.DEFAULT))
-			chat.save("yaml");
-		if (kits.merge(new Config().reload(StreamUtils.fromStream(classLoader.getResourceAsStream("files/kits.yml"))), MergeStandards.DEFAULT))
-			kits.save("yaml");
+		merge(main, "config.yml");
+		merge(translations, "translations.yml");
+		merge(commands, "commands.yml");
+		merge(cooldowns, "cooldowns.yml");
+		merge(join, "join.yml");
+		merge(quit, "quit.yml");
+		merge(chat, "chat.yml");
+		merge(kits, "kits.yml");
+		merge(economy, "economy.yml");
 		prefix = getMain().getString("prefix", "");
 		teleportRequestTime = TimeUtils.timeFromString(getMain().getString("teleport-request-time"));
 		return this;
+	}
+
+	private void merge(Config origin, String path) {
+		ClassLoader classLoader = Loader.getPlugin().getClass().getClassLoader();
+		if (origin.merge(new Config().reload(StreamUtils.fromStream(classLoader.getResourceAsStream("files/" + path))), MergeStandards.DEFAULT))
+			origin.save("yaml");
 	}
 
 	public long getTeleportRequestTime() {
@@ -97,6 +96,10 @@ public class ConfigurationManager {
 
 	public Config getKits() {
 		return kits;
+	}
+
+	public Config getEconomy() {
+		return economy;
 	}
 
 	public Config getCommands() {

@@ -18,6 +18,7 @@ import org.bukkit.plugin.InvalidPluginException;
 import org.bukkit.plugin.UnknownDependencyException;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import me.devtec.craftyserversystem.economy.CssEconomyHook;
 import me.devtec.craftyserversystem.economy.VaultEconomyHook;
 import me.devtec.craftyserversystem.events.ChatListener;
 import me.devtec.craftyserversystem.events.JoinListener;
@@ -115,7 +116,10 @@ public class Loader extends JavaPlugin implements Listener {
 	public void onPluginEnable(PluginEnableEvent e) {
 		if (e.getPlugin().getName().equals("Vault")) {
 			API.get().setPermissionHook(new VaultPermissionHook());
-			API.get().setEconomyHook(new VaultEconomyHook());
+			if (API.get().getEconomyHook() instanceof CssEconomyHook)
+				VaultEconomyHook.registerOurEconomy();
+			else
+				API.get().setEconomyHook(new VaultEconomyHook());
 		}
 		if (e.getPlugin().getName().equals("LuckPerms"))
 			API.get().setPermissionHook(new LuckPermsPermissionHook());

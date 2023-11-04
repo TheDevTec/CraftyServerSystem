@@ -74,10 +74,10 @@ public class WarpInfo {
 			if (!player.hasPermission(permission))
 				return WarpResult.FAILED_NO_PERMISSION;
 		if (cost > 0)
-			if (!API.get().getEconomyHook().has(player.getName(), cost))
+			if (!API.get().getEconomyHook().has(player.getName(), player.getWorld().getName(), cost))
 				return WarpResult.FAILED_NO_PERMISSION;
 			else
-				API.get().getEconomyHook().withdraw(player.getName(), cost);
+				API.get().getEconomyHook().withdraw(player.getName(), player.getWorld().getName(), cost);
 		if (Bukkit.isPrimaryThread())
 			player.teleport(position.toLocation());
 		else
