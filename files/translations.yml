@@ -206,3 +206,16 @@ balance:
   other: "{prefix} Balance of player &e{target} &7is &e${balance}"
   # {target}
   no-account: "{prefix} No account found for &e{target}"
+  
+pay:
+  # {target}
+  no-account: "{prefix} No account found for &e{target}"
+  # {sender}, {target}, {balance}
+  success:
+    sender: "{prefix} You paid &e${balance} &7to player &e{target}"
+    target: "{prefix} Player &e{sender} &7paid you &e${balance}"
+  failed:
+    # {target}
+    money: "{prefix} You don't have enough money"
+    self: "{prefix} You can't pay yourself"
+    
