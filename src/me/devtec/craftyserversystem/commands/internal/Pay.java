@@ -2,7 +2,6 @@ package me.devtec.craftyserversystem.commands.internal;
 
 import java.util.List;
 
-import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 
@@ -30,25 +29,6 @@ public class Pay extends CssCommand {
 		CommandStructure<Player> cmd = CommandStructure.create(Player.class, P_DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
 			msgUsage(sender, "cmd");
 		}).permission(getPerm("cmd"));
-		// other
-		cmd.selector(Selector.PLAYER, (sender, structure, args) -> {
-			msgUsage(sender, "cmd");
-		}).priority(1).selector(Selector.NUMBER, (sender, structure, args) -> {
-			Player target = Bukkit.getPlayer(args[0]);
-			if (sender.equals(target)) {
-				msg(sender, "failed.self", PlaceholdersExecutor.EMPTY);
-				return;
-			}
-			World world = sender.getWorld();
-			double money = ParseUtils.getDouble(args[1]);
-			if (pay(sender.getName(), target.getName(), world.getName(), money)) {
-				PlaceholdersExecutor executor = PlaceholdersExecutor.i().add("sender", sender.getName()).add("target", target.getName()).add("balance", money);
-				msg(sender, "success.sender", executor);
-				msg(target, "success.target", executor);
-			} else
-				msg(sender, "failed.money", PlaceholdersExecutor.i().add("target", target.getName()).add("balance", money));
-
-		});
 		// other
 		cmd.argument(null, 1, (sender, structure, args) -> {
 			msgUsage(sender, "cmd");

@@ -24,15 +24,26 @@ public class CssEconomy {
 		this.maximumMoney = maximumMoney;
 	}
 
-	protected String lookupPath(String player, String world) {
-		if (perWorldEconomy) {
-			if (world != null)
-				for (Entry<String, List<String>> entry : groupAndWorlds.entrySet())
-					if (entry.getValue().contains(world))
-						return "css.eco-pw." + entry.getKey();
-			return "css.eco-pw.default";
-		}
+	public String lookupPath(String player, String world) {
+		if (perWorldEconomy)
+			return "css.eco-pw." + getWorldGroup(world);
 		return "css.eco";
+	}
+
+	public String getWorldGroup(String world) {
+		if (world != null)
+			for (Entry<String, List<String>> entry : groupAndWorlds.entrySet())
+				if (entry.getValue().contains(world))
+					return entry.getKey();
+		return "default";
+	}
+
+	public boolean isEnabledPerWorldEconomy() {
+		return perWorldEconomy;
+	}
+
+	public Map<String, List<String>> getPerWorldGroups() {
+		return groupAndWorlds;
 	}
 
 	public String getName() {

@@ -205,6 +205,11 @@ balance:
     cmd: "css.cmd.balance"
     other: "css.cmd.balance.other"
 
+balancetop:
+  cmd: [balancetop,baltop]
+  perms:
+    cmd: "css.cmd.balancetop"
+
 economy:
   cmd: [economy,eco]
   usage:

@@ -13,4 +13,6 @@ public interface EconomyHook {
 	public default boolean has(@Nonnull String name, @Nullable String world, double balance) {
 		return getBalance(name, world) >= balance;
 	}
+
+	public String format(Double value);
 }

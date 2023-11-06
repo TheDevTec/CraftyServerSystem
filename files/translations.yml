@@ -226,3 +226,11 @@ economy:
   set: "{prefix} Balance of player &e{target} &7set to &e${balance}"
   add: "{prefix} Added &e${balance} &7to player &e{target}"
   remove: "{prefix} Removed &e${balance} &7from player &e{target}"
+  
+balancetop:
+  # {page}, {totalPages}
+  header: "{prefix} Balance Top {page}/{totalPages}"
+  # {position}, {target}, {balance}
+  key: "{prefix} &6{position}. &e{target} &7- &e${balance}"
+  # {nextPage}, {previousPage}
+  footer: ""

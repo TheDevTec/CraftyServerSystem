@@ -9,20 +9,21 @@ public class CssEconomyHook implements EconomyHook {
 
 	@Override
 	public double getBalance(String name, String world) {
-		if (economy == null)
-			return 0;
 		return economy.getBalance(name, world);
 	}
 
 	@Override
 	public void deposit(String name, String world, double balance) {
-		if (economy != null)
-			economy.deposit(name, world, balance);
+		economy.deposit(name, world, balance);
 	}
 
 	@Override
 	public void withdraw(String name, String world, double balance) {
-		if (economy != null)
-			economy.withdraw(name, world, balance);
+		economy.withdraw(name, world, balance);
+	}
+
+	@Override
+	public String format(Double value) {
+		return economy.format(value);
 	}
 }

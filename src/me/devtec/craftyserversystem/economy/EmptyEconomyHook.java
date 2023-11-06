@@ -1,5 +1,8 @@
 package me.devtec.craftyserversystem.economy;
 
+import me.devtec.shared.utility.StringUtils;
+import me.devtec.shared.utility.StringUtils.FormatType;
+
 public class EmptyEconomyHook implements EconomyHook {
 
 	public EmptyEconomyHook() {
@@ -18,5 +21,10 @@ public class EmptyEconomyHook implements EconomyHook {
 	@Override
 	public void withdraw(String name, String world, double balance) {
 
+	}
+
+	@Override
+	public String format(Double value) {
+		return StringUtils.formatDouble(FormatType.NORMAL, value);
 	}
 }

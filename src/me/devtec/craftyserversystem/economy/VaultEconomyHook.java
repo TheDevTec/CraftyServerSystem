@@ -7,6 +7,8 @@ import org.bukkit.plugin.ServicePriority;
 import me.devtec.craftyserversystem.API;
 import me.devtec.craftyserversystem.Loader;
 import me.devtec.shared.scheduler.Tasker;
+import me.devtec.shared.utility.StringUtils;
+import me.devtec.shared.utility.StringUtils.FormatType;
 import net.milkbowl.vault.economy.Economy;
 
 public class VaultEconomyHook implements EconomyHook {
@@ -54,5 +56,12 @@ public class VaultEconomyHook implements EconomyHook {
 	public void withdraw(String name, String world, double balance) {
 		if (economy != null)
 			economy.withdrawPlayer(name, world, balance);
+	}
+
+	@Override
+	public String format(Double value) {
+		if (economy != null)
+			return economy.format(value);
+		return StringUtils.formatDouble(FormatType.NORMAL, value);
 	}
 }
