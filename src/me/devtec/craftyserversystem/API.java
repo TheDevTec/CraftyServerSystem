@@ -9,7 +9,6 @@ import org.bukkit.Bukkit;
 import me.devtec.craftyserversystem.commands.CssCommand;
 import me.devtec.craftyserversystem.economy.CssEconomy;
 import me.devtec.craftyserversystem.economy.CssEconomyHook;
-import me.devtec.craftyserversystem.economy.CssEconomyVaultImplementation;
 import me.devtec.craftyserversystem.economy.EconomyHook;
 import me.devtec.craftyserversystem.economy.EmptyEconomyHook;
 import me.devtec.craftyserversystem.managers.CommandManager;
@@ -18,6 +17,7 @@ import me.devtec.craftyserversystem.managers.CooldownManager;
 import me.devtec.craftyserversystem.managers.MessageManager;
 import me.devtec.craftyserversystem.permission.EmptyPermissionHook;
 import me.devtec.craftyserversystem.permission.PermissionHook;
+import me.devtec.shared.Ref;
 import me.devtec.shared.dataholder.Config;
 import me.devtec.shared.json.Json;
 import me.devtec.shared.json.modern.ModernJsonReader;
@@ -147,7 +147,7 @@ public class API {
 						economy.getString("settings.minimum-money").equals("UNLIMITED") ? Double.NEGATIVE_INFINITY : economy.getDouble("settings.minimum-money"),
 						economy.getString("settings.maximum-money").equals("UNLIMITED") ? Double.POSITIVE_INFINITY : economy.getDouble("settings.maximum-money"), map != null, map);
 			else
-				this.economy = new CssEconomyVaultImplementation(economy.getDouble("settings.startup-money"),
+				this.economy = (CssEconomy) Ref.newInstanceByClass(Ref.getClass("me.devtec.craftyserversystem.economy.CssEconomyVaultImplementation"), economy.getDouble("settings.startup-money"),
 						economy.getString("settings.minimum-money").equals("UNLIMITED") ? Double.NEGATIVE_INFINITY : economy.getDouble("settings.minimum-money"),
 						economy.getString("settings.maximum-money").equals("UNLIMITED") ? Double.POSITIVE_INFINITY : economy.getDouble("settings.maximum-money"), map != null, map);
 			setEconomyHook(new CssEconomyHook(this.economy));
