@@ -219,3 +219,10 @@ pay:
     money: "{prefix} You don't have enough money"
     self: "{prefix} You can't pay yourself"
     
+# {target}, {balance}
+economy:
+  # {target}
+  no-account: "{prefix} No account found for &e{target}"
+  set: "{prefix} Balance of player &e{target} &7set to &e${balance}"
+  add: "{prefix} Added &e${balance} &7to player &e{target}"
+  remove: "{prefix} Removed &e${balance} &7from player &e{target}"

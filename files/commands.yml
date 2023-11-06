@@ -189,3 +189,32 @@ kit:
     no-cooldown: "css.cmd.kit.other"
     no-cooldown: "css.cmd.kit.no-cooldown"
     no-cost: "css.cmd.kit.no-cost"
+
+pay:
+  cmd: [pay]
+  usage:
+    cmd: "/pay {player} {balance}"
+  perms:
+    cmd: "css.cmd.pay"
+
+balance:
+  cmd: [balance,bal]
+  usage:
+    cmd: "/balance {balance}"
+  perms:
+    cmd: "css.cmd.balance"
+    other: "css.cmd.balance.other"
+
+economy:
+  cmd: [economy,eco]
+  usage:
+    cmd:
+    - "/economy add {player} {balance}"
+    - "/economy remove {player} {balance}"
+    - "/economy set {player} {balance}"
+    add: "/economy add {player} {balance}"
+    remove: "/economy remove {player} {balance}"
+    set: "/economy set {player} {balance}"
+  perms:
+    cmd: "css.cmd.balance"
+    other: "css.cmd.balance.other"
