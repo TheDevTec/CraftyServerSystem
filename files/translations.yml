@@ -234,3 +234,22 @@ balancetop:
   key: "{prefix} &6{position}. &e{target} &7- &e${balance}"
   # {nextPage}, {previousPage}
   footer: ""
+ 
+home:
+  no-home: "{prefix} You don't have any home"
+  # {home}
+  teleport: "{prefix} Teleporting to your home &e{home}"
+  
+sethome:
+  # {home}, {x}, {y}, {z}, {yaw}, {pitch}, {world}
+  set: "{prefix} Location of &e{home} &7home has been set to your position"
+  # {totalHomes}, {maxHomes}
+  overlimit: "{prefix} You've reached the limit on the amount of homes &8&o({maxHomes})"
+  
+delhome:
+  # {home}
+  del: "{prefix} Deleted home &e{home}"
+  
+homeother:
+  # {target}, {home}
+  teleport: "{prefix} Teleporting to home &e{home} &7of player &e{target}"

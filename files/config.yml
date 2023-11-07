@@ -8,6 +8,12 @@ god:
 
 teleport-request-time: 5min
 
+homes:
+  default: 3
+  vip: 5
+  evip: 8
+  admin: UNLIMITED
+
 warp:
   # When you use command /warp as Player, menu with warps will be opened to you instead of help message
   enable-menu: true

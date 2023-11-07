@@ -223,3 +223,30 @@ economy:
   perms:
     cmd: "css.cmd.balance"
     other: "css.cmd.balance.other"
+   
+home:
+  cmd: [home]
+  perms:
+    cmd: "css.cmd.home"
+    
+sethome:
+  cmd: [sethome]
+  usage:
+    cmd: "/sethome {home}"
+  perms:
+    cmd: "css.cmd.sethome"
+    
+delhome:
+  cmd: [delhome]
+  usage:
+    cmd: "/delhome {home}"
+  perms:
+    cmd: "css.cmd.delhome"
+    
+homeother:
+  cmd: [homeother,homeadmin]
+  usage:
+    cmd: "/homeother {player} {home}"
+  perms:
+    cmd: "css.cmd.homeother"
+    
