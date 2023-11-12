@@ -342,3 +342,13 @@ enderchest:
   perms:
     cmd: "css.cmd.enderchest"
     other: "css.cmd.enderchest.other"
+   
+vanish:
+  cmd: [v,vanish]
+  usage:
+    cmd: "/vanish {player}"
+  perms:
+    cmd: "css.cmd.vanish"
+    other: "css.cmd.vanish.other"
+    # Permission to see vanished players
+    see: "css.cmd.vanish.see"
