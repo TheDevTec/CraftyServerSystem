@@ -368,3 +368,16 @@ enderchest:
   other:
     sender: "{prefix} Opened EnderChest to player &e{target}"
     target: "{prefix} Opened EnderChest"
+
+vanish:
+  self:
+    true: "{prefix} Vanish turned on"
+    false: "{prefix} Vanish turned off"
+  #  {sender}, {target}
+  other:
+    true:
+      target: "{prefix} Vanish turned on by &e{sender}"
+      sender: "{prefix} Vanish of &e{target} &7turned on"
+    false:
+      target: "{prefix} Vanish turned off by &e{sender}"
+      sender: "{prefix} Vanish of &e{target} &7turned off"
