@@ -94,9 +94,9 @@ public class Fly extends CssCommand {
 				target.setFlying(true);
 			if (sendMessage)
 				if (!sender.equals(target)) {
-					PlaceholdersExecutor placeholders = PlaceholdersExecutor.i().add("admin", sender.getName()).add("target", target.getName());
+					PlaceholdersExecutor placeholders = PlaceholdersExecutor.i().add("sender", sender.getName()).add("target", target.getName());
 					msg(target, "other.true.target", placeholders);
-					msg(sender, "other.true.admin", placeholders);
+					msg(sender, "other.true.sender", placeholders);
 				} else
 					msg(target, "self.true", PlaceholdersExecutor.i().add("target", target.getName()));
 		} else {
@@ -106,9 +106,9 @@ public class Fly extends CssCommand {
 			target.setAllowFlight(false);
 			if (sendMessage)
 				if (!sender.equals(target)) {
-					PlaceholdersExecutor placeholders = PlaceholdersExecutor.i().add("admin", sender.getName()).add("target", target.getName());
+					PlaceholdersExecutor placeholders = PlaceholdersExecutor.i().add("sender", sender.getName()).add("target", target.getName());
 					msg(target, "other.false.target", placeholders);
-					msg(sender, "other.false.admin", placeholders);
+					msg(sender, "other.false.sender", placeholders);
 				} else
 					msg(target, "self.false", PlaceholdersExecutor.i().add("target", target.getName()));
 		}

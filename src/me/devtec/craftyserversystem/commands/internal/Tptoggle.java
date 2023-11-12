@@ -1,5 +1,7 @@
 package me.devtec.craftyserversystem.commands.internal;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
@@ -11,6 +13,7 @@ import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
 import me.devtec.shared.API;
 import me.devtec.shared.commands.structures.CommandStructure;
 import me.devtec.shared.utility.OfflineCache.Query;
+import me.devtec.theapi.bukkit.BukkitLoader;
 
 public class Tptoggle extends CssCommand {
 
@@ -47,6 +50,13 @@ public class Tptoggle extends CssCommand {
 				TpaManager.getProvider().addToToggledPlayers(sender.getUniqueId(), query.getUUID());
 				msg(sender, "user.added", PlaceholdersExecutor.i().add("target", query.getName()));
 			}
+		}, (sender, structure, args) -> {
+			Collection<? extends Player> onlinePlayers = BukkitLoader.getOnlinePlayers();
+			List<String> players = new ArrayList<>(onlinePlayers.size() + 1);
+			players.add("{offlinePlayer}");
+			for (Player player : onlinePlayers)
+				players.add(player.getName());
+			return players;
 		}).argument("-s", (sender, structure, args) -> { // silent
 			Query query = API.offlineCache().lookupQuery(args[0]);
 			if (query == null) {

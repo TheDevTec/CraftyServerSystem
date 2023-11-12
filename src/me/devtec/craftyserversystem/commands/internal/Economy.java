@@ -1,6 +1,7 @@
 package me.devtec.craftyserversystem.commands.internal;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.bukkit.Bukkit;
@@ -39,9 +40,10 @@ public class Economy extends CssCommand {
 		}).permission(getPerm("add")).argument(null, 1, (sender, structure, args) -> {
 			msgUsage(sender, "set");
 		}, (sender, structure, args) -> {
-			List<String> players = new ArrayList<>();
+			Collection<? extends Player> onlinePlayers = BukkitLoader.getOnlinePlayers();
+			List<String> players = new ArrayList<>(onlinePlayers.size() + 1);
 			players.add("{offlinePlayer}");
-			for (Player player : BukkitLoader.getOnlinePlayers())
+			for (Player player : onlinePlayers)
 				players.add(player.getName());
 			return players;
 		}).selector(Selector.NUMBER, (sender, structure, args) -> {
@@ -66,9 +68,10 @@ public class Economy extends CssCommand {
 		}).permission(getPerm("remove")).argument(null, 1, (sender, structure, args) -> {
 			msgUsage(sender, "set");
 		}, (sender, structure, args) -> {
-			List<String> players = new ArrayList<>();
+			Collection<? extends Player> onlinePlayers = BukkitLoader.getOnlinePlayers();
+			List<String> players = new ArrayList<>(onlinePlayers.size() + 1);
 			players.add("{offlinePlayer}");
-			for (Player player : BukkitLoader.getOnlinePlayers())
+			for (Player player : onlinePlayers)
 				players.add(player.getName());
 			return players;
 		}).selector(Selector.NUMBER, (sender, structure, args) -> {
@@ -94,9 +97,10 @@ public class Economy extends CssCommand {
 		}).permission(getPerm("set")).argument(null, 1, (sender, structure, args) -> {
 			msgUsage(sender, "set");
 		}, (sender, structure, args) -> {
-			List<String> players = new ArrayList<>();
+			Collection<? extends Player> onlinePlayers = BukkitLoader.getOnlinePlayers();
+			List<String> players = new ArrayList<>(onlinePlayers.size() + 1);
 			players.add("{offlinePlayer}");
-			for (Player player : BukkitLoader.getOnlinePlayers())
+			for (Player player : onlinePlayers)
 				players.add(player.getName());
 			return players;
 		}).selector(Selector.NUMBER, (sender, structure, args) -> {

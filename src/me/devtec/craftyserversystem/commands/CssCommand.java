@@ -1,6 +1,5 @@
 package me.devtec.craftyserversystem.commands;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -117,7 +116,7 @@ public abstract class CssCommand {
 			case '*':
 				return BukkitLoader.getOnlinePlayers();
 			case 'r':
-				return Arrays.asList(StringUtils.randomFromCollection(BukkitLoader.getOnlinePlayers()));
+				return Collections.singleton(StringUtils.randomFromCollection(BukkitLoader.getOnlinePlayers()));
 			case 's':
 			case 'p':
 				Location pos = null;
@@ -137,9 +136,9 @@ public abstract class CssCommand {
 					}
 				}
 				Collection<? extends Player> players = BukkitLoader.getOnlinePlayers();
-				return players.isEmpty() ? Collections.emptyList() : Arrays.asList(nearestPlayer == null ? players.iterator().next() : nearestPlayer);
+				return players.isEmpty() ? Collections.emptyList() : Collections.singleton(nearestPlayer == null ? players.iterator().next() : nearestPlayer);
 			}
 		Player target = Bukkit.getPlayer(selector);
-		return target == null ? Collections.emptyList() : Arrays.asList(target);
+		return target == null ? Collections.emptyList() : Collections.singleton(target);
 	}
 }

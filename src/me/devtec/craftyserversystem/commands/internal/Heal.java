@@ -69,9 +69,9 @@ public class Heal extends CssCommand {
 			target.removePotionEffect(effect.getType());
 		if (sendMessage)
 			if (!sender.equals(target)) {
-				PlaceholdersExecutor placeholders = PlaceholdersExecutor.i().add("admin", sender.getName()).add("target", target.getName());
+				PlaceholdersExecutor placeholders = PlaceholdersExecutor.i().add("sender", sender.getName()).add("target", target.getName());
 				msg(target, "other.target", placeholders);
-				msg(sender, "other.admin", placeholders);
+				msg(sender, "other.sender", placeholders);
 			} else
 				msg(target, "self", PlaceholdersExecutor.i().add("target", target.getName()));
 	}

@@ -1,116 +1,127 @@
-# global: {prefix}
+# global placeholder: {prefix}
 
 fly:
   self:
     true: "{prefix} Fly turned on"
     false: "{prefix} Fly turned off"
-  # placeholder: {admin}, {target}
+  #  {sender}, {target}
   other:
     true:
-      target: "{prefix} Fly turned on by {admin}"
-      admin: "{prefix} Fly of {target} turned on"
+      target: "{prefix} Fly turned on by {sender}"
+      sender: "{prefix} Fly of {target} turned on"
     false:
-      target: "{prefix} Fly turned off by {admin}"
-      admin: "{prefix} Fly of {target} turned off"
+      target: "{prefix} Fly turned off by {sender}"
+      sender: "{prefix} Fly of {target} turned off"
 
 god:
   self:
     true: "{prefix} Immortality turned on"
     false: "{prefix} Immortality turned off"
-  # placeholder: {admin}, {target}
+  #  {sender}, {target}
   other:
     true:
-      target: "{prefix} Immortality turned on by {admin}"
-      admin: "{prefix} Immortality of {target} turned on"
+      target: "{prefix} Immortality turned on by {sender}"
+      sender: "{prefix} Immortality of {target} turned on"
     false:
-      target: "{prefix} Immortality turned off by {admin}"
-      admin: "{prefix} Immortality of {target} turned off"
+      target: "{prefix} Immortality turned off by {sender}"
+      sender: "{prefix} Immortality of {target} turned off"
 
 heal:
   self: "{prefix} You've been healed"
-  # placeholder: {admin}, {target}
+  #  {sender}, {target}
   other:
-    target: "{prefix} You've been healed by  {admin}"
-    admin: "{prefix} You healed {target}"
+    target: "{prefix} You've been healed by  {sender}"
+    sender: "{prefix} You healed {target}"
 
 feed:
   self: "{prefix} You've been fed"
-  # placeholder: {admin}, {target}
+  #  {sender}, {target}
   other:
-    target: "{prefix} You've been fed by {admin}"
-    admin: "{prefix} You've fed {target}"
+    target: "{prefix} You've been fed by {sender}"
+    sender: "{prefix} You've fed {target}"
 
 warp:
-  # placeholder: {warp}, {cost}, {permission}
+  #  {warp}, {cost}, {permission}
   self:
     success: "{prefix} Warping on warp {warp}"
     failed:
       money: "{prefix} You don't have enough money. Teleporting to warp {warp} costs ${cost}"
       perm: "{prefix} You don't have permission to teleport to the warp {warp}"
-  # placeholder: {admin}, {target}, {warp}, {cost}, {permission}
+  #  {sender}, {target}, {warp}, {cost}, {permission}
   other:
     success:
-      target: "{prefix} Warping on warp {warp} by {admin}"
-      admin: "{prefix} Warping {target} on warp {warp}"
+      target: "{prefix} Warping on warp {warp} by {sender}"
+      sender: "{prefix} Warping {target} on warp {warp}"
     failed:
       money:
         target: "{prefix} You don't have enough money. Teleporting to warp {warp} costs ${cost}"
-        admin: "{prefix} {target} don't have enough money. Teleporting to warp {warp} costs ${cost}"
+        sender: "{prefix} {target} don't have enough money. Teleporting to warp {warp} costs ${cost}"
       perm:
         target: "{prefix} You don't have permission to teleport to the warp {warp}"
-        admin: "{prefix} {target} don't have permission to teleport to the warp {warp}"
+        sender: "{prefix} {target} don't have permission to teleport to the warp {warp}"
 
 setwarp:
-  # placeholder: {admin}, {target}, {warp}, {world}, {x}, {y}, {z}, {yaw}, {pitch}
+  # {warp}, {world}, {x}, {y}, {z}, {yaw}, {pitch}
   created: "{prefix} Created a warp {warp} on your position"
+  # {warp}, {world}, {x}, {y}, {z}, {yaw}, {pitch}
   moved: "{prefix} Moved a warp {warp} on your position"
 
 delwarp:
-  # placeholder: {warp}
+  #  {warp}
   deleted: "{prefix} Deleted a warp {warp}"
 
 spawn:
   self: "{prefix} Teleporting to a server spawn"
-  # placeholder: {admin}, {target}
+  #  {sender}, {target}
   other:
-    target: "{prefix} You were teleported to a server spawn by {admin}"
-    admin: "{prefix} You teleported {target} to a server spawn"
+    target: "{prefix} You were teleported to a server spawn by {sender}"
+    sender: "{prefix} You teleported {target} to a server spawn"
 
 setspawn:
-  # placeholder: {world}, {x}, {y}, {z}, {yaw}, {pitch}
+  # {world}, {x}, {y}, {z}, {yaw}, {pitch}
   set: "{prefix} Server spawn set on your position"
   
-sudo: "{prefix} You performed for the player &e{player}&7: &e{value}"
+# {target}, {value}
+sudo: "{prefix} You performed for the player &e{target}&7: &e{value}"
 
+# {gamemode}
 gamemode:
   self: "{prefix} Changed GameMode to &e{gamemode}"
+  # {sender}, {target}
   other:
-    target: "{prefix} Your GameMode changed to &e{gamemode} &7by &e{admin}"
-    admin: "{prefix} You changed GameMode of &e{target} &7to &e{gamemode}"
+    target: "{prefix} Your GameMode changed to &e{gamemode} &7by &e{sender}"
+    sender: "{prefix} You changed GameMode of &e{target} &7to &e{gamemode}"
 
+# {gamemode}
 gamemodecreative:
   self: "{prefix} Changed GameMode to &e{gamemode}"
+  # {sender}, {target}
   other:
-    target: "{prefix} Your GameMode changed to &e{gamemode} &7by &e{admin}"
-    admin: "{prefix} You changed GameMode of &e{target} &7to &e{gamemode}"
+    target: "{prefix} Your GameMode changed to &e{gamemode} &7by &e{sender}"
+    sender: "{prefix} You changed GameMode of &e{target} &7to &e{gamemode}"
 
+# {gamemode}
 gamemodesurvival:
   self: "{prefix} Changed GameMode to &e{gamemode}"
+  # {sender}, {target}
   other:
-    target: "{prefix} Your GameMode changed to &e{gamemode} &7by &e{admin}"
-    admin: "{prefix} You changed GameMode of &e{target} &7to &e{gamemode}"
+    target: "{prefix} Your GameMode changed to &e{gamemode} &7by &e{sender}"
+    sender: "{prefix} You changed GameMode of &e{target} &7to &e{gamemode}"
 
+# {gamemode}
 gamemodespectator:
   self: "{prefix} Changed GameMode to &e{gamemode}"
   other:
-    target: "{prefix} Your GameMode changed to &e{gamemode} &7by &e{admin}"
-    admin: "{prefix} You changed GameMode of &e{target} &7to &e{gamemode}"
+    target: "{prefix} Your GameMode changed to &e{gamemode} &7by &e{sender}"
+    sender: "{prefix} You changed GameMode of &e{target} &7to &e{gamemode}"
 
+# {gamemode}
 gamemodeadventure:
   self: "{prefix} Changed GameMode to &e{gamemode}"
+  # {sender}, {target}
   other:
-    target: "{prefix} Your GameMode changed to &e{gamemode} &7by &e{admin}"
-    admin: "{prefix} You changed GameMode of &e{target} &7to &e{gamemode}"
+    target: "{prefix} Your GameMode changed to &e{gamemode} &7by &e{sender}"
+    sender: "{prefix} You changed GameMode of &e{target} &7to &e{gamemode}"
 
 tpa:
   # {sender}, {target}
@@ -152,6 +163,7 @@ tpaccept:
 tpdeny:
   # {sender}, {target}
   sender: "{prefix} You denied a teleport request from player &e{target}"
+  # {sender}, {target}
   target: "{prefix} Player &e{sender} &7has denied your request to teleport"
   no-requests: "{prefix} You don't have any teleport requests"
 
@@ -161,10 +173,12 @@ tpcancel:
   no-requests: "{prefix} You don't have any teleport requests"
 
 tptoggle:
+  # {target}
   never-joined: "{prefix} Player &e{target} &7not found."
   global:
     enabled: "{prefix} Enabled global toggle of all teleport requests"
     disabled: "{prefix} Disabled global toggle of all teleport requests"
+  # {target}
   user:
     added: "{prefix} Added player &e{target} &7to the toggle list of teleport requests"
     removed: "{prefix} Removed player &e{target} &7from the toggle list of teleport requests"
@@ -186,17 +200,26 @@ tp:
     target: "{prefix} Teleporting to the coords &e{x}&7, &e{y}&7, &e{z}&7, &e{yaw}&7, &e{pitch} &8&o({world})"
 
 kit:
+  # {time}
   in-cooldown:
     self: "{prefix} Before using this kit again, please wait &e{time}"
+    # {sender}, {target}
     target: "{prefix} Before using this kit again, please wait &e{time}"
+    # {sender}, {target}
     sender: "{prefix} &cFAILED! &7Player &e{target} &7can you this kit after &e{time}"
+  # {cost}
   enough-money:
     self: "{prefix} No money, no servis! You need at least &e${cost}"
+    # {sender}, {target}
     target: "{prefix} No money, no servis! You need at least &e${cost}"
+    # {sender}, {target}
     sender: "{prefix} &cFAILED! &7Player &e{target} &7doesn't have enough money. Kit cost &e${cost}"
+  # {kit}
   used:
     self: "{prefix} Used kit &e{kit}"
+    # {sender}, {target}
     target: "{prefix} Used kit &e{kit}"
+    # {sender}, {target}
     sender: "{prefix} &aSUCCESS! &7Player &e{target} &7used kit &e{kit}"
   
 balance:
@@ -253,3 +276,39 @@ delhome:
 homeother:
   # {target}, {home}
   teleport: "{prefix} Teleporting to home &e{home} &7of player &e{target}"
+  
+msg:
+  # {sender}, {target}, {message}
+  receive:
+    sender: "&8[&eYou &7-> &6{target}&8] &f{message}"
+    target: "&8[&6{sender} &7-> &eYou&8] &f{message}"
+    spy: "&0[&cSPY&0] &8[&e{sender} &7-> &6{target}&8] &f{message}"
+    
+  self: "{prefix} You can't send a message to yourself"
+  # {target}
+  not-accepting: "{prefix} Player &e{target} &7isn't accepting PMs from you"
+
+reply:
+  # {target}
+  not-online: "{prefix} Player &e{target} &7isn't online"
+  noone: "{prefix} You have nobody to reply to"
+  
+msgspy:
+  # {target}
+  not-exist: "{prefix} No account found for &e{target}"
+  self:
+    enabled: "{prefix} Enabled PM message spy mode"
+    disabled: "{prefix} Disabled PM message spy mode"
+  # {sender}, {target}
+  other:
+    enabled:
+      sender: "{prefix} Enabled PM message spy mode for player &e{target}"
+      target: "{prefix} Enabled PM message spy mode"
+    disabled:
+      sender: "{prefix} Disabled PM message spy mode for player &e{target}"
+      target: "{prefix} Disabled PM message spy mode"
+      
+# {target}
+msgignore:
+  accepting: "{prefix} You are no longer ignoring PMs from player &e{target}"
+  ignoring: "{prefix} You will no longer receive PMs from player &e{target}"

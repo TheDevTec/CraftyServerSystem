@@ -63,9 +63,9 @@ public class GamemodeSurvival extends CssCommand {
 				PlaceholdersExecutor placeholders = PlaceholdersExecutor.i().add("target", target.getName()).add("gamemode", "survival");
 				msg(sender, "self", placeholders);
 			} else {
-				PlaceholdersExecutor placeholders = PlaceholdersExecutor.i().add("target", target.getName()).add("admin", sender.getName()).add("gamemode", "survival");
+				PlaceholdersExecutor placeholders = PlaceholdersExecutor.i().add("target", target.getName()).add("sender", sender.getName()).add("gamemode", "survival");
 				msg(sender, "other.target", placeholders);
-				msg(sender, "other.admin", placeholders);
+				msg(sender, "other.sender", placeholders);
 			}
 		// You can change gamemode only in primary thread
 		if (!Bukkit.isPrimaryThread())

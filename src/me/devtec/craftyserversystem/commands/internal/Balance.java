@@ -1,6 +1,7 @@
 package me.devtec.craftyserversystem.commands.internal;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.bukkit.Bukkit;
@@ -50,9 +51,10 @@ public class Balance extends CssCommand {
 			} else
 				msg(sender, "no-account", PlaceholdersExecutor.i().add("target", args[0]));
 		}, (sender, structure, args) -> {
-			List<String> players = new ArrayList<>();
+			Collection<? extends Player> onlinePlayers = BukkitLoader.getOnlinePlayers();
+			List<String> players = new ArrayList<>(onlinePlayers.size() + 1);
 			players.add("{offlinePlayer}");
-			for (Player player : BukkitLoader.getOnlinePlayers())
+			for (Player player : onlinePlayers)
 				players.add(player.getName());
 			return players;
 		}).permission(getPerm("other"));

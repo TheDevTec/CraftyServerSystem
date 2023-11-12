@@ -250,3 +250,32 @@ homeother:
   perms:
     cmd: "css.cmd.homeother"
     
+msg:
+  cmd: [pm,msg,tell]
+  usage:
+    cmd: "/msg {player} {message}"
+  perms:
+    cmd: "css.cmd.msg"
+
+reply:
+  cmd: [r,reply]
+  usage:
+    cmd: "/reply {message}"
+  perms:
+    cmd: "css.cmd.msg"
+
+msgignore:
+  cmd: [msgignore,msgi]
+  usage:
+    cmd: "/msgignore {player}"
+  perms:
+    cmd: "css.cmd.msgignore"
+
+msgspy:
+  cmd: [msgspy]
+  usage:
+    cmd: "/msgspy [player] {true/false}"
+  perms:
+    cmd: "css.cmd.msgspy"
+    other: "css.cmd.msgspy.other"
+    

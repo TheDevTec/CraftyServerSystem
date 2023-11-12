@@ -65,9 +65,9 @@ public class Spawn extends CssCommand {
 				PlaceholdersExecutor placeholders = PlaceholdersExecutor.i().add("target", target.getName());
 				msg(sender, "self", placeholders);
 			} else {
-				PlaceholdersExecutor placeholders = PlaceholdersExecutor.i().add("target", target.getName()).add("admin", sender.getName());
+				PlaceholdersExecutor placeholders = PlaceholdersExecutor.i().add("target", target.getName()).add("sender", sender.getName());
 				msg(sender, "other.target", placeholders);
-				msg(sender, "other.admin", placeholders);
+				msg(sender, "other.sender", placeholders);
 			}
 		// You can teleport entity only in primary thread
 		if (!Bukkit.isPrimaryThread())

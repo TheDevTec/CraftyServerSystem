@@ -292,20 +292,20 @@ public class Warp extends CssCommand {
 		WarpResult result = warp.warp(target, instant);
 		if (sendMessage)
 			if (!sender.equals(target)) {
-				PlaceholdersExecutor placeholders = PlaceholdersExecutor.i().add("admin", sender.getName()).add("target", target.getName()).add("warp", warpName).add("cost", warp.getCost())
+				PlaceholdersExecutor placeholders = PlaceholdersExecutor.i().add("sender", sender.getName()).add("target", target.getName()).add("warp", warpName).add("cost", warp.getCost())
 						.add("permission", warp.getPermission() + "");
 				switch (result) {
 				case FAILED_NO_MONEY:
 					msg(target, "other.failed.money.target", placeholders);
-					msg(sender, "other.failed.money.admin", placeholders);
+					msg(sender, "other.failed.money.sender", placeholders);
 					break;
 				case FAILED_NO_PERMISSION:
 					msg(target, "other.failed.perm.target", placeholders);
-					msg(sender, "other.failed.perm.admin", placeholders);
+					msg(sender, "other.failed.perm.sender", placeholders);
 					break;
 				case SUCCESS:
 					msg(target, "other.success.target", placeholders);
-					msg(sender, "other.success.admin", placeholders);
+					msg(sender, "other.success.sender", placeholders);
 					break;
 				}
 			} else {
