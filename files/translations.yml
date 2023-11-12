@@ -312,3 +312,59 @@ msgspy:
 msgignore:
   accepting: "{prefix} You are no longer ignoring PMs from player &e{target}"
   ignoring: "{prefix} You will no longer receive PMs from player &e{target}"
+  
+craftingtable:
+  self: "{prefix} Opened Crafting Table"
+  # {sender}, {target}
+  other:
+    sender: "{prefix} Opened Crafting Table to player &e{target}"
+    target: "{prefix} Opened Crafting Table"
+    
+anvil:
+  self: "{prefix} Opened Anvil"
+  # {sender}, {target}
+  other:
+    sender: "{prefix} Opened Anvil to player &e{target}"
+    target: "{prefix} Opened Anvil"
+    
+cartography:
+  self: "{prefix} Opened Cartography"
+  # {sender}, {target}
+  other:
+    sender: "{prefix} Opened Cartography to player &e{target}"
+    target: "{prefix} Opened Cartography"
+    
+grindstone:
+  self: "{prefix} Opened Grindstone"
+  # {sender}, {target}
+  other:
+    sender: "{prefix} Opened Grindstone to player &e{target}"
+    target: "{prefix} Opened Grindstone"
+    
+loom:
+  self: "{prefix} Opened Loom"
+  # {sender}, {target}
+  other:
+    sender: "{prefix} Opened Loom to player &e{target}"
+    target: "{prefix} Opened Loom"
+    
+smithing:
+  self: "{prefix} Opened Smithing"
+  # {sender}, {target}
+  other:
+    sender: "{prefix} Opened Smithing to player &e{target}"
+    target: "{prefix} Opened Smithing"
+    
+stonecutter:
+  self: "{prefix} Opened Stonecutter"
+  # {sender}, {target}
+  other:
+    sender: "{prefix} Opened Stonecutter to player &e{target}"
+    target: "{prefix} Opened Stonecutter"
+    
+enderchest:
+  self: "{prefix} Opened EnderChest"
+  # {sender}, {target}
+  other:
+    sender: "{prefix} Opened EnderChest to player &e{target}"
+    target: "{prefix} Opened EnderChest"

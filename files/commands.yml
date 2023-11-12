@@ -274,8 +274,71 @@ msgignore:
 msgspy:
   cmd: [msgspy]
   usage:
-    cmd: "/msgspy [player] {true/false}"
+    cmd: "/msgspy [player] [true/false]"
   perms:
     cmd: "css.cmd.msgspy"
     other: "css.cmd.msgspy.other"
     
+craftingtable:
+  cmd: [craft,workbench,craftingtable]
+  usage:
+    cmd: "/workbench {player}"
+  perms:
+    cmd: "css.cmd.craftingtable"
+    other: "css.cmd.craftingtable.other"
+    
+anvil:
+  cmd: [anvil]
+  usage:
+    cmd: "/anvil {player}"
+  perms:
+    cmd: "css.cmd.anvil"
+    other: "css.cmd.anvil.other"
+    
+cartography:
+  cmd: [cartography]
+  usage:
+    cmd: "/cartography {player}"
+  perms:
+    cmd: "css.cmd.cartography"
+    other: "css.cmd.cartography.other"
+    
+grindstone:
+  cmd: [grindstone]
+  usage:
+    cmd: "/grindstone {player}"
+  perms:
+    cmd: "css.cmd.grindstone"
+    other: "css.cmd.grindstone.other"
+    
+loom:
+  cmd: [loom]
+  usage:
+    cmd: "/loom {player}"
+  perms:
+    cmd: "css.cmd.loom"
+    other: "css.cmd.loom.other"
+    
+smithing:
+  cmd: [smithing]
+  usage:
+    cmd: "/smithing {player}"
+  perms:
+    cmd: "css.cmd.smithing"
+    other: "css.cmd.smithing.other"
+    
+stonecutter:
+  cmd: [stonecutter]
+  usage:
+    cmd: "/stonecutter {player}"
+  perms:
+    cmd: "css.cmd.stonecutter"
+    other: "css.cmd.stonecutter.other"
+    
+enderchest:
+  cmd: [ec,enderchest]
+  usage:
+    cmd: "/enderchest {player}"
+  perms:
+    cmd: "css.cmd.enderchest"
+    other: "css.cmd.enderchest.other"
