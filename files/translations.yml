@@ -7,11 +7,11 @@ fly:
   #  {sender}, {target}
   other:
     true:
-      target: "{prefix} Fly turned on by {sender}"
-      sender: "{prefix} Fly of {target} turned on"
+      target: "{prefix} Fly turned on by &e{sender}"
+      sender: "{prefix} Fly of &e{target} &7turned on"
     false:
-      target: "{prefix} Fly turned off by {sender}"
-      sender: "{prefix} Fly of {target} turned off"
+      target: "{prefix} Fly turned off by &e{sender}"
+      sender: "{prefix} Fly of &e{target} &7turned off"
 
 god:
   self:
@@ -20,69 +20,69 @@ god:
   #  {sender}, {target}
   other:
     true:
-      target: "{prefix} Immortality turned on by {sender}"
-      sender: "{prefix} Immortality of {target} turned on"
+      target: "{prefix} Immortality turned on by &e{sender}"
+      sender: "{prefix} Immortality of &e{target} &7turned on"
     false:
-      target: "{prefix} Immortality turned off by {sender}"
-      sender: "{prefix} Immortality of {target} turned off"
+      target: "{prefix} Immortality turned off by &e{sender}"
+      sender: "{prefix} Immortality of &e{target} &7turned off"
 
 heal:
   self: "{prefix} You've been healed"
   #  {sender}, {target}
   other:
-    target: "{prefix} You've been healed by  {sender}"
-    sender: "{prefix} You healed {target}"
+    target: "{prefix} You've been healed by &e{sender}"
+    sender: "{prefix} You healed &e{target}"
 
 feed:
   self: "{prefix} You've been fed"
   #  {sender}, {target}
   other:
-    target: "{prefix} You've been fed by {sender}"
-    sender: "{prefix} You've fed {target}"
+    target: "{prefix} You've been fed by &e{sender}"
+    sender: "{prefix} You've fed &e{target}"
 
 warp:
   #  {warp}, {cost}, {permission}
   self:
-    success: "{prefix} Warping on warp {warp}"
+    success: "{prefix} Warping on warp &e{warp}"
     failed:
-      money: "{prefix} You don't have enough money. Teleporting to warp {warp} costs ${cost}"
-      perm: "{prefix} You don't have permission to teleport to the warp {warp}"
+      money: "{prefix} You don't have enough money. Teleporting to warp &e{warp} &7costs &e${cost}"
+      perm: "{prefix} You don't have permission to teleport to the warp &e{warp}"
   #  {sender}, {target}, {warp}, {cost}, {permission}
   other:
     success:
-      target: "{prefix} Warping on warp {warp} by {sender}"
-      sender: "{prefix} Warping {target} on warp {warp}"
+      target: "{prefix} Warping on warp &e{warp} &7by &e{sender}"
+      sender: "{prefix} Warping &e{target} &7on warp &e{warp}"
     failed:
       money:
-        target: "{prefix} You don't have enough money. Teleporting to warp {warp} costs ${cost}"
-        sender: "{prefix} {target} don't have enough money. Teleporting to warp {warp} costs ${cost}"
+        target: "{prefix} You don't have enough money. Teleporting to warp &e{warp} &7costs &e${cost}"
+        sender: "{prefix} Player &e{target} &7don't have enough money. Teleporting to warp &e{warp} &7costs &e${cost}"
       perm:
         target: "{prefix} You don't have permission to teleport to the warp {warp}"
-        sender: "{prefix} {target} don't have permission to teleport to the warp {warp}"
+        sender: "{prefix} Player &e{target} &7don't have permission to teleport to the warp {warp}"
 
 setwarp:
   # {warp}, {world}, {x}, {y}, {z}, {yaw}, {pitch}
-  created: "{prefix} Created a warp {warp} on your position"
+  created: "{prefix} Created a warp &e{warp} &7on your position"
   # {warp}, {world}, {x}, {y}, {z}, {yaw}, {pitch}
-  moved: "{prefix} Moved a warp {warp} on your position"
+  moved: "{prefix} Moved a warp &e{warp} &7on your position"
 
 delwarp:
   #  {warp}
-  deleted: "{prefix} Deleted a warp {warp}"
+  deleted: "{prefix} Deleted a warp &e{warp}"
 
 spawn:
   self: "{prefix} Teleporting to a server spawn"
   #  {sender}, {target}
   other:
-    target: "{prefix} You were teleported to a server spawn by {sender}"
-    sender: "{prefix} You teleported {target} to a server spawn"
+    target: "{prefix} You were teleported to a server spawn by &e{sender}"
+    sender: "{prefix} You teleported player &e{target} &7to a server spawn"
 
 setspawn:
   # {world}, {x}, {y}, {z}, {yaw}, {pitch}
   set: "{prefix} Server spawn set on your position"
   
 # {target}, {value}
-sudo: "{prefix} You performed for the player &e{target}&7: &e{value}"
+sudo: "{prefix} You performed for the player &e{target}&7: &f{value}"
 
 # {gamemode}
 gamemode:
