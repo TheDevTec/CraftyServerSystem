@@ -22,6 +22,7 @@ import me.devtec.craftyserversystem.utils.ChatHandlers;
 import me.devtec.shared.Ref;
 import me.devtec.shared.dataholder.Config;
 import me.devtec.shared.dataholder.StringContainer;
+import me.devtec.shared.dataholder.cache.TempList;
 import me.devtec.shared.dataholder.cache.TempMap;
 import me.devtec.shared.utility.ColorUtils;
 import me.devtec.shared.utility.TimeUtils;
@@ -35,6 +36,12 @@ public class ChatListener implements Listener {
 	private TempMap<UUID, Object[]> prevMsgs;
 	private int maxMessages;
 	private boolean bypassAntiSpam;
+
+	// AntiSpam - Cooldown
+	@Nonnull
+	private TempList<UUID> cdMsgs;
+	private boolean antiSpamCooldownEnabled;
+	private boolean bypassAntiSpamCooldown;
 
 	// AntiFlood
 	private boolean antiFloodEnabled;
@@ -70,6 +77,14 @@ public class ChatListener implements Listener {
 			prevMsgs.clear();
 			prevMsgs.setCacheTime(TimeUtils.timeFromString(chat.getString("antiSpam.cache")) * 20);
 		}
+		antiSpamCooldownEnabled = chat.getBoolean("antiSpam.cooldown-per-message.enabled");
+		bypassAntiSpamCooldown = chat.getBoolean("antiSpam.cooldown-per-message.bypass-enabled");
+		if (cdMsgs == null)
+			cdMsgs = new TempList<>(TimeUtils.timeFromString(chat.getString("antiSpam.cooldown-per-message.time")) * 20);
+		else {
+			cdMsgs.clear();
+			cdMsgs.setCacheTime(TimeUtils.timeFromString(chat.getString("antiSpam.cooldown-per-message.time")) * 20);
+		}
 		maxMessages = chat.getInt("antiSpam.maximum-messages") + 1;
 		bypassAntiSpam = chat.getBoolean("antiSpam.bypass-enabled");
 		antiFloodEnabled = chat.getBoolean("antiFlood.enabled");
@@ -91,18 +106,27 @@ public class ChatListener implements Listener {
 		Config chat = API.get().getConfigManager().getChat();
 		String[] playerNames = playerNames(e.getPlayer());
 
-		String modifiedMessage = antiFloodEnabled && (bypassAntiFlood ? !e.getPlayer().hasPermission("gk.chat.bypass.antiflood") : true)
+		String modifiedMessage = antiFloodEnabled && (bypassAntiFlood ? !e.getPlayer().hasPermission("css.chat.bypass.antiflood") : true)
 				? ChatHandlers.antiFlood(e.getMessage(), ChatHandlers.match(e.getMessage(), playerNames), floodMaxNumbers, floodMaxChars)
 				: e.getMessage();
 
-		if (antiSpamEnabled && (bypassAntiSpam ? !e.getPlayer().hasPermission("gk.chat.bypass.antispam") : true)
-				&& ChatHandlers.processAntiSpam(e.getPlayer().getUniqueId(), modifiedMessage, prevMsgs, maxMessages)) {
-			e.setCancelled(true);
-			API.get().getMsgManager().sendMessageFromFile(chat, "translations.antiSpam", PlaceholdersExecutor.i().add("player", e.getPlayer().getName()), e.getPlayer());
-			return;
-
+		if (antiSpamEnabled && (bypassAntiSpam ? !e.getPlayer().hasPermission("css.chat.bypass.antispam") : true)) {
+			if (antiSpamCooldownEnabled && (bypassAntiSpamCooldown ? !e.getPlayer().hasPermission("css.chat.bypass.anticooldown") : true)) {
+				if (cdMsgs.contains(e.getPlayer().getUniqueId())) {
+					e.setCancelled(true);
+					API.get().getMsgManager().sendMessageFromFile(chat, "translations.antiSpam-Cooldown", PlaceholdersExecutor.i().add("player", e.getPlayer().getName()).add("time",
+							TimeUtils.timeToString(cdMsgs.getTimeOf(e.getPlayer().getUniqueId()) - System.currentTimeMillis() / 50L + cdMsgs.getCacheTime())), e.getPlayer());
+					return;
+				}
+				cdMsgs.add(e.getPlayer().getUniqueId());
+			}
+			if (ChatHandlers.processAntiSpam(e.getPlayer().getUniqueId(), modifiedMessage, prevMsgs, maxMessages)) {
+				e.setCancelled(true);
+				API.get().getMsgManager().sendMessageFromFile(chat, "translations.antiSpam", PlaceholdersExecutor.i().add("player", e.getPlayer().getName()), e.getPlayer());
+				return;
+			}
 		}
-		if (antiSwearEnabled && (bypassAntiSwear ? !e.getPlayer().hasPermission("gk.chat.bypass.antiswear") : true))
+		if (antiSwearEnabled && (bypassAntiSwear ? !e.getPlayer().hasPermission("css.chat.bypass.antiswear") : true))
 			if (chat.getBoolean("antiSwear.block-event")) {
 				if (ChatHandlers.antiSwear(modifiedMessage, words, allowedPhrases, ChatHandlers.match(modifiedMessage, playerNames))) {
 					e.setCancelled(true);
@@ -111,7 +135,7 @@ public class ChatListener implements Listener {
 				}
 			} else
 				modifiedMessage = ChatHandlers.antiSwearReplace(modifiedMessage, words, allowedPhrases, ChatHandlers.match(modifiedMessage, playerNames), replacement);
-		if (antiAdEnabled && (bypassAntiAd ? !e.getPlayer().hasPermission("gk.chat.bypass.antiad") : true) && ChatHandlers.antiAd(modifiedMessage, antiAdWhitelist)) {
+		if (antiAdEnabled && (bypassAntiAd ? !e.getPlayer().hasPermission("css.chat.bypass.antiad") : true) && ChatHandlers.antiAd(modifiedMessage, antiAdWhitelist)) {
 			e.setCancelled(true);
 			API.get().getMsgManager().sendMessageFromFile(chat, "translations.antiAd", PlaceholdersExecutor.i().add("player", e.getPlayer().getName()), e.getPlayer());
 			API.get().getMsgManager().sendMessageFromFile(chat, "translations.antiAd-admin", PlaceholdersExecutor.i().add("player", e.getPlayer().getName()).add("message", modifiedMessage),

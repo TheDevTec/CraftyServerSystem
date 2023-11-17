@@ -4,27 +4,33 @@ antiSwear:
   enabled: true
   words: ["kkt", "kokot", "kreten", "devko", "devki", "devka", "curak", "curac", "kund", "mrd", "penis", "vagin", "kurv", "idiot", "pica", "pico", "fuck", "suck","dick"]
   block-event: false
-  replacement: "****" # pokud je block-event nastaven na false
-  # gk.chat.bypass.antiswear
+  # if block-event is set to false, replacement is used.
+  replacement: "****"
+  # css.chat.bypass.antiswear
   bypass-enabled: false
   allowed-phrases: ["sekund"]
 antiSpam:
   enabled: true
   cache: 5min
   maximum-messages: 3
-  # gk.chat.bypass.antispam
+  cooldown-per-message:
+    enabled: false
+    time: 5s
+    # css.chat.bypass.anticooldown
+    bypass-enabled: false
+  # css.chat.bypass.antispam
   bypass-enabled: false
 antiFlood:
   enabled: true
   maximum-chars: 2
   maximum-numbers: 12
-  # gk.chat.bypass.antiflood
+  # css.chat.bypass.antiflood
   bypass-enabled: false
 antiAd:
   enabled: true
   whitelist:
   - "example.com"
-  # gk.chat.bypass.antiad
+  # css.chat.bypass.antiad
   bypass-enabled: false
   
 options:
@@ -55,11 +61,13 @@ notification:
   messages: []
 
 translations:
-  antiSwear: "&f&lServer &8&l> &eNebuď vulgární, jsou mezi námi i děti!"
-  antiSpam: "&f&lServer &8&l> &eProsím, nespamuj chat."
-  antiAd: "&f&lServer &8&l> &eZde je reklama zakázaná."
+  antiSwear: "{prefix} &eDon't be vulgar, there are kids among us!"
+  antiSpam: "{prefix} &ePlease don't spam the chat."
+  # {time}
+  antiSpam-Cooldown: "{prefix} &ePlease don't spam the chat, wait {time} before sending another message."
+  antiAd: "{prefix} &eAdvertising is forbidden here."
   # gh.chat.antiad
-  antiAd-admin: "&f&lServer &8&l> &cHráč &e{player} &cse snažil napsat reklamu: &e{message}"
+  antiAd-admin: "{prefix} &cPlayer &e{player} &cwas trying to post an ad: &e{message}"
 
 formats:
   default:
@@ -72,6 +80,6 @@ formats:
     message: "&a{message}"
     name: "&aVIP &e{player}"
   anotherGroup:
-    chat: ["", {"text":"{player} &7» "}, {"text":"{message}", "hoverEvent":{"action":"show_text", "value":"&aZpráva odeslána v %server_time%"}}]
+    chat: ["", {"text":"{player} &7» "}, {"text":"{message}", "hoverEvent":{"action":"show_text", "value":"&aMessage sent at %server_time%"}}]
     message: "&3{message}"
     name: "&4Admin &6{player}"
