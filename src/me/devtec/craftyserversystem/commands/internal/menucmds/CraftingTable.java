@@ -2,10 +2,8 @@ package me.devtec.craftyserversystem.commands.internal.menucmds;
 
 import java.util.List;
 
-import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.event.inventory.InventoryType;
 
 import me.devtec.craftyserversystem.commands.CssCommand;
 import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
@@ -57,7 +55,7 @@ public class CraftingTable extends CssCommand {
 	}
 
 	private void openInv(CommandSender sender, Player target, boolean sendMessages) {
-		target.openInventory(Bukkit.createInventory(target, InventoryType.CRAFTING));
+		target.openWorkbench(target.getLocation(), true);
 		if (sendMessages)
 			if (sender.equals(target))
 				msg(sender, "self");

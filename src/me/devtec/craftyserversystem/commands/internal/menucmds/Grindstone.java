@@ -57,7 +57,7 @@ public class Grindstone extends CssCommand {
 	}
 
 	private void openInv(CommandSender sender, Player target, boolean sendMessages) {
-		target.openInventory(Bukkit.createInventory(target, InventoryType.GRINDSTONE));
+		target.openInventory(Bukkit.createInventory(null, InventoryType.GRINDSTONE));
 		if (sendMessages)
 			if (sender.equals(target))
 				msg(sender, "self");

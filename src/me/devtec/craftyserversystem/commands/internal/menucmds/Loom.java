@@ -57,7 +57,7 @@ public class Loom extends CssCommand {
 	}
 
 	private void openInv(CommandSender sender, Player target, boolean sendMessages) {
-		target.openInventory(Bukkit.createInventory(target, InventoryType.LOOM));
+		target.openInventory(Bukkit.createInventory(null, InventoryType.LOOM));
 		if (sendMessages)
 			if (sender.equals(target))
 				msg(sender, "self");

@@ -57,7 +57,7 @@ public class Stonecutter extends CssCommand {
 	}
 
 	private void openInv(CommandSender sender, Player target, boolean sendMessages) {
-		target.openInventory(Bukkit.createInventory(target, InventoryType.STONECUTTER));
+		target.openInventory(Bukkit.createInventory(null, InventoryType.STONECUTTER));
 		if (sendMessages)
 			if (sender.equals(target))
 				msg(sender, "self");

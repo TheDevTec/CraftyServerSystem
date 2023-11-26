@@ -381,3 +381,8 @@ vanish:
     false:
       target: "{prefix} Vanish turned off by &e{sender}"
       sender: "{prefix} Vanish of &e{target} &7turned off"
+    
+invsee:
+  open: "{prefix} Opening inventory of player &e{target}"
+  self: "{prefix} You can't invsee yourself"
+  

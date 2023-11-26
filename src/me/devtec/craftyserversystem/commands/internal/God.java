@@ -9,8 +9,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityAirChangeEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
+import org.bukkit.event.entity.FoodLevelChangeEvent;
 
 import me.devtec.craftyserversystem.API;
 import me.devtec.craftyserversystem.Loader;
@@ -33,18 +35,43 @@ public class God extends CssCommand {
 		if (isRegistered())
 			return;
 
-		if (API.get().getConfigManager().getMain().getBoolean("god.anti-void-damage-listener")) {
+		if (API.get().getConfigManager().getMain().getBoolean("god.anti-void-damage-listener"))
 			listener = new Listener() {
 
 				@EventHandler
 				public void playerVoid(EntityDamageEvent e) {
-					if (e.getCause() == DamageCause.VOID && e.getEntityType() == EntityType.PLAYER)
-						if (e.getEntity().isInvulnerable())
-							e.setCancelled(true);
+					if (e.getCause() == DamageCause.VOID && e.getEntityType() == EntityType.PLAYER && isAllowed((Player) e.getEntity()))
+						e.setCancelled(true);
+				}
+
+				@EventHandler
+				public void playerFood(FoodLevelChangeEvent e) {
+					if (e.getEntityType() == EntityType.PLAYER && isAllowed((Player) e.getEntity()))
+						e.setCancelled(true);
+				}
+
+				@EventHandler
+				public void playerAir(EntityAirChangeEvent e) {
+					if (e.getEntityType() == EntityType.PLAYER && isAllowed((Player) e.getEntity()) && ((Player) e.getEntity()).getRemainingAir() > e.getAmount())
+						e.setCancelled(true);
 				}
 			};
-			Bukkit.getPluginManager().registerEvents(listener, Loader.getPlugin());
-		}
+		else
+			listener = new Listener() {
+
+				@EventHandler
+				public void playerFood(FoodLevelChangeEvent e) {
+					if (e.getEntityType() == EntityType.PLAYER && isAllowed((Player) e.getEntity()))
+						e.setCancelled(true);
+				}
+
+				@EventHandler
+				public void playerAir(EntityAirChangeEvent e) {
+					if (e.getEntityType() == EntityType.PLAYER && isAllowed((Player) e.getEntity()) && ((Player) e.getEntity()).getRemainingAir() > e.getAmount())
+						e.setCancelled(true);
+				}
+			};
+		Bukkit.getPluginManager().registerEvents(listener, Loader.getPlugin());
 
 		CommandStructure<CommandSender> cmd = CommandStructure.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
 			if (!(sender instanceof Player)) {

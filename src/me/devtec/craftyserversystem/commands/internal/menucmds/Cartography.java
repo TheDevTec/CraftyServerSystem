@@ -57,7 +57,7 @@ public class Cartography extends CssCommand {
 	}
 
 	private void openInv(CommandSender sender, Player target, boolean sendMessages) {
-		target.openInventory(Bukkit.createInventory(target, InventoryType.CARTOGRAPHY));
+		target.openInventory(Bukkit.createInventory(null, InventoryType.CARTOGRAPHY));
 		if (sendMessages)
 			if (sender.equals(target))
 				msg(sender, "self");

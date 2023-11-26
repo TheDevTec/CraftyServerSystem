@@ -57,7 +57,7 @@ public class Smithing extends CssCommand {
 	}
 
 	private void openInv(CommandSender sender, Player target, boolean sendMessages) {
-		target.openInventory(Bukkit.createInventory(target, InventoryType.SMITHING));
+		target.openInventory(Bukkit.createInventory(null, InventoryType.SMITHING));
 		if (sendMessages)
 			if (sender.equals(target))
 				msg(sender, "self");

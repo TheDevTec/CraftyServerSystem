@@ -352,3 +352,10 @@ vanish:
     other: "css.cmd.vanish.other"
     # Permission to see vanished players
     see: "css.cmd.vanish.see"
+
+invsee:
+  usage:
+    cmd: "/invsee [player]"
+  cmd: [invsee]
+  perms:
+    cmd: "css.cmd.invsee"
