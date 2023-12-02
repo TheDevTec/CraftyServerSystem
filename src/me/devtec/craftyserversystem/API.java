@@ -1,5 +1,6 @@
 package me.devtec.craftyserversystem;
 
+import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -7,6 +8,7 @@ import java.util.Map;
 import org.bukkit.Bukkit;
 
 import me.devtec.craftyserversystem.commands.CssCommand;
+import me.devtec.craftyserversystem.commands.internal.BalanceTop;
 import me.devtec.craftyserversystem.economy.CssEconomy;
 import me.devtec.craftyserversystem.economy.CssEconomyHook;
 import me.devtec.craftyserversystem.economy.EconomyHook;
@@ -120,6 +122,9 @@ public class API {
 
 	public void setEconomyHook(EconomyHook hook) {
 		economyHook = hook;
+		CssCommand balanceTop = getCommandManager().getRegistered().get("balancetop");
+		if (balanceTop != null)
+			((BalanceTop) balanceTop).calculate();
 	}
 
 	protected void init() {
@@ -146,10 +151,13 @@ public class API {
 				this.economy = new CssEconomy(economy.getDouble("settings.startup-money"),
 						economy.getString("settings.minimum-money").equals("UNLIMITED") ? Double.NEGATIVE_INFINITY : economy.getDouble("settings.minimum-money"),
 						economy.getString("settings.maximum-money").equals("UNLIMITED") ? Double.POSITIVE_INFINITY : economy.getDouble("settings.maximum-money"), map != null, map);
-			else
-				this.economy = (CssEconomy) Ref.newInstanceByClass(Ref.getClass("me.devtec.craftyserversystem.economy.CssEconomyVaultImplementation"), economy.getDouble("settings.startup-money"),
+			else {
+				Constructor<?> cons = Ref.constructor(Ref.getClass("me.devtec.craftyserversystem.economy.CssEconomyVaultImplementation"), double.class, double.class, double.class, boolean.class,
+						Map.class);
+				this.economy = (CssEconomy) Ref.newInstance(cons, economy.getDouble("settings.startup-money"),
 						economy.getString("settings.minimum-money").equals("UNLIMITED") ? Double.NEGATIVE_INFINITY : economy.getDouble("settings.minimum-money"),
 						economy.getString("settings.maximum-money").equals("UNLIMITED") ? Double.POSITIVE_INFINITY : economy.getDouble("settings.maximum-money"), map != null, map);
+			}
 			setEconomyHook(new CssEconomyHook(this.economy));
 		}
 	}

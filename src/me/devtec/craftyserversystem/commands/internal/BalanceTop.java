@@ -38,13 +38,14 @@ public class BalanceTop extends CssCommand {
 
 	public int task;
 	public PlaceholderExpansion placeholder;
+	private double minimumBalanceToShow;
 
 	@Override
 	public void register() {
 		if (isRegistered())
 			return;
 
-		double minimumBalanceToShow = API.get().getConfigManager().getEconomy().getDouble("settings.balance-top.minimum-money");
+		minimumBalanceToShow = API.get().getConfigManager().getEconomy().getDouble("settings.balance-top.minimum-money");
 		int entriesPerPage = API.get().getConfigManager().getEconomy().getInt("settings.balance-top.entries-per-page");
 		if (API.get().getConfigManager().getEconomy().getBoolean("settings.balance-top.enable-global-placeholder")) {
 			EconomyHook hook = API.get().getEconomyHook();
@@ -142,7 +143,13 @@ public class BalanceTop extends CssCommand {
 		placeholder = null;
 	}
 
+	public void calculate() {
+		calculate(minimumBalanceToShow);
+	}
+
 	public void calculate(double minimumBalanceToShow) {
+		if (API.get().getEconomyHook() == null)
+			return;
 		balanceTop.clear();
 		if (API.get().getEconomyHook() instanceof CssEconomyHook) {
 			CssEconomyHook hook = (CssEconomyHook) API.get().getEconomyHook();
