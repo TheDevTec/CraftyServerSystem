@@ -116,9 +116,7 @@ public class Loader extends JavaPlugin implements Listener {
 	public void onPluginEnable(PluginEnableEvent e) {
 		if (e.getPlugin().getName().equals("Vault")) {
 			API.get().setPermissionHook(new VaultPermissionHook());
-			if (API.get().getEconomyHook() instanceof CssEconomyHook)
-				VaultEconomyHook.registerOurEconomy();
-			else
+			if (!(API.get().getEconomyHook() instanceof CssEconomyHook))
 				API.get().setEconomyHook(new VaultEconomyHook());
 		}
 		if (e.getPlugin().getName().equals("LuckPerms"))
