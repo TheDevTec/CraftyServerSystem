@@ -36,6 +36,7 @@ public class VaultEconomyHook implements EconomyHook {
 	}
 
 	public static void registerOurEconomy() {
+		Loader.getPlugin().getLogger().info("Registering own Economy service.");
 		Bukkit.getServicesManager().register(Economy.class, (CssEconomyVaultImplementation) ((CssEconomyHook) API.get().getEconomyHook()).economy, Loader.getPlugin(), ServicePriority.Normal);
 	}
 
