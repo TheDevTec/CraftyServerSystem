@@ -13,6 +13,7 @@ import me.devtec.craftyserversystem.economy.CssEconomy;
 import me.devtec.craftyserversystem.economy.CssEconomyHook;
 import me.devtec.craftyserversystem.economy.EconomyHook;
 import me.devtec.craftyserversystem.economy.EmptyEconomyHook;
+import me.devtec.craftyserversystem.economy.VaultEconomyHook;
 import me.devtec.craftyserversystem.managers.CommandManager;
 import me.devtec.craftyserversystem.managers.ConfigurationManager;
 import me.devtec.craftyserversystem.managers.CooldownManager;
@@ -147,18 +148,20 @@ public class API {
 				for (String key : economy.getKeys("per-world-groups"))
 					map.put(key, economy.getStringList("per-world-groups." + key));
 			}
-			if (Bukkit.getPluginManager().getPlugin("Vault") == null)
+			if (Bukkit.getPluginManager().getPlugin("Vault") == null) {
 				this.economy = new CssEconomy(economy.getDouble("settings.startup-money"),
 						economy.getString("settings.minimum-money").equals("UNLIMITED") ? Double.NEGATIVE_INFINITY : economy.getDouble("settings.minimum-money"),
 						economy.getString("settings.maximum-money").equals("UNLIMITED") ? Double.POSITIVE_INFINITY : economy.getDouble("settings.maximum-money"), map != null, map);
-			else {
+				setEconomyHook(new CssEconomyHook(this.economy));
+			} else {
 				Constructor<?> cons = Ref.constructor(Ref.getClass("me.devtec.craftyserversystem.economy.CssEconomyVaultImplementation"), double.class, double.class, double.class, boolean.class,
 						Map.class);
 				this.economy = (CssEconomy) Ref.newInstance(cons, economy.getDouble("settings.startup-money"),
 						economy.getString("settings.minimum-money").equals("UNLIMITED") ? Double.NEGATIVE_INFINITY : economy.getDouble("settings.minimum-money"),
 						economy.getString("settings.maximum-money").equals("UNLIMITED") ? Double.POSITIVE_INFINITY : economy.getDouble("settings.maximum-money"), map != null, map);
+				setEconomyHook(new CssEconomyHook(this.economy));
+				VaultEconomyHook.registerOurEconomy();
 			}
-			setEconomyHook(new CssEconomyHook(this.economy));
 		}
 	}
 }
