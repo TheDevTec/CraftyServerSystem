@@ -10,6 +10,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -101,8 +102,10 @@ public class ChatListener implements Listener {
 		antiAdWhitelist = chat.getStringList("antiAd.whitelist");
 	}
 
-	@EventHandler
+	@EventHandler(priority = EventPriority.MONITOR)
 	public void onChat(AsyncPlayerChatEvent e) {
+		if (e.isCancelled())
+			return;
 		Config chat = API.get().getConfigManager().getChat();
 		String[] playerNames = playerNames(e.getPlayer());
 

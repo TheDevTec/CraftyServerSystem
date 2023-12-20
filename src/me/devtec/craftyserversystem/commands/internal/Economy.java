@@ -38,7 +38,7 @@ public class Economy extends CssCommand {
 		cmd.argument("add", (sender, structure, args) -> {
 			msgUsage(sender, "add");
 		}).permission(getPerm("add")).argument(null, 1, (sender, structure, args) -> {
-			msgUsage(sender, "set");
+			msgUsage(sender, "add");
 		}, (sender, structure, args) -> {
 			Collection<? extends Player> onlinePlayers = BukkitLoader.getOnlinePlayers();
 			List<String> players = new ArrayList<>(onlinePlayers.size() + 1);
@@ -66,7 +66,7 @@ public class Economy extends CssCommand {
 		cmd.argument("remove", (sender, structure, args) -> {
 			msgUsage(sender, "remove");
 		}).permission(getPerm("remove")).argument(null, 1, (sender, structure, args) -> {
-			msgUsage(sender, "set");
+			msgUsage(sender, "remove");
 		}, (sender, structure, args) -> {
 			Collection<? extends Player> onlinePlayers = BukkitLoader.getOnlinePlayers();
 			List<String> players = new ArrayList<>(onlinePlayers.size() + 1);

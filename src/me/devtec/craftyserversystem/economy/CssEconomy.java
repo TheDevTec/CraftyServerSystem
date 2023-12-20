@@ -82,6 +82,7 @@ public class CssEconomy {
 			totalBalance = minimumMoney;
 		if (totalBalance > maximumMoney)
 			totalBalance = maximumMoney;
+		data.set(path, totalBalance);
 		return true;
 	}
 
@@ -96,6 +97,7 @@ public class CssEconomy {
 			totalBalance = minimumMoney;
 		if (totalBalance > maximumMoney)
 			totalBalance = maximumMoney;
+		data.set(path, totalBalance);
 		return true;
 	}
 
