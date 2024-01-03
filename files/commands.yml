@@ -13,6 +13,33 @@ god:
   perms:
     cmd: "css.cmd.god"
     other: "css.cmd.god.other"
+    
+flyspeed:
+  usage:
+    usage: "/flyspeed [0-10]"
+    other: "/flyspeed [player] [0-10]"
+  cmd: [flyspeed]
+  perms:
+    cmd: "css.cmd.flyspeed"
+    other: "css.cmd.flyspeed.other"
+    
+walkspeed:
+  usage:
+    usage: "/walkspeed [0-10]"
+    other: "/walkspeed [player] [0-10]"
+  cmd: [walkspeed]
+  perms:
+    cmd: "css.cmd.walkspeed"
+    other: "css.cmd.walkspeed.other"
+    
+speed:
+  usage:
+    usage: "/speed [0-10]"
+    other: "/speed [player] [0-10]"
+  cmd: [speed]
+  perms:
+    cmd: "css.cmd.speed"
+    other: "css.cmd.speed.other"
 
 heal:
   usage:

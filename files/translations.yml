@@ -26,6 +26,20 @@ god:
       target: "{prefix} Immortality turned off by &e{sender}"
       sender: "{prefix} Immortality of &e{target} &7turned off"
 
+flyspeed:
+  self: "{prefix} You've set your flyspeed to &e{value}"
+  #  {sender}, {target}
+  other:
+    target: "{prefix} Your flyspeed set to &e{value} &7by &e{sender}"
+    sender: "{prefix} You set flyspeed of &e{target} &7to &e{value}"
+
+walkspeed:
+  self: "{prefix} You've set your walkspeed to &e{value}"
+  #  {sender}, {target}
+  other:
+    target: "{prefix} Your walkspeed set to &e{value} &7by &e{sender}"
+    sender: "{prefix} You set walkspeed of &e{target} &7to &e{value}"
+
 heal:
   self: "{prefix} You've been healed"
   #  {sender}, {target}
