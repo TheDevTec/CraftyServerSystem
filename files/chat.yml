@@ -41,12 +41,12 @@ options:
   # If type is PER_WORLD, create world groups in which players can write between:
   per_world:
     group0:
-    - world
-    - trade_world
+    - "world"
+    - "trade_world"
     group1:
-    - world_nether
+    - "world_nether"
     group2:
-    - world_the_end
+    - "world_the_end"
     # etc.
     
 notification:
