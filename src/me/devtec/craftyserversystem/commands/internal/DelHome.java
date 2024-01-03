@@ -13,7 +13,7 @@ public class DelHome extends CssCommand {
 
 	@Override
 	public String section() {
-		return "sethome";
+		return "delhome";
 	}
 
 	@Override
