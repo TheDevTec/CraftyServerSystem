@@ -21,15 +21,14 @@ public class GetPos extends CssCommand {
 
 		CommandStructure<CommandSender> cmd = CommandStructure.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
 			if (!(sender instanceof Player)) {
-				msgUsage(sender, "other");
+				msgUsage(sender, "usage");
 				return;
 			}
 			getPos((Player) sender, sender);
 		}).permission(getPerm("cmd"));
 		// other
 		cmd.selector(Selector.PLAYER, (sender, structure, args) -> {
-			Player player = Bukkit.getPlayer(args[0]);
-			getPos(player, sender);
+			getPos(Bukkit.getPlayer(args[0]), sender);
 		}).permission(getPerm("other"));
 
 		// register

@@ -19,7 +19,7 @@ public class Burn extends CssCommand {
 
 		CommandStructure<CommandSender> cmd = CommandStructure.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
 			if (!(sender instanceof Player)) {
-				msgUsage(sender, "other");
+				msgUsage(sender, "usage");
 				return;
 			}
 			burn((Player) sender, true, sender);
@@ -27,7 +27,7 @@ public class Burn extends CssCommand {
 		// silent
 		cmd.argument("-s", (sender, structure, args) -> {
 			if (!(sender instanceof Player)) {
-				msgUsage(sender, "other");
+				msgUsage(sender, "usage");
 				return;
 			}
 			burn((Player) sender, false, sender);
