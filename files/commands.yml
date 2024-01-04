@@ -127,28 +127,28 @@ day:
     usage: "/day {world}"
   cmd: [day]
   perms:
-    cmd: "css.cmd.playerday"
+    cmd: "css.cmd.day"
     
 noon:
   usage:
     usage: "/noon {world}"
   cmd: [noon]
   perms:
-    cmd: "css.cmd.playernoon"
+    cmd: "css.cmd.noon"
     
 night:
   usage:
     usage: "/night {world}"
   cmd: [night]
   perms:
-    cmd: "css.cmd.playernight"
+    cmd: "css.cmd.night"
     
 midnight:
   usage:
     usage: "/midnight {world}"
   cmd: [midnight]
   perms:
-    cmd: "css.cmd.playermidnight"
+    cmd: "css.cmd.midnight"
     
 playerday:
   usage:
