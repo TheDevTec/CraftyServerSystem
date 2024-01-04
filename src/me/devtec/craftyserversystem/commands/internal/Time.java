@@ -103,25 +103,25 @@ public class Time extends CssCommand {
 	private void setDay(CommandSender sender, World target, boolean sendMessage) {
 		target.setTime(1000);
 		if (sendMessage)
-			msgOut(sender, "day", PlaceholdersExecutor.i().add("world", target.getName()));
+			msgOut(sender, "time.day", PlaceholdersExecutor.i().add("world", target.getName()));
 	}
 
 	private void setNoon(CommandSender sender, World target, boolean sendMessage) {
 		target.setTime(6000);
 		if (sendMessage)
-			msgOut(sender, "noon", PlaceholdersExecutor.i().add("world", target.getName()));
+			msgOut(sender, "time.noon", PlaceholdersExecutor.i().add("world", target.getName()));
 	}
 
 	private void setNight(CommandSender sender, World target, boolean sendMessage) {
 		target.setTime(13000);
 		if (sendMessage)
-			msgOut(sender, "night", PlaceholdersExecutor.i().add("world", target.getName()));
+			msgOut(sender, "time.night", PlaceholdersExecutor.i().add("world", target.getName()));
 	}
 
 	private void setMidnight(CommandSender sender, World target, boolean sendMessage) {
 		target.setTime(18000);
 		if (sendMessage)
-			msgOut(sender, "midnight", PlaceholdersExecutor.i().add("world", target.getName()));
+			msgOut(sender, "time.midnight", PlaceholdersExecutor.i().add("world", target.getName()));
 	}
 
 }

@@ -95,7 +95,7 @@ public class PlayerWeather extends CssCommand {
 				msgOut(sender, "playerweather-reset.other.sender", PLACEHOLDERS);
 				msgOut(target, "playerweather-reset.other.target", PLACEHOLDERS);
 			} else
-				msgOut(target, "playerweather-reset.self", PlaceholdersExecutor.EMPTY);
+				msgOut(target, "playerweather-reset.self");
 	}
 
 	private void setSun(CommandSender sender, Player target, boolean sendMessages) {
@@ -106,7 +106,7 @@ public class PlayerWeather extends CssCommand {
 				msgOut(sender, "playersun.other.sender", PLACEHOLDERS);
 				msgOut(target, "playersun.other.target", PLACEHOLDERS);
 			} else
-				msgOut(sender, "playersun.self", PlaceholdersExecutor.EMPTY);
+				msgOut(sender, "playersun.self");
 	}
 
 	private void setRain(CommandSender sender, Player target, boolean sendMessages) {
@@ -117,7 +117,7 @@ public class PlayerWeather extends CssCommand {
 				msgOut(sender, "playerrain.other.sender", PLACEHOLDERS);
 				msgOut(target, "playerrain.other.target", PLACEHOLDERS);
 			} else
-				msgOut(sender, "playerrain.self", PlaceholdersExecutor.EMPTY);
+				msgOut(sender, "playerrain.self");
 	}
 
 }

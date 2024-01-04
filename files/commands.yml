@@ -122,6 +122,34 @@ playerrain:
     cmd: "css.cmd.playerrain"
     other: "css.cmd.playerrain.other"
     
+day:
+  usage:
+    usage: "/day {world}"
+  cmd: [day]
+  perms:
+    cmd: "css.cmd.playerday"
+    
+noon:
+  usage:
+    usage: "/noon {world}"
+  cmd: [noon]
+  perms:
+    cmd: "css.cmd.playernoon"
+    
+night:
+  usage:
+    usage: "/night {world}"
+  cmd: [night]
+  perms:
+    cmd: "css.cmd.playernight"
+    
+midnight:
+  usage:
+    usage: "/midnight {world}"
+  cmd: [midnight]
+  perms:
+    cmd: "css.cmd.playermidnight"
+    
 playerday:
   usage:
     usage: "/pday {player}"

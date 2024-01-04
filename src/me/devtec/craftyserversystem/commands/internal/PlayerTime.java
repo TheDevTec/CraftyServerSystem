@@ -133,7 +133,7 @@ public class PlayerTime extends CssCommand {
 				msgOut(sender, "playtime-reset.other.sender", PLACEHOLDERS);
 				msgOut(target, "playtime-reset.other.target", PLACEHOLDERS);
 			} else
-				msgOut(target, "playtime-reset.self", PlaceholdersExecutor.EMPTY);
+				msgOut(target, "playtime-reset.self");
 	}
 
 	private void setDay(CommandSender sender, Player target, boolean sendMessages) {
@@ -144,7 +144,7 @@ public class PlayerTime extends CssCommand {
 				msgOut(sender, "playerday.other.sender", PLACEHOLDERS);
 				msgOut(target, "playerday.other.target", PLACEHOLDERS);
 			} else
-				msgOut(sender, "playerday.self", PlaceholdersExecutor.EMPTY);
+				msgOut(sender, "playerday.self");
 	}
 
 	private void setNoon(CommandSender sender, Player target, boolean sendMessages) {
@@ -155,7 +155,7 @@ public class PlayerTime extends CssCommand {
 				msgOut(sender, "playernoon.other.sender", PLACEHOLDERS);
 				msgOut(target, "playernoon.other.target", PLACEHOLDERS);
 			} else
-				msgOut(sender, "playernoon.self", PlaceholdersExecutor.EMPTY);
+				msgOut(sender, "playernoon.self");
 	}
 
 	private void setNight(CommandSender sender, Player target, boolean sendMessages) {
@@ -166,7 +166,7 @@ public class PlayerTime extends CssCommand {
 				msgOut(sender, "playernight.other.sender", PLACEHOLDERS);
 				msgOut(target, "playernight.other.target", PLACEHOLDERS);
 			} else
-				msgOut(sender, "playernight.self", PlaceholdersExecutor.EMPTY);
+				msgOut(sender, "playernight.self");
 	}
 
 	private void setMidnight(CommandSender sender, Player target, boolean sendMessages) {
@@ -177,7 +177,7 @@ public class PlayerTime extends CssCommand {
 				msgOut(sender, "playermidnight.other.sender", PLACEHOLDERS);
 				msgOut(target, "playermidnight.other.target", PLACEHOLDERS);
 			} else
-				msgOut(sender, "playermidnight.self", PlaceholdersExecutor.EMPTY);
+				msgOut(sender, "playermidnight.self");
 	}
 
 }

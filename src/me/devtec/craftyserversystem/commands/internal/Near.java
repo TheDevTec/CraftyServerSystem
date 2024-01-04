@@ -34,7 +34,11 @@ public class Near extends CssCommand {
 				if (pDistance <= distance)
 					near.put(player.getName(), pDistance);
 			}
-			msg(sender, "result", PlaceholdersExecutor.i().add("amount", near.size()));
+			if (near.isEmpty()) {
+				msg(sender, "noone", PlaceholdersExecutor.i().add("distance", distance));
+				return;
+			}
+			msg(sender, "result", PlaceholdersExecutor.i().add("amount", near.size()).add("distance", distance));
 			for (Entry<String, Double> entry : near.entrySet())
 				msg(sender, "item", PlaceholdersExecutor.i().add("target", entry.getKey()).add("distance", entry.getValue()));
 		});
