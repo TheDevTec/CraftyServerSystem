@@ -15,11 +15,6 @@ import me.devtec.theapi.bukkit.BukkitLoader;
 public class Tpaccept extends CssCommand {
 
 	@Override
-	public String section() {
-		return "tpaccept";
-	}
-
-	@Override
 	public void register() {
 		if (isRegistered())
 			return;

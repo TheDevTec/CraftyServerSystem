@@ -18,11 +18,6 @@ import me.devtec.theapi.bukkit.BukkitLoader;
 public class Tptoggle extends CssCommand {
 
 	@Override
-	public String section() {
-		return "tptoggle";
-	}
-
-	@Override
 	public void register() {
 		if (isRegistered())
 			return;

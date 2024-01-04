@@ -20,11 +20,6 @@ import me.devtec.theapi.bukkit.BukkitLoader;
 public class MsgSpy extends CssCommand {
 
 	@Override
-	public String section() {
-		return "msgspy";
-	}
-
-	@Override
 	public void register() {
 		if (isRegistered())
 			return;

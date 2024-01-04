@@ -33,11 +33,6 @@ public class Kit extends CssCommand {
 	private static Map<String, KitSample> kits = new HashMap<>();
 
 	@Override
-	public String section() {
-		return "kit";
-	}
-
-	@Override
 	public void register() {
 		if (isRegistered())
 			return;

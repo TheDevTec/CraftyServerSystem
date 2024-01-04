@@ -26,11 +26,6 @@ public class God extends CssCommand {
 	private Listener listener;
 
 	@Override
-	public String section() {
-		return "god";
-	}
-
-	@Override
 	public void register() {
 		if (isRegistered())
 			return;

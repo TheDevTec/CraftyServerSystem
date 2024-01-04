@@ -16,11 +16,6 @@ import me.devtec.shared.utility.ParseUtils;
 
 public class FlySpeed extends CssCommand {
 
-	@Override
-	public String section() {
-		return "flyspeed";
-	}
-
 	@SuppressWarnings("unchecked")
 	@Override
 	public void register() {

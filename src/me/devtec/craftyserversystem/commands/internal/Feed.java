@@ -13,11 +13,6 @@ import me.devtec.shared.commands.structures.CommandStructure;
 public class Feed extends CssCommand {
 
 	@Override
-	public String section() {
-		return "feed";
-	}
-
-	@Override
 	public void register() {
 		if (isRegistered())
 			return;

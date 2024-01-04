@@ -40,6 +40,142 @@ speed:
   perms:
     cmd: "css.cmd.speed"
     other: "css.cmd.speed.other"
+    
+thor:
+  usage:
+    usage: "/thor [player] {-attack}"
+  cmd: [thor,smite]
+  perms:
+    cmd: "css.cmd.thor"
+    
+weather:
+  usage:
+    usage: "/weather [sun/rain/thunder] {world}"
+  cmd: [weather]
+  perms:
+    cmd: "css.cmd.weather"
+    
+time:
+  usage:
+    usage: "/time [day/noon/night/midnight] {world}"
+  cmd: [time]
+  perms:
+    cmd: "css.cmd.time"
+    
+sun:
+  usage:
+    usage: "/sun {world}"
+  cmd: [sun]
+  perms:
+    cmd: "css.cmd.sun"
+    
+rain:
+  usage:
+    usage: "/rain {world}"
+  cmd: [rain]
+  perms:
+    cmd: "css.cmd.rain"
+    
+thunder:
+  usage:
+    usage: "/thunder {world}"
+  cmd: [thunder]
+  perms:
+    cmd: "css.cmd.thunder"
+    
+spawner:
+  usage:
+    usage: "/spawner {entityType}"
+  cmd: [spawner]
+  perms:
+    cmd: "css.cmd.spawner"
+    
+skull:
+  usage:
+    usage: "/skull {playerName/values/url.png/hdb:id}"
+  cmd: [skull,head]
+  perms:
+    cmd: "css.cmd.skull"
+    other: "css.cmd.skull.other"
+    
+playerweather:
+  usage:
+    usage: "/pweather [sun/rain/reset] {player}"
+  cmd: [pweather]
+  perms:
+    cmd: "css.cmd.playerweather"
+    other: "css.cmd.playerweather.other"
+    
+playersun:
+  usage:
+    usage: "/psun {player}"
+  cmd: [psun]
+  perms:
+    cmd: "css.cmd.playersun"
+    other: "css.cmd.playersun.other"
+    
+playerrain:
+  usage:
+    usage: "/prain {player}"
+  cmd: [prain]
+  perms:
+    cmd: "css.cmd.playerrain"
+    other: "css.cmd.playerrain.other"
+    
+playerday:
+  usage:
+    usage: "/pday {player}"
+  cmd: [pday]
+  perms:
+    cmd: "css.cmd.playerday"
+    other: "css.cmd.playerday.other"
+    
+playernoon:
+  usage:
+    usage: "/pnoon {player}"
+  cmd: [pnoon]
+  perms:
+    cmd: "css.cmd.playernoon"
+    other: "css.cmd.playernoon.other"
+    
+playernight:
+  usage:
+    usage: "/pnight {player}"
+  cmd: [pnight]
+  perms:
+    cmd: "css.cmd.playernight"
+    other: "css.cmd.playernight.other"
+    
+playermidnight:
+  usage:
+    usage: "/pmidnight {player}"
+  cmd: [pmidnight]
+  perms:
+    cmd: "css.cmd.playermidnight"
+    other: "css.cmd.playermidnight.other"
+    
+near:
+  usage:
+    usage: "/near {distance}"
+  cmd: [near]
+  perms:
+    cmd: "css.cmd.near"
+    
+burn:
+  usage:
+    usage: "/burn {player}"
+  cmd: [burn]
+  perms:
+    cmd: "css.cmd.burn"
+    other: "css.cmd.burn.other"
+    
+hat:
+  usage:
+    usage: "/hat {player}"
+  cmd: [hat]
+  perms:
+    cmd: "css.cmd.hat"
+    other: "css.cmd.hat.other"
 
 heal:
   usage:
@@ -216,6 +352,13 @@ kit:
     no-cooldown: "css.cmd.kit.other"
     no-cooldown: "css.cmd.kit.no-cooldown"
     no-cost: "css.cmd.kit.no-cost"
+
+getpos:
+  cmd: [getpos,position]
+  usage:
+    cmd: "/getPos {player}"
+  perms:
+    cmd: "css.cmd.getpos"
 
 pay:
   cmd: [pay]

@@ -20,11 +20,6 @@ import me.devtec.theapi.bukkit.BukkitLoader;
 public class Pay extends CssCommand {
 
 	@Override
-	public String section() {
-		return "pay";
-	}
-
-	@Override
 	public void register() {
 		if (isRegistered())
 			return;

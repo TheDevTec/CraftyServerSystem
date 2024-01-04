@@ -64,11 +64,6 @@ public class Invsee extends CssCommand {
 	private static ItemGUI EMPTY = new EmptyItemGUI(ItemMaker.of(XMaterial.BLACK_STAINED_GLASS_PANE).displayName("&7").build());
 
 	@Override
-	public String section() {
-		return "invsee";
-	}
-
-	@Override
 	public void register() {
 		if (isRegistered())
 			return;

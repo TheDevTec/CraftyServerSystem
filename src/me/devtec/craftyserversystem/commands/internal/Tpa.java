@@ -17,11 +17,6 @@ import me.devtec.shared.commands.structures.CommandStructure;
 public class Tpa extends CssCommand {
 
 	@Override
-	public String section() {
-		return "tpa";
-	}
-
-	@Override
 	public void register() {
 		if (isRegistered())
 			return;

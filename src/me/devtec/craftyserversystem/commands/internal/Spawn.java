@@ -16,11 +16,6 @@ import me.devtec.theapi.bukkit.BukkitLoader;
 public class Spawn extends CssCommand {
 
 	@Override
-	public String section() {
-		return "spawn";
-	}
-
-	@Override
 	public void register() {
 		if (isRegistered())
 			return;

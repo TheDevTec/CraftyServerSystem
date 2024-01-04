@@ -20,11 +20,6 @@ import me.devtec.theapi.bukkit.BukkitLoader;
 public class Balance extends CssCommand {
 
 	@Override
-	public String section() {
-		return "balance";
-	}
-
-	@Override
 	public void register() {
 		if (isRegistered())
 			return;

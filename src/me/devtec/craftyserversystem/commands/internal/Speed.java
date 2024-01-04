@@ -16,11 +16,6 @@ import me.devtec.shared.utility.ParseUtils;
 
 public class Speed extends CssCommand {
 
-	@Override
-	public String section() {
-		return "speed";
-	}
-
 	@SuppressWarnings("unchecked")
 	@Override
 	public void register() {

@@ -16,11 +16,6 @@ import me.devtec.theapi.bukkit.game.Position;
 public class SetSpawn extends CssCommand {
 
 	@Override
-	public String section() {
-		return "setspawn";
-	}
-
-	@Override
 	public void register() {
 		if (isRegistered())
 			return;

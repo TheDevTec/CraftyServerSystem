@@ -31,11 +31,6 @@ public class BalanceTop extends CssCommand {
 
 	static Map<String, ComparableObject<String, Double>[]> balanceTop = new HashMap<>();
 
-	@Override
-	public String section() {
-		return "balancetop";
-	}
-
 	public int task;
 	public PlaceholderExpansion placeholder;
 	private double minimumBalanceToShow;

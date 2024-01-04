@@ -23,15 +23,6 @@ import me.devtec.theapi.bukkit.BukkitLoader;
 public class Tp extends CssCommand {
 
 	@Override
-	public String section() {
-		return "tp";
-	}
-
-	// help:
-	// player
-	// player-or-loc
-
-	@Override
 	public void register() {
 		if (isRegistered())
 			return;

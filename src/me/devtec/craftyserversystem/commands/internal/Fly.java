@@ -28,11 +28,6 @@ public class Fly extends CssCommand {
 	private List<UUID> fallDamageCancel = new ArrayList<>();
 
 	@Override
-	public String section() {
-		return "fly";
-	}
-
-	@Override
 	public void register() {
 		if (isRegistered())
 			return;

@@ -17,11 +17,6 @@ import me.devtec.theapi.bukkit.game.Position;
 public class SetWarp extends CssCommand {
 
 	@Override
-	public String section() {
-		return "setwarp";
-	}
-
-	@Override
 	public void register() {
 		if (isRegistered())
 			return;

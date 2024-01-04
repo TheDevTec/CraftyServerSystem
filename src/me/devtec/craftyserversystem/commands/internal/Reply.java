@@ -17,11 +17,6 @@ import me.devtec.theapi.bukkit.BukkitLoader;
 public class Reply extends CssCommand {
 
 	@Override
-	public String section() {
-		return "reply";
-	}
-
-	@Override
 	public void register() {
 		if (isRegistered())
 			return;

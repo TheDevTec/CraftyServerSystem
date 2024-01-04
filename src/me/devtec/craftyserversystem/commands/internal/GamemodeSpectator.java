@@ -17,11 +17,6 @@ import me.devtec.theapi.bukkit.BukkitLoader;
 public class GamemodeSpectator extends CssCommand {
 
 	@Override
-	public String section() {
-		return "gamemodespectator";
-	}
-
-	@Override
 	public void register() {
 		if (isRegistered() || !Ref.isNewerThan(7))
 			return;

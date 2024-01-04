@@ -25,11 +25,6 @@ public class Vanish extends CssCommand {
 	private Listener listener;
 
 	@Override
-	public String section() {
-		return "vanish";
-	}
-
-	@Override
 	public void register() {
 		if (isRegistered())
 			return;

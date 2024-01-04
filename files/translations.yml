@@ -40,6 +40,11 @@ walkspeed:
     target: "{prefix} Your walkspeed set to &e{value} &7by &e{sender}"
     sender: "{prefix} You set walkspeed of &e{target} &7to &e{value}"
 
+# {world}, {x}, {y}, {z}, {yaw}, {pitch}, {target}
+getpos:
+  self: "{prefix} Your position is &e{x}, {y}, {z} &o&8({world})"
+  other: "{prefix} Position of &e{target} &7is &e{x}, {y}, {z} &o&8({world})"
+
 heal:
   self: "{prefix} You've been healed"
   #  {sender}, {target}

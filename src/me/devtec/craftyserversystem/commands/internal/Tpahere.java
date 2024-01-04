@@ -16,11 +16,6 @@ import me.devtec.shared.commands.structures.CommandStructure;
 public class Tpahere extends CssCommand {
 
 	@Override
-	public String section() {
-		return "tpahere";
-	}
-
-	@Override
 	public void register() {
 		if (isRegistered())
 			return;

@@ -45,7 +45,9 @@ public abstract class CssCommand {
 	protected CommandHolder<? extends CommandSender> cmd;
 
 	@Nonnull
-	public abstract String section();
+	public String section() {
+		return getClass().getSimpleName().toLowerCase();
+	}
 
 	public abstract void register();
 

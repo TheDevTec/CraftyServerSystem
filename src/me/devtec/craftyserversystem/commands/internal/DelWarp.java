@@ -13,11 +13,6 @@ import me.devtec.shared.utility.StringUtils;
 public class DelWarp extends CssCommand {
 
 	@Override
-	public String section() {
-		return "delwarp";
-	}
-
-	@Override
 	public void register() {
 		if (isRegistered())
 			return;

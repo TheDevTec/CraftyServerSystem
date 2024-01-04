@@ -16,11 +16,6 @@ import me.devtec.theapi.bukkit.BukkitLoader;
 public class GamemodeCreative extends CssCommand {
 
 	@Override
-	public String section() {
-		return "gamemodecreative";
-	}
-
-	@Override
 	public void register() {
 		if (isRegistered())
 			return;

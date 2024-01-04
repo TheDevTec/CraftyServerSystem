@@ -16,11 +16,6 @@ import me.devtec.theapi.bukkit.game.Position;
 public class Home extends CssCommand {
 
 	@Override
-	public String section() {
-		return "home";
-	}
-
-	@Override
 	public void register() {
 		if (isRegistered())
 			return;

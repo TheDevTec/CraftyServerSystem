@@ -21,11 +21,6 @@ import me.devtec.theapi.bukkit.BukkitLoader;
 public class Msg extends CssCommand {
 
 	@Override
-	public String section() {
-		return "msg";
-	}
-
-	@Override
 	public void register() {
 		if (isRegistered())
 			return;

@@ -14,11 +14,6 @@ import me.devtec.shared.commands.structures.CommandStructure;
 public class Tpcancel extends CssCommand {
 
 	@Override
-	public String section() {
-		return "tpcancel";
-	}
-
-	@Override
 	public void register() {
 		if (isRegistered())
 			return;

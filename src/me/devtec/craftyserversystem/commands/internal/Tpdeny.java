@@ -14,11 +14,6 @@ import me.devtec.shared.commands.structures.CommandStructure;
 public class Tpdeny extends CssCommand {
 
 	@Override
-	public String section() {
-		return "tpdeny";
-	}
-
-	@Override
 	public void register() {
 		if (isRegistered())
 			return;

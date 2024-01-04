@@ -16,11 +16,6 @@ import me.devtec.theapi.bukkit.BukkitLoader;
 public class GamemodeSurvival extends CssCommand {
 
 	@Override
-	public String section() {
-		return "gamemodesurvival";
-	}
-
-	@Override
 	public void register() {
 		if (isRegistered())
 			return;

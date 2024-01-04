@@ -15,11 +15,6 @@ import me.devtec.shared.commands.structures.CommandStructure;
 public class Heal extends CssCommand {
 
 	@Override
-	public String section() {
-		return "heal";
-	}
-
-	@Override
 	public void register() {
 		if (isRegistered())
 			return;
@@ -63,7 +58,7 @@ public class Heal extends CssCommand {
 		target.setExhaustion(0);
 		target.setFireTicks(0);
 		target.setRemainingAir(target.getMaximumAir());
-		if (Ref.isNewerThan(18)) // TODO 1.19+
+		if (Ref.isNewerThan(16))
 			target.setFreezeTicks(0);
 		for (PotionEffect effect : target.getActivePotionEffects())
 			target.removePotionEffect(effect.getType());

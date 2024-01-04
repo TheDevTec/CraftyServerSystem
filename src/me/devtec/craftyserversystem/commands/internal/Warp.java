@@ -39,11 +39,6 @@ public class Warp extends CssCommand {
 		requireUpdateMenu = true;
 	}
 
-	@Override
-	public String section() {
-		return "warp";
-	}
-
 	public interface MenuItem {
 		ItemGUI makeItem(GUI prev, GUI next, int currentPage, int totalPages);
 	}

@@ -12,11 +12,6 @@ import me.devtec.shared.commands.structures.CommandStructure;
 public class DelHome extends CssCommand {
 
 	@Override
-	public String section() {
-		return "delhome";
-	}
-
-	@Override
 	public void register() {
 		if (isRegistered())
 			return;
