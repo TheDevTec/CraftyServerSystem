@@ -25,7 +25,7 @@ import me.devtec.shared.dataholder.Config;
 import me.devtec.shared.json.Json;
 import me.devtec.shared.json.modern.ModernJsonReader;
 import me.devtec.shared.json.modern.ModernJsonWriter;
-import me.devtec.shared.utility.StringUtils;
+import me.devtec.shared.utility.ColorUtils;
 
 public class API {
 
@@ -133,10 +133,10 @@ public class API {
 		cmdManager = new CommandManager(cfgManager);
 		cdManager = new CooldownManager();
 		msgManager = new MessageManager();
-		if (Json.reader().getClass() == ModernJsonReader.class && Json.writer().getClass() == ModernJsonWriter.class) {
+		if (Json.reader().getClass() == ModernJsonReader.class || Json.writer().getClass() == ModernJsonWriter.class) {
 			Bukkit.getConsoleSender().sendMessage("");
-			Bukkit.getConsoleSender().sendMessage(StringUtils.colorize(
-					"&cCraftyServerSystem &8» &aWe recommend to change &2Json reader & writer &afrom &e&nGuava&r&a to our own &2&nTheAPI&r&a in &cplugins/TheAPI/config.yml &aon line &c\"default-json-handler\""));
+			Bukkit.getConsoleSender().sendMessage(ColorUtils.colorize(
+					"&cCraftyServerSystem &8» &aWe recommend to change &2Json reader & writer &afrom &e&nGuava&r&a to our own &2&nTheAPI&r&a in the &cplugins/TheAPI/config.yml &aon line &c\"default-json-handler\""));
 			Bukkit.getConsoleSender().sendMessage("");
 		}
 		// Register our economy hook
