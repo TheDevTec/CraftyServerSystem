@@ -9,6 +9,7 @@ antiSwear:
   # css.chat.bypass.antiswear
   bypass-enabled: false
   allowed-phrases: ["sekund"]
+  
 antiSpam:
   enabled: true
   cache: 5min
@@ -20,12 +21,15 @@ antiSpam:
     bypass-enabled: false
   # css.chat.bypass.antispam
   bypass-enabled: false
+  
 antiFlood:
   enabled: true
   maximum-chars: 2
+  maximum-caps-chars: 2
   maximum-numbers: 12
   # css.chat.bypass.antiflood
   bypass-enabled: false
+  
 antiAd:
   enabled: true
   whitelist:

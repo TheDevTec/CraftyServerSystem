@@ -60,7 +60,8 @@ public class ChatHandlers {
 
 			private boolean findUrl() {
 				int lookingMode = 0;
-				int suffixCount = 0;
+				int prevCount = 0;
+				int count = 0;
 				startAt = endAt;
 				int i;
 				int initAt = 0;
@@ -68,96 +69,365 @@ public class ChatHandlers {
 				// url finder
 				loop: for (i = endAt; i < input.length(); ++i) {
 					char c = input.charAt(i);
-					switch (lookingMode) {
+					switchCase: switch (lookingMode) {
 					case 0:
 						initAt = i;
-						if (c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z' || c >= '0' && c <= '9') {
+						if (c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z' || c >= '0' && c <= '9' || c == '_') {
 							lookingMode = 1;
-							continue;
+							count = 1;
+							break switchCase;
 						}
 						break;
-					case 1: // additional
+					case 1:
 						if (c == ' ') {
-							initAt = i;
+							if (count >= 2)
+								if (i + 1 < input.length() && (input.charAt(i + 1) == '.' || input.charAt(i + 1) == ',' || input.charAt(i + 1) == '-')) {
+									++i;
+									if (i + 1 < input.length() && input.charAt(i + 1) == ' ')
+										++i;
+									prevCount = count;
+									count = 0;
+									lookingMode = 2;
+									break switchCase;
+								}
 							lookingMode = 0;
-							continue;
+							break switchCase;
 						}
-						if (c == '.' || c == ',') { // probably end
-							lookingMode = 2;
-							continue;
+						if (c == '.' || c == ',' || c == '-') { // xxx.
+							if (count >= 2) {
+								if (i + 1 < input.length() && input.charAt(i + 1) == ' ')
+									++i;
+								prevCount = count;
+								count = 0;
+								lookingMode = 2;
+							} else
+								lookingMode = 0;
+							break switchCase;
 						}
-						if (c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z' || c >= '0' && c <= '9')
-							continue;
-						if (c == '-') {
-							lookingMode = 0;
-							continue;
+						if (c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z' || c >= '0' && c <= '9' || c == '_') {
+							++count;
+							break switchCase;
 						}
-						initAt = i;
 						lookingMode = 0;
 						break;
-					case 2:
+					case 2: // xxx.(lookingForPossibleEnding/xxx)
 						if (c >= '0' && c <= '9') {
 							lookingMode = 0; // Start
-							suffixCount = 0;
-							continue;
+							count = 0;
+							break switchCase;
 						}
 						if (c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z') {
-							++suffixCount;
-							continue;
+							if (++count == 1 && prevCount >= 4)
+								switch (c) {
+								case 'a':
+									if (i + 2 < input.length() && (input.charAt(i + 1) == 'p' && input.charAt(i + 2) == 'p' || input.charAt(i + 1) == 'r' && input.charAt(i + 2) == 't')) {
+										i += 2;
+										lookingMode = 4; // Read until space
+									}
+									break switchCase;
+								case 'g':
+									if (i + 1 < input.length() && input.charAt(i + 1) == 'g') {
+										i += 1;
+										lookingMode = 4; // Read until space
+									}
+									break switchCase;
+								case 'm':
+									if (i + 1 < input.length() && input.charAt(i + 1) == 'c') {
+										i += 1;
+										lookingMode = 4; // Read until space
+									} else if (i + 6 < input.length() && input.charAt(i + 1) == 'o' && input.charAt(i + 2) == 'n' && input.charAt(i + 3) == 's' && input.charAt(i + 4) == 't'
+											&& input.charAt(i + 5) == 'e' && input.charAt(i + 6) == 'r') {
+										i += 6;
+										lookingMode = 4; // Read until space
+									}
+									break switchCase;
+								case 'c':
+									if (i + 1 < input.length() && input.charAt(i + 1) == 'z') {
+										i += 1;
+										lookingMode = 4; // Read until space
+									} else if (i + 2 < input.length() && input.charAt(i + 1) == 'o' && input.charAt(i + 2) == 'm') {
+										i += 2;
+										lookingMode = 4; // Read until space
+									} else if (i + 4 < input.length() && input.charAt(i + 1) == 'l' && input.charAt(i + 2) == 'o' && input.charAt(i + 3) == 'u' && input.charAt(i + 4) == 'd') {
+										i += 4;
+										lookingMode = 4; // Read until space
+									}
+									break switchCase;
+								case 'n':
+									if (i + 2 < input.length() && input.charAt(i + 1) == 'e' && input.charAt(i + 2) == 't') {
+										i += 2;
+										lookingMode = 4; // Read until space
+									}
+									break switchCase;
+								case 'o':
+									if (i + 2 < input.length() && input.charAt(i + 1) == 'r' && input.charAt(i + 2) == 'g') {
+										i += 2;
+										lookingMode = 4; // Read until space
+									} else if (i + 5 < input.length() && input.charAt(i + 1) == 'n' && input.charAt(i + 2) == 'l' && input.charAt(i + 3) == 'i' && input.charAt(i + 4) == 'n'
+											&& input.charAt(i + 5) == 'e') {
+										i += 5;
+										lookingMode = 4; // Read until space
+									}
+									break switchCase;
+								case 'i':
+									if (i + 1 < input.length() && input.charAt(i + 1) == 'o') {
+										i += 1;
+										lookingMode = 4; // Read until space
+									} else if (i + 3 < input.length() && input.charAt(i + 1) == 'n' && input.charAt(i + 2) == 'f' && input.charAt(i + 3) == 'o') {
+										i += 3;
+										lookingMode = 4; // Read until space
+									}
+									break switchCase;
+								case 'u':
+									if (i + 1 < input.length() && (input.charAt(i + 1) == 's' || input.charAt(i + 1) == 'k')) {
+										i += 1;
+										lookingMode = 4; // Read until space
+									}
+									break switchCase;
+								case 'd':
+									if (i + 1 < input.length() && input.charAt(i + 1) == 'e') {
+										i += 1;
+										lookingMode = 4; // Read until space
+									}
+									break switchCase;
+								case 'b':
+									if (i + 3 < input.length() && input.charAt(i + 1) == 'l' && input.charAt(i + 2) == 'o' && input.charAt(i + 3) == 'g') {
+										i += 3;
+										lookingMode = 4; // Read until space
+									}
+									break switchCase;
+								case 't':
+									if (i + 3 < input.length() && input.charAt(i + 1) == 'e' && input.charAt(i + 2) == 'c' && input.charAt(i + 3) == 'h') {
+										i += 3;
+										lookingMode = 4; // Read until space
+									}
+									break switchCase;
+								case 's':
+									if (i + 1 < input.length() && input.charAt(i + 1) == 'k') {
+										i += 1;
+										lookingMode = 4; // Read until space
+									} else if (i + 3 < input.length() && input.charAt(i + 1) == 'i' && input.charAt(i + 2) == 't' && input.charAt(i + 3) == 'e') {
+										i += 3;
+										lookingMode = 4; // Read until space
+									} else if (i + 4 < input.length() && (input.charAt(i + 1) == 'p' && input.charAt(i + 2) == 'a' && input.charAt(i + 3) == 'c' && input.charAt(i + 4) == 'e'
+											|| input.charAt(i + 1) == 't' && input.charAt(i + 2) == 'o' && input.charAt(i + 3) == 'r' && input.charAt(i + 4) == 'e')) {
+										i += 4;
+										lookingMode = 4; // Read until space
+									}
+									break switchCase;
+								case 'p':
+									if (i + 1 < input.length() && input.charAt(i + 1) == 'l') {
+										i += 1;
+										lookingMode = 4; // Read until space
+									}
+									if (i + 2 < input.length() && input.charAt(i + 1) == 'r' && input.charAt(i + 2) == 'o') {
+										i += 2;
+										lookingMode = 4; // Read until space
+									}
+									break switchCase;
+								case 'e':
+									if (i + 1 < input.length() && input.charAt(i + 1) == 'u') {
+										i += 1;
+										lookingMode = 4; // Read until space
+									}
+									break switchCase;
+								case 'r':
+									if (i + 1 < input.length() && input.charAt(i + 1) == 'u') {
+										i += 1;
+										lookingMode = 4; // Read until space
+									}
+									break switchCase;
+								case 'f':
+									if (i + 2 < input.length() && input.charAt(i + 1) == 'u' && input.charAt(i + 2) == 'n') {
+										i += 2;
+										lookingMode = 4; // Read until space
+									}
+									break switchCase;
+								case 'x':
+									if (i + 2 < input.length() && input.charAt(i + 1) == 'y' && input.charAt(i + 2) == 'z') {
+										i += 2;
+										lookingMode = 4; // Read until space
+									}
+									break switchCase;
+								case 'w':
+									if (i + 3 < input.length() && input.charAt(i + 1) == 'i' && input.charAt(i + 2) == 'k' && input.charAt(i + 3) == 'i') {
+										i += 3;
+										lookingMode = 4; // Read until space
+									} else if (i + 6 < input.length() && input.charAt(i + 1) == 'e' && input.charAt(i + 2) == 'b' && input.charAt(i + 3) == 's' && input.charAt(i + 4) == 'i'
+											&& input.charAt(i + 5) == 't' && input.charAt(i + 6) == 'e') {
+										i += 6;
+										lookingMode = 4; // Read until space
+									}
+									break switchCase;
+								}
+							break switchCase;
 						}
-						switch (c) {
-						case '-':
-							// Reset
-							lookingMode = 0; // Start
-							suffixCount = 0;
-							continue;
-						case '.':
-							// Reset
-							lookingMode = 3; // Start
-							suffixCount = 0;
-							continue;
-						case ' ':
-							if (suffixCount >= 2 && suffixCount <= 5)
-								break loop;
-							// Reset
-							lookingMode = 0; // Start
-							suffixCount = 0;
-							break;
-						default:
-							initAt = i;
-							lookingMode = 0;
-							break;
+						if (c == '.' || c == ',' || c == '-') { // xxx.
+							if (count >= 4) {
+								if (i + 1 < input.length() && input.charAt(i + 1) == ' ')
+									++i;
+								count = 0;
+								lookingMode = 3;
+							} else
+								lookingMode = 0;
+							break switchCase;
 						}
+						lookingMode = 0;
 						break;
 					case 3:
 						if (c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z') {
-							++suffixCount;
-							continue;
+							if (++count == 1)
+								switch (c) {
+								case 'a':
+									if (i + 2 < input.length() && (input.charAt(i + 1) == 'p' && input.charAt(i + 2) == 'p' || input.charAt(i + 1) == 'r' && input.charAt(i + 2) == 't')) {
+										i += 2;
+										lookingMode = 4; // Read until space
+									}
+									break switchCase;
+								case 'g':
+									if (i + 1 < input.length() && input.charAt(i + 1) == 'g') {
+										i += 1;
+										lookingMode = 4; // Read until space
+									}
+									break switchCase;
+								case 'm':
+									if (i + 1 < input.length() && input.charAt(i + 1) == 'c') {
+										i += 1;
+										lookingMode = 4; // Read until space
+									} else if (i + 6 < input.length() && input.charAt(i + 1) == 'o' && input.charAt(i + 2) == 'n' && input.charAt(i + 3) == 's' && input.charAt(i + 4) == 't'
+											&& input.charAt(i + 5) == 'e' && input.charAt(i + 6) == 'r') {
+										i += 6;
+										lookingMode = 4; // Read until space
+									}
+									break switchCase;
+								case 'c':
+									if (i + 1 < input.length() && input.charAt(i + 1) == 'z') {
+										i += 1;
+										lookingMode = 4; // Read until space
+									} else if (i + 2 < input.length() && input.charAt(i + 1) == 'o' && input.charAt(i + 2) == 'm') {
+										i += 2;
+										lookingMode = 4; // Read until space
+									} else if (i + 4 < input.length() && input.charAt(i + 1) == 'l' && input.charAt(i + 2) == 'o' && input.charAt(i + 3) == 'u' && input.charAt(i + 4) == 'd') {
+										i += 4;
+										lookingMode = 4; // Read until space
+									}
+									break switchCase;
+								case 'n':
+									if (i + 2 < input.length() && input.charAt(i + 1) == 'e' && input.charAt(i + 2) == 't') {
+										i += 2;
+										lookingMode = 4; // Read until space
+									}
+									break switchCase;
+								case 'o':
+									if (i + 2 < input.length() && input.charAt(i + 1) == 'r' && input.charAt(i + 2) == 'g') {
+										i += 2;
+										lookingMode = 4; // Read until space
+									} else if (i + 5 < input.length() && input.charAt(i + 1) == 'n' && input.charAt(i + 2) == 'l' && input.charAt(i + 3) == 'i' && input.charAt(i + 4) == 'n'
+											&& input.charAt(i + 5) == 'e') {
+										i += 5;
+										lookingMode = 4; // Read until space
+									}
+									break switchCase;
+								case 'i':
+									if (i + 1 < input.length() && input.charAt(i + 1) == 'o') {
+										i += 1;
+										lookingMode = 4; // Read until space
+									} else if (i + 3 < input.length() && input.charAt(i + 1) == 'n' && input.charAt(i + 2) == 'f' && input.charAt(i + 3) == 'o') {
+										i += 3;
+										lookingMode = 4; // Read until space
+									}
+									break switchCase;
+								case 'u':
+									if (i + 1 < input.length() && (input.charAt(i + 1) == 's' || input.charAt(i + 1) == 'k')) {
+										i += 1;
+										lookingMode = 4; // Read until space
+									}
+									break switchCase;
+								case 'd':
+									if (i + 1 < input.length() && input.charAt(i + 1) == 'e') {
+										i += 1;
+										lookingMode = 4; // Read until space
+									}
+									break switchCase;
+								case 'b':
+									if (i + 3 < input.length() && input.charAt(i + 1) == 'l' && input.charAt(i + 2) == 'o' && input.charAt(i + 3) == 'g') {
+										i += 3;
+										lookingMode = 4; // Read until space
+									}
+									break switchCase;
+								case 't':
+									if (i + 3 < input.length() && input.charAt(i + 1) == 'e' && input.charAt(i + 2) == 'c' && input.charAt(i + 3) == 'h') {
+										i += 3;
+										lookingMode = 4; // Read until space
+									}
+									break switchCase;
+								case 's':
+									if (i + 1 < input.length() && input.charAt(i + 1) == 'k') {
+										i += 1;
+										lookingMode = 4; // Read until space
+									} else if (i + 3 < input.length() && input.charAt(i + 1) == 'i' && input.charAt(i + 2) == 't' && input.charAt(i + 3) == 'e') {
+										i += 3;
+										lookingMode = 4; // Read until space
+									} else if (i + 4 < input.length() && (input.charAt(i + 1) == 'p' && input.charAt(i + 2) == 'a' && input.charAt(i + 3) == 'c' && input.charAt(i + 4) == 'e'
+											|| input.charAt(i + 1) == 't' && input.charAt(i + 2) == 'o' && input.charAt(i + 3) == 'r' && input.charAt(i + 4) == 'e')) {
+										i += 4;
+										lookingMode = 4; // Read until space
+									}
+									break switchCase;
+								case 'p':
+									if (i + 1 < input.length() && input.charAt(i + 1) == 'l') {
+										i += 1;
+										lookingMode = 4; // Read until space
+									}
+									if (i + 2 < input.length() && input.charAt(i + 1) == 'r' && input.charAt(i + 2) == 'o') {
+										i += 2;
+										lookingMode = 4; // Read until space
+									}
+									break switchCase;
+								case 'e':
+									if (i + 1 < input.length() && input.charAt(i + 1) == 'u') {
+										i += 1;
+										lookingMode = 4; // Read until space
+									}
+									break switchCase;
+								case 'r':
+									if (i + 1 < input.length() && input.charAt(i + 1) == 'u') {
+										i += 1;
+										lookingMode = 4; // Read until space
+									}
+									break switchCase;
+								case 'f':
+									if (i + 2 < input.length() && input.charAt(i + 1) == 'u' && input.charAt(i + 2) == 'n') {
+										i += 2;
+										lookingMode = 4; // Read until space
+									}
+									break switchCase;
+								case 'x':
+									if (i + 2 < input.length() && input.charAt(i + 1) == 'y' && input.charAt(i + 2) == 'z') {
+										i += 2;
+										lookingMode = 4; // Read until space
+									}
+									break switchCase;
+								case 'w':
+									if (i + 3 < input.length() && input.charAt(i + 1) == 'i' && input.charAt(i + 2) == 'k' && input.charAt(i + 3) == 'i') {
+										i += 3;
+										lookingMode = 4; // Read until space
+									} else if (i + 6 < input.length() && input.charAt(i + 1) == 'e' && input.charAt(i + 2) == 'b' && input.charAt(i + 3) == 's' && input.charAt(i + 4) == 'i'
+											&& input.charAt(i + 5) == 't' && input.charAt(i + 6) == 'e') {
+										i += 6;
+										lookingMode = 4; // Read until space
+									}
+									break switchCase;
+								}
+							break switchCase;
 						}
 						switch (c) {
 						case '/':
-							if (suffixCount < 2 || suffixCount > 5)
+							if (count < 2 || count > 5)
 								break loop;
 							lookingMode = 4; // Read until space
-							continue;
-						case '-':
-							// Reset
-							lookingMode = 0; // Start
-							suffixCount = 0;
-							continue;
-						case '.':
-							// Reset
-							suffixCount = 0;
-							continue;
-						case ' ':
-							if (suffixCount >= 2 && suffixCount <= 5)
-								break loop;
-							// Reset
-							lookingMode = 0; // Start
-							suffixCount = 0;
-							break;
+							break switchCase;
 						default:
-							initAt = i;
 							lookingMode = 0;
 							break;
 						}
@@ -168,7 +438,7 @@ public class ChatHandlers {
 						break;
 					}
 				}
-				if (suffixCount >= 2 && suffixCount <= 5) {
+				if (lookingMode == 4) {
 					startAt = initAt;
 					endAt = i;
 					return true;
@@ -350,7 +620,7 @@ public class ChatHandlers {
 
 	// nalezne hledane sektory a returne int array - v prvnim array namisto
 	// List<int[]> - int[] obsahuje v arg0=positionInString, arg1=stringLength
-	public static int[][] match(String input, String... search) {
+	public static int[][] match(String input, List<String> search) {
 		List<int[]> list = new ArrayList<>();
 		for (String name : search) {
 			int pos = 0;
@@ -480,14 +750,14 @@ public class ChatHandlers {
 	}
 
 	// Nalezne vulgarismy a nahradi za replacement
-	public static String antiSwearReplace(String input, List<String> words, List<String> allowedPhrases, int[][] ignoredSections, String replacement) {
+	public static String antiSwearReplace(String input, List<String> words, List<String> allowedPhrases, int[][] ignoredSections, String replacement, boolean shouldAddColors) {
 		StringContainerWithPositions filtered = new StringContainerWithPositions(input.length());
 		int posOfSection = 0;
 		int[] currentSection = ignoredSections == null ? null : ignoredSections[posOfSection];
 
 		char prev = 0;
 		int times = 0;
-		for (int i = 0; i < input.length(); i++) {
+		for (int i = 0; i < input.length(); ++i) {
 			if (currentSection != null && currentSection[0] == i) {
 				i += currentSection[1];
 				if (currentSection.length - 1 != ++posOfSection)
@@ -585,7 +855,7 @@ public class ChatHandlers {
 							if (positionAndLength == null)
 								positionAndLength = new HashMap<>();
 							int realPos = filtered.posAt(pos);
-							positionAndLength.put(realPos, realPos + word.length());
+							positionAndLength.put(realPos, filtered.posAt(pos + word.length() - 1) + 1);
 							pos = filtered.indexOf(word, posStart);
 							continue;
 						}
@@ -596,7 +866,7 @@ public class ChatHandlers {
 						if (positionAndLength == null)
 							positionAndLength = new HashMap<>();
 						int realPos = filtered.posAt(pos);
-						positionAndLength.put(realPos, realPos + word.length());
+						positionAndLength.put(realPos, filtered.posAt(pos + word.length() - 1) + 1);
 					}
 					pos = filtered.indexOf(word, posStart);
 				}
@@ -608,21 +878,23 @@ public class ChatHandlers {
 		ComparableObject<Integer, Integer>[] result = SortingAPI.sortByKeyArray(positionAndLength, true);
 		for (ComparableObject<Integer, Integer> res : result)
 			try {
-				container.replace(res.getKey(), res.getValue(), replacement);
+				container.replace(res.getKey(), res.getValue(), replacement + (shouldAddColors ? "§g" : ""));
 			} catch (Exception e) {
 			} // V případě že by se dvě slova překrývali
 		return container.toString();
 	}
 
 	// Odstrani ze Stringu všechny zdvojeny pismena a predela caps na lowercaps
-	public static String antiFlood(String input, int[][] ignoredSections, int floodMaxNumbers, int floodMaxChars) {
+	public static String antiFlood(String input, int[][] ignoredSections, int floodMaxNumbers, int floodMaxChars, int floodMaxCapsChars) {
 		StringContainer filtered = new StringContainer(input.length());
 		char prev = 0;
 		int times = 0;
 		boolean inCaps = false;
+		int capsTimes = 0;
 
 		int posOfSection = 0;
 		int numberTimes = 0;
+		int dotTimes = 0;
 		int[] currentSection = ignoredSections == null ? null : ignoredSections[posOfSection];
 		for (int i = 0; i < input.length(); i++) {
 			if (currentSection != null && currentSection[0] == i) {
@@ -639,6 +911,7 @@ public class ChatHandlers {
 				times = 0;
 				numberTimes = 0;
 				inCaps = false;
+				capsTimes = 0;
 				continue;
 			}
 
@@ -646,9 +919,20 @@ public class ChatHandlers {
 			if (origin == ' ') {
 				filtered.append(origin);
 				inCaps = false;
+				capsTimes = 0;
 				numberTimes = 0;
 				continue;
 			}
+			if (origin == '.') {
+				if (++dotTimes >= 4) {
+					inCaps = false;
+					continue;
+				}
+				filtered.append(origin);
+				inCaps = false;
+				continue;
+			}
+			dotTimes = 0;
 			if (origin >= '0' && origin <= '9') {
 				if (++numberTimes >= floodMaxNumbers) {
 					inCaps = false;
@@ -660,14 +944,18 @@ public class ChatHandlers {
 			}
 			numberTimes = 0;
 
-			char c = Character.toLowerCase(origin);
+			boolean allowedForCapsCheck = origin >= 96 && origin <= 658;
+			char c = allowedForCapsCheck ? Character.toLowerCase(origin) : origin;
 			if (c == prev && ++times >= floodMaxChars)
 				continue;
-			filtered.append(inCaps ? c : origin);
+			if (++capsTimes >= floodMaxCapsChars && inCaps)
+				filtered.append(inCaps ? c : origin);
+			else
+				filtered.append(origin);
 			if (prev != c)
 				times = 0;
 			prev = c;
-			if (c != origin)
+			if (allowedForCapsCheck && c != origin)
 				inCaps = true;
 		}
 		return filtered.toString();
