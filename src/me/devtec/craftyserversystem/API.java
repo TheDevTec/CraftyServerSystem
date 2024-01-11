@@ -17,6 +17,7 @@ import me.devtec.craftyserversystem.economy.VaultEconomyHook;
 import me.devtec.craftyserversystem.managers.CommandManager;
 import me.devtec.craftyserversystem.managers.ConfigurationManager;
 import me.devtec.craftyserversystem.managers.CooldownManager;
+import me.devtec.craftyserversystem.managers.ListenerManager;
 import me.devtec.craftyserversystem.managers.MessageManager;
 import me.devtec.craftyserversystem.permission.EmptyPermissionHook;
 import me.devtec.craftyserversystem.permission.PermissionHook;
@@ -35,6 +36,7 @@ public class API {
 	private CommandManager cmdManager;
 	private CooldownManager cdManager;
 	private MessageManager msgManager;
+	private ListenerManager listenerManager;
 
 	private PermissionHook permissionHook = new EmptyPermissionHook();
 	private EconomyHook economyHook = new EmptyEconomyHook();
@@ -72,6 +74,17 @@ public class API {
 	 */
 	public CommandManager getCommandManager() {
 		return cmdManager;
+	}
+
+	/**
+	 * Our own ListenerManager with all listeners, you can also register your own
+	 * listeners into it by getting a list of listeners and adding your own. <br>
+	 * When plugin is disabling, all listeners are automatically unregistered.
+	 *
+	 * @return ListenerManager
+	 */
+	public ListenerManager getListenerManager() {
+		return listenerManager;
 	}
 
 	/**
@@ -133,6 +146,7 @@ public class API {
 		cmdManager = new CommandManager(cfgManager);
 		cdManager = new CooldownManager();
 		msgManager = new MessageManager();
+		listenerManager = new ListenerManager();
 		if (Json.reader().getClass() == ModernJsonReader.class || Json.writer().getClass() == ModernJsonWriter.class) {
 			Bukkit.getConsoleSender().sendMessage("");
 			Bukkit.getConsoleSender().sendMessage(ColorUtils.colorize(

@@ -1,4 +1,4 @@
-package me.devtec.craftyserversystem.events;
+package me.devtec.craftyserversystem.events.internal;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -18,6 +18,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import me.devtec.craftyserversystem.API;
 import me.devtec.craftyserversystem.Loader;
 import me.devtec.craftyserversystem.annotations.Nonnull;
+import me.devtec.craftyserversystem.events.CssListener;
 import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
 import me.devtec.craftyserversystem.utils.ChatHandlers;
 import me.devtec.shared.dataholder.Config;
@@ -28,7 +29,7 @@ import me.devtec.shared.utility.ColorUtils;
 import me.devtec.shared.utility.TimeUtils;
 import me.devtec.theapi.bukkit.BukkitLoader;
 
-public class ChatListener implements Listener {
+public class ChatListener implements Listener, CssListener {
 
 	// AntiSpam
 	private boolean antiSpamEnabled;
@@ -66,43 +67,49 @@ public class ChatListener implements Listener {
 	@Nonnull
 	private List<String> antiAdWhitelist;
 
-	public ChatListener() {
-		reload();
+	@Override
+	public Config getConfig() {
+		return API.get().getConfigManager().getChat();
 	}
 
+	@Override
+	public boolean isEnabled() {
+		return getConfig().getBoolean("enabled");
+	}
+
+	@Override
 	public void reload() {
-		Config chat = API.get().getConfigManager().getChat();
-		antiSpamEnabled = chat.getBoolean("antiSpam.enabled");
+		antiSpamEnabled = getConfig().getBoolean("antiSpam.enabled");
 		if (prevMsgs == null)
-			prevMsgs = new TempMap<>(TimeUtils.timeFromString(chat.getString("antiSpam.cache")) * 20);
+			prevMsgs = new TempMap<>(TimeUtils.timeFromString(getConfig().getString("antiSpam.cache")) * 20);
 		else {
 			prevMsgs.clear();
-			prevMsgs.setCacheTime(TimeUtils.timeFromString(chat.getString("antiSpam.cache")) * 20);
+			prevMsgs.setCacheTime(TimeUtils.timeFromString(getConfig().getString("antiSpam.cache")) * 20);
 		}
-		antiSpamCooldownEnabled = chat.getBoolean("antiSpam.cooldown-per-message.enabled");
-		bypassAntiSpamCooldown = chat.getBoolean("antiSpam.cooldown-per-message.bypass-enabled");
+		antiSpamCooldownEnabled = getConfig().getBoolean("antiSpam.cooldown-per-message.enabled");
+		bypassAntiSpamCooldown = getConfig().getBoolean("antiSpam.cooldown-per-message.bypass-enabled");
 		if (cdMsgs == null)
-			cdMsgs = new TempList<>(TimeUtils.timeFromString(chat.getString("antiSpam.cooldown-per-message.time")) * 20);
+			cdMsgs = new TempList<>(TimeUtils.timeFromString(getConfig().getString("antiSpam.cooldown-per-message.time")) * 20);
 		else {
 			cdMsgs.clear();
-			cdMsgs.setCacheTime(TimeUtils.timeFromString(chat.getString("antiSpam.cooldown-per-message.time")) * 20);
+			cdMsgs.setCacheTime(TimeUtils.timeFromString(getConfig().getString("antiSpam.cooldown-per-message.time")) * 20);
 		}
-		maxMessages = chat.getInt("antiSpam.maximum-messages") + 1;
-		bypassAntiSpam = chat.getBoolean("antiSpam.bypass-enabled");
-		antiFloodEnabled = chat.getBoolean("antiFlood.enabled");
-		floodMaxChars = chat.getInt("antiFlood.maximum-chars");
-		floodMaxCapsChars = chat.getInt("antiFlood.maximum-caps-chars");
-		floodMaxNumbers = chat.getInt("antiFlood.maximum-numbers");
-		bypassAntiFlood = chat.getBoolean("antiFlood.bypass-enabled");
-		antiSwearEnabled = chat.getBoolean("antiSwear.enabled");
-		replacement = chat.getString("antiSwear.replacement");
+		maxMessages = getConfig().getInt("antiSpam.maximum-messages") + 1;
+		bypassAntiSpam = getConfig().getBoolean("antiSpam.bypass-enabled");
+		antiFloodEnabled = getConfig().getBoolean("antiFlood.enabled");
+		floodMaxChars = getConfig().getInt("antiFlood.maximum-chars");
+		floodMaxCapsChars = getConfig().getInt("antiFlood.maximum-caps-chars");
+		floodMaxNumbers = getConfig().getInt("antiFlood.maximum-numbers");
+		bypassAntiFlood = getConfig().getBoolean("antiFlood.bypass-enabled");
+		antiSwearEnabled = getConfig().getBoolean("antiSwear.enabled");
+		replacement = getConfig().getString("antiSwear.replacement");
 		addColors = replacement.indexOf('§') != -1;
-		words = chat.getStringList("antiSwear.words");
-		allowedPhrases = chat.getStringList("antiSwear.allowed-phrases");
-		bypassAntiSwear = chat.getBoolean("antiSwear.bypass-enabled");
-		antiAdEnabled = chat.getBoolean("antiAd.enabled");
-		bypassAntiAd = chat.getBoolean("antiAd.bypass-enabled");
-		antiAdWhitelist = chat.getStringList("antiAd.whitelist");
+		words = getConfig().getStringList("antiSwear.words");
+		allowedPhrases = getConfig().getStringList("antiSwear.allowed-phrases");
+		bypassAntiSwear = getConfig().getBoolean("antiSwear.bypass-enabled");
+		antiAdEnabled = getConfig().getBoolean("antiAd.enabled");
+		bypassAntiAd = getConfig().getBoolean("antiAd.bypass-enabled");
+		antiAdWhitelist = getConfig().getStringList("antiAd.whitelist");
 	}
 
 	@EventHandler(priority = EventPriority.MONITOR)
