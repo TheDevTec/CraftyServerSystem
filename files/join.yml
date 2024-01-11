@@ -7,7 +7,7 @@ join:
     broadcast: []
     commands:
     - "kit firstJoin {player}"
-  next:
+  normal:
     text: "{prefix} Player {player} joined the server"
     broadcast: []
     commands: []

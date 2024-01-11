@@ -17,7 +17,7 @@ public class JoinListener implements Listener {
 
 	@EventHandler
 	public void onJoin(PlayerJoinEvent e) {
-		String time = e.getPlayer().hasPlayedBefore() ? "next" : "first";
+		String time = e.getPlayer().hasPlayedBefore() ? "normal" : "first";
 		e.setJoinMessage(null); // Remove message
 
 		PlaceholdersExecutor placeholders = PlaceholdersExecutor.i().add("player", e.getPlayer().getName()).papi(e.getPlayer().getUniqueId());
