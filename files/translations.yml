@@ -33,16 +33,11 @@ flyspeed:
     target: "{prefix} Your flyspeed set to &e{value} &7by &e{sender}"
     sender: "{prefix} You set flyspeed of &e{target} &7to &e{value}"
 
-walkspeed:
-  self: "{prefix} You've set your walkspeed to &e{value}"
-  #  {sender}, {target}
-  other:
-    target: "{prefix} Your walkspeed set to &e{value} &7by &e{sender}"
-    sender: "{prefix} You set walkspeed of &e{target} &7to &e{value}"
 
-# {world}, {x}, {y}, {z}, {yaw}, {pitch}, {target}
 getpos:
+  # {world}, {x}, {y}, {z}, {yaw}, {pitch}
   self: "{prefix} Your position is &e{x}, {y}, {z} &o&8({world})"
+  # {target}, {world}, {x}, {y}, {z}, {yaw}, {pitch}
   other: "{prefix} Position of &e{target} &7is &e{x}, {y}, {z} &o&8({world})"
 
 heal:
@@ -58,6 +53,142 @@ feed:
   other:
     target: "{prefix} You've been fed by &e{sender}"
     sender: "{prefix} You've fed &e{target}"
+
+# --------------------    
+# Darqes edit
+# --------------------
+
+
+walkspeed:
+  self: "{prefix} I feel like your walking speed is &e{value}"
+  #  {sender}, {target}
+  other:
+    target: "{prefix} Careful! Your walking speed is at &e{value}&7, &e{sender} &7just messed up with it."
+    sender: "{prefix} Are you an innovator? Cause you like to change lots of things just like &e{target}'s walking speed &7to &e{value}&7."
+
+playertime-reset:
+  self: "{prefix} Everything is back to normal! Your time has been &ereset&7."
+  #  {sender}, {target}
+  other:
+    sender: "{prefix} It seems like you have &ereset the time&7 for &e{target}&7."
+    target: "{prefix} Did you see that? &e{sender} &7has just &ereset your time&7!"
+
+playerday:
+  self: "{prefix} Can you see the light outside? It's a &eday&7 now!"
+  #  {sender}, {target}
+  other:
+    sender: "{prefix} Finally, &e{target} &7noticed the fact, that it's &eday&7 now!"
+    target: "{prefix} Did I hear 'day'? Well, &e{sender}&7 just changed your time for &eday&7!"
+
+playernoon:
+  self: "{prefix} Aren't you starving? It's about lunchtime - &enoon&7.. "
+  #  {sender}, {target}
+  other:
+    sender: "{prefix} He should be ready for a lunch! Cause &e{target}&7's time has been set for &enoon&7."
+    target: "{prefix} Are you hungry? Cause &e{sender}&7 just changed your time for&e noon&7, you might be thinking about having lunch."
+
+playernight:
+  self: "{prefix} How's your bed? Your time has been changed for the &enight&7!"
+  #  {sender}, {target}
+  other:
+    sender: "{prefix} I bet he's tired! Cause &e{target}&7's time has been set for the &enight&7."
+    target: "{prefix} You should be sleeping! &e{sender}&7 just changed your time for the &enight&7!"
+
+playermidnight:
+  self: "{prefix} You shouldn't be outside. You could find a werewolf there. It's &emidnight&7!"
+  #  {sender}, {target}
+  other:
+    sender: "{prefix} Isn't he a werewolf? &e{target}&7's still awake even though it's been &emidnight&7!"
+    target: "{prefix} &e{sender}&7 just messed up with your time, it's been &emidnight&7 now!"
+playerweather-reset:
+  self: "{prefix} Everything's alright again! Your &eweather&7 has been &ereset&7."
+  #  {sender}, {target}
+  other:
+    sender: "{prefix} &e{target}&7's back to normal! His &eweather has been reset&7."
+    target: "{prefix} Everything is back to normal! &e{sender}&7 just made &eyour weather alright&7."
+
+playersun:
+  self: "{prefix} You should check outside. It's &esunny&7!"
+  #  {sender}, {target}
+  other:
+    sender: "{prefix} You have made &e{target}&7 feel better! Finally, it's &esunny&7."
+    target: "{prefix} What a lovely day, right? &e{sender}&7 asked your god for &esunny&7 weather."
+
+playerrain:
+  self: "{prefix} Just stay at home. The weather is terrible today, it's &erainy&7!"
+  #  {sender}, {target}
+  other:
+    sender: "{prefix} You don't like &e{target}&7, do you? You have just messed up his weather to be &erainy&7!"
+    target: "{prefix} &e{sender}&7 detests you! He made your weather &erainy&7."
+
+thor:
+  # {sender}, {target}
+  other:
+    effect:
+      sender: "{prefix} Did you want to scare &e{target} &7and therefore you &esmote&7 him?"
+      target: "{prefix} Ah! You have been &esmote&7 by &e{sender}&7!"
+    attack:
+      sender: "{prefix} How cruel! You have just used your godpowers to &esmite {target}&7!"
+      target: "{prefix} Augh! &e{sender}&7 almost killed you by &esmiting&7 you!"
+  self:
+    effect: "{prefix} Are you trying to become a Thor the Son of Odin? Or why did you just &esmite yourself&7?"
+    attack: "{prefix} Augh! That hurts! Don't be dumb next time and &esmite&7 some other player!"
+  # {x}, {y}, {z}, {world}
+  block:
+    effect: "{prefix} How scary! You're almost a &eThor, the god of Thunder&7!"
+    attack: "{prefix} What did the block do to you that you had to &esmite&7 him?"
+    
+# {world}
+time:
+  day: "{prefix} Finally! We can see the light outside! It's a &eday&7."
+  noon: "{prefix} I bet you're hungry because it's about lunchtime - &enoon&7!"
+  night: "{prefix} Go to your bed! It's &enight&7!"
+  midnight: "{prefix} Why would you even try to cosplay the werewolf? Or why are you still awake at &emidnight&7?"
+
+# {world}
+weather:
+  sun: "{prefix} What a lovely day! It's &esunny&7!"
+  rain: "{prefix} Unfortunately, it's &eraining&7!"
+  thunder: "{prefix} Just hide yourself! You might get smote! It's &ethundering&7 outside!"
+
+spawner:
+  not-spawner: "This block doesn't seem like a spawner to me.. Try another one."
+  # {type}
+  changed: "You aren't a serial killer, are you? Why did you change the spawner to &e{type}&7?"
+
+skull:
+  # {owner}
+  self: "{prefix} What do you want to do with &e{owner}'s skull&7?"
+  #  {sender}, {target}, {owner}
+  other:
+    sender: "{prefix} Are you a cannibal? Or why are you trading &e{owner}'s skull&7 with &e{target}&7?"
+    target: "{prefix} Are you a collector? Or why did you just take the &e{owner}'s skull &7from &e{sender}&7?"
+
+near:
+  # {radius}
+  noone: "{prefix} That's so sad! There's nobody near to you.. :("
+  # {distance}, {amount}
+  result: "{prefix} You should be alert! There're &e{amount}&7 players around you:"
+  # {target}, {distance}
+  item: "  &f* &e{target} &7- &e{distance} radius"
+hat:
+  empty-hand: "{prefix} Can you see something in your hand? Cause me neither."
+  set:
+    self: "I have no idea why would you do that, but you just managed to put the item from your hand on your head."
+    other:
+      sender: "{prefix} Are you looking for a trash bin? Or why did you just put the item from your hand on &e{target}'s head&7?"
+      target: "{prefix} You should see yourself in the mirror. &e{sender} &7probably put something on your &ehead&7."
+
+burn:
+  self: "{prefix} You may want some water, cause you're burning!"
+  #  {sender}, {target}
+  other:
+    sender: "{prefix} How evil! You just made &e{target} burn&7!"
+    target: "{prefix} &e{sender}&7's a troll! He made you &eburn&7!"
+
+# --------------------    
+# Darqes edit end
+# --------------------
 
 warp:
   #  {warp}, {cost}, {permission}
