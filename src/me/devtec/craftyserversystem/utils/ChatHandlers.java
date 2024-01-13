@@ -2,9 +2,11 @@ package me.devtec.craftyserversystem.utils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import me.devtec.shared.dataholder.StringContainer;
@@ -13,8 +15,10 @@ import me.devtec.shared.sorting.SortingAPI.ComparableObject;
 
 public class ChatHandlers {
 
-	// return true, pokud nalezne nepovolenou adresu
+	// return true, if found not allowed ad
 	public static boolean antiAd(String input, List<String> whitelist) {
+		if (input == null)
+			return false;
 		Iterator<String> matcher = findWebAddress(input);
 		while (matcher.hasNext()) {
 			String next = matcher.next();
@@ -81,9 +85,9 @@ public class ChatHandlers {
 					case 1:
 						if (c == ' ') {
 							if (count >= 2)
-								if (i + 1 < input.length() && (input.charAt(i + 1) == '.' || input.charAt(i + 1) == ',' || input.charAt(i + 1) == '-')) {
+								if (i + 1 < input.length() && ((c = input.charAt(i + 1)) == '.' || c == ',' || c == '-')) {
 									++i;
-									if (i + 1 < input.length() && input.charAt(i + 1) == ' ')
+									while (i + 1 < input.length() && ((c = input.charAt(i + 1)) == '.' || c == ',' || c == '-' || c == ' '))
 										++i;
 									prevCount = count;
 									count = 0;
@@ -95,7 +99,7 @@ public class ChatHandlers {
 						}
 						if (c == '.' || c == ',' || c == '-') { // xxx.
 							if (count >= 2) {
-								if (i + 1 < input.length() && input.charAt(i + 1) == ' ')
+								while (i + 1 < input.length() && ((c = input.charAt(i + 1)) == '.' || c == ',' || c == '-' || c == ' '))
 									++i;
 								prevCount = count;
 								count = 0;
@@ -264,7 +268,7 @@ public class ChatHandlers {
 						}
 						if (c == '.' || c == ',' || c == '-') { // xxx.
 							if (count >= 4) {
-								if (i + 1 < input.length() && input.charAt(i + 1) == ' ')
+								while (i + 1 < input.length() && ((c = input.charAt(i + 1)) == '.' || c == ',' || c == '-' || c == ' '))
 									++i;
 								count = 0;
 								lookingMode = 3;
@@ -604,22 +608,43 @@ public class ChatHandlers {
 		};
 	}
 
-	// return true - pokud je hrac v antiSpam queue (nemuze odeslat zpravu)
-	public static boolean processAntiSpam(UUID uniqueId, String message, Map<UUID, Object[]> prevMsgs, int maxMessages) {
+	// return true - if player is in the antiSpam queue (can't send message)
+	@SuppressWarnings("unchecked")
+	public static boolean processAntiSpam(UUID uniqueId, String message, Map<UUID, Object[]> prevMsgs, int maxMessages, double minimalSimilarity) {
 		Object[] sentMsgs = prevMsgs.get(uniqueId);
 		if (sentMsgs == null)
 			prevMsgs.put(uniqueId, sentMsgs = new Object[maxMessages]);
+		Set<String> calcSpaces = new HashSet<>();
+		splitSpaces(calcSpaces, message);
 		for (int i = 0; i < maxMessages - 1; ++i)
-			if (message.equals(sentMsgs[i]))
+			if (sentMsgs[i] != null && calculateSimilarity(calcSpaces, (Set<String>) sentMsgs[i]) >= minimalSimilarity)
 				return true;
 		int pos = sentMsgs[maxMessages - 1] == null ? 0 : (int) sentMsgs[maxMessages - 1];
-		sentMsgs[pos] = message;
+		sentMsgs[pos] = calcSpaces;
 		sentMsgs[maxMessages - 1] = ++pos >= maxMessages - 1 ? 0 : pos;
 		return false;
 	}
 
-	// nalezne hledane sektory a returne int array - v prvnim array namisto
-	// List<int[]> - int[] obsahuje v arg0=positionInString, arg1=stringLength
+	private static double calculateSimilarity(Set<String> text1, Set<String> text2) {
+		Set<String> set2 = new HashSet<>(text2);
+		Set<String> intersection = new HashSet<>(text1);
+		intersection.retainAll(set2);
+		set2.addAll(text1);
+		return (double) intersection.size() / text1.size();
+	}
+
+	private static void splitSpaces(Set<String> set, String text) {
+		int prev = 0;
+		int spaceAt;
+		while ((spaceAt = text.indexOf(' ', prev)) != -1) {
+			set.add(text.substring(prev, spaceAt));
+			prev = spaceAt + 1;
+		}
+		set.add(text.substring(prev));
+	}
+
+	// Lookup for search words and return array of int[]
+	// arg0=positionInString, arg1=stringLength
 	public static int[][] match(String input, List<String> search) {
 		List<int[]> list = new ArrayList<>();
 		for (String name : search) {
@@ -636,9 +661,9 @@ public class ChatHandlers {
 		return list.isEmpty() ? null : list.toArray(new int[0][0]);
 	}
 
-	// return true - pokud nalezne vulgarismy
-	public static boolean antiSwear(String input, List<String> words, List<String> allowedPhrases, int[][] ignoredSections) {
-		StringContainer filtered = new StringContainer(input.length());
+	// return true - if found any vulgarism
+	public static boolean antiSwear(String input, List<String> words, List<String[]> allowedPhrases, int[][] ignoredSections) {
+		StringContainerWithPositions filtered = new StringContainerWithPositions(input.length());
 		int posOfSection = 0;
 		int[] currentSection = ignoredSections == null ? null : ignoredSections[posOfSection];
 		char prev = 0;
@@ -708,7 +733,7 @@ public class ChatHandlers {
 			}
 			if (prev == c && (c == 'k' ? ++times >= 2 : true))
 				continue;
-			filtered.append(c);
+			filtered.append(c, i);
 			times = 0;
 			prev = c;
 		}
@@ -716,41 +741,37 @@ public class ChatHandlers {
 			int posStart = 0;
 			int pos = filtered.indexOf(word, posStart);
 			if (pos != -1) {
+				int lengthWithoutSpaces = 0;
 				String phrase = null;
+				String compare = null;
 				int startAt = -1;
-				for (String fphrase : allowedPhrases) {
-					startAt = fphrase.indexOf(word);
-					if (startAt != -1) {
-						phrase = fphrase;
-						break;
-					}
-				}
-				boolean found = true;
-				while (pos != -1) {
-					found = true;
-					posStart = pos + word.length();
-					if (startAt != -1) {
-						String before = startAt == 0 ? "" : phrase.substring(0, startAt);
-						String after = startAt + word.length() == phrase.length() ? "" : phrase.substring(startAt + word.length());
-
-						if (before.length() == 0 && after.length() == 0 || pos - before.length() < 0 || pos + after.length() > filtered.length()
-								|| filtered.indexOf(phrase, pos - before.length()) != pos - before.length()) {
-							pos = filtered.indexOf(word, posStart);
-							return true;
+				for (String[] phraseSplit : allowedPhrases)
+					if (phraseSplit[0].equals(word)) {
+						compare = phraseSplit[1];
+						startAt = filtered.indexOf(compare);
+						lengthWithoutSpaces = compare.length();
+						if (startAt != -1) {
+							phrase = phraseSplit[2];
+							break;
 						}
-						posStart += after.length();
-						found = false;
 					}
+				while (pos != -1) {
+					if (startAt == -1)
+						return true;
+					int realPos = filtered.posAt(startAt);
+					if (realPos + phrase.length() > input.length() || !input.substring(realPos, realPos + phrase.length()).equalsIgnoreCase(phrase))
+						return true;
+					startAt = filtered.indexOf(compare, Math.max(startAt, posStart - compare.length()));
+					posStart = pos + lengthWithoutSpaces;
 					pos = filtered.indexOf(word, posStart);
 				}
-				return found;
 			}
 		}
 		return false;
 	}
 
-	// Nalezne vulgarismy a nahradi za replacement
-	public static String antiSwearReplace(String input, List<String> words, List<String> allowedPhrases, int[][] ignoredSections, String replacement, boolean shouldAddColors) {
+	// find vulgarism and replace it
+	public static String antiSwearReplace(String input, List<String> words, List<String[]> allowedPhrases, int[][] ignoredSections, String replacement, boolean shouldAddColors) {
 		StringContainerWithPositions filtered = new StringContainerWithPositions(input.length());
 		int posOfSection = 0;
 		int[] currentSection = ignoredSections == null ? null : ignoredSections[posOfSection];
@@ -834,32 +855,37 @@ public class ChatHandlers {
 			int posStart = 0;
 			int pos = filtered.indexOf(word, posStart);
 			if (pos != -1) {
+				int lengthWithoutSpaces = 0;
 				String phrase = null;
+				String compare = null;
 				int startAt = -1;
-				for (String fphrase : allowedPhrases) {
-					startAt = fphrase.indexOf(word);
-					if (startAt != -1) {
-						phrase = fphrase;
-						break;
+				for (String[] phraseSplit : allowedPhrases)
+					if (phraseSplit[0].equals(word)) {
+						compare = phraseSplit[1];
+						startAt = filtered.indexOf(compare);
+						lengthWithoutSpaces = compare.length();
+						if (startAt != -1) {
+							phrase = phraseSplit[2];
+							break;
+						}
 					}
-				}
 				while (pos != -1) {
-					posStart = pos + word.length();
 					if (startAt != -1) {
-						String before = startAt == 0 ? "" : phrase.substring(0, startAt);
-						String after = startAt + word.length() == phrase.length() ? "" : phrase.substring(startAt + word.length());
-						if (before.length() == 0 && after.length() == 0 || pos - before.length() < 0 || pos + after.length() > filtered.length()
-								|| filtered.indexOf(phrase, pos - before.length()) != pos - before.length()) {
+						int realPos = filtered.posAt(startAt);
+						if (realPos + phrase.length() > input.length() || !input.substring(realPos, realPos + phrase.length()).equalsIgnoreCase(phrase)) {
 							if (container == null)
 								container = new StringContainer(input);
 							if (positionAndLength == null)
 								positionAndLength = new HashMap<>();
-							int realPos = filtered.posAt(pos);
+							realPos = filtered.posAt(pos);
 							positionAndLength.put(realPos, filtered.posAt(pos + word.length() - 1) + 1);
 							pos = filtered.indexOf(word, posStart);
+							posStart = pos + word.length();
+							startAt = filtered.indexOf(compare, Math.max(startAt, posStart - compare.length()));
 							continue;
 						}
-						posStart += after.length();
+						startAt = filtered.indexOf(compare, Math.max(startAt, posStart - compare.length()));
+						posStart = pos + lengthWithoutSpaces;
 					} else {
 						if (container == null)
 							container = new StringContainer(input);
@@ -867,6 +893,7 @@ public class ChatHandlers {
 							positionAndLength = new HashMap<>();
 						int realPos = filtered.posAt(pos);
 						positionAndLength.put(realPos, filtered.posAt(pos + word.length() - 1) + 1);
+						posStart = pos + word.length();
 					}
 					pos = filtered.indexOf(word, posStart);
 				}
@@ -880,12 +907,12 @@ public class ChatHandlers {
 			try {
 				container.replace(res.getKey(), res.getValue(), replacement + (shouldAddColors ? "§g" : ""));
 			} catch (Exception e) {
-			} // V případě že by se dvě slova překrývali
+			}
 		return container.toString();
 	}
 
-	// Odstrani ze Stringu všechny zdvojeny pismena a predela caps na lowercaps
-	public static String antiFlood(String input, int[][] ignoredSections, int floodMaxNumbers, int floodMaxChars, int floodMaxCapsChars) {
+	// Removes from message flood and transfer uppercase characters to lowercase
+	public static String antiFlood(String input, int[][] ignoredSections, int floodMaxNumbers, int floodMaxChars, int floodMaxCapsChars, int floodMaxSameWords, int floodMinWordsBetweenSameToIgnore) {
 		StringContainer filtered = new StringContainer(input.length());
 		char prev = 0;
 		int times = 0;
@@ -895,13 +922,17 @@ public class ChatHandlers {
 		int posOfSection = 0;
 		int numberTimes = 0;
 		int dotTimes = 0;
+
+		int wordPos = 0;
+		Map<Integer, String> wordsInRow = new HashMap<>(floodMinWordsBetweenSameToIgnore);
+		Map<String, Integer> counterOfSameWords = new HashMap<>();
+
+		int start = 0;
 		int[] currentSection = ignoredSections == null ? null : ignoredSections[posOfSection];
-		for (int i = 0; i < input.length(); i++) {
+		charLoop: for (int i = 0; i < input.length(); i++) {
 			if (currentSection != null && currentSection[0] == i) {
-				for (int c = 0; c < currentSection[1]; ++c) {
-					filtered.append(input.charAt(i));
-					++i;
-				}
+				for (int c = 0; c < currentSection[1]; ++c)
+					filtered.append(input.charAt(i++));
 				if (currentSection.length - 1 != ++posOfSection)
 					currentSection = ignoredSections[posOfSection];
 				else
@@ -912,15 +943,34 @@ public class ChatHandlers {
 				numberTimes = 0;
 				inCaps = false;
 				capsTimes = 0;
+				start = filtered.length();
 				continue;
 			}
 
 			char origin = input.charAt(i);
 			if (origin == ' ') {
-				filtered.append(origin);
+				String word = filtered.substring(start).toLowerCase();
+				if (filtered.charAt(filtered.length() - 1) != ' ')
+					filtered.append(origin);
 				inCaps = false;
 				capsTimes = 0;
 				numberTimes = 0;
+				for (int ic = 0; ic < floodMinWordsBetweenSameToIgnore; ++ic) {
+					String savedWord = wordsInRow.get(ic);
+					if (!word.equals(savedWord))
+						continue;
+					int repeats = counterOfSameWords.getOrDefault(word, 0) + 1;
+					if (repeats >= floodMaxSameWords)
+						filtered.delete(start, filtered.length());
+					else
+						counterOfSameWords.put(word, repeats);
+					start = filtered.length();
+					continue charLoop;
+				}
+				wordsInRow.put(wordPos, word);
+				if (++wordPos >= floodMinWordsBetweenSameToIgnore)
+					wordPos = 0;
+				start = filtered.length();
 				continue;
 			}
 			if (origin == '.') {
@@ -943,20 +993,32 @@ public class ChatHandlers {
 				continue;
 			}
 			numberTimes = 0;
-
-			boolean allowedForCapsCheck = origin >= 96 && origin <= 658;
+			boolean allowedForCapsCheck = origin >= 65 && origin <= 658;
 			char c = allowedForCapsCheck ? Character.toLowerCase(origin) : origin;
 			if (c == prev && ++times >= floodMaxChars)
 				continue;
-			if (++capsTimes >= floodMaxCapsChars && inCaps)
+			if (allowedForCapsCheck && c != origin && ++capsTimes >= floodMaxCapsChars)
+				inCaps = true;
+
+			if (inCaps)
 				filtered.append(inCaps ? c : origin);
 			else
 				filtered.append(origin);
 			if (prev != c)
 				times = 0;
 			prev = c;
-			if (allowedForCapsCheck && c != origin)
-				inCaps = true;
+		}
+		String word = filtered.substring(start).toLowerCase();
+		for (int ic = 0; ic < floodMinWordsBetweenSameToIgnore; ++ic) {
+			String savedWord = wordsInRow.get(ic);
+			if (!word.equals(savedWord))
+				continue;
+			int repeats = counterOfSameWords.getOrDefault(word, 0) + 1;
+			if (repeats >= floodMaxSameWords)
+				filtered.delete(start, filtered.length());
+			else
+				counterOfSameWords.put(word, repeats);
+			break;
 		}
 		return filtered.toString();
 	}

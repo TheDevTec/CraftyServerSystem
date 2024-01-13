@@ -1,19 +1,44 @@
 enabled: true
 
+# Available placeholders: {player}
+placeholders:
+  limit-per-message: 3
+  # For item is hoverEvent automatically used
+  item:
+    replace: "&7[&f{itemName}&7]"
+    inv-title: "&e{player}&7's Item"
+  inventory:
+    replace: "&7[&eInventory&7]"
+    inv-title: "&e{player}&7's Inventory"
+    # Leave this empty to remove hoverEvent ("")
+    hoverEvent: "&7Click to show &e{player}&7's inventory"
+  enderchest:
+    replace: "&7[&eEnder Chest&7]"
+    inv-title: "&f{player}&7's Ender Chest"
+    # Leave this empty to remove hoverEvent ("")
+    hoverEvent: "&7Click to show &e{player}&7's ender chest"
+
 antiSwear:
   enabled: true
-  words: ["kkt", "kokot", "kreten", "devko", "devki", "devka", "curak", "curac", "kund", "mrd", "penis", "vagin", "kurv", "idiot", "pica", "pico", "fuck", "suck","dick"]
+  words: ["sex", "gai", "gei", "gay", "gey", "gej", "gaj", "kkt", "kokot", "kreten", "devko", "devki", "devka", "curak", "curac", "kund", "mrd", "penis", "vagin", "kurv", "idiot", "pica", "pico", "pici", "pice", "picu", "fuck", "suck", "dick", "fck", "cock", "bitch", "sperm", "masturb", "dement","demence","penys","srack","vagyn","kripl","krypl","debil","debyl"]
   block-event: false
   # if block-event is set to false, replacement is used.
   replacement: "****"
   # css.chat.bypass.antiswear
   bypass-enabled: false
-  allowed-phrases: ["sekund"]
-  
+  allowed-phrases: ["kund:sekund","kkt:ak kter","kkt:ak ktor","debyl:kde byl","debil:kde bil","pice:opice"]
+
+chat-placeholders:
+  shrug:
+    text: ":shrug:"
+    replacement: "¯\_(ツ)_/¯"
+
 antiSpam:
   enabled: true
   cache: 5min
   maximum-messages: 3
+  # Maximum is 1.0
+  minimal-similarity: 0.41
   cooldown-per-message:
     enabled: false
     time: 5s
@@ -25,7 +50,9 @@ antiSpam:
 antiFlood:
   enabled: true
   maximum-chars: 2
-  maximum-caps-chars: 2
+  maximum-caps-chars: 3
+  words-between-same-to-ignore: 6
+  maximum-same-words-in-row: 2
   maximum-numbers: 12
   # css.chat.bypass.antiflood
   bypass-enabled: false
