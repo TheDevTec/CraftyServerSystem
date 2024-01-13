@@ -51,7 +51,7 @@ public class CssEconomy {
 	}
 
 	public String format(double value) {
-		return StringUtils.formatDouble(FormatType.NORMAL, value);
+		return StringUtils.formatDouble(FormatType.COMPLEX, value);
 	}
 
 	public String currencyNamePlural() {
