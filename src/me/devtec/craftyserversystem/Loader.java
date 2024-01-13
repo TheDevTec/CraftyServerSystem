@@ -99,6 +99,7 @@ public class Loader extends JavaPlugin implements Listener {
 			return;
 		API.get().getCommandManager().unregister();
 		API.get().getListenerManager().unregister();
+		API.get().shutdown();
 	}
 
 	@EventHandler

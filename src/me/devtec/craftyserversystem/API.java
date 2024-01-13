@@ -26,6 +26,7 @@ import me.devtec.shared.dataholder.Config;
 import me.devtec.shared.json.Json;
 import me.devtec.shared.json.modern.ModernJsonReader;
 import me.devtec.shared.json.modern.ModernJsonWriter;
+import me.devtec.shared.mcmetrics.Metrics;
 import me.devtec.shared.utility.ColorUtils;
 
 public class API {
@@ -41,6 +42,7 @@ public class API {
 	private PermissionHook permissionHook = new EmptyPermissionHook();
 	private EconomyHook economyHook = new EmptyEconomyHook();
 	private CssEconomy economy;
+	private Metrics metrics;
 
 	// Private constructor
 	private API() {
@@ -142,6 +144,7 @@ public class API {
 	}
 
 	protected void init() {
+		metrics = new Metrics(Loader.getPlugin().getDescription().getVersion(), 20204);
 		cfgManager = new ConfigurationManager().initFromJar();
 		cmdManager = new CommandManager(cfgManager);
 		cdManager = new CooldownManager();
@@ -177,5 +180,9 @@ public class API {
 				VaultEconomyHook.registerOurEconomy();
 			}
 		}
+	}
+
+	protected void shutdown() {
+		metrics.shutdown();
 	}
 }
