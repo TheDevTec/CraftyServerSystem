@@ -42,9 +42,9 @@ public class GetPos extends CssCommand {
 		PlaceholdersExecutor placeholders = PlaceholdersExecutor.i().add("target", target.getName()).add("x", loc.getX()).add("y", loc.getY()).add("z", loc.getZ()).add("yaw", loc.getYaw())
 				.add("pitch", loc.getPitch()).add("world", loc.getWorld().getName());
 		if (!sender.equals(target))
-			msg(target, "other", placeholders);
+			msg(sender, "other", placeholders);
 		else
-			msg(target, "self", placeholders);
+			msg(sender, "self", placeholders);
 	}
 
 }

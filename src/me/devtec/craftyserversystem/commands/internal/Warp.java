@@ -44,9 +44,17 @@ public class Warp extends CssCommand {
 	}
 
 	@Override
+	public void unregister() {
+		super.unregister();
+		WarpManager.getProvider().unload(true);
+	}
+
+	@Override
 	public void register() {
 		if (isRegistered())
 			return;
+
+		WarpManager.getProvider().load();
 
 		CommandExecutor<CommandSender> main;
 
@@ -153,8 +161,10 @@ public class Warp extends CssCommand {
 						ItemMaker maker = ItemMaker.loadMakerFromConfig(config, "warp.items." + key);
 						PlaceholdersExecutor ex = PlaceholdersExecutor.i().add("page", currentPage).add("totalPages", totalPages1).add("nextPage", currentPage + 1).add("previousPage",
 								currentPage - 1);
-						maker.displayName(ex.apply(maker.getDisplayName()));
-						maker.lore(ex.apply(maker.getLore()));
+						if (maker.getDisplayName() != null)
+							maker.displayName(ex.apply(maker.getDisplayName()));
+						if (maker.getLore() != null)
+							maker.lore(ex.apply(maker.getLore()));
 						return currentPage == totalPages1 ? new EmptyItemGUI(maker.build()) : new ItemGUI(maker.build()) {
 							@Override
 							public void onClick(Player s, HolderGUI menu, ClickType arg2) {
@@ -169,8 +179,10 @@ public class Warp extends CssCommand {
 						ItemMaker maker = ItemMaker.loadMakerFromConfig(config, "warp.items." + key + "." + (currentPage == totalPages1 ? "empty" : "available"));
 						PlaceholdersExecutor ex = PlaceholdersExecutor.i().add("page", currentPage).add("totalPages", totalPages1).add("nextPage", currentPage + 1).add("previousPage",
 								currentPage - 1);
-						maker.displayName(ex.apply(maker.getDisplayName()));
-						maker.lore(ex.apply(maker.getLore()));
+						if (maker.getDisplayName() != null)
+							maker.displayName(ex.apply(maker.getDisplayName()));
+						if (maker.getLore() != null)
+							maker.lore(ex.apply(maker.getLore()));
 						return currentPage == totalPages1 ? new EmptyItemGUI(maker.build()) : new ItemGUI(maker.build()) {
 							@Override
 							public void onClick(Player s, HolderGUI menu, ClickType arg2) {
@@ -185,8 +197,10 @@ public class Warp extends CssCommand {
 						ItemMaker maker = ItemMaker.loadMakerFromConfig(config, "warp.items." + key + "." + (currentPage == 1 ? "empty" : "available"));
 						PlaceholdersExecutor ex = PlaceholdersExecutor.i().add("page", currentPage).add("totalPages", totalPages1).add("nextPage", currentPage + 1).add("previousPage",
 								currentPage - 1);
-						maker.displayName(ex.apply(maker.getDisplayName()));
-						maker.lore(ex.apply(maker.getLore()));
+						if (maker.getDisplayName() != null)
+							maker.displayName(ex.apply(maker.getDisplayName()));
+						if (maker.getLore() != null)
+							maker.lore(ex.apply(maker.getLore()));
 						return currentPage == 1 ? new EmptyItemGUI(maker.build()) : new ItemGUI(maker.build()) {
 							@Override
 							public void onClick(Player s, HolderGUI menu, ClickType arg2) {
@@ -218,59 +232,56 @@ public class Warp extends CssCommand {
 		GUI prevBuild = warpMenu;
 		GUI currentBuild = warpMenu;
 
-		while (!warps.isEmpty()) {
-			int pos = 0;
-			for (String slot : config.getStringList("warp.slots"))
-				for (int i = 0; i < slot.length(); ++i) {
-					char c = slot.charAt(i);
-					if (c == warpChar) {
-						if (initLists)
-							places.add(pos);
-						continue;
-					}
-					ItemGUI menuItem = items.get(c);
-					if (menuItem == null) {
-						MenuItem actionitem;
-						if ((actionitem = menuItems.get(c)) != null)
-							if (initLists)
-								menuItemPlaces.put(pos, actionitem);
-						continue;
-					}
-					currentBuild.setItem(pos, menuItem);
-					++pos;
+		int pos = 0;
+		for (String slot : config.getStringList("warp.slots"))
+			for (int i = 0; i < slot.length(); ++i) {
+				char c = slot.charAt(i);
+				if (c == warpChar) {
+					if (initLists)
+						places.add(pos++);
+					continue;
 				}
-			initLists = false;
-
-			for (int i = 0; i < places.size() && !warps.isEmpty(); ++i) {
-				String warp = warps.remove(0); // pull
-				WarpInfo warpInfo = WarpManager.getProvider().get(warp);
-				if (!warpInfo.isValid())
-					continue; // Skip invalid warp
-				int warpPlace = places.get(i);
-				currentBuild.setItem(warpPlace,
-						new ItemGUI(ItemMaker.of(warpInfo.getIcon())
-								.lore(PlaceholdersExecutor.i().add("warp", warp).add("cost", warpInfo.getCost()).add("permission", warpInfo.getPermission() + "")
-										.apply(config.getStringList("warp.warp_lore." + (warpInfo.getCost() > 0 && warpInfo.getPermission() != null ? "withBoth"
-												: warpInfo.getCost() > 0 ? "withCost" : warpInfo.getPermission() != null ? "withPerm" : "clear"))))
-								.build()) {
-							@Override
-							public void onClick(Player s, HolderGUI menu, ClickType arg2) {
-								warp(s, warp, true, false, s);
-							}
-						});
+				ItemGUI menuItem = items.get(c);
+				if (menuItem == null) {
+					MenuItem actionitem;
+					if ((actionitem = menuItems.get(c)) != null)
+						if (initLists)
+							menuItemPlaces.put(pos++, actionitem);
+					continue;
+				}
+				currentBuild.setItem(pos++, menuItem);
 			}
-			if (!warps.isEmpty()) { // next page
-				++currentPage;
-				prevBuild = currentBuild;
-				currentBuild = new GUI(menuPlaceholders.add("page", currentPage + 1).apply(config.getString("warp.title")), menuSize);
-				for (Entry<Integer, MenuItem> entry : menuItemPlaces.entrySet())
-					prevBuild.setItem(entry.getKey(), entry.getValue().makeItem(prevBuild, currentBuild, currentPage, totalPages));
-				++currentPage;
+		initLists = false;
 
-			} else
-				for (Entry<Integer, MenuItem> entry : menuItemPlaces.entrySet())
-					prevBuild.setItem(entry.getKey(), entry.getValue().makeItem(prevBuild, currentBuild, currentPage, totalPages));
+		for (int i = 0; i < places.size() && !warps.isEmpty(); ++i) {
+			String warp = warps.remove(0); // pull
+			WarpInfo warpInfo = WarpManager.getProvider().get(warp);
+			if (!warpInfo.isValid())
+				continue; // Skip invalid warp
+			int warpPlace = places.get(i);
+			currentBuild.setItem(warpPlace,
+					new ItemGUI(ItemMaker.of(warpInfo.getIcon())
+							.lore(PlaceholdersExecutor.i().add("warp", warp).add("cost", warpInfo.getCost()).add("permission", warpInfo.getPermission() + "")
+									.apply(config.getStringList("warp.warp_lore." + (warpInfo.getCost() > 0 && warpInfo.getPermission() != null ? "withBoth"
+											: warpInfo.getCost() > 0 ? "withCost" : warpInfo.getPermission() != null ? "withPerm" : "clear"))))
+							.build()) {
+						@Override
+						public void onClick(Player s, HolderGUI menu, ClickType arg2) {
+							warp(s, warp, true, false, s);
+						}
+					});
 		}
+		if (!warps.isEmpty()) { // next page
+			++currentPage;
+			prevBuild = currentBuild;
+			currentBuild = new GUI(menuPlaceholders.add("page", currentPage + 1).apply(config.getString("warp.title")), menuSize);
+			for (Entry<Integer, MenuItem> entry : menuItemPlaces.entrySet())
+				prevBuild.setItem(entry.getKey(), entry.getValue().makeItem(prevBuild, currentBuild, currentPage, totalPages));
+			++currentPage;
+
+		} else
+			for (Entry<Integer, MenuItem> entry : menuItemPlaces.entrySet())
+				prevBuild.setItem(entry.getKey(), entry.getValue().makeItem(prevBuild, currentBuild, currentPage, totalPages));
 	}
 
 	private int countWarpSpaces(List<String> slots, char warpChar) {

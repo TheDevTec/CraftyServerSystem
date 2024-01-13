@@ -32,7 +32,7 @@ public class Msg extends CssCommand {
 		cmd.argument("$CONSOLE", 1, (sender, structure, args) -> {
 			msgUsage(sender, "cmd");
 		}, (sender, structure, args) -> sender instanceof Player ? Arrays.asList("$CONSOLE") : Collections.emptyList()) // Create tab completer without console option, if sender isn't player
-				.argument(null, (sender, structure, args) -> { // Message argument
+				.argument(null, -1, (sender, structure, args) -> { // Message argument
 					sendMessage(sender, Bukkit.getConsoleSender(), StringUtils.buildString(1, args));
 				}, (sender, structure, args) -> Arrays.asList("{message}"));
 		// player
@@ -45,7 +45,7 @@ public class Msg extends CssCommand {
 				if (!player.equals(sender))
 					players.add(player.getName());
 			return players; // Create tab completer without sender's name
-		}).argument(null, (sender, structure, args) -> { // Message argument
+		}).argument(null, -1, (sender, structure, args) -> { // Message argument
 			sendMessage(sender, Bukkit.getPlayer(args[0]), StringUtils.buildString(1, args));
 		}, (sender, structure, args) -> Arrays.asList("{message}"));
 

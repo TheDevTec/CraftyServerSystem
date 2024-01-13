@@ -43,7 +43,7 @@ public class WalkSpeed extends CssCommand {
 				});
 		cmd.selector(Selector.NUMBER, (sender, structure, args) -> {
 			speed((Player) sender, ParseUtils.getFloat(args[0]), true, sender);
-		}, (sender, structure, args) -> sender instanceof Player ? API.selectorUtils.build(args[0], Selector.NUMBER) : Collections.emptyList())
+		}, (sender, structure, args) -> sender instanceof Player ? API.selectorUtils.build(sender, Selector.NUMBER) : Collections.emptyList())
 				// silent
 				.argument("-s", (sender, structure, args) -> {
 					speed((Player) sender, ParseUtils.getFloat(args[1]), false, sender);

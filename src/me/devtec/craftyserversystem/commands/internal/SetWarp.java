@@ -2,7 +2,7 @@ package me.devtec.craftyserversystem.commands.internal;
 
 import java.util.List;
 
-import org.bukkit.command.CommandSender;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
 import me.devtec.craftyserversystem.commands.CssCommand;
@@ -33,21 +33,26 @@ public class SetWarp extends CssCommand {
 			this.cmd = addBypassSettings(cmd).build().register(cmds.remove(0), cmds.toArray(new String[0]));
 	}
 
-	private void setWarp(String warpName, Position pos, CommandSender sender) {
+	private void setWarp(String warpName, Position pos, Player sender) {
 		WarpInfo info;
 		if ((info = WarpManager.getProvider().get(warpName)) != null) {
 			info.setPosition(pos);
+			if (sender.getItemInHand().getType() != Material.AIR)
+				info.setIcon(sender.getItemInHand());
 			PlaceholdersExecutor placeholders = PlaceholdersExecutor.i().add("warp", warpName).add("world", pos.getWorldName()).add("x", StringUtils.formatDouble(FormatType.NORMAL, pos.getX()))
 					.add("y", StringUtils.formatDouble(FormatType.NORMAL, pos.getY())).add("z", StringUtils.formatDouble(FormatType.NORMAL, pos.getZ()))
 					.add("yaw", StringUtils.formatDouble(FormatType.NORMAL, pos.getYaw())).add("pitch", StringUtils.formatDouble(FormatType.NORMAL, pos.getPitch()));
 			msg(sender, "moved", placeholders);
 		} else {
 			info = WarpManager.getProvider().create(warpName, pos);
+			if (sender.getItemInHand().getType() != Material.AIR)
+				info.setIcon(sender.getItemInHand());
 			PlaceholdersExecutor placeholders = PlaceholdersExecutor.i().add("warp", warpName).add("world", pos.getWorldName()).add("x", StringUtils.formatDouble(FormatType.NORMAL, pos.getX()))
 					.add("y", StringUtils.formatDouble(FormatType.NORMAL, pos.getY())).add("z", StringUtils.formatDouble(FormatType.NORMAL, pos.getZ()))
 					.add("yaw", StringUtils.formatDouble(FormatType.NORMAL, pos.getYaw())).add("pitch", StringUtils.formatDouble(FormatType.NORMAL, pos.getPitch()));
 			msg(sender, "created", placeholders);
 		}
+		Warp.callMenuUpdate();
 	}
 
 }

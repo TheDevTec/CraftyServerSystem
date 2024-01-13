@@ -110,7 +110,7 @@ public abstract class CssCommand {
 
 	@Nonnull
 	public Collection<? extends Player> selector(CommandSender sender, String selector) {
-		char lowerCase = selector.charAt(0) == '*' ? '*' : selector.charAt(0) == '@' && selector.length() == 2 ? Character.toLowerCase(selector.charAt(1)) : 0;
+		char lowerCase = selector.length() == 1 && selector.charAt(0) == '*' ? '*' : selector.length() == 2 && selector.charAt(0) == '@' ? Character.toLowerCase(selector.charAt(1)) : 0;
 		if (lowerCase != 0)
 			switch (lowerCase) {
 			case 'a':

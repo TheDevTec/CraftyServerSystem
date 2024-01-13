@@ -24,9 +24,9 @@ public class Reply extends CssCommand {
 		CommandStructure<CommandSender> cmd = CommandStructure.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
 			msgUsage(sender, "cmd");
 		}).permission(getPerm("cmd"));
-		cmd.argument(null, (sender, structure, args) -> {
+		cmd.argument(null, -1, (sender, structure, args) -> {
 			String replyTo = MsgManager.get().getReply(sender instanceof Player ? sender.getName() : null);
-			sendMessage(sender, replyTo, StringUtils.buildString(1, args));
+			sendMessage(sender, replyTo, StringUtils.buildString(args));
 		}, (sender, structure, args) -> Arrays.asList("{message}"));
 		// register
 		List<String> cmds = getCommands();

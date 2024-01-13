@@ -75,7 +75,7 @@ public class WarpInfo {
 				return WarpResult.FAILED_NO_PERMISSION;
 		if (cost > 0)
 			if (!API.get().getEconomyHook().has(player.getName(), player.getWorld().getName(), cost))
-				return WarpResult.FAILED_NO_PERMISSION;
+				return WarpResult.FAILED_NO_MONEY;
 			else
 				API.get().getEconomyHook().withdraw(player.getName(), player.getWorld().getName(), cost);
 		if (Bukkit.isPrimaryThread())

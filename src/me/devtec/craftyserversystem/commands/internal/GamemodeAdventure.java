@@ -59,7 +59,7 @@ public class GamemodeAdventure extends CssCommand {
 				msg(sender, "self", placeholders);
 			} else {
 				PlaceholdersExecutor placeholders = PlaceholdersExecutor.i().add("target", target.getName()).add("sender", sender.getName()).add("gamemode", "adventure");
-				msg(sender, "other.target", placeholders);
+				msg(target, "other.target", placeholders);
 				msg(sender, "other.sender", placeholders);
 			}
 		// You can change gamemode only in primary thread

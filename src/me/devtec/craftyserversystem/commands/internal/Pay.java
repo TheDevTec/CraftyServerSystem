@@ -11,10 +11,11 @@ import me.devtec.craftyserversystem.API;
 import me.devtec.craftyserversystem.commands.CssCommand;
 import me.devtec.craftyserversystem.economy.EconomyHook;
 import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
-import me.devtec.shared.commands.selectors.Selector;
 import me.devtec.shared.commands.structures.CommandStructure;
 import me.devtec.shared.utility.OfflineCache.Query;
 import me.devtec.shared.utility.ParseUtils;
+import me.devtec.shared.utility.StringUtils;
+import me.devtec.shared.utility.StringUtils.FormatType;
 import me.devtec.theapi.bukkit.BukkitLoader;
 
 public class Pay extends CssCommand {
@@ -36,18 +37,35 @@ public class Pay extends CssCommand {
 			players.add("{offlinePlayer}");
 			for (Player player : onlinePlayers)
 				players.add(player.getName());
+			players.remove(sender.getName());
 			return players;
-		}).selector(Selector.NUMBER, (sender, structure, args) -> {
+		}).argument(null, 1, (sender, structure, args) -> {
 			Query query = me.devtec.shared.API.offlineCache().lookupQuery(args[0]);
 			if (query != null) {
+				if (query.getUUID().equals(sender.getUniqueId())) {
+					msg(sender, "failed.self", PlaceholdersExecutor.EMPTY);
+					return;
+				}
 				World world = sender.getWorld();
-				double money = ParseUtils.getDouble(args[1]);
+				double money = Economy.multipleByMoneyFormat(ParseUtils.getDouble(args[1]), args[1]);
 				if (pay(sender.getName(), query.getName(), world.getName(), money))
-					msg(sender, "success.sender", PlaceholdersExecutor.i().add("sender", sender.getName()).add("target", query.getName()).add("balance", money));
+					msg(sender, "success.sender",
+							PlaceholdersExecutor.i().add("sender", sender.getName()).add("target", query.getName()).add("balance", StringUtils.formatDouble(FormatType.COMPLEX, money)));
 				else
-					msg(sender, "failed.money", PlaceholdersExecutor.i().add("target", query.getName()).add("balance", money));
+					msg(sender, "failed.money", PlaceholdersExecutor.i().add("target", query.getName()).add("balance", StringUtils.formatDouble(FormatType.COMPLEX, money)));
 			} else
 				msg(sender, "no-account", PlaceholdersExecutor.i().add("target", args[0]));
+		}, (sender, structure, args) -> {
+			List<String> tabCompleter = new ArrayList<>();
+			if (args[1].isEmpty()) {
+				tabCompleter.add("1k");
+				tabCompleter.add("100");
+			} else {
+				if (Character.isDigit(args[1].charAt(args[1].length() - 1)))
+					tabCompleter.add(args[1] + "k");
+				tabCompleter.add(args[1]);
+			}
+			return tabCompleter;
 		});
 
 		// register

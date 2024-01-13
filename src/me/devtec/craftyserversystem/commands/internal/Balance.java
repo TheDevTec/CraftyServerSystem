@@ -15,6 +15,8 @@ import me.devtec.craftyserversystem.commands.CssCommand;
 import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
 import me.devtec.shared.commands.structures.CommandStructure;
 import me.devtec.shared.utility.OfflineCache.Query;
+import me.devtec.shared.utility.StringUtils;
+import me.devtec.shared.utility.StringUtils.FormatType;
 import me.devtec.theapi.bukkit.BukkitLoader;
 
 public class Balance extends CssCommand {
@@ -29,7 +31,8 @@ public class Balance extends CssCommand {
 				msgUsage(sender, "cmd");
 				return;
 			}
-			msg(sender, "self", PlaceholdersExecutor.i().add("balance", API.get().getEconomyHook().getBalance(sender.getName(), ((Player) sender).getWorld().getName())));
+			msg(sender, "self", PlaceholdersExecutor.i().add("balance",
+					StringUtils.formatDouble(FormatType.COMPLEX, API.get().getEconomyHook().getBalance(sender.getName(), ((Player) sender).getWorld().getName()))));
 		}).permission(getPerm("cmd"));
 		// other
 		cmd.argument(null, 1, (sender, structure, args) -> {
@@ -42,7 +45,8 @@ public class Balance extends CssCommand {
 					world = ((BlockCommandSender) sender).getBlock().getWorld();
 				else
 					world = Bukkit.getWorlds().get(0);
-				msg(sender, "other", PlaceholdersExecutor.i().add("target", query.getName()).add("balance", API.get().getEconomyHook().getBalance(query.getName(), world.getName())));
+				msg(sender, "other", PlaceholdersExecutor.i().add("target", query.getName()).add("balance",
+						StringUtils.formatDouble(FormatType.COMPLEX, API.get().getEconomyHook().getBalance(query.getName(), world.getName()))));
 			} else
 				msg(sender, "no-account", PlaceholdersExecutor.i().add("target", args[0]));
 		}, (sender, structure, args) -> {

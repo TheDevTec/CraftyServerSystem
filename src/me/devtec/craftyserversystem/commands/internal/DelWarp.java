@@ -33,6 +33,7 @@ public class DelWarp extends CssCommand {
 		if (WarpManager.getProvider().delete(warpName)) {
 			PlaceholdersExecutor placeholders = PlaceholdersExecutor.i().add("warp", warpName);
 			msg(sender, "deleted", placeholders);
+			Warp.callMenuUpdate();
 		}
 	}
 

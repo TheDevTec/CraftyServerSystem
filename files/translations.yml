@@ -161,8 +161,8 @@ skull:
   self: "{prefix} What do you want to do with &e{owner}'s skull&7?"
   #  {sender}, {target}, {owner}
   other:
-    sender: "{prefix} Are you a cannibal? Or why are you trading &e{owner}'s skull&7 with &e{target}&7?"
-    target: "{prefix} Are you a collector? Or why did you just take the &e{owner}'s skull &7from &e{sender}&7?"
+    sender: "{prefix} Are you a cannibal? Or why are you trading &e{owner}&7's skull with &e{target}&7?"
+    target: "{prefix} Are you a collector? Or why did you just take the &e{owner}&7's skull from &e{sender}&7?"
 
 near:
   # {radius}
@@ -176,7 +176,7 @@ hat:
   set:
     self: "I have no idea why would you do that, but you just managed to put the item from your hand on your head."
     other:
-      sender: "{prefix} Are you looking for a trash bin? Or why did you just put the item from your hand on &e{target}'s head&7?"
+      sender: "{prefix} Are you looking for a trash bin? Or why did you just put the item from your hand on &e{target}&7's head?"
       target: "{prefix} You should see yourself in the mirror. &e{sender} &7probably put something on your &ehead&7."
 
 burn:
@@ -189,6 +189,20 @@ burn:
 # --------------------    
 # Darqes edit end
 # --------------------
+
+warpmanager:
+  icon:
+    empty-hand: "{prefix} Can you see something in your hand? Cause me neither."
+    # {warp}, {type}
+    set: "{prefix} Icon of warp &e{warp} &7set to &e{type}"
+  cost:
+    is-under-zero: "{prefix} Cost of warp cannot be under zero!"
+    # {warp}, {cost}
+    set: "{prefix} Set cost of warp &e{warp} &7to &e€{cost}"
+  perm:
+    none: "{prefix} Warp &e{warp} &7no longer require permission."
+    # {warp}, {permission}
+    set: "{prefix} Warp &e{warp} &7now require permission &e{permission}"
 
 warp:
   #  {warp}, {cost}, {permission}
@@ -401,6 +415,7 @@ economy:
   remove: "{prefix} Removed &e${balance} &7from player &e{target}"
   
 balancetop:
+  loading: "{prefix} Please wait, we are countdown the richest players"
   # {page}, {totalPages}
   header: "{prefix} Balance Top {page}/{totalPages}"
   # {position}, {target}, {balance}
@@ -521,14 +536,14 @@ enderchest:
 
 vanish:
   self:
-    true: "{prefix} Vanish turned on"
-    false: "{prefix} Vanish turned off"
+    enabled: "{prefix} Vanish turned on"
+    disabled: "{prefix} Vanish turned off"
   #  {sender}, {target}
   other:
-    true:
+    enabled:
       target: "{prefix} Vanish turned on by &e{sender}"
       sender: "{prefix} Vanish of &e{target} &7turned on"
-    false:
+    disabled:
       target: "{prefix} Vanish turned off by &e{sender}"
       sender: "{prefix} Vanish of &e{target} &7turned off"
     

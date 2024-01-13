@@ -99,6 +99,10 @@ public class BalanceTop extends CssCommand {
 	}
 
 	private void listBalanceTop(CommandSender sender, ComparableObject<String, Double>[] comparableObjects, int page, int maxEntries) {
+		if (comparableObjects == null) {
+			msg(sender, "loading");
+			return;
+		}
 		EconomyHook hook = API.get().getEconomyHook();
 		int totalPages = Math.max(comparableObjects.length / maxEntries, 1);
 		if (page <= 0)
@@ -108,7 +112,7 @@ public class BalanceTop extends CssCommand {
 		msg(sender, "header", PlaceholdersExecutor.i().add("page", page).add("totalPages", totalPages));
 		for (int i = page * maxEntries - maxEntries; i < page * maxEntries && i < comparableObjects.length; ++i) {
 			ComparableObject<String, Double> comp = comparableObjects[i];
-			msg(sender, "key", PlaceholdersExecutor.i().add("position", i).add("target", comp.getKey()).add("balance", hook.format(comp.getValue())));
+			msg(sender, "key", PlaceholdersExecutor.i().add("position", i + 1).add("target", comp.getKey()).add("balance", hook.format(comp.getValue())));
 		}
 		msg(sender, "footer", PlaceholdersExecutor.i().add("page", page).add("totalPages", totalPages).add("previousPage", Math.max(1, page - 1)).add("nextPage", Math.min(totalPages, page + 1)));
 	}
@@ -160,20 +164,20 @@ public class BalanceTop extends CssCommand {
 						if (entry.getValue().isEmpty())
 							continue;
 						double balance = API.get().getEconomyHook().getBalance(query.getName(), entry.getValue().get(0));
-						if (balance > minimumBalanceToShow)
+						if (balance >= minimumBalanceToShow)
 							bal.get(entry.getKey()).put(query.getName(), balance);
 					}
 				for (Entry<String, Map<String, Double>> entry : bal.entrySet())
-					balanceTop.put(entry.getKey(), SortingAPI.sortByValueArray(entry.getValue(), false));
+					balanceTop.put(entry.getKey(), SortingAPI.sortByValueArray(entry.getValue(), true));
 				return;
 			}
 		}
 		Map<String, Double> bal = new HashMap<>();
 		for (Query query : me.devtec.shared.API.offlineCache().getQueries()) {
 			double balance = API.get().getEconomyHook().getBalance(query.getName(), null);
-			if (balance > minimumBalanceToShow)
+			if (balance >= minimumBalanceToShow)
 				bal.put(query.getName(), balance);
 		}
-		balanceTop.put("default", SortingAPI.sortByValueArray(bal, false));
+		balanceTop.put("default", SortingAPI.sortByValueArray(bal, true));
 	}
 }
