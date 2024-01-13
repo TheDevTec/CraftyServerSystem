@@ -92,7 +92,7 @@ spawner:
     
 skull:
   usage:
-    usage: "/skull {playerName/values/url.png/hdb:id}"
+    usage: "/skull {skullOwner/values/url.png/hdb:id} {player}"
   cmd: [skull,head]
   perms:
     cmd: "css.cmd.skull"
@@ -234,6 +234,18 @@ warp:
     # -i or -si (silent & instant)
     instant: "css.cmd.warp.instant"
     other-instant: "css.cmd.warp.instant"
+
+warpmanager:
+  usage:
+    cmd:
+    - "/warpManager [warp] icon"
+    - "/warpManager [warp] cost [number]"
+    - "/warpManager [warp] perm [permName]"
+    cmd-cost: "/warpManager [warp] cost [number]"
+    cmd-perm: "/warpManager [warp] perm [permName]"
+  cmd: [warpmanager,warpm]
+  perms:
+    cmd: "css.cmd.warpmanager"
 
 setwarp:
   usage:
