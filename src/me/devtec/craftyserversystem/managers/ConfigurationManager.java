@@ -18,6 +18,8 @@ public class ConfigurationManager {
 	private Config cooldowns;
 	private Config join;
 	private Config quit;
+	private Config tab;
+	private Config scoreboard;
 	private Config chat;
 	private Config kits;
 	private Config economy;
@@ -33,6 +35,8 @@ public class ConfigurationManager {
 		join = new Config(FILES_PATH + "events/join.yml");
 		quit = new Config(FILES_PATH + "events/quit.yml");
 		chat = new Config(FILES_PATH + "events/chat.yml");
+		scoreboard = new Config(FILES_PATH + "events/scoreboard.yml");
+		tab = new Config(FILES_PATH + "events/tablist.yml");
 		kits = new Config(FILES_PATH + "kits.yml");
 		economy = new Config(FILES_PATH + "economy.yml");
 	}
@@ -45,6 +49,8 @@ public class ConfigurationManager {
 		merge(join, "join.yml");
 		merge(quit, "quit.yml");
 		merge(chat, "chat.yml");
+		merge(scoreboard, "scoreboard.yml");
+		merge(tab, "tablist.yml");
 		merge(kits, "kits.yml");
 		merge(economy, "economy.yml");
 		prefix = getMain().getString("prefix", "");
@@ -114,8 +120,14 @@ public class ConfigurationManager {
 		getMain().reload();
 		getTranslations().reload();
 		getCommands().reload();
-		getKits().reload();
 		getCooldowns().reload();
+		getScoreboard().reload();
+		getJoin().reload();
+		getQuit().reload();
+		getChat().reload();
+		getTab().reload();
+		getKits().reload();
+		getEconomy().reload();
 		prefix = getMain().getString("prefix", "");
 		teleportRequestTime = TimeUtils.timeFromString(getMain().getString("teleport-request-time"));
 	}
@@ -126,6 +138,14 @@ public class ConfigurationManager {
 
 	public Config getJoin() {
 		return join;
+	}
+
+	public Config getScoreboard() {
+		return scoreboard;
+	}
+
+	public Config getTab() {
+		return tab;
 	}
 
 	public Config getQuit() {
