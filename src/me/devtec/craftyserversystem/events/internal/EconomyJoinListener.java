@@ -28,7 +28,7 @@ public class EconomyJoinListener implements Listener, CssListener {
 	}
 
 	@EventHandler
-	public void onLogin(PlayerJoinEvent e) {
+	public void onJoin(PlayerJoinEvent e) {
 		if (API.get().getEconomyHook() instanceof CssEconomyHook)
 			if (!((CssEconomyHook) API.get().getEconomyHook()).economy.hasAccount(e.getPlayer().getName(), e.getPlayer().getWorld().getName()))
 				((CssEconomyHook) API.get().getEconomyHook()).economy.createPlayerAccount(e.getPlayer().getName(), e.getPlayer().getWorld().getName());
