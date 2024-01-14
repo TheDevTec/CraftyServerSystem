@@ -10,9 +10,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import org.bukkit.Bukkit;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.plugin.InvalidDescriptionException;
 import org.bukkit.plugin.InvalidPluginException;
 import org.bukkit.plugin.UnknownDependencyException;
@@ -23,7 +20,7 @@ import me.devtec.craftyserversystem.economy.VaultEconomyHook;
 import me.devtec.craftyserversystem.permission.LuckPermsPermissionHook;
 import me.devtec.craftyserversystem.permission.VaultPermissionHook;
 
-public class Loader extends JavaPlugin implements Listener {
+public class Loader extends JavaPlugin {
 
 	private static Loader plugin;
 
@@ -88,6 +85,13 @@ public class Loader extends JavaPlugin implements Listener {
 	public void onEnable() {
 		if (API.get().getCommandManager() == null)
 			return;
+		if (Bukkit.getPluginManager().isPluginEnabled("LuckPerms"))
+			API.get().setPermissionHook(new LuckPermsPermissionHook());
+		if (Bukkit.getPluginManager().isPluginEnabled("Vault")) {
+			API.get().setPermissionHook(new VaultPermissionHook());
+			if (!(API.get().getEconomyHook() instanceof CssEconomyHook))
+				API.get().setEconomyHook(new VaultEconomyHook());
+		}
 		API.get().getCommandManager().register();
 		API.get().getConfigManager().loadSpawn();
 		API.get().getListenerManager().register();
@@ -100,17 +104,6 @@ public class Loader extends JavaPlugin implements Listener {
 		API.get().getCommandManager().unregister();
 		API.get().getListenerManager().unregister();
 		API.get().shutdown();
-	}
-
-	@EventHandler
-	public void onPluginEnable(PluginEnableEvent e) {
-		if (e.getPlugin().getName().equals("Vault")) {
-			API.get().setPermissionHook(new VaultPermissionHook());
-			if (!(API.get().getEconomyHook() instanceof CssEconomyHook))
-				API.get().setEconomyHook(new VaultEconomyHook());
-		}
-		if (e.getPlugin().getName().equals("LuckPerms"))
-			API.get().setPermissionHook(new LuckPermsPermissionHook());
 	}
 
 	/**
