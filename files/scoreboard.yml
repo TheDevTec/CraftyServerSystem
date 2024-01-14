@@ -1,5 +1,8 @@
 enabled: true
 
+disabled-in-worlds:
+- "disabledWorld"
+
 # per-world-settings
 world:
   # world name

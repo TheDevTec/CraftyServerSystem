@@ -1,6 +1,7 @@
 package me.devtec.craftyserversystem.events.internal;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.UUID;
@@ -41,6 +42,7 @@ public class ScoreboardListener implements Listener, CssListener {
 	private Map<UUID, UserScoreboardData> data = new ConcurrentHashMap<>();
 	private int taskId;
 	private Object lpListener;
+	private List<String> disabledInWorlds;
 
 	@Override
 	public Config getConfig() {
@@ -64,6 +66,7 @@ public class ScoreboardListener implements Listener, CssListener {
 		}
 		if (taskId != 0)
 			Scheduler.cancelTask(taskId);
+		disabledInWorlds = getConfig().getStringList("disabled-in-worlds");
 		for (String world : getConfig().getKeys("world")) {
 			PerWorldScoreboardData pw;
 			perWorld.put(world, pw = new PerWorldScoreboardData());
@@ -177,6 +180,8 @@ public class ScoreboardListener implements Listener, CssListener {
 
 	@EventHandler
 	public void onJoin(PlayerJoinEvent e) {
+		if (disabledInWorlds.contains(e.getPlayer().getWorld().getName()))
+			return;
 		data.put(e.getPlayer().getUniqueId(), generateData(e.getPlayer()));
 	}
 
@@ -189,6 +194,12 @@ public class ScoreboardListener implements Listener, CssListener {
 
 	@EventHandler
 	public void onWorldChange(PlayerChangedWorldEvent e) {
+		if (disabledInWorlds.contains(e.getPlayer().getWorld().getName())) {
+			UserScoreboardData user;
+			if ((user = data.remove(e.getPlayer().getUniqueId())) != null)
+				user.removeScoreboard();
+			return;
+		}
 		data.put(e.getPlayer().getUniqueId(), generateData(e.getPlayer()));
 	}
 }
