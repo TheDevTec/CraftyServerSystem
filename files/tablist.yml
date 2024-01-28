@@ -1,0 +1,91 @@
+enabled: true
+
+# per-world-settings
+world:
+  # world name
+  exampleWorld:
+    player:
+      # player name
+      test:
+        tab:
+          prefix: "&6CSS &f"
+          suffix: ""
+        tag:
+          prefix: "&6CSS &f"
+          suffix: ""
+        yellowNumber:
+          value: "{health}"
+          displayAs: INTEGER
+    group:
+      # group name
+      default:
+        tab:
+          prefix: "&7"
+          suffix: ""
+        tag:
+          prefix: "&7"
+          suffix: ""
+
+# This settings can be overriden by per-world-settings
+# per-player-settings
+player:
+  # player name
+  test:
+    tab:
+      prefix: "&7Player &f"
+      suffix: ""
+    tag:
+      prefix: "&7Player &f"
+      suffix: ""
+
+# This settings can be overriden by per-player-settings
+# per-group-settings
+group:
+  # group name
+  default:
+    tab:
+      format: "{prefix}{player}{suffix}"
+      prefix: "&7Player &f"
+      suffix: ""
+    tag:
+      format: "{prefix}{player}{suffix}"
+      prefix: "&7Player &f"
+      suffix: ""
+
+yellowNumber:
+  # Must be integer (number)
+  value: "{ping}"
+  # INTEGER or HEARTS
+  displayAs: INTEGER
+
+header:
+- "{animation:serverTitle}"
+- "&7Total Online &e{online} &7players:"
+
+footer:
+- "&7Money: &e€{balance} &8| &7Ping: &e{ping}"
+
+# Default tab & tag format when group attemp fail
+tab:
+  format: "{prefix}{player}{suffix}"
+  prefix: "&cInvalid &f"
+  suffix: ""
+tag:
+  format: "{prefix}{player}{suffix}"
+  prefix: "&cInvalid &f"
+  suffix: ""
+
+sorting:
+  # PLAYER_NAME(Vanilla), GROUP(Vault), GROUP_WEIGHT(LuckPerms)
+  by: GROUP_WEIGHT
+  # if "by" is set to "GROUP"
+  list:
+  - owner
+  - admin
+  - helper
+  - vip
+  - default
+  
+# How much do you want to reflesh tablist data (nametag & tablist)
+# 20 ticks = 1s
+data-reflesh-every-ticks: 1
