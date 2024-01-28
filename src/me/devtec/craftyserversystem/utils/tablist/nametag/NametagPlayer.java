@@ -136,9 +136,7 @@ public class NametagPlayer {
 
 	@Comment(comment = "Internal code - Called only when player quit server in the PlayerQuitEvent event")
 	public void onQuit() {
-		System.out.println(NametagManagerAPI.get().getPlayers());
 		NametagManagerAPI.get().getPlayers().remove(this);
-		System.out.println(NametagManagerAPI.get().getPlayers());
 		if (getPlayer().getVehicle() != null)
 			NametagManagerAPI.get().watchingEntityMove.remove(getPlayer().getVehicle().getEntityId());
 
