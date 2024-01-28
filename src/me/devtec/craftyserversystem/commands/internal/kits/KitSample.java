@@ -8,7 +8,7 @@ import org.bukkit.inventory.ItemStack;
 
 import me.devtec.craftyserversystem.API;
 import me.devtec.craftyserversystem.annotations.IgnoredClass;
-import me.devtec.craftyserversystem.annotations.Nonnull;
+import me.devtec.shared.annotations.Nonnull;
 import me.devtec.craftyserversystem.managers.cooldown.CooldownHolder;
 import me.devtec.shared.dataholder.Config;
 import me.devtec.shared.utility.TimeUtils;

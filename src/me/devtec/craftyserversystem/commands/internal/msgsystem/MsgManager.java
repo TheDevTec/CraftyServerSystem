@@ -3,8 +3,8 @@ package me.devtec.craftyserversystem.commands.internal.msgsystem;
 import java.util.List;
 
 import me.devtec.craftyserversystem.annotations.IgnoredClass;
-import me.devtec.craftyserversystem.annotations.Nonnull;
-import me.devtec.craftyserversystem.annotations.Nullable;
+import me.devtec.shared.annotations.Nonnull;
+import me.devtec.shared.annotations.Nullable;
 import me.devtec.shared.API;
 import me.devtec.shared.dataholder.Config;
 

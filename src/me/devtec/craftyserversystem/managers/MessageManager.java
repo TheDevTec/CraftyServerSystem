@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -15,8 +16,11 @@ import java.util.logging.Logger;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import me.devtec.craftyserversystem.API;
@@ -195,7 +199,18 @@ public class MessageManager {
 		}
 
 		private String getNbtOf(ItemStack itemInHand) {
-			Object nbt = BukkitLoader.getNmsProvider().getNBT(itemInHand);
+			if (!itemInHand.hasItemMeta() || itemInHand.getType() == Material.AIR)
+				return null;
+			ItemStack item = itemInHand.clone();
+			ItemMeta meta = Bukkit.getItemFactory().getItemMeta(itemInHand.getType());
+			meta.setLore(itemInHand.getItemMeta().getLore());
+			for (Entry<Enchantment, Integer> ench : itemInHand.getEnchantments().entrySet())
+				meta.addEnchant(ench.getKey(), ench.getValue(), true);
+			meta.addItemFlags(itemInHand.getItemMeta().getItemFlags().toArray(new ItemFlag[0]));
+			if (itemInHand.getItemMeta().getDisplayName() != null)
+				meta.setDisplayName("§e");
+			item.setItemMeta(meta);
+			Object nbt = BukkitLoader.getNmsProvider().getNBT(item);
 			return nbt == null ? null : nbt + "";
 		}
 

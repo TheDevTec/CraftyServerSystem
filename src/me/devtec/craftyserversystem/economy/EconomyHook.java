@@ -1,7 +1,7 @@
 package me.devtec.craftyserversystem.economy;
 
-import me.devtec.craftyserversystem.annotations.Nonnull;
-import me.devtec.craftyserversystem.annotations.Nullable;
+import me.devtec.shared.annotations.Nonnull;
+import me.devtec.shared.annotations.Nullable;
 
 public interface EconomyHook {
 	public double getBalance(@Nonnull String name, @Nullable String world);
