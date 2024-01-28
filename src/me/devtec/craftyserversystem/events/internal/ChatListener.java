@@ -2,8 +2,11 @@ package me.devtec.craftyserversystem.events.internal;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 
@@ -20,10 +23,11 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import me.devtec.craftyserversystem.API;
 import me.devtec.craftyserversystem.Loader;
-import me.devtec.craftyserversystem.annotations.Nonnull;
 import me.devtec.craftyserversystem.events.CssListener;
 import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
 import me.devtec.craftyserversystem.utils.ChatHandlers;
+import me.devtec.shared.annotations.Nonnull;
+import me.devtec.shared.annotations.Nullable;
 import me.devtec.shared.dataholder.Config;
 import me.devtec.shared.dataholder.StringContainer;
 import me.devtec.shared.dataholder.cache.TempList;
@@ -73,6 +77,11 @@ public class ChatListener implements Listener, CssListener {
 	private boolean bypassAntiAd;
 	@Nonnull
 	private List<String> antiAdWhitelist;
+	// Chat placeholders (emojis, etc.)
+	@Nonnull
+	private Map<String, String> chatPlaceholders;
+	@Nullable
+	private Set<Entry<String, String>> entrySetOfChatPlaceholders;
 
 	@Override
 	public Config getConfig() {
@@ -126,11 +135,20 @@ public class ChatListener implements Listener, CssListener {
 			info[0] = split[0];
 			info[1] = split[1].replace(" ", "");
 			info[2] = split[1];
+			allowedPhrases.add(info);
 		}
 		bypassAntiSwear = getConfig().getBoolean("antiSwear.bypass-enabled");
 		antiAdEnabled = getConfig().getBoolean("antiAd.enabled");
 		bypassAntiAd = getConfig().getBoolean("antiAd.bypass-enabled");
 		antiAdWhitelist = getConfig().getStringList("antiAd.whitelist");
+		entrySetOfChatPlaceholders = null;
+		if (chatPlaceholders == null)
+			chatPlaceholders = new HashMap<>();
+		else
+			chatPlaceholders.clear();
+		for (String key : getConfig().getKeys("chat-placeholders"))
+			chatPlaceholders.put(getConfig().getString("chat-placeholders." + key + ".text"), getConfig().getString("chat-placeholders." + key + ".replacement"));
+		entrySetOfChatPlaceholders = chatPlaceholders.entrySet();
 	}
 
 	@EventHandler(priority = EventPriority.MONITOR)
@@ -249,8 +267,11 @@ public class ChatListener implements Listener, CssListener {
 			ignoredStrings.addAll(ignoredPlaceholders);
 
 		// Chat notigications & colors
+		StringContainer container = new StringContainer(placeholders.get("{message}"), 0, 16);
+		for (Entry<String, String> entry : entrySetOfChatPlaceholders)
+			container.replace(entry.getKey(), entry.getValue());
 
-		placeholders.add("message", notificationReplace(player, colorize(player, placeholders.get("{message}"), ignoredStrings), e.getRecipients()));
+		placeholders.add("message", notificationReplace(player, colorize(player, container, ignoredStrings), e.getRecipients()));
 		e.setMessage(placeholders.get("{message}")); // For other boring plugins
 		e.setFormat(API.get().getMsgManager().sendMessageFromFileWithResult(getConfig(), "formats." + userGroup + ".chat", placeholders, BukkitLoader.getOnlinePlayers(), e.getPlayer()).replace("%",
 				"%%"));
@@ -324,11 +345,10 @@ public class ChatListener implements Listener, CssListener {
 		API.get().getMsgManager().sendMessageFromFile(chat, "notification.messages", placeholders, target);
 	}
 
-	public StringContainer colorize(Player sender, final String original, final List<String> protectedStrings) {
-		if (original == null || original.isEmpty()
+	public StringContainer colorize(Player sender, final StringContainer container, final List<String> protectedStrings) {
+		if (container.isEmpty()
 				|| !sender.hasPermission("css.chat.colors") && !sender.hasPermission("css.chat.gradient") && !sender.hasPermission("css.chat.hex") && !sender.hasPermission("css.chat.rainbow"))
-			return new StringContainer(original, 0, 16);
-		StringContainer container = new StringContainer(original, 0, 16);
+			return container;
 		if (sender.hasPermission("css.chat.colors"))
 			for (int i = 0; i < container.length(); ++i) {
 				char c = container.charAt(i);

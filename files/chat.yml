@@ -26,7 +26,7 @@ antiSwear:
   replacement: "****"
   # css.chat.bypass.antiswear
   bypass-enabled: false
-  allowed-phrases: ["kund:sekund","kkt:ak kter","kkt:ak ktor","debyl:kde byl","debil:kde bil","pice:opice"]
+  allowed-phrases: ["kund:sekund","kkt:ak kter","kkt:ak ktor","debyl:kde byl","debil:kde bil","pice:opice","mrd:smrdi","mrd:smrde"]
 
 chat-placeholders:
   shrug:
