@@ -569,3 +569,11 @@ invsee:
   cmd: [invsee]
   perms:
     cmd: "css.cmd.invsee"
+    
+scoreboardhide:
+  usage:
+    usage: "/scoreboardhide [player] {true/false}"
+  cmd: [scoreboardhide,board]
+  perms:
+    cmd: "css.cmd.scoreboardhide"
+    other: "css.cmd.scoreboardhide.other"

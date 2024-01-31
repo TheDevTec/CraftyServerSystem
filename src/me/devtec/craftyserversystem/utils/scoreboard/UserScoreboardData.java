@@ -14,13 +14,30 @@ public class UserScoreboardData extends ScoreboardData {
 	private byte updateTitleMode = 1;
 	private Player player;
 	private String group;
+	private volatile boolean hidden;
 
-	public UserScoreboardData(Player player, String vaultGroup) {
+	public UserScoreboardData(Player player, String vaultGroup, boolean hidden) {
 		this.player = player;
 		group = vaultGroup;
+		this.hidden = hidden;
+	}
+
+	public boolean isHidden() {
+		return hidden;
+	}
+
+	public void setHidden(boolean hide) {
+		if (hide)
+			hidden = false;
+		else {
+			hidden = true;
+			removeScoreboard();
+		}
 	}
 
 	public void process(PlaceholdersExecutor placeholders) {
+		if (hidden)
+			return;
 		if (updateTitleMode != 0) {
 			if (updateTitleMode != 2)
 				updateTitleMode = 0;

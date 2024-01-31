@@ -39,7 +39,7 @@ public class ScoreboardListener implements Listener, CssListener {
 	private Map<String, ScoreboardData> perGroup = new HashMap<>();
 	private Map<String, ScoreboardData> perPlayer = new HashMap<>();
 	private ScoreboardData global;
-	private Map<UUID, UserScoreboardData> data = new ConcurrentHashMap<>();
+	public static Map<UUID, UserScoreboardData> data = new ConcurrentHashMap<>();
 	private int taskId;
 	private Object lpListener;
 	private List<String> disabledInWorlds;
