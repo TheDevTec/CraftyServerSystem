@@ -16,7 +16,7 @@ public class TablistData {
 	private String tagSuffix;
 	// Yellow number
 	private String yellowNumberPlaceholder;
-	private Boolean displayYellowNumberAsInteger;
+	private YellowNumberDisplayMode displayYellowNumberMode;
 
 	@Override
 	public boolean equals(Object object) {
@@ -62,12 +62,12 @@ public class TablistData {
 		return this;
 	}
 
-	public boolean shouldDisplayYellowNumberAsInteger() {
-		return displayYellowNumberAsInteger == null ? true : displayYellowNumberAsInteger;
+	public YellowNumberDisplayMode getYellowNumberDisplayMode() {
+		return displayYellowNumberMode;
 	}
 
-	public TablistData setDisplayYellowNumberAsInteger(boolean displayYellowNumberAsInteger) {
-		this.displayYellowNumberAsInteger = displayYellowNumberAsInteger;
+	public TablistData setDisplayYellowNumberMode(YellowNumberDisplayMode displayYellowNumberMode) {
+		this.displayYellowNumberMode = displayYellowNumberMode;
 		return this;
 	}
 
@@ -117,7 +117,7 @@ public class TablistData {
 	}
 
 	public boolean isComplete() {
-		return header != null && footer != null && tabNameFormat != null && tabPrefix != null && tabSuffix != null && yellowNumberPlaceholder != null && displayYellowNumberAsInteger != null
+		return header != null && footer != null && tabNameFormat != null && tabPrefix != null && tabSuffix != null && yellowNumberPlaceholder != null && displayYellowNumberMode != null
 				&& tagNameFormat != null && tagPrefix != null && tagSuffix != null;
 	}
 
@@ -140,8 +140,8 @@ public class TablistData {
 			tagSuffix = additional.tagSuffix;
 		if (yellowNumberPlaceholder == null)
 			yellowNumberPlaceholder = additional.yellowNumberPlaceholder;
-		if (displayYellowNumberAsInteger == null)
-			displayYellowNumberAsInteger = additional.displayYellowNumberAsInteger;
+		if (displayYellowNumberMode == null)
+			displayYellowNumberMode = additional.displayYellowNumberMode;
 		return this;
 	}
 }

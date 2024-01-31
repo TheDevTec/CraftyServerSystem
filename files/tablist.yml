@@ -55,7 +55,7 @@ group:
 yellowNumber:
   # Must be integer (number)
   value: "{ping}"
-  # INTEGER or HEARTS
+  # NONE, INTEGER or HEARTS
   displayAs: INTEGER
 
 header:

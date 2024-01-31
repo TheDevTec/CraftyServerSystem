@@ -24,6 +24,7 @@ import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
 import me.devtec.craftyserversystem.utils.tablist.PerWorldTablistData;
 import me.devtec.craftyserversystem.utils.tablist.TablistData;
 import me.devtec.craftyserversystem.utils.tablist.UserTablistData;
+import me.devtec.craftyserversystem.utils.tablist.YellowNumberDisplayMode;
 import me.devtec.craftyserversystem.utils.tablist.nametag.NametagManagerAPI;
 import me.devtec.shared.dataholder.Config;
 import me.devtec.shared.scheduler.Scheduler;
@@ -152,12 +153,13 @@ public class TablistListener implements Listener, CssListener {
 		data.setYellowNumberText(getConfig().getString(path + "yellowNumber.value"));
 		String yellowNumberDisplay;
 		if ((yellowNumberDisplay = getConfig().getString(path + "yellowNumber.displayAs")) != null)
-			data.setDisplayYellowNumberAsInteger(yellowNumberDisplay.equalsIgnoreCase("INTEGER"));
+			data.setDisplayYellowNumberMode(YellowNumberDisplayMode.valueOf(yellowNumberDisplay));
 	}
 
 	public UserTablistData generateData(Player player) {
 		String vaultGroup = API.get().getPermissionHook().getGroup(player);
-		UserTablistData userData = new UserTablistData(player);
+		UserTablistData user = data.get(player.getUniqueId());
+		UserTablistData userData = user == null ? new UserTablistData(player) : new UserTablistData(player, user);
 		PerWorldTablistData pwData;
 		TablistData data;
 		if ((pwData = perWorld.get(player.getWorld().getName())) != null) {
@@ -193,7 +195,12 @@ public class TablistListener implements Listener, CssListener {
 	public void onJoin(PlayerJoinEvent e) {
 		if (disabledInWorlds.contains(e.getPlayer().getWorld().getName()))
 			return;
-		data.put(e.getPlayer().getUniqueId(), generateData(e.getPlayer()));
+		Player player = e.getPlayer();
+		Location loc = player.getLocation();
+		data.put(player.getUniqueId(),
+				generateData(e.getPlayer()).process(PlaceholdersExecutor.i().papi(player.getUniqueId()).add("player", player.getName())
+						.add("money", API.get().getEconomyHook().format(API.get().getEconomyHook().getBalance(player.getName(), player.getWorld().getName()))).add("health", player.getHealth())
+						.add("food", player.getFoodLevel()).add("x", loc.getX()).add("y", loc.getY()).add("z", loc.getZ()).add("world", loc.getWorld().getName())));
 	}
 
 	@EventHandler
@@ -211,6 +218,11 @@ public class TablistListener implements Listener, CssListener {
 				user.removeTablist();
 			return;
 		}
-		data.put(e.getPlayer().getUniqueId(), generateData(e.getPlayer()));
+		Player player = e.getPlayer();
+		Location loc = player.getLocation();
+		data.put(player.getUniqueId(),
+				generateData(e.getPlayer()).process(PlaceholdersExecutor.i().papi(player.getUniqueId()).add("player", player.getName())
+						.add("money", API.get().getEconomyHook().format(API.get().getEconomyHook().getBalance(player.getName(), player.getWorld().getName()))).add("health", player.getHealth())
+						.add("food", player.getFoodLevel()).add("x", loc.getX()).add("y", loc.getY()).add("z", loc.getZ()).add("world", loc.getWorld().getName())));
 	}
 }
