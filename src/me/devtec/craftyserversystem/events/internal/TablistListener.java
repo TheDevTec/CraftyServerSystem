@@ -10,14 +10,13 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 import me.devtec.craftyserversystem.API;
-import me.devtec.craftyserversystem.Loader;
 import me.devtec.craftyserversystem.events.CssListener;
+import me.devtec.craftyserversystem.events.internal.supportlp.TablistLP;
 import me.devtec.craftyserversystem.permission.LuckPermsPermissionHook;
 import me.devtec.craftyserversystem.permission.VaultPermissionHook;
 import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
@@ -30,11 +29,8 @@ import me.devtec.shared.dataholder.Config;
 import me.devtec.shared.scheduler.Scheduler;
 import me.devtec.shared.scheduler.Tasker;
 import me.devtec.theapi.bukkit.BukkitLoader;
-import net.luckperms.api.LuckPermsProvider;
-import net.luckperms.api.event.EventSubscription;
-import net.luckperms.api.event.user.UserDataRecalculateEvent;
 
-public class TablistListener implements Listener, CssListener {
+public class TablistListener implements CssListener {
 
 	private Map<String, PerWorldTablistData> perWorld = new HashMap<>();
 	private Map<String, TablistData> perGroup = new HashMap<>();
@@ -43,7 +39,7 @@ public class TablistListener implements Listener, CssListener {
 	public static Map<UUID, UserTablistData> data = new ConcurrentHashMap<>();
 	private int taskId;
 	private int refleshTaskId;
-	private Object lpListener;
+	private TablistLP lpListener;
 	private List<String> disabledInWorlds;
 
 	@Override
@@ -63,7 +59,7 @@ public class TablistListener implements Listener, CssListener {
 		perPlayer.clear();
 		data.clear();
 		if (lpListener != null) {
-			((EventSubscription<?>) lpListener).close();
+			lpListener.unregister();
 			lpListener = null;
 		}
 		if (taskId != 0)
@@ -103,10 +99,7 @@ public class TablistListener implements Listener, CssListener {
 			fill(global, "");
 
 			if (API.get().getPermissionHook().getClass() == LuckPermsPermissionHook.class)
-				lpListener = LuckPermsProvider.get().getEventBus().subscribe(Loader.getPlugin(), UserDataRecalculateEvent.class, e -> {
-					UserTablistData userData = data.get(e.getUser().getUniqueId());
-					data.put(e.getUser().getUniqueId(), generateData(userData.getPlayer()));
-				});
+				lpListener = new TablistLP().register(this);
 			else if (API.get().getPermissionHook().getClass() == VaultPermissionHook.class)
 				taskId = new Tasker() {
 

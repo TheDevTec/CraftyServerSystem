@@ -11,14 +11,13 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 import me.devtec.craftyserversystem.API;
-import me.devtec.craftyserversystem.Loader;
 import me.devtec.craftyserversystem.events.CssListener;
+import me.devtec.craftyserversystem.events.internal.supportlp.ScoreboardLP;
 import me.devtec.craftyserversystem.permission.LuckPermsPermissionHook;
 import me.devtec.craftyserversystem.permission.VaultPermissionHook;
 import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
@@ -29,11 +28,8 @@ import me.devtec.shared.dataholder.Config;
 import me.devtec.shared.scheduler.Scheduler;
 import me.devtec.shared.scheduler.Tasker;
 import me.devtec.theapi.bukkit.BukkitLoader;
-import net.luckperms.api.LuckPermsProvider;
-import net.luckperms.api.event.EventSubscription;
-import net.luckperms.api.event.user.UserDataRecalculateEvent;
 
-public class ScoreboardListener implements Listener, CssListener {
+public class ScoreboardListener implements CssListener {
 
 	private Map<String, PerWorldScoreboardData> perWorld = new HashMap<>();
 	private Map<String, ScoreboardData> perGroup = new HashMap<>();
@@ -41,7 +37,7 @@ public class ScoreboardListener implements Listener, CssListener {
 	private ScoreboardData global;
 	public static Map<UUID, UserScoreboardData> data = new ConcurrentHashMap<>();
 	private int taskId;
-	private Object lpListener;
+	private ScoreboardLP lpListener;
 	private List<String> disabledInWorlds;
 
 	@Override
@@ -61,7 +57,7 @@ public class ScoreboardListener implements Listener, CssListener {
 		perPlayer.clear();
 		data.clear();
 		if (lpListener != null) {
-			((EventSubscription<?>) lpListener).close();
+			lpListener.unregister();
 			lpListener = null;
 		}
 		if (taskId != 0)
@@ -117,19 +113,17 @@ public class ScoreboardListener implements Listener, CssListener {
 						if (player == null || !player.isOnline())
 							continue;
 						Location loc = player.getLocation();
-						entry.getValue().process(PlaceholdersExecutor.i().papi(player.getUniqueId()).add("player", player.getName())
-								.add("money", API.get().getEconomyHook().format(API.get().getEconomyHook().getBalance(player.getName(), player.getWorld().getName()))).add("health", player.getHealth())
-								.add("food", player.getFoodLevel()).add("x", loc.getX()).add("y", loc.getY()).add("z", loc.getZ()).add("world", loc.getWorld().getName()));
+						entry.getValue()
+								.process(PlaceholdersExecutor.i().papi(player.getUniqueId()).add("player", player.getName())
+										.add("balance", API.get().getEconomyHook().format(API.get().getEconomyHook().getBalance(player.getName(), player.getWorld().getName())))
+										.add("health", player.getHealth()).add("food", player.getFoodLevel()).add("x", loc.getX()).add("y", loc.getY()).add("z", loc.getZ())
+										.add("world", loc.getWorld().getName()));
 					}
 				}
 			}
-		}.runRepeating(1, 1);
+		}.runRepeating(12, Math.max(1, getConfig().getLong("settings.data-reflesh-every-ticks")));
 		if (API.get().getPermissionHook().getClass() == LuckPermsPermissionHook.class)
-			lpListener = LuckPermsProvider.get().getEventBus().subscribe(Loader.getPlugin(), UserDataRecalculateEvent.class, e -> {
-				UserScoreboardData userData = data.get(e.getUser().getUniqueId());
-				if (userData.shouldUpdateData(e.getData().getMetaData().getPrimaryGroup()))
-					data.put(e.getUser().getUniqueId(), generateData(userData.getPlayer()));
-			});
+			lpListener = new ScoreboardLP().register(this);
 		else if (API.get().getPermissionHook().getClass() == VaultPermissionHook.class)
 			new Tasker() {
 
