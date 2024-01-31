@@ -146,7 +146,8 @@ public class ScoreboardListener implements Listener, CssListener {
 
 	public UserScoreboardData generateData(Player player) {
 		String vaultGroup = API.get().getPermissionHook().getGroup(player);
-		UserScoreboardData userData = new UserScoreboardData(player, vaultGroup);
+		UserScoreboardData previous = data.get(player.getUniqueId());
+		UserScoreboardData userData = new UserScoreboardData(player, vaultGroup, previous == null ? false : previous.isHidden());
 		PerWorldScoreboardData pwData;
 		ScoreboardData data;
 		if ((pwData = perWorld.get(player.getWorld().getName())) != null) {
