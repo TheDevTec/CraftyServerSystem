@@ -27,12 +27,11 @@ public class UserScoreboardData extends ScoreboardData {
 	}
 
 	public void setHidden(boolean hide) {
-		if (hide)
-			hidden = false;
-		else {
+		if (hide) {
 			hidden = true;
 			removeScoreboard();
-		}
+		} else
+			hidden = false;
 	}
 
 	public void process(PlaceholdersExecutor placeholders) {
