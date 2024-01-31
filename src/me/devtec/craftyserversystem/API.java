@@ -14,6 +14,8 @@ import me.devtec.craftyserversystem.economy.CssEconomyHook;
 import me.devtec.craftyserversystem.economy.EconomyHook;
 import me.devtec.craftyserversystem.economy.EmptyEconomyHook;
 import me.devtec.craftyserversystem.economy.VaultEconomyHook;
+import me.devtec.craftyserversystem.events.internal.ScoreboardListener;
+import me.devtec.craftyserversystem.events.internal.TablistListener;
 import me.devtec.craftyserversystem.managers.CommandManager;
 import me.devtec.craftyserversystem.managers.ConfigurationManager;
 import me.devtec.craftyserversystem.managers.CooldownManager;
@@ -21,6 +23,9 @@ import me.devtec.craftyserversystem.managers.ListenerManager;
 import me.devtec.craftyserversystem.managers.MessageManager;
 import me.devtec.craftyserversystem.permission.EmptyPermissionHook;
 import me.devtec.craftyserversystem.permission.PermissionHook;
+import me.devtec.craftyserversystem.utils.scoreboard.UserScoreboardData;
+import me.devtec.craftyserversystem.utils.tablist.UserTablistData;
+import me.devtec.craftyserversystem.utils.tablist.nametag.NametagManagerAPI;
 import me.devtec.shared.Ref;
 import me.devtec.shared.dataholder.Config;
 import me.devtec.shared.json.Json;
@@ -184,5 +189,13 @@ public class API {
 
 	protected void shutdown() {
 		metrics.shutdown();
+		if (NametagManagerAPI.get().isLoaded())
+			NametagManagerAPI.get().unload();
+		if (!TablistListener.data.isEmpty())
+			for (UserTablistData data : TablistListener.data.values())
+				data.removeTablist();
+		if (!ScoreboardListener.data.isEmpty())
+			for (UserScoreboardData data : ScoreboardListener.data.values())
+				data.removeScoreboard();
 	}
 }
