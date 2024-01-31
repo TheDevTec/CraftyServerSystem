@@ -16,7 +16,6 @@ import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
-import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -36,7 +35,7 @@ import me.devtec.shared.utility.ColorUtils;
 import me.devtec.shared.utility.TimeUtils;
 import me.devtec.theapi.bukkit.BukkitLoader;
 
-public class ChatListener implements Listener, CssListener {
+public class ChatListener implements CssListener {
 
 	// AntiSpam
 	private List<String> ignoredPlaceholders = Arrays.asList("[item]", "[inv]", "[ec]");

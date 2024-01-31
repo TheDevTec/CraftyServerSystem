@@ -1,7 +1,6 @@
 package me.devtec.craftyserversystem.events.internal;
 
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 
@@ -10,7 +9,7 @@ import me.devtec.craftyserversystem.economy.CssEconomyHook;
 import me.devtec.craftyserversystem.events.CssListener;
 import me.devtec.shared.dataholder.Config;
 
-public class EconomyJoinListener implements Listener, CssListener {
+public class EconomyJoinListener implements CssListener {
 
 	@Override
 	public Config getConfig() {

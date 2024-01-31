@@ -3,7 +3,6 @@ package me.devtec.craftyserversystem.events.internal;
 import java.util.Map;
 
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 
 import me.devtec.craftyserversystem.API;
@@ -12,7 +11,7 @@ import me.devtec.shared.dataholder.Config;
 import me.devtec.shared.dataholder.cache.TempMap;
 import me.devtec.theapi.bukkit.gui.GUI;
 
-public class PreCommandListener implements Listener, CssListener {
+public class PreCommandListener implements CssListener {
 	public static final Map<String, GUI> guis = new TempMap<String, GUI>(20 * 60 * 15).setCallback(value -> value.getValue().close());
 
 	@Override

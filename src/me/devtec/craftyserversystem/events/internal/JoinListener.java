@@ -5,7 +5,6 @@ import java.util.Collection;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 
 import me.devtec.craftyserversystem.API;
@@ -14,7 +13,7 @@ import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
 import me.devtec.shared.dataholder.Config;
 import me.devtec.theapi.bukkit.BukkitLoader;
 
-public class JoinListener implements Listener, CssListener {
+public class JoinListener implements CssListener {
 
 	@Override
 	public Config getConfig() {
