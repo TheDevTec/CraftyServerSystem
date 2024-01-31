@@ -2,6 +2,8 @@ package me.devtec.craftyserversystem.utils.tablist;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Function;
 
 import org.bukkit.entity.Player;
@@ -25,7 +27,10 @@ public class UserTablistData extends TablistData {
 	private static final Object emptyTabPacket = BukkitLoader.getNmsProvider().packetPlayerListHeaderFooter(Component.EMPTY_COMPONENT, Component.EMPTY_COMPONENT);
 
 	private Player player;
+	private String previousHeader;
+	private String previousFooter;
 	private YellowNumberDisplayMode previous;
+	private Map<Player, Integer> yellowNumber = new HashMap<>();
 
 	public UserTablistData(Player player) {
 		this.player = player;
@@ -34,6 +39,9 @@ public class UserTablistData extends TablistData {
 	public UserTablistData(Player player, UserTablistData previousData) {
 		this.player = player;
 		previous = previousData.previous;
+		previousHeader = previousData.previousHeader;
+		previousFooter = previousData.previousFooter;
+		yellowNumber.putAll(previousData.yellowNumber);
 	}
 
 	public UserTablistData process(PlaceholdersExecutor placeholders) {
@@ -49,18 +57,26 @@ public class UserTablistData extends TablistData {
 				footerContainer.append('\n');
 			footerContainer.append(placeholders.apply(text));
 		}
-		Object tabPacket = BukkitLoader.getNmsProvider().packetPlayerListHeaderFooter(ComponentAPI.fromString(headerContainer.toString()), ComponentAPI.fromString(footerContainer.toString()));
-		BukkitLoader.getPacketHandler().send(player, tabPacket);
-		player.setPlayerListName(placeholders.apply(getTabNameFormat().replace("{player}", player.getName()).replace("{prefix}", getTabPrefix()).replace("{suffix}", getTabSuffix())));
+		String header = headerContainer.toString();
+		String footer = footerContainer.toString();
+		if (!(header.equals(previousHeader) && footer.equals(previousFooter))) {
+			Object tabPacket = BukkitLoader.getNmsProvider().packetPlayerListHeaderFooter(ComponentAPI.fromString(header), ComponentAPI.fromString(footer));
+			BukkitLoader.getPacketHandler().send(player, tabPacket);
+			previousHeader = header;
+			previousFooter = footer;
+		}
+		String playerlistName = placeholders.apply(getTabNameFormat().replace("{player}", player.getName()).replace("{prefix}", getTabPrefix()).replace("{suffix}", getTabSuffix()));
+		if (!player.getPlayerListName().equals(playerlistName))
+			player.setPlayerListName(playerlistName);
 		NametagPlayer nametag = NametagManagerAPI.get().getPlayer(player);
 		nametag.setNametagGenerator(generateFunction(getTagNameFormat()));
 		nametag.getNametag().setText(nametag.getNametagGenerator().apply(player));
 
-		Collection<Player> whoCanSee = null;
 		if (previous != null && previous != getYellowNumberDisplayMode()) {
-			BukkitLoader.getPacketHandler().send(whoCanSee = whoCanSee(player), BukkitLoader.getNmsProvider().packetScoreboardScore(Action.REMOVE, "css_yn", player.getName(), 0));
-			BukkitLoader.getPacketHandler().send(player, createObjectivePacket(1, "css_yn", "", previous == YellowNumberDisplayMode.INTEGER));
 			// remove
+			if (!yellowNumber.isEmpty())
+				BukkitLoader.getPacketHandler().send(yellowNumber.keySet(), BukkitLoader.getNmsProvider().packetScoreboardScore(Action.REMOVE, "css_yn", player.getName(), 0));
+			BukkitLoader.getPacketHandler().send(player, createObjectivePacket(1, "css_yn", "", previous == YellowNumberDisplayMode.INTEGER));
 		}
 		if (previous == null && previous != getYellowNumberDisplayMode() && getYellowNumberDisplayMode() != YellowNumberDisplayMode.NONE) {
 			// create
@@ -69,19 +85,26 @@ public class UserTablistData extends TablistData {
 			Ref.set(packet, "b", "css_yn");
 			BukkitLoader.getPacketHandler().send(player, packet);
 		}
-		if (getYellowNumberDisplayMode() != YellowNumberDisplayMode.NONE)
+		if (getYellowNumberDisplayMode() != YellowNumberDisplayMode.NONE) {
 			// update
-			BukkitLoader.getPacketHandler().send(whoCanSee == null ? whoCanSee(player) : whoCanSee,
-					BukkitLoader.getNmsProvider().packetScoreboardScore(Action.CHANGE, "css_yn", player.getName(), (int) MathUtils.calculate(placeholders.applyWithoutColors(getYellowNumberText()))));
+			int updateValue = (int) MathUtils.calculate(placeholders.applyWithoutColors(getYellowNumberText()));
+			Collection<Player> requiredUpdate = whoRequireUpdate(player, updateValue);
+			if (!requiredUpdate.isEmpty())
+				BukkitLoader.getPacketHandler().send(requiredUpdate, BukkitLoader.getNmsProvider().packetScoreboardScore(Action.CHANGE, "css_yn", player.getName(), updateValue));
+		}
 		previous = getYellowNumberDisplayMode();
 		return this;
 	}
 
-	private Collection<Player> whoCanSee(Player target) {
+	private Collection<Player> whoRequireUpdate(Player target, int value) {
 		Collection<Player> list = new ArrayList<>();
-		for (Player player : BukkitLoader.getOnlinePlayers())
-			if (player.canSee(target))
+		for (Player player : BukkitLoader.getOnlinePlayers()) {
+			Integer val;
+			if (player.canSee(target) && ((val = yellowNumber.get(player)) == null || val != value)) {
 				list.add(player);
+				yellowNumber.put(player, value);
+			}
+		}
 		return list;
 	}
 
@@ -114,6 +137,8 @@ public class UserTablistData extends TablistData {
 		player.setPlayerListName(null);
 		NametagPlayer nametag = NametagManagerAPI.get().getPlayer(player);
 		nametag.remove();
+		BukkitLoader.getPacketHandler().send(yellowNumber.keySet(), BukkitLoader.getNmsProvider().packetScoreboardScore(Action.REMOVE, "css_yn", player.getName(), 0));
+		yellowNumber.clear();
 		BukkitLoader.getPacketHandler().send(player, createObjectivePacket(1, "css_yn", "", previous == YellowNumberDisplayMode.INTEGER));
 		if (NametagManagerAPI.get().getPlayers().size() == 1)
 			NametagManagerAPI.get().getPlayers().remove(nametag);
