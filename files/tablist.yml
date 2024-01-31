@@ -86,7 +86,7 @@ sorting:
   - helper
   - vip
   - default
-  
-# How much do you want to reflesh tablist data (nametag & tablist)
+
+# How frequently to refresh tablist data (tablist, nametag and yellow number)
 # 20 ticks = 1s
 data-reflesh-every-ticks: 1

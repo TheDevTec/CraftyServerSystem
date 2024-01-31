@@ -1,4 +1,4 @@
-enabled: true
+senabled: true
 
 disabled-in-worlds:
 - "disabledWorld"
@@ -96,3 +96,7 @@ settings:
   # How red numbers in scoreboard should be displayed?
   # Options: VANILLA (0,1,2,3...) or specific number (like 0)
   displayNumbers: 0
+  
+  # How frequently to refresh tablist data (tablist, nametag and yellow number)
+  # 20 ticks = 1s
+  data-reflesh-every-ticks: 1
