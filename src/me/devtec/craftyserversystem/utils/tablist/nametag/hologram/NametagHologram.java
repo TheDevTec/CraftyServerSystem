@@ -142,15 +142,72 @@ public class NametagHologram extends Hologram {
 	}
 
 	public void shouldTeleport(Location playerLoc) {
-		for (NametagPlayer player : whichCanSee)
-			if (player.getPlayer().isOnline())
-				shouldTeleport(player, playerLoc);
+		if (owner.getVehicle() != null) {
+			double additionalY = owner.getVehicle().getLocation().getY();
+			EntityType type = owner.getVehicle().getType();
+			if (type == EntityType.HORSE || type == EntityType.SKELETON_HORSE || type == EntityType.ZOMBIE_HORSE)
+				additionalY += 0.85;
+			else if (type == EntityType.DONKEY)
+				additionalY += 0.525;
+			else if (type.name().equals("CAMEL"))
+				additionalY += 1.15;
+			else if (type == EntityType.PIG)
+				additionalY += 0.325;
+			else if (type.name().equals("STRIDER"))
+				additionalY += 1.15;
+			else if (type == EntityType.BOAT || type.name().equals("CHEST_BOAT"))
+				additionalY += -0.45;
+			playerLoc.setY(additionalY);
+		}
+		if (!prevWorld.equals(playerLoc.getWorld())) {
+			hideAll();
+			prevWorld = playerLoc.getWorld();
+			prevX = playerLoc.getX();
+			prevY = playerLoc.getY();
+			prevZ = playerLoc.getZ();
+			shouldUpdate = true;
+			return;
+		}
+		if (!areSame(playerLoc)) {
+			prevX = playerLoc.getX();
+			prevY = playerLoc.getY();
+			prevZ = playerLoc.getZ();
+			Object teleportPacket = HologramHolder.packetTeleport(id, prevX, prevY + height, prevZ);
+			for (NametagPlayer player : whichCanSee)
+				if (player.getPlayer().isOnline())
+					BukkitLoader.getPacketHandler().send(player.getPlayer(), teleportPacket);
+			shouldUpdate = true;
+		}
 	}
 
 	public void shouldTeleport(double x, double y, double z) {
-		for (NametagPlayer player : whichCanSee)
-			if (player.getPlayer().isOnline())
-				shouldTeleport(player, x, y, z);
+		if (owner.getVehicle() != null) {
+			double additionalY = owner.getVehicle().getLocation().getY();
+			EntityType type = owner.getVehicle().getType();
+			if (type == EntityType.HORSE || type == EntityType.SKELETON_HORSE || type == EntityType.ZOMBIE_HORSE)
+				additionalY += 0.85;
+			else if (type == EntityType.DONKEY)
+				additionalY += 0.525;
+			else if (type.name().equals("CAMEL"))
+				additionalY += 1.15;
+			else if (type == EntityType.PIG)
+				additionalY += 0.325;
+			else if (type.name().equals("STRIDER"))
+				additionalY += 1.15;
+			else if (type == EntityType.BOAT || type.name().equals("CHEST_BOAT"))
+				additionalY += -0.45;
+			y = additionalY;
+		}
+		if (!areSame(x, y, z)) {
+			prevX = x;
+			prevY = y;
+			prevZ = z;
+			Object teleportPacket = HologramHolder.packetTeleport(id, prevX, prevY + height, prevZ);
+			for (NametagPlayer player : whichCanSee)
+				if (player.getPlayer().isOnline())
+					BukkitLoader.getPacketHandler().send(player.getPlayer(), teleportPacket);
+			shouldUpdate = true;
+		}
 	}
 
 	public void shouldTeleport(NametagPlayer player, Location playerLoc) {
