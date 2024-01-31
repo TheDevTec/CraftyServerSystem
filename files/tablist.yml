@@ -54,16 +54,17 @@ group:
 
 yellowNumber:
   # Must be integer (number)
+  # Accepting placeholders from PlaceholderAPI
   value: "{ping}"
   # NONE, INTEGER or HEARTS
   displayAs: INTEGER
 
 header:
-- "{animation:serverTitle}"
+- "  &f&lServer name"
 - "&7Total Online &e{online} &7players:"
 
 footer:
-- "&7Money: &e€{balance} &8| &7Ping: &e{ping}"
+- "&7Money: &e€{balance}"
 
 # Default tab & tag format when group attemp fail
 tab:
