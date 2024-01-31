@@ -42,7 +42,7 @@ public class VaultPermissionHook implements PermissionHook {
 
 	@Override
 	public String getGroup(String name) {
-		if (perm == null)
+		if (perm == null || !perm.hasGroupSupport())
 			return "default";
 		String group = perm.getPrimaryGroup(Bukkit.getWorlds().get(0).getName(), Bukkit.getOfflinePlayer(name));
 		return group == null ? "default" : group;
