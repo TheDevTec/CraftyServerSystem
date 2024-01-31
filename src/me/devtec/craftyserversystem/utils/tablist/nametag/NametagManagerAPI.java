@@ -8,6 +8,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -23,6 +24,7 @@ import me.devtec.craftyserversystem.utils.tablist.nametag.support.VaultTeamManag
 import me.devtec.shared.API;
 import me.devtec.shared.Ref;
 import me.devtec.shared.annotations.Nonnull;
+import me.devtec.shared.dataholder.cache.ConcurrentSet;
 import me.devtec.theapi.bukkit.BukkitLoader;
 import me.devtec.theapi.bukkit.packetlistener.ChannelContainer;
 import me.devtec.theapi.bukkit.packetlistener.PacketContainer;
@@ -40,7 +42,7 @@ public class NametagManagerAPI {
 
 	private boolean isLoaded;
 	private PacketListener listener;
-	private volatile List<NametagPlayer> players = new ArrayList<>();
+	private volatile Set<NametagPlayer> players = new ConcurrentSet<>();
 
 	protected volatile Map<Integer, List<NametagPlayer>> watchingEntityMove = new ConcurrentHashMap<>();
 	private TeamManager teamManager = new DefaultTeamManager();
@@ -57,7 +59,7 @@ public class NametagManagerAPI {
 
 	}
 
-	public List<NametagPlayer> getPlayers() {
+	public Set<NametagPlayer> getPlayers() {
 		return players;
 	}
 
@@ -66,9 +68,9 @@ public class NametagManagerAPI {
 	}
 
 	public NametagPlayer lookupById(int id) {
-		for (Player player : BukkitLoader.getOnlinePlayers())
-			if (player.getEntityId() == id)
-				return lookupByUuid(player.getUniqueId());
+		for (NametagPlayer player : players)
+			if (player.getPlayer().getEntityId() == id)
+				return player;
 		return null;
 	}
 
@@ -210,7 +212,7 @@ public class NametagManagerAPI {
 					NametagPlayer player = lookupById(id);
 					if (player != null) {
 						NametagHologram hologram = player.getNametag();
-						hologram.shouldTeleport(lookupByName(name), hologram.getPlayer().getLocation());
+						hologram.shouldTeleport(hologram.getPlayer().getLocation());
 					} else {
 						List<NametagPlayer> ridingPlayers = watchingEntityMove.get(id);
 						if (ridingPlayers != null)
@@ -219,7 +221,7 @@ public class NametagManagerAPI {
 								while (itr.hasNext()) {
 									NametagPlayer riding = itr.next();
 									NametagHologram hologram = riding.getNametag();
-									hologram.shouldTeleport(lookupByName(name), hologram.getPlayer().getLocation());
+									hologram.shouldTeleport(hologram.getPlayer().getLocation());
 								}
 							}
 					}
@@ -231,7 +233,7 @@ public class NametagManagerAPI {
 						NametagPlayer receiver = lookupByName(name);
 						if (receiver == null)
 							return;
-						player.getNametag().shouldTeleport(receiver, player.getPlayer().getLocation());
+						player.getNametag().shouldTeleport(player.getPlayer().getLocation());
 					}
 					return;
 				}
@@ -303,13 +305,9 @@ public class NametagManagerAPI {
 							return;
 						NametagPlayer receiverPlayer = lookupByUuidOrCreate(offlinePlayer, offlineUuid);
 						for (UUID entity : (List<UUID>) Ref.get(packet, listUuidsField)) {
-							if (entity.equals(offlineUuid))
+							if (entity.equals(offlineUuid) || Bukkit.getPlayer(entity) == null)
 								continue;
-
-							Player listPlayer;
-							if ((listPlayer = Bukkit.getPlayer(entity)) == null)
-								continue;
-							NametagPlayer spawned = lookupByUuidOrCreate(listPlayer, entity);
+							NametagPlayer spawned = lookupByUuid(entity);
 							receiverPlayer.removeTabSorting(spawned);
 						}
 						return;
@@ -323,14 +321,9 @@ public class NametagManagerAPI {
 						NametagPlayer receiverPlayer = lookupByUuidOrCreate(offlinePlayer, offlineUuid);
 						for (Object entity : (List<?>) Ref.get(packet, listUuidsField)) {
 							UUID uuid = BukkitLoader.getNmsProvider().fromGameProfile(Ref.get(entity, playerInfoUuidField)).getUUID();
-							if (uuid.equals(offlineUuid))
+							if (uuid.equals(offlineUuid) || Bukkit.getPlayer(uuid) == null)
 								continue;
-
-							Player listPlayer = null;
-							if ((listPlayer = Bukkit.getPlayer(uuid)) == null)
-								continue;
-
-							NametagPlayer spawned = lookupByUuidOrCreate(listPlayer, uuid);
+							NametagPlayer spawned = lookupByUuid(uuid);
 							receiverPlayer.removeTabSorting(spawned);
 						}
 					} else { // Add or update
@@ -366,9 +359,7 @@ public class NametagManagerAPI {
 						while (joinedPlayer == null && (joinedPlayer = Bukkit.getPlayer(uuid)) == null || joinedPlayer.getWorld() == null)
 							; // Await connection
 
-						NametagPlayer spawned;
-						spawned = lookupByUuidOrCreate(joinedPlayer, uuid);
-
+						NametagPlayer spawned = lookupByUuidOrCreate(joinedPlayer, uuid);
 						NametagPlayer receiverPlayer = lookupByUuidOrCreate(offlinePlayer, offlineUuid);
 						spawned.showNametag(receiverPlayer);
 					}
@@ -470,7 +461,7 @@ public class NametagManagerAPI {
 				if (packet.getClass().isAssignableFrom(outTeleport)) {
 					NametagPlayer player = lookupById((int) Ref.get(packet, entityIdField));
 					if (player != null)
-						player.getNametag().shouldTeleport(lookupByName(name), (double) Ref.get(packet, xField), (double) Ref.get(packet, yField), (double) Ref.get(packet, zField));
+						player.getNametag().shouldTeleport((double) Ref.get(packet, xField), (double) Ref.get(packet, yField), (double) Ref.get(packet, zField));
 					return;
 				}
 				if (packet.getClass().isAssignableFrom(outScoreboardTeam) && nametagVisibility != null)
