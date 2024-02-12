@@ -41,6 +41,13 @@ speed:
     cmd: "css.cmd.speed"
     other: "css.cmd.speed.other"
     
+broadcast:
+  usage:
+    cmd: "/broadcast [message]"
+  cmd: [broadcast,bc]
+  perms:
+    cmd: "css.cmd.broadcast"
+    
 thor:
   usage:
     usage: "/thor [player] {-attack}"
