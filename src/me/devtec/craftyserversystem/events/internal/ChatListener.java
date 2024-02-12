@@ -150,7 +150,7 @@ public class ChatListener implements CssListener {
 		entrySetOfChatPlaceholders = chatPlaceholders.entrySet();
 	}
 
-	@EventHandler(priority = EventPriority.MONITOR)
+	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onChat(AsyncPlayerChatEvent e) {
 		if (e.isCancelled())
 			return;
