@@ -13,11 +13,14 @@ import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
 
 import me.devtec.craftyserversystem.Loader;
+import me.devtec.craftyserversystem.api.events.VanishToggleEvent;
 import me.devtec.craftyserversystem.commands.CssCommand;
 import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
 import me.devtec.shared.API;
 import me.devtec.shared.commands.selectors.Selector;
 import me.devtec.shared.commands.structures.CommandStructure;
+import me.devtec.shared.dataholder.Config;
+import me.devtec.shared.events.EventManager;
 import me.devtec.theapi.bukkit.BukkitLoader;
 
 public class Vanish extends CssCommand {
@@ -33,10 +36,16 @@ public class Vanish extends CssCommand {
 
 			@EventHandler
 			public void login(PlayerLoginEvent e) {
-				if (API.getUser(e.getPlayer().getUniqueId()).getBoolean("css.vanish"))
-					setVanish(e.getPlayer(), e.getPlayer(), true, false); // Hide connected player before online players
+				Config user = API.getUser(e.getPlayer().getUniqueId());
+				if (user.getBoolean("css.vanish")) {
+					VanishToggleEvent event = new VanishToggleEvent(e.getPlayer().getUniqueId(), true);
+					EventManager.call(event);
+					if (event.getStatus())
+						setVanish(e.getPlayer(), e.getPlayer(), true, false); // Hide connected player before online players
+					else
+						user.remove("css.vanish");
+				}
 				// Hide vanished players before this player
-
 				for (Player player : BukkitLoader.getOnlinePlayers())
 					if (!player.equals(e.getPlayer()) && getVanish(player) && !player.hasPermission(getPerm("see")))
 						e.getPlayer().hidePlayer(Loader.getPlugin(), player);
@@ -93,24 +102,25 @@ public class Vanish extends CssCommand {
 	}
 
 	private void setVanish(CommandSender sender, Player target, boolean status, boolean sendMessages) {
-		if (status) { // enable
+		VanishToggleEvent event = new VanishToggleEvent(target.getUniqueId(), status);
+		EventManager.call(event);
+		if (event.getStatus()) { // enable
 			if (!getVanish(target))
 				target.setMetadata("css-vanish", new FixedMetadataValue(Loader.getPlugin(), true));
 		} else if (getVanish(target))
 			for (MetadataValue value : target.getMetadata("css-vanish"))
 				target.removeMetadata("css-vanish", value.getOwningPlugin());
-		if (status)
+		if (event.getStatus())
 			API.getUser(target.getUniqueId()).set("css.vanish", true);
 		else
 			API.getUser(target.getUniqueId()).remove("css.vanish");
-		// TODO bungeecord bridge?
 
 		for (Player player : BukkitLoader.getOnlinePlayers())
 			if (!player.equals(target) && !player.hasPermission(getPerm("see")))
 				player.hidePlayer(Loader.getPlugin(), target);
 
 		if (sendMessages) {
-			String statusPath = status ? "enabled" : "disabled";
+			String statusPath = event.getStatus() ? "enabled" : "disabled";
 			if (sender.equals(target))
 				msg(sender, "self." + statusPath);
 			else {

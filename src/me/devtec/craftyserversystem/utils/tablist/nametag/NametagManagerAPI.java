@@ -113,7 +113,7 @@ public class NametagManagerAPI {
 
 	public void load() {
 		isLoaded = true;
-		switch (me.devtec.craftyserversystem.API.get().getConfigManager().getTab().getString("sorting.by").toUpperCase()) {
+		switch (me.devtec.craftyserversystem.api.API.get().getConfigManager().getTab().getString("sorting.by").toUpperCase()) {
 		case "GROUP_WEIGHT":
 			if (Bukkit.getPluginManager().isPluginEnabled("LuckPerms")) {
 				teamManager = new LuckPermsTeamManager();

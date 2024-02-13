@@ -1,4 +1,4 @@
-package me.devtec.craftyserversystem;
+package me.devtec.craftyserversystem.api;
 
 import java.lang.reflect.Constructor;
 import java.util.HashMap;
@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.bukkit.Bukkit;
 
+import me.devtec.craftyserversystem.Loader;
 import me.devtec.craftyserversystem.commands.CssCommand;
 import me.devtec.craftyserversystem.commands.internal.BalanceTop;
 import me.devtec.craftyserversystem.economy.CssEconomy;
@@ -51,6 +52,42 @@ public class API {
 
 	// Private constructor
 	private API() {
+		metrics = new Metrics(Loader.getPlugin().getDescription().getVersion(), 20204);
+		cfgManager = new ConfigurationManager().initFromJar();
+		cmdManager = new CommandManager(cfgManager);
+		cdManager = new CooldownManager();
+		msgManager = new MessageManager();
+		listenerManager = new ListenerManager();
+		if (Json.reader().getClass() == ModernJsonReader.class || Json.writer().getClass() == ModernJsonWriter.class) {
+			Bukkit.getConsoleSender().sendMessage("");
+			Bukkit.getConsoleSender().sendMessage(ColorUtils.colorize(
+					"&cCraftyServerSystem &8» &aWe recommend to change &2Json reader & writer &afrom &e&nGuava&r&a to our own &2&nTheAPI&r&a in the &cplugins/TheAPI/config.yml &aon line &c\"default-json-handler\""));
+			Bukkit.getConsoleSender().sendMessage("");
+		}
+		// Register our economy hook
+		Config economy = getConfigManager().getEconomy();
+		if (economy.getBoolean("enabled")) {
+			Map<String, List<String>> map = null;
+			if (economy.getBoolean("settings.per-world-economy")) {
+				map = new HashMap<>();
+				for (String key : economy.getKeys("per-world-groups"))
+					map.put(key, economy.getStringList("per-world-groups." + key));
+			}
+			if (Bukkit.getPluginManager().getPlugin("Vault") == null) {
+				this.economy = new CssEconomy(economy.getDouble("settings.startup-money"),
+						economy.getString("settings.minimum-money").equals("UNLIMITED") ? Double.NEGATIVE_INFINITY : economy.getDouble("settings.minimum-money"),
+						economy.getString("settings.maximum-money").equals("UNLIMITED") ? Double.POSITIVE_INFINITY : economy.getDouble("settings.maximum-money"), map != null, map);
+				setEconomyHook(new CssEconomyHook(this.economy));
+			} else {
+				Constructor<?> cons = Ref.constructor(Ref.getClass("me.devtec.craftyserversystem.economy.CssEconomyVaultImplementation"), double.class, double.class, double.class, boolean.class,
+						Map.class);
+				this.economy = (CssEconomy) Ref.newInstance(cons, economy.getDouble("settings.startup-money"),
+						economy.getString("settings.minimum-money").equals("UNLIMITED") ? Double.NEGATIVE_INFINITY : economy.getDouble("settings.minimum-money"),
+						economy.getString("settings.maximum-money").equals("UNLIMITED") ? Double.POSITIVE_INFINITY : economy.getDouble("settings.maximum-money"), map != null, map);
+				setEconomyHook(new CssEconomyHook(this.economy));
+				VaultEconomyHook.registerOurEconomy();
+			}
+		}
 	}
 
 	/**
@@ -148,46 +185,7 @@ public class API {
 			((BalanceTop) balanceTop).calculate();
 	}
 
-	protected void init() {
-		metrics = new Metrics(Loader.getPlugin().getDescription().getVersion(), 20204);
-		cfgManager = new ConfigurationManager().initFromJar();
-		cmdManager = new CommandManager(cfgManager);
-		cdManager = new CooldownManager();
-		msgManager = new MessageManager();
-		listenerManager = new ListenerManager();
-		if (Json.reader().getClass() == ModernJsonReader.class || Json.writer().getClass() == ModernJsonWriter.class) {
-			Bukkit.getConsoleSender().sendMessage("");
-			Bukkit.getConsoleSender().sendMessage(ColorUtils.colorize(
-					"&cCraftyServerSystem &8» &aWe recommend to change &2Json reader & writer &afrom &e&nGuava&r&a to our own &2&nTheAPI&r&a in the &cplugins/TheAPI/config.yml &aon line &c\"default-json-handler\""));
-			Bukkit.getConsoleSender().sendMessage("");
-		}
-		// Register our economy hook
-		Config economy = getConfigManager().getEconomy();
-		if (economy.getBoolean("enabled")) {
-			Map<String, List<String>> map = null;
-			if (economy.getBoolean("settings.per-world-economy")) {
-				map = new HashMap<>();
-				for (String key : economy.getKeys("per-world-groups"))
-					map.put(key, economy.getStringList("per-world-groups." + key));
-			}
-			if (Bukkit.getPluginManager().getPlugin("Vault") == null) {
-				this.economy = new CssEconomy(economy.getDouble("settings.startup-money"),
-						economy.getString("settings.minimum-money").equals("UNLIMITED") ? Double.NEGATIVE_INFINITY : economy.getDouble("settings.minimum-money"),
-						economy.getString("settings.maximum-money").equals("UNLIMITED") ? Double.POSITIVE_INFINITY : economy.getDouble("settings.maximum-money"), map != null, map);
-				setEconomyHook(new CssEconomyHook(this.economy));
-			} else {
-				Constructor<?> cons = Ref.constructor(Ref.getClass("me.devtec.craftyserversystem.economy.CssEconomyVaultImplementation"), double.class, double.class, double.class, boolean.class,
-						Map.class);
-				this.economy = (CssEconomy) Ref.newInstance(cons, economy.getDouble("settings.startup-money"),
-						economy.getString("settings.minimum-money").equals("UNLIMITED") ? Double.NEGATIVE_INFINITY : economy.getDouble("settings.minimum-money"),
-						economy.getString("settings.maximum-money").equals("UNLIMITED") ? Double.POSITIVE_INFINITY : economy.getDouble("settings.maximum-money"), map != null, map);
-				setEconomyHook(new CssEconomyHook(this.economy));
-				VaultEconomyHook.registerOurEconomy();
-			}
-		}
-	}
-
-	protected void shutdown() {
+	public void shutdown() {
 		metrics.shutdown();
 		if (NametagManagerAPI.get().isLoaded())
 			NametagManagerAPI.get().unload();

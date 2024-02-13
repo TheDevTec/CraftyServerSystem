@@ -25,7 +25,7 @@ public class HomeManager {
 	}
 
 	public int getMaximumHomes(@Nonnull String player) {
-		Integer homeLimit = groups.get(me.devtec.craftyserversystem.API.get().getPermissionHook().getGroup(player));
+		Integer homeLimit = groups.get(me.devtec.craftyserversystem.api.API.get().getPermissionHook().getGroup(player));
 		return homeLimit == null ? groups.get("default") : homeLimit;
 	}
 

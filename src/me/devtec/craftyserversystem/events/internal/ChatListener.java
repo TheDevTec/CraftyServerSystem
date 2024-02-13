@@ -20,8 +20,8 @@ import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import me.devtec.craftyserversystem.API;
 import me.devtec.craftyserversystem.Loader;
+import me.devtec.craftyserversystem.api.API;
 import me.devtec.craftyserversystem.events.CssListener;
 import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
 import me.devtec.craftyserversystem.utils.ChatHandlers;

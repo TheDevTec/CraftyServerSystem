@@ -6,8 +6,8 @@ import java.util.List;
 import org.bukkit.command.CommandSender;
 import org.bukkit.inventory.ItemStack;
 
-import me.devtec.craftyserversystem.API;
 import me.devtec.craftyserversystem.annotations.IgnoredClass;
+import me.devtec.craftyserversystem.api.API;
 import me.devtec.shared.annotations.Nonnull;
 import me.devtec.craftyserversystem.managers.cooldown.CooldownHolder;
 import me.devtec.shared.dataholder.Config;

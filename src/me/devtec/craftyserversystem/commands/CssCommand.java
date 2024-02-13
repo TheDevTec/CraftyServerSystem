@@ -10,9 +10,9 @@ import org.bukkit.command.BlockCommandSender;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import me.devtec.craftyserversystem.API;
 import me.devtec.shared.annotations.Nonnull;
 import me.devtec.shared.annotations.Nullable;
+import me.devtec.craftyserversystem.api.API;
 import me.devtec.craftyserversystem.managers.cooldown.CooldownHolder;
 import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
 import me.devtec.shared.commands.holder.CommandHolder;

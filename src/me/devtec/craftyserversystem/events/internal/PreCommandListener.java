@@ -5,7 +5,7 @@ import java.util.Map;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 
-import me.devtec.craftyserversystem.API;
+import me.devtec.craftyserversystem.api.API;
 import me.devtec.craftyserversystem.events.CssListener;
 import me.devtec.shared.dataholder.Config;
 import me.devtec.shared.dataholder.cache.TempMap;

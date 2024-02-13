@@ -6,7 +6,7 @@ import java.util.Map;
 
 import org.bukkit.entity.Player;
 
-import me.devtec.craftyserversystem.API;
+import me.devtec.craftyserversystem.api.API;
 import me.devtec.craftyserversystem.commands.CssCommand;
 import me.devtec.craftyserversystem.commands.internal.home.HomeManager;
 import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;

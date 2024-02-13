@@ -23,8 +23,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import me.devtec.craftyserversystem.API;
 import me.devtec.craftyserversystem.Loader;
+import me.devtec.craftyserversystem.api.API;
 import me.devtec.craftyserversystem.events.internal.PreCommandListener;
 import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
 import me.devtec.shared.components.ClickEvent;

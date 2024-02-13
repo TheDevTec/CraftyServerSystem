@@ -14,8 +14,8 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import me.devtec.craftyserversystem.API;
 import me.devtec.craftyserversystem.Loader;
+import me.devtec.craftyserversystem.api.API;
 import me.devtec.craftyserversystem.commands.CssCommand;
 import me.devtec.craftyserversystem.commands.internal.kits.KitSample;
 import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;

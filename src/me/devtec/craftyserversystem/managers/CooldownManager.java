@@ -7,8 +7,8 @@ import javax.annotation.Nullable;
 
 import org.bukkit.command.CommandSender;
 
-import me.devtec.craftyserversystem.API;
 import me.devtec.craftyserversystem.Loader;
+import me.devtec.craftyserversystem.api.API;
 import me.devtec.craftyserversystem.managers.cooldown.CooldownHolder;
 import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
 import me.devtec.shared.dataholder.Config;

@@ -15,6 +15,7 @@ import org.bukkit.plugin.InvalidPluginException;
 import org.bukkit.plugin.UnknownDependencyException;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import me.devtec.craftyserversystem.api.API;
 import me.devtec.craftyserversystem.economy.CssEconomyHook;
 import me.devtec.craftyserversystem.economy.VaultEconomyHook;
 import me.devtec.craftyserversystem.permission.LuckPermsPermissionHook;
@@ -32,7 +33,7 @@ public class Loader extends JavaPlugin {
 			return; // Error
 
 		// Init managers
-		API.get().init();
+		API.get();
 	}
 
 	private boolean checkOrInstallTheAPI() {
