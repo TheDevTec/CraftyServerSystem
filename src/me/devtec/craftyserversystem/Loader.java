@@ -33,7 +33,7 @@ public class Loader extends JavaPlugin {
 			return; // Error
 
 		// Init managers
-		API.get();
+		API.get().start();
 	}
 
 	private boolean checkOrInstallTheAPI() {
