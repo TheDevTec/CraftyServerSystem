@@ -20,7 +20,7 @@ public class ChatHandlers {
 		if (input == null)
 			return false;
 		Iterator<String> matcher = findWebAddress(input);
-		while (matcher.hasNext()) {
+		lookup: while (matcher.hasNext()) {
 			String next = matcher.next();
 			if (next.startsWith("http://"))
 				next = next.substring(7);
@@ -29,29 +29,19 @@ public class ChatHandlers {
 			if (next.startsWith("www."))
 				next = next.substring(4);
 
-			boolean whitelisted = false;
 			for (String wl : whitelist)
 				if (next.startsWith(wl)) {
 					char c;
-					if (next.length() == wl.length() || (c = next.charAt(wl.length())) == '/' || c == '?' || c == '&') {
-						whitelisted = true;
-						break;
-					}
+					if (next.length() == wl.length() || (c = next.charAt(wl.length())) == '/' || c == '?' || c == '&')
+						continue lookup;
 				}
-			if (!whitelisted)
-				return true;
 		}
 		matcher = findIpAddress(input);
-		while (matcher.hasNext()) {
+		lookup: while (matcher.hasNext()) {
 			String next = matcher.next();
-			boolean whitelisted = false;
 			for (String wl : whitelist)
-				if (next.startsWith(wl) && next.length() == wl.length()) {
-					whitelisted = true;
-					break;
-				}
-			if (!whitelisted)
-				return true;
+				if (next.startsWith(wl) && next.length() == wl.length())
+					continue lookup;
 		}
 		return false;
 	}
