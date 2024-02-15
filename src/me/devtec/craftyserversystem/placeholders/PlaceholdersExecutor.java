@@ -21,7 +21,7 @@ public class PlaceholdersExecutor {
 	public static final PlaceholdersExecutor EMPTY = new PlaceholdersExecutor() {
 		@Override
 		public String apply(String text) {
-			return PlaceholderAPI.apply(ColorUtils.colorize(text.replace("{prefix}", API.get().getConfigManager().getPrefix())), null);
+			return ColorUtils.colorize(PlaceholderAPI.apply(text.replace("{prefix}", API.get().getConfigManager().getPrefix()), null));
 		}
 	};
 
@@ -56,12 +56,12 @@ public class PlaceholdersExecutor {
 
 	public String apply(String text) {
 		if (placeholders.isEmpty() || text.indexOf('{') == -1)
-			return PlaceholderAPI.apply(ColorUtils.colorize(text), target); // Doesn't contains any (our) placeholders
+			return ColorUtils.colorize(PlaceholderAPI.apply(text, target)); // Doesn't contains any (our) placeholders
 
 		StringContainer container = new StringContainer(text); // Much faster than using String#replace method
 		for (Entry<String, String> entry : placeholders.entrySet())
 			container.replace(entry.getKey(), entry.getValue());
-		return PlaceholderAPI.apply(ColorUtils.colorize(container.toString()), target);
+		return ColorUtils.colorize(PlaceholderAPI.apply(container.toString(), target));
 	}
 
 	public String applyWithoutColors(String text) {

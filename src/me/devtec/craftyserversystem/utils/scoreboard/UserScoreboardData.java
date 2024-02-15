@@ -2,7 +2,9 @@ package me.devtec.craftyserversystem.utils.scoreboard;
 
 import org.bukkit.entity.Player;
 
+import me.devtec.craftyserversystem.api.API;
 import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
+import me.devtec.shared.placeholders.PlaceholderAPI;
 import me.devtec.theapi.bukkit.scoreboard.ScoreboardAPI;
 import me.devtec.theapi.bukkit.scoreboard.SimpleScore;
 
@@ -37,13 +39,20 @@ public class UserScoreboardData extends ScoreboardData {
 	public void process(PlaceholdersExecutor placeholders) {
 		if (hidden)
 			return;
+		for (String placeholder : API.get().getConfigManager().getPlaceholders().getKeys()) {
+			String replaced = PlaceholderAPI.apply(API.get().getConfigManager().getPlaceholders().getString(placeholder + ".placeholder"), player.getUniqueId());
+			placeholders.add(placeholder,
+					API.get().getConfigManager().getPlaceholders()
+							.getString(placeholder + ".replace." + replaced, API.get().getConfigManager().getPlaceholders().getString(placeholder + ".replace._DEFAULT", ""))
+							.replace("{placeholder}", replaced));
+		}
 		if (updateTitleMode != 0) {
 			if (updateTitleMode != 2)
 				updateTitleMode = 0;
-			score.setTitle(placeholders.applyWithoutColors(getTitle()));
+			score.setTitle(placeholders.apply(getTitle()));
 		}
 		for (String line : getLines())
-			score.addLine(placeholders.applyWithoutColors(line));
+			score.addLine(placeholders.apply(line));
 		score.send(player);
 	}
 

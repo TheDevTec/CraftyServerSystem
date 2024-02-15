@@ -8,6 +8,7 @@ import java.util.function.Function;
 
 import org.bukkit.entity.Player;
 
+import me.devtec.craftyserversystem.api.API;
 import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
 import me.devtec.craftyserversystem.utils.tablist.nametag.NametagManagerAPI;
 import me.devtec.craftyserversystem.utils.tablist.nametag.NametagPlayer;
@@ -45,6 +46,14 @@ public class UserTablistData extends TablistData {
 	}
 
 	public UserTablistData process(PlaceholdersExecutor placeholders) {
+		for (String placeholder : API.get().getConfigManager().getPlaceholders().getKeys()) {
+			String replaced = PlaceholderAPI.apply(API.get().getConfigManager().getPlaceholders().getString(placeholder + ".placeholder"), player.getUniqueId());
+			placeholders.add(placeholder,
+					API.get().getConfigManager().getPlaceholders()
+							.getString(placeholder + ".replace." + replaced, API.get().getConfigManager().getPlaceholders().getString(placeholder + ".replace._DEFAULT", ""))
+							.replace("{placeholder}", replaced));
+		}
+
 		StringContainer headerContainer = new StringContainer(64);
 		for (String text : getHeader()) {
 			if (!headerContainer.isEmpty())

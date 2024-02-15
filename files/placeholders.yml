@@ -1,0 +1,6 @@
+vanish:
+  placeholder: "%css_vanish%"
+  replace:
+    true: " &0[&7V&0]"
+    false: ""
+    _DEFAULT: "{placeholder}"
