@@ -225,11 +225,11 @@ delwarp:
   deleted: "{prefix} Ohh, it seems that warp &e{warp} &7has been &edeleted&7!"
 
 spawn:
-  self: "{prefix} Here we go again.. &eYou're teleporting to the spawn&7!"
+  self: "{prefix} You're teleporting to the spawn&7!"
   #  {sender}, {target}
   other:
     target: "{prefix} Welcome to the &espawn&7! &e{sender}&7 has moved you here."
-    sender: "{prefix} Alright, commander! &e{target} &7 has been &emoved to the server spawn&7."
+    sender: "{prefix} Alright, commander! &e{target} &7has been moved to the server spawn."
 
 setspawn:
   # {world}, {x}, {y}, {z}, {yaw}, {pitch}
@@ -353,63 +353,59 @@ tp:
     sender: "{prefix} Alright, commander! You have successfully teleported &e{target} &7to the coords: &e{x}&7, &e{y}&7, &e{z}&7, &e{yaw}&7, &e{pitch} &8&o({world})&7."
     target: "{prefix} Alright, adventurer! You have been teleported to the coords: &e{x}&7, &e{y}&7, &e{z}&7, &e{yaw}&7, &e{pitch} &8&o({world})&7."
 
-# --------------------    
-# Darqes edit end
-# --------------------
-
 kit:
   # {time}
   in-cooldown:
-    self: "{prefix} Before using this kit again, please wait &e{time}"
+    self: "{prefix} Chill out! It's not ready yet. You will have to wait for &e{time}&7."
     # {sender}, {target}
-    target: "{prefix} Before using this kit again, please wait &e{time}"
+    target: "{prefix} Chill out! It's not ready yet. You will have to wait for &e{time}&7."
     # {sender}, {target}
-    sender: "{prefix} &cFAILED! &7Player &e{target} &7can you this kit after &e{time}"
+    sender: "{prefix} Oh come on! &e{target} &7would be able to use this kit in &e{time}&7."
   # {cost}
   enough-money:
-    self: "{prefix} No money, no servis! You need at least &e${cost}"
+    self: "{prefix} You are too poor! You need at least &e${cost}&7."
     # {sender}, {target}
-    target: "{prefix} No money, no servis! You need at least &e${cost}"
+    target: "{prefix} You are too poor! You need at least &e${cost}&7."
     # {sender}, {target}
-    sender: "{prefix} &cFAILED! &7Player &e{target} &7doesn't have enough money. Kit cost &e${cost}"
+    sender: "{prefix} Ha! &e{target}&7 and having enough money? Not happening today! He would need at least &e${cost}&7."
   # {kit}
   used:
-    self: "{prefix} Used kit &e{kit}"
+    self: "{prefix} Congratulations! You have equipped &e{kit}&7."
     # {sender}, {target}
-    target: "{prefix} Used kit &e{kit}"
+    target: "{prefix} Congratulations! You have equipped &e{kit}&7."
     # {sender}, {target}
-    sender: "{prefix} &aSUCCESS! &7Player &e{target} &7used kit &e{kit}"
+    sender: "{prefix} You have successfully geared up &e{target}&7 by giving him kit &e{kit}&7."
   
 balance:
   # {balance}
-  self: "{prefix} Your balance is &e${balance}"
+  self: "{prefix} Eyo, businessman! Your balance is currently: &e${balance}&7."
   # {target}, {balance}
-  other: "{prefix} Balance of player &e{target} &7is &e${balance}"
+  other: "{prefix} Well, &e{target}&7's balance is currently at &e${balance}&7."
   # {target}
-  no-account: "{prefix} No account found for &e{target}"
+  no-account: "{prefix} Why are you wasting my time by searching for &e{target}&7, who has never connected to our network?"
   
 pay:
   # {target}
-  no-account: "{prefix} No account found for &e{target}"
+  no-account: "{prefix} Why are you wasting my time by searching for &e{target}&7, who has never connected to our network?"
   # {sender}, {target}, {balance}
   success:
-    sender: "{prefix} You paid &e${balance} &7to player &e{target}"
-    target: "{prefix} Player &e{sender} &7paid you &e${balance}"
+    sender: "{prefix} You have paid &e${balance} &7to &e{target}&7."
+    target: "{prefix} Money has been received! &e{sender} &7has paid you &e${balance}&7."
   failed:
     # {target}
-    money: "{prefix} You don't have enough money"
-    self: "{prefix} You can't pay yourself"
+    money: "{prefix} What are you trying to do? You don't have enough money for that. Go to work!"
+    self: "{prefix} I know, it would be so nice to have friends, but you can't pay to yourself and think that it was your imaginary friend - Fred!"
     
 # {target}, {balance}
 economy:
   # {target}
-  no-account: "{prefix} No account found for &e{target}"
-  set: "{prefix} Balance of player &e{target} &7set to &e${balance}"
-  add: "{prefix} Added &e${balance} &7to player &e{target}"
-  remove: "{prefix} Removed &e${balance} &7from player &e{target}"
+  no-account: "{prefix} Why are you wasting my time by searching for &e{target}&7, who has never connected to our network?"
+  set: "{prefix} Alright, banker! Balance of &e{target} &7has been set to &e${balance}&7."
+  add: "{prefix} Alright, banker! You have successfully added balance of &e${balance} &7to &e{target}&7."
+  remove: "{prefix} Alright, banker! You have successfully removed balance of &e${balance} &7from &e{target}&7."
   
 balancetop:
-  loading: "{prefix} Please wait, we are countdown the richest players"
+  loading: "{prefix} Wait a second! Those rich guys are hiding lots of their money, we are still counting!"
   # {page}, {totalPages}
   header: "{prefix} Balance Top {page}/{totalPages}"
   # {position}, {target}, {balance}
@@ -418,23 +414,23 @@ balancetop:
   footer: ""
  
 home:
-  no-home: "{prefix} You don't have any home"
+  no-home: "{prefix} Ha! You are homeless!"
   # {home}
-  teleport: "{prefix} Teleporting to your home &e{home}"
+  teleport: "{prefix} Teleporting to your home &e{home}&7."
   
 sethome:
   # {home}, {x}, {y}, {z}, {yaw}, {pitch}, {world}
-  set: "{prefix} Location of &e{home} &7home has been set to your position"
+  set: "{prefix} So you finally found some place for your home? &e{home} &7home has been set to your position."
   # {totalHomes}, {maxHomes}
-  overlimit: "{prefix} You've reached the limit on the amount of homes &8&o({maxHomes})"
+  overlimit: "{prefix} Unfortunately, you can't afford another home. &8&o({maxHomes} is the maximum of homes.)"
   
 delhome:
   # {home}
-  del: "{prefix} Deleted home &e{home}"
+  del: "{prefix} Your home &e{home} &7has been removed. I knew you can't afford it."
   
 homeother:
   # {target}, {home}
-  teleport: "{prefix} Teleporting to home &e{home} &7of player &e{target}"
+  teleport: "{prefix} Hey, thief! Welcome to home &e{home} &7of &e{target}&7."
   
 msg:
   # {sender}, {target}, {message}
@@ -443,123 +439,122 @@ msg:
     target: "&8[&6{sender} &7-> &eYou&8] &f{message}"
     spy: "&0[&cSPY&0] &8[&e{sender} &7-> &6{target}&8] &f{message}"
     
-  self: "{prefix} You can't send a message to yourself"
+  self: "{prefix} Alright, you should try to find some friends. Cause your imaginary friends won't be able to communicate with you like this."
   # {target}
-  not-accepting: "{prefix} Player &e{target} &7isn't accepting PMs from you"
+  not-accepting: "{prefix} &e{target} &7doesn't want to communicate with you through PMs!"
 
 reply:
   # {target}
-  not-online: "{prefix} Player &e{target} &7isn't online"
-  noone: "{prefix} You have nobody to reply to"
+  not-online: "{prefix} &e{target} &7has rather vanished than to talk to you."
+  noone: "{prefix} And again! Your imaginary friends! I have already told you that you can't communicate with them like this!"
   
 msgspy:
   # {target}
-  not-exist: "{prefix} No account found for &e{target}"
+  not-exist: "{prefix} Why are you wasting my time by searching for &e{target}&7, who has never connected to our network?"
   self:
-    enabled: "{prefix} Enabled PM message spy mode"
-    disabled: "{prefix} Disabled PM message spy mode"
+    enabled: "{prefix} Alright, spy! You can watch the communications of other players now!"
+    disabled: "{prefix} Alright, spy! You finally stopped watching the communications of other players!"
   # {sender}, {target}
   other:
     enabled:
-      sender: "{prefix} Enabled PM message spy mode for player &e{target}"
-      target: "{prefix} Enabled PM message spy mode"
+      sender: "{prefix} You have made &e{target}&7 a spy! He can watch the communications of other players now!"
+      target: "{prefix} Alright, spy! You can watch the communications of other players now!"
     disabled:
-      sender: "{prefix} Disabled PM message spy mode for player &e{target}"
-      target: "{prefix} Disabled PM message spy mode"
+      sender: "{prefix} You have demoted &e{target}&7! He can watch the communications of other players no longer!"
+      target: "{prefix} Alright, spy! You finally stopped watching the communications of other players!"
       
 # {target}
 msgignore:
-  accepting: "{prefix} You are no longer ignoring PMs from player &e{target}"
-  ignoring: "{prefix} You will no longer receive PMs from player &e{target}"
+  accepting: "{prefix} Did you decide to talk to someone? &e{target}&7 is approved to message you again!"
+  ignoring: "{prefix} Well, it is also a option to ignore &e{target}&7."
   
 craftingtable:
-  self: "{prefix} Opened Crafting Table"
+  self: "{prefix} What are we going to craft?"
   # {sender}, {target}
   other:
-    sender: "{prefix} Opened Crafting Table to player &e{target}"
-    target: "{prefix} Opened Crafting Table"
+    sender: "{prefix} &e{target}&7 will be crafting something!"
+    target: "{prefix} Let's go to do some crafting!"
     
 anvil:
-  self: "{prefix} Opened Anvil"
+  self: "{prefix} Hey, blacksmith! Let's make something!"
   # {sender}, {target}
   other:
-    sender: "{prefix} Opened Anvil to player &e{target}"
-    target: "{prefix} Opened Anvil"
+    sender: "{prefix} &e{target}&7 is going to become a blacksmith!"
+    target: "{prefix} Welcome to the world of blacksmiths! Let's try to do something here!"
     
 cartography:
-  self: "{prefix} Opened Cartography"
+  self: "{prefix} Hey, adventurer! What are we going to do?"
   # {sender}, {target}
   other:
-    sender: "{prefix} Opened Cartography to player &e{target}"
-    target: "{prefix} Opened Cartography"
+    sender: "{prefix} &e{target}&7 will be creating a map!"
+    target: "{prefix} Alright, what are we going to do?"
     
 grindstone:
-  self: "{prefix} Opened Grindstone"
+  self: "{prefix} Hey, armorer! What are we going to do?"
   # {sender}, {target}
   other:
-    sender: "{prefix} Opened Grindstone to player &e{target}"
-    target: "{prefix} Opened Grindstone"
+    sender: "{prefix} &e{target}&7 will be repairing or disenchanting something!"
+    target: "{prefix} Alright, what are we going to do?"
     
 loom:
-  self: "{prefix} Opened Loom"
+  self: "{prefix} Hey, shepherd! What are we going to do?"
   # {sender}, {target}
   other:
-    sender: "{prefix} Opened Loom to player &e{target}"
-    target: "{prefix} Opened Loom"
+    sender: "{prefix} &e{target}&7 is going to upgrade his banner!"
+    target: "{prefix} Alright, what are we going to do?"
     
 smithing:
-  self: "{prefix} Opened Smithing"
+  self: "{prefix} Hey, toolsmith! What are we going to do?"
   # {sender}, {target}
   other:
-    sender: "{prefix} Opened Smithing to player &e{target}"
-    target: "{prefix} Opened Smithing"
+    sender: "{prefix} &e{target}&7 is going to upgrade his armor or tools!"
+    target: "{prefix} Alright, what are we going to do?"
     
 stonecutter:
-  self: "{prefix} Opened Stonecutter"
+  self: "{prefix} Hey, stone mason! What are we going to do?"
   # {sender}, {target}
   other:
-    sender: "{prefix} Opened Stonecutter to player &e{target}"
-    target: "{prefix} Opened Stonecutter"
+    sender: "{prefix} &e{target}&7 is going to make something from stone!"
+    target: "{prefix} Alright, what are we going to do?"
     
 enderchest:
-  self: "{prefix} Opened EnderChest"
+  self: "{prefix} What do we need to hide or save here?"
   # {sender}, {target}
   other:
-    sender: "{prefix} Opened EnderChest to player &e{target}"
-    target: "{prefix} Opened EnderChest"
+    sender: "{prefix} &e{target}&7 is going to save or hide something in his enderchest!"
+    target: "{prefix} You should hide something here!"
 
 vanish:
   self:
-    enabled: "{prefix} Vanish turned on"
-    disabled: "{prefix} Vanish turned off"
+    enabled: "{prefix} You have successfully become a ghost! Or you at least vanished."
+    disabled: "{prefix} You are a ghost no longer! Well, you just turned off your vanish."
   #  {sender}, {target}
   other:
     enabled:
-      target: "{prefix} Vanish turned on by &e{sender}"
-      sender: "{prefix} Vanish of &e{target} &7turned on"
+      target: "{prefix} &e{sender}&7 has made you a ghost! Vanish has been turned on."
+      sender: "{prefix} You made &e{target}&7 a ghost. His vanish has been turned on."
     disabled:
-      target: "{prefix} Vanish turned off by &e{sender}"
-      sender: "{prefix} Vanish of &e{target} &7turned off"
+      target: "{prefix} You are a ghost no longer! &e{sender}&7 turned off your vanish."
+      sender: "{prefix} &e{target} &7is a ghost no longer! His vanish is turned off."
     
 invsee:
-  open: "{prefix} Opening inventory of player &e{target}"
-  self: "{prefix} You can't invsee yourself"
+  open: "{prefix} Let's steal something from &e{target}&7's inventory!"
+  self: "{prefix} Your imaginary friend - Fred - did not steal your pickaxe! You broke it by yourself, so don't try to look at your inventory by this command."
   
 scoreboardhide:
   other:
     already-set-to:
-      true: "{prefix} &e{target}&7's scoreboard is already hidden"
-      false: "{prefix} &e{target}&7's scoreboard is already displayed"
+      true: "{prefix} Well, you tried but &e{target}&7's scoreboard is already hidden."
+      false: "{prefix} Well, you tried but &e{target}&7's scoreboard is already displayed."
     true:
-      sender: "{prefix} &e{target}&7's scoreboard hidden"
-      target: "{prefix} Scoreboard hidden by &e{sender}"
+      sender: "{prefix} You have made &e{target}&7's scoreboard disappear."
+      target: "{prefix} Where did your scoreboard go? Ask &e{sender}&7. He made sure that you won't be able to see it."
     false:
-      sender: "{prefix} &e{target}&7's scoreboard displayed"
-      target: "{prefix} Scoreboard displayed by &e{sender}"
+      sender: "{prefix} You have made &e{target}&7's scoreboard displayed."
+      target: "{prefix} If you are wondering why you can see your scoreboard, ask &e{sender}&7. He made sure that you will be able to see it."
   self:
     already-set-to:
-      true: "{prefix} Your scoreboard is already hidden"
-      false: "{prefix} Your scoreboard is already displayed"
-    true: "{prefix} Scoreboard hidden"
-    false: "{prefix} Scoreboard displayed"
-  
+      true: "{prefix} Scoreboard is already hidden."
+      false: "{prefix} Scoreboard is already displayed."
+    true: "{prefix} Scoreboard has been hidden."
+    false: "{prefix} Scoreboard has been displayed."
