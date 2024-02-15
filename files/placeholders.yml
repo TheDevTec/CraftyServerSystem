@@ -1,3 +1,6 @@
+# Placeholders in this file can be used in the scoreboard.yml and tablist.yml!
+# Use these placeholders as others our placeholders, for example: {vanish} instead of %css_vanish%
+
 vanish:
   placeholder: "%css_vanish%"
   replace:
