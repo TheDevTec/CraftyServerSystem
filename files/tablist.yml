@@ -46,11 +46,11 @@ group:
     tab:
       format: "{prefix}{player}{suffix}"
       prefix: "&7Player &f"
-      suffix: ""
+      suffix: "{vanish}"
     tag:
       format: "{prefix}{player}{suffix}"
       prefix: "&7Player &f"
-      suffix: ""
+      suffix: "{vanish}"
 
 yellowNumber:
   # Must be integer (number)
@@ -70,11 +70,11 @@ footer:
 tab:
   format: "{prefix}{player}{suffix}"
   prefix: "&cInvalid &f"
-  suffix: ""
+  suffix: "{vanish}"
 tag:
   format: "{prefix}{player}{suffix}"
   prefix: "&cInvalid &f"
-  suffix: ""
+  suffix: "{vanish}"
 
 sorting:
   # PLAYER_NAME(Vanilla), GROUP(Vault), GROUP_WEIGHT(LuckPerms)
