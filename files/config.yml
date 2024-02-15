@@ -1,5 +1,25 @@
 prefix: "&6&lS&f&lerver &8&l»&7"
 
+# Used for saving vanish in the database
+sql:
+  enabled: false
+  # without :port
+  ip: localhost
+  database: "global_649"
+  username: "root"
+  password: "root"
+  # Types:
+  # MYSQL
+  # MARIADB
+  # SQLSERVER
+  type: MYSQL
+  # Leave this empty, if you don't know what are you doing!
+  attributes: ""
+
+vanish:
+  # This option will be used only if "sql" option is enabled
+  store-in-sql: true
+
 fly:
   anti-fall-damage-listener: true
 

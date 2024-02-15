@@ -1,6 +1,7 @@
 package me.devtec.craftyserversystem.api;
 
 import java.lang.reflect.Constructor;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,6 +29,13 @@ import me.devtec.craftyserversystem.utils.scoreboard.UserScoreboardData;
 import me.devtec.craftyserversystem.utils.tablist.UserTablistData;
 import me.devtec.craftyserversystem.utils.tablist.nametag.NametagManagerAPI;
 import me.devtec.shared.Ref;
+import me.devtec.shared.annotations.Nullable;
+import me.devtec.shared.database.DatabaseAPI;
+import me.devtec.shared.database.DatabaseAPI.DatabaseType;
+import me.devtec.shared.database.DatabaseAPI.SqlDatabaseSettings;
+import me.devtec.shared.database.DatabaseHandler;
+import me.devtec.shared.database.DatabaseHandler.Row;
+import me.devtec.shared.database.SqlFieldType;
 import me.devtec.shared.dataholder.Config;
 import me.devtec.shared.json.Json;
 import me.devtec.shared.json.modern.ModernJsonReader;
@@ -49,6 +57,8 @@ public class API {
 	private EconomyHook economyHook = new EmptyEconomyHook();
 	private CssEconomy economy;
 	private Metrics metrics;
+	@Nullable
+	private DatabaseHandler sqlDatabase;
 
 	// Private constructor
 	private API() {
@@ -149,11 +159,35 @@ public class API {
 			((BalanceTop) balanceTop).calculate();
 	}
 
+	@Nullable
+	public DatabaseHandler getSqlConnection() {
+		return sqlDatabase;
+	}
+
 	public void start() {
 		if (metrics != null)
 			return;
 		metrics = new Metrics(Loader.getPlugin().getDescription().getVersion(), 20204);
 		cfgManager = new ConfigurationManager().initFromJar();
+
+		// Login to the database
+		Config config = getConfigManager().getMain();
+		if (config.getBoolean("sql.enabled")) {
+			DatabaseType databaseType = DatabaseType.valueOf(config.getString("sql.type").toUpperCase());
+			try {
+				SqlDatabaseSettings sqlSettings = new SqlDatabaseSettings(databaseType, config.getString("sql.ip"), 3306, config.getString("sql.database"), config.getString("sql.username"),
+						config.getString("sql.password"));
+				if (!config.getString("sql.attributes").trim().isEmpty())
+					sqlSettings.attributes(config.getString("sql.attributes"));
+				sqlDatabase = DatabaseAPI.openConnection(databaseType, sqlSettings);
+				// Create tables
+				if (config.getBoolean("vanish.store-in-sql"))
+					sqlDatabase.createTable("css_vanish", new Row[] { new Row("id", SqlFieldType.VARCHAR, 48) });
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+
 		cmdManager = new CommandManager(cfgManager);
 		cdManager = new CooldownManager();
 		msgManager = new MessageManager();
