@@ -4,14 +4,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import me.devtec.shared.events.Cancellable;
 import me.devtec.shared.events.Event;
 import me.devtec.shared.events.ListenerHolder;
 
-public class VanishToggleEvent extends Event {
+public class VanishToggleEvent extends Event implements Cancellable {
 	private static List<ListenerHolder> listeners = new ArrayList<>();
 
 	private final UUID uuid;
-	private boolean status;
+	private final boolean status;
+	private boolean cancelled;
 
 	public VanishToggleEvent(UUID uuid, boolean status) {
 		this.uuid = uuid;
@@ -26,10 +28,6 @@ public class VanishToggleEvent extends Event {
 		return status;
 	}
 
-	public void setStatus(boolean status) {
-		this.status = status;
-	}
-
 	@Override
 	public List<ListenerHolder> getHandlers() {
 		return listeners;
@@ -37,6 +35,16 @@ public class VanishToggleEvent extends Event {
 
 	public static List<ListenerHolder> getHandlerList() {
 		return listeners;
+	}
+
+	@Override
+	public boolean isCancelled() {
+		return cancelled;
+	}
+
+	@Override
+	public void setCancelled(boolean cancel) {
+		cancelled = cancel;
 	}
 
 }
