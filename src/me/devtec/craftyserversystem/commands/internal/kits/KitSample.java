@@ -8,8 +8,8 @@ import org.bukkit.inventory.ItemStack;
 
 import me.devtec.craftyserversystem.annotations.IgnoredClass;
 import me.devtec.craftyserversystem.api.API;
-import me.devtec.shared.annotations.Nonnull;
 import me.devtec.craftyserversystem.managers.cooldown.CooldownHolder;
+import me.devtec.shared.annotations.Nonnull;
 import me.devtec.shared.dataholder.Config;
 import me.devtec.shared.utility.TimeUtils;
 
@@ -52,16 +52,19 @@ public class KitSample {
 
 			@Override
 			public boolean tryWithoutWriting(CommandSender sender) {
+				return remainingTime(sender) <= 0;
+			}
+
+			@Override
+			public long remainingTime(CommandSender sender) {
 				if (bypassPerm != null && sender.hasPermission(bypassPerm))
-					return true; // Skip whole cooldown checker
+					return 0; // Skip whole cooldown checker
 
 				long currentTime = System.currentTimeMillis() / 1000;
 				Config file = me.devtec.shared.API.getUser(sender.getName());
 				long lastUsedTime = file.getLong("css.cd." + id());
 				long nextUsageIn = lastUsedTime - currentTime;
-				if (nextUsageIn <= 0)
-					return true;
-				return false;
+				return Math.max(0, nextUsageIn);
 			}
 		};
 		API.get().getCooldownManager().register(cooldown);

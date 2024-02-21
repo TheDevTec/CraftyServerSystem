@@ -12,8 +12,6 @@ import me.devtec.craftyserversystem.api.API;
 import me.devtec.craftyserversystem.managers.cooldown.CooldownHolder;
 import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
 import me.devtec.shared.dataholder.Config;
-import me.devtec.shared.utility.StringUtils;
-import me.devtec.shared.utility.StringUtils.FormatType;
 import me.devtec.shared.utility.TimeUtils;
 
 public class CooldownManager {
@@ -26,6 +24,8 @@ public class CooldownManager {
 
 	@Nullable
 	public CooldownHolder getOrPrepare(String id) {
+		if (id == null)
+			return null;
 		CooldownHolder cd = map.get(id);
 		if (cd == null) {
 			Config cdConfig = API.get().getConfigManager().getCooldowns();
@@ -69,23 +69,25 @@ public class CooldownManager {
 								return true;
 							}
 							if (sendMessage)
-								API.get().getMsgManager().sendMessageFromFile(cdConfig, id + ".cooldown-message",
-										PlaceholdersExecutor.i().add("time", StringUtils.formatDouble(FormatType.NORMAL, nextUsageIn)), sender);
+								API.get().getMsgManager().sendMessageFromFile(cdConfig, id + ".cooldown-message", PlaceholdersExecutor.i().add("time", TimeUtils.timeToString(nextUsageIn)), sender);
 							return false;
 						}
 
 						@Override
 						public boolean tryWithoutWriting(CommandSender sender) {
+							return remainingTime(sender) <= 0;
+						}
+
+						@Override
+						public long remainingTime(CommandSender sender) {
 							if (bypassPerm != null && sender.hasPermission(bypassPerm))
-								return true; // Skip whole cooldown checker
+								return 0; // Skip whole cooldown checker
 
 							long currentTime = System.currentTimeMillis() / 1000;
 							Config file = me.devtec.shared.API.getUser(sender.getName());
 							long lastUsedTime = file.getLong("css.cd." + id());
 							long nextUsageIn = lastUsedTime - currentTime;
-							if (nextUsageIn <= 0)
-								return true;
-							return false;
+							return Math.max(0, nextUsageIn);
 						}
 					};
 				} else {
@@ -115,23 +117,26 @@ public class CooldownManager {
 									return true;
 								}
 								if (sendMessage)
-									API.get().getMsgManager().sendMessageFromFile(cdConfig, id + ".cooldown-message",
-											PlaceholdersExecutor.i().add("time", StringUtils.formatDouble(FormatType.NORMAL, nextUsageIn)), sender);
+									API.get().getMsgManager().sendMessageFromFile(cdConfig, id + ".cooldown-message", PlaceholdersExecutor.i().add("time", TimeUtils.timeToString(nextUsageIn)),
+											sender);
 								return false;
 							}
 
 							@Override
 							public boolean tryWithoutWriting(CommandSender sender) {
+								return remainingTime(sender) <= 0;
+							}
+
+							@Override
+							public long remainingTime(CommandSender sender) {
 								if (bypassPerm != null && sender.hasPermission(bypassPerm))
-									return true; // Skip whole cooldown checker
+									return 0; // Skip whole cooldown checker
 
 								long currentTime = System.currentTimeMillis() / 1000;
 								Config file = me.devtec.shared.API.getUser(sender.getName());
 								long lastUsedTime = file.getLong("css.cd." + id());
 								long nextUsageIn = lastUsedTime - currentTime;
-								if (nextUsageIn <= 0)
-									return true;
-								return false;
+								return Math.max(0, nextUsageIn);
 							}
 						};
 					else
@@ -151,23 +156,26 @@ public class CooldownManager {
 									return true;
 								}
 								if (sendMessage)
-									API.get().getMsgManager().sendMessageFromFile(cdConfig, id + ".cooldown-message",
-											PlaceholdersExecutor.i().add("time", StringUtils.formatDouble(FormatType.NORMAL, nextUsageIn)), sender);
+									API.get().getMsgManager().sendMessageFromFile(cdConfig, id + ".cooldown-message", PlaceholdersExecutor.i().add("time", TimeUtils.timeToString(nextUsageIn)),
+											sender);
 								return false;
 							}
 
 							@Override
 							public boolean tryWithoutWriting(CommandSender sender) {
+								return remainingTime(sender) <= 0;
+							}
+
+							@Override
+							public long remainingTime(CommandSender sender) {
 								if (bypassPerm != null && sender.hasPermission(bypassPerm))
-									return true; // Skip whole cooldown checker
+									return 0; // Skip whole cooldown checker
 
 								long currentTime = System.currentTimeMillis() / 1000;
 								Config file = me.devtec.shared.API.getUser(sender.getName());
 								long lastUsedTime = file.getLong("css.cd." + id());
 								long nextUsageIn = lastUsedTime - currentTime;
-								if (nextUsageIn <= 0)
-									return true;
-								return false;
+								return Math.max(0, nextUsageIn);
 							}
 						};
 				}

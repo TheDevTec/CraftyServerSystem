@@ -18,4 +18,6 @@ public abstract class CooldownHolder {
 
 	public abstract boolean tryWithoutWriting(CommandSender sender);
 
+	public abstract long remainingTime(CommandSender sender);
+
 }
