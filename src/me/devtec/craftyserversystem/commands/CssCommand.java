@@ -10,11 +10,11 @@ import org.bukkit.command.BlockCommandSender;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import me.devtec.shared.annotations.Nonnull;
-import me.devtec.shared.annotations.Nullable;
 import me.devtec.craftyserversystem.api.API;
 import me.devtec.craftyserversystem.managers.cooldown.CooldownHolder;
 import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
+import me.devtec.shared.annotations.Nonnull;
+import me.devtec.shared.annotations.Nullable;
 import me.devtec.shared.commands.holder.CommandHolder;
 import me.devtec.shared.commands.manager.PermissionChecker;
 import me.devtec.shared.commands.structures.CommandStructure;
@@ -50,6 +50,10 @@ public abstract class CssCommand {
 	}
 
 	public abstract void register();
+
+	public void reload() {
+
+	}
 
 	public void unregister() {
 		if (!isRegistered())
