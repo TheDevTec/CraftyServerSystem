@@ -23,3 +23,18 @@ healing:
   bypass-perm: "css.cooldown.healing"
   
   cooldown-message: "{prefix} Please wait {time} before using this command."
+
+# group name
+freedia:
+  # Cooldown time
+  time: 1d
+  
+  # Cooldown per player or global for all
+  # Set to "true" if you want this cooldown to be global
+  isGlobal: false
+  # Permission name to bypass this cooldown
+  # Leave an empty string (bypass-perm: "") for no permissions
+  # - Cooldown cannot be bypassed by anyone or anything.
+  bypass-perm: ""
+  
+  cooldown-message: "{prefix} You can claim your gift after {time}!"

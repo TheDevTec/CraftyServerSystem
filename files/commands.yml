@@ -584,3 +584,11 @@ scoreboardhide:
   perms:
     cmd: "css.cmd.scoreboardhide"
     other: "css.cmd.scoreboardhide.other"
+
+cssgui:
+  usage:
+    cmd: "/cssgui [gui-id] {player}"
+  cmd: [cssgui]
+  perms:
+    cmd: "css.cmd.cssgui"
+    other: "css.cmd.cssgui.other"

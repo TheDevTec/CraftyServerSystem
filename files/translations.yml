@@ -558,3 +558,10 @@ scoreboardhide:
       false: "{prefix} Scoreboard is already displayed."
     true: "{prefix} Scoreboard has been hidden."
     false: "{prefix} Scoreboard has been displayed."
+
+cssgui:
+  self: "{prefix} Opening custom gui with id &e{id}"
+  #  {sender}, {target}
+  other:
+    target: "{prefix} Opening custom gui with id &e{id}"
+    sender: "{prefix} Opening custom gui with id &e{id} &7to player &e{target}"

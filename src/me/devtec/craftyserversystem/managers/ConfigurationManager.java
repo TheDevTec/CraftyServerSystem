@@ -24,6 +24,7 @@ public class ConfigurationManager {
 	private Config kits;
 	private Config economy;
 	private Config placeholders;
+	private Config customGuis;
 	private String prefix = "";
 	private Position spawn;
 	private long teleportRequestTime;
@@ -40,6 +41,7 @@ public class ConfigurationManager {
 		tab = new Config(FILES_PATH + "events/tablist.yml");
 		kits = new Config(FILES_PATH + "kits.yml");
 		economy = new Config(FILES_PATH + "economy.yml");
+		customGuis = new Config(FILES_PATH + "custom-guis.yml");
 		placeholders = new Config(FILES_PATH + "placeholders.yml");
 	}
 
@@ -56,6 +58,7 @@ public class ConfigurationManager {
 		merge(kits, "kits.yml");
 		merge(economy, "economy.yml");
 		merge(placeholders, "placeholders.yml");
+		merge(customGuis, "custom-guis.yml");
 		prefix = getMain().getString("prefix", "");
 		teleportRequestTime = TimeUtils.timeFromString(getMain().getString("teleport-request-time"));
 		return this;
@@ -136,6 +139,7 @@ public class ConfigurationManager {
 		getKits().reload();
 		getEconomy().reload();
 		getPlaceholders().reload();
+		getCustomGuis().reload();
 		prefix = getMain().getString("prefix", "");
 		teleportRequestTime = TimeUtils.timeFromString(getMain().getString("teleport-request-time"));
 	}
@@ -162,5 +166,9 @@ public class ConfigurationManager {
 
 	public Config getChat() {
 		return chat;
+	}
+
+	public Config getCustomGuis() {
+		return customGuis;
 	}
 }
