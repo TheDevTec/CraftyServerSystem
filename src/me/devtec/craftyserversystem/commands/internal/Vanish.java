@@ -25,14 +25,12 @@ import me.devtec.shared.database.DatabaseHandler.InsertQuery;
 import me.devtec.shared.database.DatabaseHandler.RemoveQuery;
 import me.devtec.shared.database.DatabaseHandler.SelectQuery;
 import me.devtec.shared.events.EventManager;
-import me.devtec.shared.placeholders.PlaceholderExpansion;
 import me.devtec.theapi.bukkit.BukkitLoader;
 
 public class Vanish extends CssCommand {
 
 	private Listener listener;
 	private boolean storeVanishInDb;
-	private PlaceholderExpansion placeholder;
 
 	@Override
 	public void register() {
@@ -41,15 +39,6 @@ public class Vanish extends CssCommand {
 
 		storeVanishInDb = me.devtec.craftyserversystem.api.API.get().getConfigManager().getMain().getBoolean("vanish.store-in-sql")
 				&& me.devtec.craftyserversystem.api.API.get().getSqlConnection() != null;
-
-		placeholder = new PlaceholderExpansion("css") {
-
-			@Override
-			public String apply(String text, UUID player) {
-				Player online;
-				return text.equals("css_vanish") && (online = Bukkit.getPlayer(player)) != null ? "" + getVanish(online) : null;
-			}
-		}.register();
 
 		listener = new Listener() {
 
@@ -62,10 +51,10 @@ public class Vanish extends CssCommand {
 						// Legacy support
 						if (event.getStatus()) {
 							if (!getVanish(e.getPlayer()))
-								e.getPlayer().setMetadata("css-vanish", new FixedMetadataValue(Loader.getPlugin(), true));
+								e.getPlayer().setMetadata("vanish", new FixedMetadataValue(Loader.getPlugin(), true));
 						} else if (getVanish(e.getPlayer()))
-							for (MetadataValue value : e.getPlayer().getMetadata("css-vanish"))
-								e.getPlayer().removeMetadata("css-vanish", value.getOwningPlugin());
+							for (MetadataValue value : e.getPlayer().getMetadata("vanish"))
+								e.getPlayer().removeMetadata("vanish", value.getOwningPlugin());
 						for (Player player : BukkitLoader.getOnlinePlayers())
 							if (!player.equals(e.getPlayer()) && !player.hasPermission(getPerm("see")))
 								player.hidePlayer(Loader.getPlugin(), e.getPlayer());
@@ -136,13 +125,11 @@ public class Vanish extends CssCommand {
 			HandlerList.unregisterAll(listener);
 			listener = null;
 		}
-		if (placeholder != null)
-			placeholder.unregister();
 	}
 
-	private boolean getVanish(Player target) {
-		if (target.hasMetadata("css-vanish"))
-			return !target.getMetadata("css-vanish").isEmpty();
+	public static boolean getVanish(Player target) {
+		if (target.hasMetadata("vanish"))
+			return !target.getMetadata("vanish").isEmpty();
 		return false;
 	}
 
@@ -155,10 +142,10 @@ public class Vanish extends CssCommand {
 		// Legacy support
 		if (event.getStatus()) {
 			if (!getVanish(target))
-				target.setMetadata("css-vanish", new FixedMetadataValue(Loader.getPlugin(), true));
+				target.setMetadata("vanish", new FixedMetadataValue(Loader.getPlugin(), true));
 		} else if (getVanish(target))
-			for (MetadataValue value : target.getMetadata("css-vanish"))
-				target.removeMetadata("css-vanish", value.getOwningPlugin());
+			for (MetadataValue value : target.getMetadata("vanish"))
+				target.removeMetadata("vanish", value.getOwningPlugin());
 
 		// Store in the player's data / sql
 		if (storeVanishInDb) {
