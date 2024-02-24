@@ -104,7 +104,7 @@ public class BalanceTop extends CssCommand {
 			return;
 		}
 		EconomyHook hook = API.get().getEconomyHook();
-		int totalPages = Math.max(comparableObjects.length / maxEntries, 1);
+		int totalPages = comparableObjects.length / maxEntries + (comparableObjects.length % maxEntries == 0 ? 0 : 1);
 		if (page <= 0)
 			page = 1;
 		if (page > totalPages)
