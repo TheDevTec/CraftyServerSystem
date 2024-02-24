@@ -93,19 +93,19 @@ public class PlaceholdersExecutor {
 		return placeholders.get(placeholder);
 	}
 
+	@SuppressWarnings("unchecked")
 	public Object apply(Object object) {
 		if (object instanceof Map) {
-			@SuppressWarnings("unchecked")
-			Map<?, Object> map = (Map<?, Object>) object;
-			for (Entry<?, Object> entry : map.entrySet()) {
+			Map<String, Object> map = new HashMap<>(((Map<String, Object>) object).size());
+			for (Entry<String, Object> entry : ((Map<String, Object>) object).entrySet())
 				if (entry.getKey().equals("color"))
-					continue;
-
-				entry.setValue(apply(entry.getValue(), entry.getKey().equals("hoverEvent")));
-			}
+					map.put(entry.getKey(), entry.getValue());
+				else
+					map.put(entry.getKey(), apply(entry.getValue(), entry.getKey().equals("hoverEvent")));
+			return map;
 		}
 		if (object instanceof Collection) {
-			List<Object> rewritten = new ArrayList<>();
+			List<Object> rewritten = new ArrayList<>(((Collection<?>) object).size());
 			for (Object obj : (Collection<?>) object)
 				rewritten.add(apply(obj));
 			return rewritten;
@@ -113,18 +113,20 @@ public class PlaceholdersExecutor {
 		return object instanceof String ? apply(object.toString()) : object;
 	}
 
+	@SuppressWarnings("unchecked")
 	private Object apply(Object object, boolean shouldConvertToComponent) {
 		if (object instanceof Map) {
-			@SuppressWarnings("unchecked")
-			Map<?, Object> map = (Map<?, Object>) object;
-			for (Entry<?, Object> entry : map.entrySet()) {
+			Map<String, Object> map = new HashMap<>(((Map<String, Object>) object).size());
+			for (Entry<String, Object> entry : ((Map<String, Object>) object).entrySet())
 				if (entry.getKey().equals("color"))
-					continue;
-				entry.setValue(apply(entry.getValue(), shouldConvertToComponent ? entry.getKey().equals("value") || entry.getKey().equals("content") || entry.getKey().equals("contents") : false));
-			}
+					map.put(entry.getKey(), entry.getValue());
+				else
+					map.put(entry.getKey(),
+							apply(entry.getValue(), shouldConvertToComponent ? entry.getKey().equals("value") || entry.getKey().equals("content") || entry.getKey().equals("contents") : false));
+			return map;
 		}
 		if (object instanceof Collection) {
-			List<Object> rewritten = new ArrayList<>();
+			List<Object> rewritten = new ArrayList<>(((Collection<?>) object).size());
 			for (Object obj : (Collection<?>) object)
 				rewritten.add(apply(obj, shouldConvertToComponent));
 			return rewritten;
