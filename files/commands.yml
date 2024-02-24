@@ -592,3 +592,29 @@ cssgui:
   perms:
     cmd: "css.cmd.cssgui"
     other: "css.cmd.cssgui.other"
+
+cssuser:
+  usage:
+    cmd:
+    - "/cssuser [player] get [section]"
+    - "/cssuser [player] set [section] [value]"
+    - "/cssuser [player] keys {section}"
+    - "/cssuser [player] addNumber [section] [number]"
+    - "/cssuser [player] addToList [section] [value]"
+    - "/cssuser [player] removeFromList [section] [value/-pos:{position}]"
+    - "/cssuser [player] showList [section] {page}"
+    get:
+    - "/cssuser [player] get [section]"
+    get:
+    - "/cssuser [player] get [section]"
+    addNumber:
+    - "/cssuser [player] addNumber [section] [number]"
+    addToList:
+    - "/cssuser [player] addToList [section] [value]"
+    removeFromList:
+    - "/cssuser [player] removeFromList [section] [value/-pos:{position}]"
+    showList:
+    - "/cssuser [player] showList [section] {page}"
+  cmd: [cssuser]
+  perms:
+    cmd: "css.cmd.cssuser"

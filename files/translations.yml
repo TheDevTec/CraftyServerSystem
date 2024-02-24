@@ -565,3 +565,31 @@ cssgui:
   other:
     target: "{prefix} Opening custom gui with id &e{id}"
     sender: "{prefix} Opening custom gui with id &e{id} &7to player &e{target}"
+
+cssuser:
+  get: "{prefix} Value in the section &e{path} &7of user &e{user} &7is set to &e{value}"
+  does-not-exist: "{prefix} Section &e{path} &7of user &e{user} &7doesn't exist"
+  set: "{prefix} Value in the section &e{path} &7of user &e{user} &7has been modified to &e{value}"
+  addNumber: "{prefix} Number in the section &e{path} &7of user &e{user} &7has been modified to &e{value}"
+  keys:
+    primary:
+    - "{prefix} Primary keys of user &e{user}&7:"
+    - "&f{keys}"
+    sub:
+    - "{prefix} Sub keys of &e{path} &7of user &e{user}&7:"
+    - "&f{keys}"
+    empty-primary:
+    - "{prefix} There are no sections of user &e{user}"
+    empty:
+    - "{prefix} There are no sub sections of &e{path} &7of user &e{user}"
+  addToList:
+    success: "{prefix} Value &e{value} &7has been added to the list &e{path} &7of user &e{user}"
+    failed: "{prefix} Failed to add value to the list &e{path} &7of user &e{user}&7! Probably list doesn't allow duplicates."
+  removeFromList:
+    success: "{prefix} Value &e{value} &7has been removed from the list &e{path} &7of user &e{user}"
+    failed: "{prefix} Value &e{value} &7is not listed in the list &e{path} &7of user &e{user}"
+  showList:
+    empty: "{prefix} List &e{path} &7of user &e{user} &7is empty or doesn't exist"
+    header: "{prefix} Contents of values&8&o({size})&7 in List &e{path} &7of player &e{user}&7:"
+    entry: [{"text":"  &e{position}. &f{value}   "}, {"text":"&0[&cREMOVE&0]", "clickEvent":{"action":"run_command","value":"/cssuser {user} removeFromList {path} -pos:{listPosition}"}}]
+    footer: [{"text":"&e<<<","clickEvent":{"action":"run_command","value":"/cssuser {user} showList {path} {previousPage}"}}, {"text":"&7Page &6{page}&7/&6{totalPages} "}, {"text":"&e>>>","clickEvent":{"action":"run_command","value":"/cssuser {user} showList {path} {nextPage}"}}]
