@@ -5,12 +5,15 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 
 import me.devtec.craftyserversystem.Loader;
 import me.devtec.craftyserversystem.commands.CssCommand;
 import me.devtec.craftyserversystem.commands.internal.BalanceTop;
+import me.devtec.craftyserversystem.commands.internal.Vanish;
 import me.devtec.craftyserversystem.economy.CssEconomy;
 import me.devtec.craftyserversystem.economy.CssEconomyHook;
 import me.devtec.craftyserversystem.economy.EconomyHook;
@@ -41,7 +44,9 @@ import me.devtec.shared.json.Json;
 import me.devtec.shared.json.modern.ModernJsonReader;
 import me.devtec.shared.json.modern.ModernJsonWriter;
 import me.devtec.shared.mcmetrics.Metrics;
+import me.devtec.shared.placeholders.PlaceholderExpansion;
 import me.devtec.shared.utility.ColorUtils;
+import me.devtec.theapi.bukkit.BukkitLoader;
 
 public class API {
 
@@ -164,6 +169,8 @@ public class API {
 		return sqlDatabase;
 	}
 
+	private PlaceholderExpansion placeholder;
+
 	public void start() {
 		if (metrics != null)
 			return;
@@ -195,7 +202,7 @@ public class API {
 		if (Json.reader().getClass() == ModernJsonReader.class || Json.writer().getClass() == ModernJsonWriter.class) {
 			Bukkit.getConsoleSender().sendMessage("");
 			Bukkit.getConsoleSender().sendMessage(ColorUtils.colorize(
-					"&cCraftyServerSystem &8» &aWe recommend to change &2Json reader & writer &afrom &e&nGuava&r&a to our own &2&nTheAPI&r&a in the &cplugins/TheAPI/config.yml &aon line &c\"default-json-handler\""));
+					"&cCraftyServerSystem &8» &aWe recommend to change &2Json reader & writer &afrom &e&nGuava&r&a to our own &2&nTheAPI&r&a in the &cplugins/TheAPI/config.yml &afile on line &c\"default-json-handler\""));
 			Bukkit.getConsoleSender().sendMessage("");
 		}
 		// Register our economy hook
@@ -222,9 +229,44 @@ public class API {
 				VaultEconomyHook.registerOurEconomy();
 			}
 		}
+
+		placeholder = new PlaceholderExpansion("css") {
+
+			@Override
+			public String apply(String text, UUID player) {
+				if (player == null || !text.startsWith("css_"))
+					return null;
+				if (text.startsWith("css_user_"))
+					return me.devtec.shared.API.getUser(player).get(text.substring(9)) + "";
+				if (text.equals("css_balance")) {
+					Player online = Bukkit.getPlayer(player);
+					return "" + API.get().getEconomyHook().getBalance(online == null ? me.devtec.shared.API.offlineCache().lookupNameById(player) : online.getName(),
+							online == null ? null : online.getWorld().getName());
+				}
+				if (text.equals("css_formatted_balance")) {
+					Player online = Bukkit.getPlayer(player);
+					return API.get().getEconomyHook().format(API.get().getEconomyHook().getBalance(online == null ? me.devtec.shared.API.offlineCache().lookupNameById(player) : online.getName(),
+							online == null ? null : online.getWorld().getName()));
+				}
+				if (text.equals("css_vanish")) {
+					Player online = Bukkit.getPlayer(player);
+					return online != null ? "" + Vanish.getVanish(online) : null;
+				}
+				if (text.equals("css_ping")) {
+					Player online = Bukkit.getPlayer(player);
+					return online != null ? "" + BukkitLoader.getNmsProvider().getPing(online) : null;
+				}
+				if (text.equals("css_scoreboard")) {
+					UserScoreboardData online = ScoreboardListener.data.get(player);
+					return online != null ? "" + online.isHidden() : null;
+				}
+				return null;
+			}
+		}.register();
 	}
 
 	public void shutdown() {
+		placeholder.unregister();
 		metrics.shutdown();
 		if (NametagManagerAPI.get().isLoaded())
 			NametagManagerAPI.get().unload();
