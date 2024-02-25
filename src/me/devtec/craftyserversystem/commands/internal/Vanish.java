@@ -166,9 +166,14 @@ public class Vanish extends CssCommand {
 		else
 			API.getUser(target.getUniqueId()).remove("css.vanish");
 
-		for (Player player : BukkitLoader.getOnlinePlayers())
-			if (!player.equals(target) && !player.hasPermission(getPerm("see")))
-				player.hidePlayer(Loader.getPlugin(), target);
+		if (event.getStatus()) {
+			for (Player player : BukkitLoader.getOnlinePlayers())
+				if (!player.equals(target) && !player.hasPermission(getPerm("see")))
+					player.hidePlayer(Loader.getPlugin(), target);
+		} else
+			for (Player player : BukkitLoader.getOnlinePlayers())
+				if (!player.equals(target) && !player.canSee(target))
+					player.showPlayer(Loader.getPlugin(), target);
 
 		if (sendMessages) {
 			String statusPath = event.getStatus() ? "enabled" : "disabled";
