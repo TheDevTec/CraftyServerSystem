@@ -18,7 +18,6 @@ import me.devtec.shared.components.ComponentAPI;
 import me.devtec.shared.dataholder.StringContainer;
 import me.devtec.shared.placeholders.PlaceholderAPI;
 import me.devtec.shared.scheduler.Tasker;
-import me.devtec.shared.utility.ColorUtils;
 import me.devtec.shared.utility.MathUtils;
 import me.devtec.theapi.bukkit.BukkitLoader;
 import me.devtec.theapi.bukkit.nms.NmsProvider.Action;
@@ -78,7 +77,7 @@ public class UserTablistData extends TablistData {
 		if (!player.getPlayerListName().equals(playerlistName))
 			player.setPlayerListName(playerlistName);
 		NametagPlayer nametag = NametagManagerAPI.get().getPlayer(player);
-		nametag.setNametagGenerator(generateFunction(getTagNameFormat()));
+		nametag.setNametagGenerator(generateFunction(getTagNameFormat(), placeholders));
 		nametag.getNametag().setText(nametag.getNametagGenerator().apply(player));
 
 		if (previous != null && previous != getYellowNumberDisplayMode()) {
@@ -136,9 +135,8 @@ public class UserTablistData extends TablistData {
 		return packet;
 	}
 
-	private Function<Player, String> generateFunction(String format) {
-		return player -> ColorUtils
-				.colorize(PlaceholderAPI.apply(format.replace("{prefix}", getTagPrefix()).replace("{suffix}", getTagSuffix()).replace("{player}", player.getName()), player.getUniqueId()));
+	private Function<Player, String> generateFunction(String format, PlaceholdersExecutor placeholders) {
+		return player -> placeholders.apply(format.replace("{prefix}", getTagPrefix()).replace("{suffix}", getTagSuffix()).replace("{player}", player.getName()));
 	}
 
 	public void removeTablist() {

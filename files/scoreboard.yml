@@ -1,4 +1,4 @@
-senabled: true
+enabled: true
 
 disabled-in-worlds:
 - "disabledWorld"

@@ -191,6 +191,7 @@ public class NametagManagerAPI {
 			Field listBField = Ref.field(clientPlayerInfoUpdate, List.class);
 			Field clientPlayerInfoLegacyAction = Ref.field(clientPlayerInfoUpdate, "a");
 			Field listUuidsField = Ref.field(clientPlayerInfoRemove, List.class);
+			Field listUuidsFieldUpdate = Ref.field(clientPlayerInfoUpdate, List.class);
 			Field iterableField = Ref.field(clientBundle, Iterable.class);
 			Object entityTypePlayer = findEntityType();
 			Field metaEntityId = Ref.field(outMetadata, int.class);
@@ -286,7 +287,7 @@ public class NametagManagerAPI {
 
 						NametagPlayer receiverPlayer = lookupByUuidOrCreate(offlinePlayer, offlineUuid);
 						for (Object entity : (List<?>) Ref.get(packet, listBField)) {
-							UUID uuid = (UUID) Ref.get(entity, playerInfoUuidField);
+							UUID uuid = (UUID) Ref.get(entity, listUuidsFieldUpdate);
 							if (uuid.equals(offlineUuid))
 								continue;
 							Player joinedPlayer = null;
@@ -308,7 +309,7 @@ public class NametagManagerAPI {
 							if (entity.equals(offlineUuid) || Bukkit.getPlayer(entity) == null)
 								continue;
 							NametagPlayer spawned = lookupByUuid(entity);
-							receiverPlayer.removeTabSorting(spawned);
+							spawned.removeTabSorting(receiverPlayer);
 						}
 						return;
 					}
@@ -319,12 +320,12 @@ public class NametagManagerAPI {
 						if ((offlinePlayer = Bukkit.getPlayer(offlineUuid)) == null)
 							return;
 						NametagPlayer receiverPlayer = lookupByUuidOrCreate(offlinePlayer, offlineUuid);
-						for (Object entity : (List<?>) Ref.get(packet, listUuidsField)) {
+						for (Object entity : (List<?>) Ref.get(packet, listUuidsFieldUpdate)) {
 							UUID uuid = BukkitLoader.getNmsProvider().fromGameProfile(Ref.get(entity, playerInfoUuidField)).getUUID();
 							if (uuid.equals(offlineUuid) || Bukkit.getPlayer(uuid) == null)
 								continue;
 							NametagPlayer spawned = lookupByUuid(uuid);
-							receiverPlayer.removeTabSorting(spawned);
+							spawned.removeTabSorting(receiverPlayer);
 						}
 					} else { // Add or update
 						while ((offlinePlayer = Bukkit.getPlayer(offlineUuid)) == null)
@@ -398,22 +399,16 @@ public class NametagManagerAPI {
 					if (obj instanceof List)
 						for (int i : (List<Integer>) obj) { // IntList
 							NametagPlayer despawning = lookupById(i);
-							if (despawning != null) {
+							if (despawning != null)
 								if (!despawning.getPlayer().isOnline() || despawning.getPlayer().getGameMode() == GameMode.SPECTATOR || !receiver.getPlayer().canSee(despawning.getPlayer()))
 									despawning.hideNametag(receiver);
-								if (despawning.getPlayer().getGameMode() != GameMode.SPECTATOR)
-									receiver.hideNametag(despawning);
-							}
 						}
 					else
 						for (int i : (int[]) obj) { // int[]
 							NametagPlayer despawning = lookupById(i);
-							if (despawning != null) {
+							if (despawning != null)
 								if (!despawning.getPlayer().isOnline() || despawning.getPlayer().getGameMode() == GameMode.SPECTATOR || !receiver.getPlayer().canSee(despawning.getPlayer()))
 									despawning.hideNametag(receiver);
-								if (despawning.getPlayer().getGameMode() != GameMode.SPECTATOR)
-									receiver.hideNametag(despawning);
-							}
 						}
 					return;
 				}

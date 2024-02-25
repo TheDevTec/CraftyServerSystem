@@ -60,6 +60,7 @@ public class NametagPlayer {
 	public NametagPlayer initNametag(@Nonnull Player player) {
 		Location loc = player.getLocation();
 		nametag = new NametagHologram(player, player.getWorld(), loc.getX(), loc.getY(), loc.getZ(), nametagGenerator.apply(player));
+		BukkitLoader.getPacketHandler().send(player, NametagHologram.createTeamPacket(0, name, "z_nametag"));
 		BukkitLoader.getPacketHandler().send(player, NametagHologram.createTeamPacket(0, name, teamName));
 		return this;
 	}
@@ -106,8 +107,7 @@ public class NametagPlayer {
 
 	public void addTabSorting(@Nonnull NametagPlayer player) {
 		if (withProfile.add(player)) {
-			BukkitLoader.getPacketHandler().send(getPlayer(), NametagHologram.createTeamPacket(0, player.name, "nametag"));
-			BukkitLoader.getPacketHandler().send(getPlayer(), NametagHologram.createTeamPacket(0, player.name, player.teamName));
+			BukkitLoader.getPacketHandler().send(player.getPlayer(), NametagHologram.createTeamPacket(0, name, "z_nametag"));
 			BukkitLoader.getPacketHandler().send(player.getPlayer(), NametagHologram.createTeamPacket(0, name, teamName));
 		}
 	}
