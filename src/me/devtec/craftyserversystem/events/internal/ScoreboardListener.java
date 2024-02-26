@@ -182,9 +182,9 @@ public class ScoreboardListener implements CssListener {
 
 	@EventHandler
 	public void onQuit(PlayerQuitEvent e) {
-		UserScoreboardData user;
-		if ((user = data.remove(e.getPlayer().getUniqueId())) != null)
-			user.removeScoreboard();
+		UserScoreboardData userData = data.remove(e.getPlayer().getUniqueId());
+		if (userData != null)
+			userData.removeScoreboard();
 	}
 
 	@EventHandler

@@ -109,6 +109,8 @@ public class NametagPlayer {
 		if (withProfile.add(player)) {
 			BukkitLoader.getPacketHandler().send(player.getPlayer(), NametagHologram.createTeamPacket(0, name, "z_nametag"));
 			BukkitLoader.getPacketHandler().send(player.getPlayer(), NametagHologram.createTeamPacket(0, name, teamName));
+			BukkitLoader.getPacketHandler().send(getPlayer(), NametagHologram.createTeamPacket(0, player.name, player.teamName));
+			BukkitLoader.getPacketHandler().send(getPlayer(), NametagHologram.createTeamPacket(0, player.name, "z_nametag"));
 		}
 	}
 
