@@ -32,12 +32,12 @@ public class UserTablistData extends TablistData {
 	private YellowNumberDisplayMode previous;
 	private Map<Player, Integer> yellowNumber = new HashMap<>();
 
-	public UserTablistData(Player player) {
-		this.player = player;
+	public UserTablistData(Player p) {
+		player = p;
 	}
 
-	public UserTablistData(Player player, UserTablistData previousData) {
-		this.player = player;
+	public UserTablistData(Player p, UserTablistData previousData) {
+		player = p;
 		previous = previousData.previous;
 		previousHeader = previousData.previousHeader;
 		previousFooter = previousData.previousFooter;
@@ -84,7 +84,7 @@ public class UserTablistData extends TablistData {
 			// remove
 			if (!yellowNumber.isEmpty())
 				BukkitLoader.getPacketHandler().send(yellowNumber.keySet(), BukkitLoader.getNmsProvider().packetScoreboardScore(Action.REMOVE, "css_yn", player.getName(), 0));
-			BukkitLoader.getPacketHandler().send(player, createObjectivePacket(1, "css_yn", "", previous == YellowNumberDisplayMode.INTEGER));
+			BukkitLoader.getPacketHandler().send(player, createObjectivePacket(0, "css_yn", "", previous == YellowNumberDisplayMode.INTEGER));
 		}
 		if (previous == null && previous != getYellowNumberDisplayMode() && getYellowNumberDisplayMode() != YellowNumberDisplayMode.NONE) {
 			// create
@@ -122,7 +122,9 @@ public class UserTablistData extends TablistData {
 			Ref.set(packet, "d", sbname);
 			Ref.set(packet, "e", BukkitLoader.getNmsProvider().toIChatBaseComponent(ComponentAPI.fromString(displayName)));
 			Ref.set(packet, "f", BukkitLoader.getNmsProvider().getEnumScoreboardHealthDisplay(displayAsInteger ? DisplayType.INTEGER : DisplayType.HEARTS));
-			Ref.set(packet, "g", mode);
+			if (Ref.isNewerThan(20) || Ref.serverVersionInt() == 20 && Ref.serverVersionRelease() >= 3)
+				Ref.set(packet, "g", null);
+			Ref.set(packet, Ref.isNewerThan(20) || Ref.serverVersionInt() == 20 && Ref.serverVersionRelease() >= 3 ? "h" : "g", mode);
 		} else {
 			Ref.set(packet, "a", sbname);
 			Ref.set(packet, "b", Ref.isNewerThan(12) ? BukkitLoader.getNmsProvider().toIChatBaseComponent(ComponentAPI.fromString(displayName)) : displayName);
@@ -146,7 +148,7 @@ public class UserTablistData extends TablistData {
 		nametag.remove();
 		BukkitLoader.getPacketHandler().send(yellowNumber.keySet(), BukkitLoader.getNmsProvider().packetScoreboardScore(Action.REMOVE, "css_yn", player.getName(), 0));
 		yellowNumber.clear();
-		BukkitLoader.getPacketHandler().send(player, createObjectivePacket(1, "css_yn", "", previous == YellowNumberDisplayMode.INTEGER));
+		BukkitLoader.getPacketHandler().send(player, createObjectivePacket(0, "css_yn", "", previous == YellowNumberDisplayMode.INTEGER));
 		if (NametagManagerAPI.get().getPlayers().size() == 1)
 			NametagManagerAPI.get().getPlayers().remove(nametag);
 		else

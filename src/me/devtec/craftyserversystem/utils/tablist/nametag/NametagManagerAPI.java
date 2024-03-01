@@ -287,7 +287,7 @@ public class NametagManagerAPI {
 
 						NametagPlayer receiverPlayer = lookupByUuidOrCreate(offlinePlayer, offlineUuid);
 						for (Object entity : (List<?>) Ref.get(packet, listBField)) {
-							UUID uuid = (UUID) Ref.get(entity, listUuidsFieldUpdate);
+							UUID uuid = (UUID) Ref.get(entity, playerInfoUuidField);
 							if (uuid.equals(offlineUuid))
 								continue;
 							Player joinedPlayer = null;
