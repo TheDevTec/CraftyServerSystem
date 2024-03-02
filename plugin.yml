@@ -3,5 +3,5 @@ main: me.devtec.craftyserversystem.Loader
 authors: [Straikerinos,Darqes]
 softdepend: [TheAPI,Vault,LuckPerms]
 web: https://spigotmc.org/resources/71147/
-version: 1.0.5
+version: 1.0.6
 api-version: '1.13'
