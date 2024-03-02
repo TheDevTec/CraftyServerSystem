@@ -57,7 +57,7 @@ public class Vanish extends CssCommand {
 								e.getPlayer().removeMetadata("vanish", value.getOwningPlugin());
 						for (Player player : BukkitLoader.getOnlinePlayers())
 							if (!player.equals(e.getPlayer()) && !player.hasPermission(getPerm("see")))
-								player.hidePlayer(Loader.getPlugin(), e.getPlayer());
+								player.hidePlayer(e.getPlayer());
 					} else if (storeVanishInDb)
 						try {
 							me.devtec.craftyserversystem.api.API.get().getSqlConnection().remove(RemoveQuery.table("css_vanish").where("id", e.getPlayer().getUniqueId().toString()));
@@ -70,7 +70,7 @@ public class Vanish extends CssCommand {
 				// Hide vanished players before this player
 				for (Player player : BukkitLoader.getOnlinePlayers())
 					if (!player.equals(e.getPlayer()) && getVanish(player) && !player.hasPermission(getPerm("see")))
-						e.getPlayer().hidePlayer(Loader.getPlugin(), player);
+						e.getPlayer().hidePlayer(player);
 			}
 
 			private boolean hasVanishEnabled(UUID uuid) {
@@ -169,11 +169,11 @@ public class Vanish extends CssCommand {
 		if (event.getStatus()) {
 			for (Player player : BukkitLoader.getOnlinePlayers())
 				if (!player.equals(target) && !player.hasPermission(getPerm("see")))
-					player.hidePlayer(Loader.getPlugin(), target);
+					player.hidePlayer(target);
 		} else
 			for (Player player : BukkitLoader.getOnlinePlayers())
 				if (!player.equals(target) && !player.canSee(target))
-					player.showPlayer(Loader.getPlugin(), target);
+					player.showPlayer(target);
 
 		if (sendMessages) {
 			String statusPath = event.getStatus() ? "enabled" : "disabled";

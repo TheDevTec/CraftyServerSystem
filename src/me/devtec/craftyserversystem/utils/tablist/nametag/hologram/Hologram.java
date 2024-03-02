@@ -12,10 +12,14 @@ import me.devtec.shared.Ref;
 import me.devtec.theapi.bukkit.BukkitLoader;
 
 public class Hologram implements HologramHolder {
-	static Object data = findDataWatcherObject(Ref.nms("world.entity", "Entity"), Byte.class);
-	static Object name = findDataWatcherObject(Ref.nms("world.entity", "Entity"), Optional.class);
-	static Object showName = findDataWatcherObject(Ref.nms("world.entity", "Entity"), Boolean.class);
-	static Object properties = findDataWatcherObject(Ref.nms("world.entity.decoration", "EntityArmorStand"), Byte.class);
+	static Object data = Ref.isOlderThan(12) ? 0 : findDataWatcherObject(Ref.nms("world.entity", "Entity"), Byte.class);
+	static Object name = Ref.isOlderThan(12) ? 2 : findDataWatcherObject(Ref.nms("world.entity", "Entity"), Optional.class);
+	static {
+		if (name == null)
+			name = findDataWatcherObject(Ref.nms("world.entity", "Entity"), String.class);
+	}
+	static Object showName = Ref.isOlderThan(12) ? 3 : findDataWatcherObject(Ref.nms("world.entity", "Entity"), Boolean.class);
+	static Object properties = Ref.isOlderThan(12) ? 10 : findDataWatcherObject(Ref.nms("world.entity.decoration", "EntityArmorStand"), Byte.class);
 
 	protected int id;
 	protected UUID uuid;

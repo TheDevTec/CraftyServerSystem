@@ -9,6 +9,7 @@ import org.bukkit.event.inventory.InventoryType;
 
 import me.devtec.craftyserversystem.commands.CssCommand;
 import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
+import me.devtec.shared.Ref;
 import me.devtec.shared.commands.selectors.Selector;
 import me.devtec.shared.commands.structures.CommandStructure;
 
@@ -21,7 +22,7 @@ public class Loom extends CssCommand {
 
 	@Override
 	public void register() {
-		if (isRegistered())
+		if (isRegistered() || !Ref.isNewerThan(13))
 			return;
 
 		CommandStructure<CommandSender> cmd = CommandStructure.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {

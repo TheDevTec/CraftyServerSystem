@@ -23,6 +23,7 @@ import me.devtec.shared.Ref;
 import me.devtec.shared.components.Component;
 import me.devtec.shared.components.ComponentAPI;
 import me.devtec.shared.dataholder.cache.ConcurrentSet;
+import me.devtec.shared.utility.MathUtils;
 import me.devtec.theapi.bukkit.BukkitLoader;
 import me.devtec.theapi.bukkit.nms.utils.TeamUtils;
 
@@ -31,6 +32,18 @@ public class NametagHologram extends Hologram {
 	private static final Object entityTypeArmorStand = findEntityType();
 	private static Constructor<?> spawnEntityPacket = Ref.constructor(Ref.nms("network.protocol.game", "PacketPlayOutSpawnEntity"), int.class, UUID.class, double.class, double.class, double.class,
 			float.class, float.class, Ref.nms("world.entity", "EntityTypes"), int.class, Ref.nms("world.phys", "Vec3D"), double.class);
+	private static byte LEGACY_SPAWN_PACKET;
+	static {
+		if (spawnEntityPacket == null) {
+			spawnEntityPacket = Ref.constructor(Ref.nms("network.protocol.game", "PacketPlayOutSpawnEntity"), int.class, UUID.class, double.class, double.class, double.class, float.class, float.class,
+					Ref.nms("world.entity", "EntityTypes"), int.class, Ref.nms("world.phys", "Vec3D"));
+			LEGACY_SPAWN_PACKET = 1;
+		}
+		if (spawnEntityPacket == null) {
+			spawnEntityPacket = Ref.constructor(Ref.nms("network.protocol.game", "PacketPlayOutSpawnEntity"));
+			LEGACY_SPAWN_PACKET = 2;
+		}
+	}
 	private static final Object zero = Ref.isNewerThan(18) ? Ref.getStatic(Ref.nms("world.phys", "Vec3D"), "b") : Ref.getStatic(Ref.nms("world.phys", "Vec3D"), "a");
 
 	private static Object findEntityType() {
@@ -67,13 +80,13 @@ public class NametagHologram extends Hologram {
 		prevZ = z;
 		prevWorld = world;
 		updateHeight(owner.isSneaking(), owner.isSleeping(), owner.getVehicle() != null, true);
-		id = integer.incrementAndGet();
+		id = HologramHolder.increaseAndGetId();
 		if (owner.getVehicle() != null) {
 			double additionalY = owner.getVehicle().getLocation().getY();
 			EntityType type = owner.getVehicle().getType();
-			if (type == EntityType.HORSE || type == EntityType.SKELETON_HORSE || type == EntityType.ZOMBIE_HORSE)
+			if (type == EntityType.HORSE || type.name().equals("SKELETON_HORSE") || type.name().equals("ZOMBIE_HORSE"))
 				additionalY += 0.85;
-			else if (type == EntityType.DONKEY)
+			else if (type.name().equals("DONKEY"))
 				additionalY += 0.525;
 			else if (type.name().equals("CAMEL"))
 				additionalY += 1.15;
@@ -85,18 +98,54 @@ public class NametagHologram extends Hologram {
 				additionalY += -0.45;
 			prevY = additionalY;
 		}
-		metadataPacket = HologramHolder.packetMetadata(id, metadataListValue = Arrays.asList(makeItemInstance(data, owner.isSneaking() ? (byte) 34 : (byte) 32), makeItemInstance(showName, true),
-				makeItemInstance(name, Optional.of(BukkitLoader.getNmsProvider().toIChatBaseComponent(ComponentAPI.fromString(text, true, false)))), makeItemInstance(properties, (byte) (16 | 1))));
-		spawnPacket = Ref.newInstance(spawnEntityPacket, id, uuid, prevX, prevY + height, prevZ, 0, 0, entityTypeArmorStand, 0, zero, 0);
+		metadataPacket = HologramHolder.packetMetadata(id,
+				metadataListValue = Arrays.asList(makeItemInstance(data, owner.isSneaking() ? (byte) 34 : (byte) 32), makeItemInstance(showName, true),
+						makeItemInstance(name, LEGACY_SPAWN_PACKET == 2 ? text : Optional.of(BukkitLoader.getNmsProvider().toIChatBaseComponent(ComponentAPI.fromString(text, true, false)))),
+						makeItemInstance(properties, (byte) (16 | 1))));
+		switch (LEGACY_SPAWN_PACKET) {
+		case 0:
+			spawnPacket = Ref.newInstance(spawnEntityPacket, id, uuid, prevX, prevY + height, prevZ, 0, 0, entityTypeArmorStand, 0, zero, 0);
+			break;
+		case 1:
+			spawnPacket = Ref.newInstance(spawnEntityPacket, id, uuid, prevX, prevY + height, prevZ, 0, 0, entityTypeArmorStand, 0, zero);
+			break;
+		case 2:
+			spawnPacket = Ref.newInstance(spawnEntityPacket);
+			Ref.set(spawnPacket, "a", id);
+			if (Ref.isOlderThan(12)) {
+				Ref.set(spawnPacket, "b", MathUtils.floor(prevX * 32.0));
+				Ref.set(spawnPacket, "c", MathUtils.floor((prevY + height) * 32.0));
+				Ref.set(spawnPacket, "d", MathUtils.floor(prevZ * 32.0));
+				Ref.set(spawnPacket, "j", 78);
+			} else {
+				Ref.set(spawnPacket, "b", uuid);
+				Ref.set(spawnPacket, "c", prevX);
+				Ref.set(spawnPacket, "d", prevY + height);
+				Ref.set(spawnPacket, "e", prevZ);
+				Ref.set(spawnPacket, "k", 78);
+			}
+			break;
+		}
 		despawnPacket = BukkitLoader.getNmsProvider().packetEntityDestroy(id);
 	}
 
 	private static Constructor<?> dataWatcherItem = Ref.constructor(Ref.nms("network.syncher", "DataWatcher$Item"), Ref.nms("network.syncher", "DataWatcherObject"), Object.class);
 	private static Method dataWatcherMakeInstance = Ref.method(Ref.nms("network.syncher", "DataWatcher$Item"), "e");
+	static {
+		if (dataWatcherMakeInstance == null)
+			dataWatcherMakeInstance = Ref.method(Ref.nms("network.syncher", "DataWatcher$Item"), "a");
+		if (Ref.isOlderThan(12)) {
+			dataWatcherItem = Ref.constructor(Ref.nms("network.syncher", "DataWatcher$WatchableObject"), int.class, int.class, Object.class);
+			dataWatcherMakeInstance = Ref.method(Ref.nms("network.syncher", "DataWatcher$WatchableObject"), "a");
+		}
+
+	}
 
 	private static Object makeItemInstance(Object dataIndex, Object value) {
 		return Ref.isNewerThan(19) || Ref.serverVersionInt() == 19 && Ref.serverVersionRelease() >= 2 ? Ref.invoke(Ref.newInstance(dataWatcherItem, dataIndex, value), dataWatcherMakeInstance)
-				: Ref.newInstance(dataWatcherItem, dataIndex, value);
+				: Ref.isOlderThan(12)
+						? Ref.newInstance(dataWatcherItem, value.getClass() == String.class ? 4 : 0, (int) dataIndex, value instanceof Boolean ? (boolean) value ? (byte) 1 : (byte) 0 : value)
+						: Ref.newInstance(dataWatcherItem, dataIndex, value);
 	}
 
 	public Player getPlayer() {
@@ -115,7 +164,30 @@ public class NametagHologram extends Hologram {
 		}
 		if (whichCanSee.add(to)) {
 			if (shouldUpdate) {
-				spawnPacket = Ref.newInstance(spawnEntityPacket, id, uuid, prevX, prevY + height, prevZ, 0, 0, entityTypeArmorStand, 0, zero, 0);
+				switch (LEGACY_SPAWN_PACKET) {
+				case 0:
+					spawnPacket = Ref.newInstance(spawnEntityPacket, id, uuid, prevX, prevY + height, prevZ, 0, 0, entityTypeArmorStand, 0, zero, 0);
+					break;
+				case 1:
+					spawnPacket = Ref.newInstance(spawnEntityPacket, id, uuid, prevX, prevY + height, prevZ, 0, 0, entityTypeArmorStand, 0, zero);
+					break;
+				case 2:
+					spawnPacket = Ref.newInstance(spawnEntityPacket);
+					Ref.set(spawnPacket, "a", id);
+					if (Ref.isOlderThan(12)) {
+						Ref.set(spawnPacket, "b", MathUtils.floor(prevX * 32.0));
+						Ref.set(spawnPacket, "c", MathUtils.floor((prevY + height) * 32.0));
+						Ref.set(spawnPacket, "d", MathUtils.floor(prevZ * 32.0));
+						Ref.set(spawnPacket, "j", 78);
+					} else {
+						Ref.set(spawnPacket, "b", uuid);
+						Ref.set(spawnPacket, "c", prevX);
+						Ref.set(spawnPacket, "d", prevY + height);
+						Ref.set(spawnPacket, "e", prevZ);
+						Ref.set(spawnPacket, "k", 78);
+					}
+					break;
+				}
 				shouldUpdate = false;
 			}
 			super.show(to.getPlayer());
@@ -132,7 +204,7 @@ public class NametagHologram extends Hologram {
 			return;
 		nametag = text;
 
-		metadataListValue.set(2, makeItemInstance(name, Optional.of(BukkitLoader.getNmsProvider().toIChatBaseComponent(ComponentAPI.fromString(text, true, false)))));
+		metadataListValue.set(2, makeItemInstance(name, LEGACY_SPAWN_PACKET == 2 ? text : Optional.of(BukkitLoader.getNmsProvider().toIChatBaseComponent(ComponentAPI.fromString(text, true, false)))));
 		for (NametagPlayer asPlayer : whichCanSee) {
 			if (!asPlayer.getPlayer().isOnline())
 				continue;
@@ -145,9 +217,9 @@ public class NametagHologram extends Hologram {
 		if (owner.getVehicle() != null) {
 			double additionalY = owner.getVehicle().getLocation().getY();
 			EntityType type = owner.getVehicle().getType();
-			if (type == EntityType.HORSE || type == EntityType.SKELETON_HORSE || type == EntityType.ZOMBIE_HORSE)
+			if (type == EntityType.HORSE || type.name().equals("SKELETON_HORSE") || type.name().equals("ZOMBIE_HORSE"))
 				additionalY += 0.85;
-			else if (type == EntityType.DONKEY)
+			else if (type.name().equals("DONKEY"))
 				additionalY += 0.525;
 			else if (type.name().equals("CAMEL"))
 				additionalY += 1.15;
@@ -184,9 +256,9 @@ public class NametagHologram extends Hologram {
 		if (owner.getVehicle() != null) {
 			double additionalY = owner.getVehicle().getLocation().getY();
 			EntityType type = owner.getVehicle().getType();
-			if (type == EntityType.HORSE || type == EntityType.SKELETON_HORSE || type == EntityType.ZOMBIE_HORSE)
+			if (type == EntityType.HORSE || type.name().equals("SKELETON_HORSE") || type.name().equals("ZOMBIE_HORSE"))
 				additionalY += 0.85;
-			else if (type == EntityType.DONKEY)
+			else if (type.name().equals("DONKEY"))
 				additionalY += 0.525;
 			else if (type.name().equals("CAMEL"))
 				additionalY += 1.15;
@@ -214,9 +286,9 @@ public class NametagHologram extends Hologram {
 		if (owner.getVehicle() != null) {
 			double additionalY = owner.getVehicle().getLocation().getY();
 			EntityType type = owner.getVehicle().getType();
-			if (type == EntityType.HORSE || type == EntityType.SKELETON_HORSE || type == EntityType.ZOMBIE_HORSE)
+			if (type == EntityType.HORSE || type.name().equals("SKELETON_HORSE") || type.name().equals("ZOMBIE_HORSE"))
 				additionalY += 0.85;
-			else if (type == EntityType.DONKEY)
+			else if (type.name().equals("DONKEY"))
 				additionalY += 0.525;
 			else if (type.name().equals("CAMEL"))
 				additionalY += 1.15;
@@ -251,9 +323,9 @@ public class NametagHologram extends Hologram {
 		if (owner.getVehicle() != null) {
 			double additionalY = owner.getVehicle().getLocation().getY();
 			EntityType type = owner.getVehicle().getType();
-			if (type == EntityType.HORSE || type == EntityType.SKELETON_HORSE || type == EntityType.ZOMBIE_HORSE)
+			if (type == EntityType.HORSE || type.name().equals("SKELETON_HORSE") || type.name().equals("ZOMBIE_HORSE"))
 				additionalY += 0.85;
-			else if (type == EntityType.DONKEY)
+			else if (type.name().equals("DONKEY"))
 				additionalY += 0.525;
 			else if (type.name().equals("CAMEL"))
 				additionalY += 1.15;
@@ -378,9 +450,9 @@ public class NametagHologram extends Hologram {
 		if (vehicle != null) {
 			double additionalY = vehicle.getLocation().getY();
 			EntityType type = vehicle.getType();
-			if (type == EntityType.HORSE || type == EntityType.SKELETON_HORSE || type == EntityType.ZOMBIE_HORSE)
+			if (type == EntityType.HORSE || type.name().equals("SKELETON_HORSE") || type.name().equals("ZOMBIE_HORSE"))
 				additionalY += 0.85;
-			else if (type == EntityType.DONKEY)
+			else if (type.name().equals("DONKEY"))
 				additionalY += 0.525;
 			else if (type.name().equals("CAMEL"))
 				additionalY += 1.15;

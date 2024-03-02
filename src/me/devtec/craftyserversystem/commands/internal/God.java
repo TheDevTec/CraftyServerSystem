@@ -18,6 +18,7 @@ import me.devtec.craftyserversystem.Loader;
 import me.devtec.craftyserversystem.api.API;
 import me.devtec.craftyserversystem.commands.CssCommand;
 import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
+import me.devtec.shared.Ref;
 import me.devtec.shared.commands.selectors.Selector;
 import me.devtec.shared.commands.structures.CommandStructure;
 
@@ -30,7 +31,38 @@ public class God extends CssCommand {
 		if (isRegistered())
 			return;
 
-		if (API.get().getConfigManager().getMain().getBoolean("god.anti-void-damage-listener"))
+		if (Ref.isOlderThan(12))
+			if (API.get().getConfigManager().getMain().getBoolean("god.anti-void-damage-listener"))
+				listener = new Listener() {
+
+					@EventHandler
+					public void playerVoid(EntityDamageEvent e) {
+						if (e.getEntityType() == EntityType.PLAYER && isAllowed((Player) e.getEntity()))
+							e.setCancelled(true);
+					}
+
+					@EventHandler
+					public void playerFood(FoodLevelChangeEvent e) {
+						if (e.getEntityType() == EntityType.PLAYER && isAllowed((Player) e.getEntity()))
+							e.setCancelled(true);
+					}
+				};
+			else
+				listener = new Listener() {
+
+					@EventHandler
+					public void playerVoid(EntityDamageEvent e) {
+						if (e.getCause() != DamageCause.VOID && e.getEntityType() == EntityType.PLAYER && isAllowed((Player) e.getEntity()))
+							e.setCancelled(true);
+					}
+
+					@EventHandler
+					public void playerFood(FoodLevelChangeEvent e) {
+						if (e.getEntityType() == EntityType.PLAYER && isAllowed((Player) e.getEntity()))
+							e.setCancelled(true);
+					}
+				};
+		else if (API.get().getConfigManager().getMain().getBoolean("god.anti-void-damage-listener"))
 			listener = new Listener() {
 
 				@EventHandler
@@ -102,7 +134,10 @@ public class God extends CssCommand {
 
 	private void setGod(Player target, boolean godStatus, boolean sendMessage, CommandSender sender) {
 		if (godStatus) {
-			target.setInvulnerable(true);
+			if (Ref.isOlderThan(12))
+				me.devtec.shared.API.getUser(target.getUniqueId()).set("css.god", true);
+			else
+				target.setInvulnerable(true);
 			if (sendMessage)
 				if (!sender.equals(target)) {
 					PlaceholdersExecutor placeholders = PlaceholdersExecutor.i().add("sender", sender.getName()).add("target", target.getName());
@@ -111,7 +146,10 @@ public class God extends CssCommand {
 				} else
 					msg(target, "self.true", PlaceholdersExecutor.i().add("target", target.getName()));
 		} else {
-			target.setInvulnerable(false);
+			if (Ref.isOlderThan(12))
+				me.devtec.shared.API.getUser(target.getUniqueId()).set("css.god", false);
+			else
+				target.setInvulnerable(false);
 			if (sendMessage)
 				if (!sender.equals(target)) {
 					PlaceholdersExecutor placeholders = PlaceholdersExecutor.i().add("sender", sender.getName()).add("target", target.getName());
@@ -122,8 +160,10 @@ public class God extends CssCommand {
 		}
 	}
 
-	private boolean isAllowed(Player sender) {
-		return sender.isInvulnerable();
+	private boolean isAllowed(Player target) {
+		if (Ref.isOlderThan(12))
+			return me.devtec.shared.API.getUser(target.getUniqueId()).getBoolean("css.god");
+		return target.isInvulnerable();
 	}
 
 	@Override

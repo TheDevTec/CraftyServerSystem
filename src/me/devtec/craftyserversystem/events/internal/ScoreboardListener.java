@@ -113,11 +113,11 @@ public class ScoreboardListener implements CssListener {
 						if (player == null || !player.isOnline())
 							continue;
 						Location loc = player.getLocation();
-						entry.getValue()
-								.process(PlaceholdersExecutor.i().papi(player.getUniqueId()).add("player", player.getName())
-										.add("balance", API.get().getEconomyHook().format(API.get().getEconomyHook().getBalance(player.getName(), player.getWorld().getName())))
-										.add("health", player.getHealth()).add("food", player.getFoodLevel()).add("x", loc.getX()).add("y", loc.getY()).add("z", loc.getZ())
-										.add("world", loc.getWorld().getName()));
+						entry.getValue().process(PlaceholdersExecutor.i().papi(player.getUniqueId()).add("player", player.getName()).add("ping", BukkitLoader.getNmsProvider().getPing(player))
+								.add("online", BukkitLoader.getOnlinePlayers().size()).add("max_players", Bukkit.getMaxPlayers())
+								.add("balance", API.get().getEconomyHook().format(API.get().getEconomyHook().getBalance(player.getName(), player.getWorld().getName())))
+								.add("money", API.get().getEconomyHook().format(API.get().getEconomyHook().getBalance(player.getName(), player.getWorld().getName()))).add("health", player.getHealth())
+								.add("food", player.getFoodLevel()).add("x", loc.getX()).add("y", loc.getY()).add("z", loc.getZ()).add("world", loc.getWorld().getName()));
 					}
 				}
 			}

@@ -46,7 +46,7 @@ public class Sun extends CssCommand {
 	private void setSun(CommandSender sender, World world, boolean sendMessages) {
 		world.setStorm(false);
 		world.setThundering(false);
-		world.setClearWeatherDuration(36000);
+		world.setWeatherDuration(36000);
 		if (sendMessages)
 			msgOut(sender, "weather.sun", PlaceholdersExecutor.i().add("world", world.getName()));
 	}

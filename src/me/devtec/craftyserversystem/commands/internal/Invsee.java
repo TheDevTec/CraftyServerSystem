@@ -16,7 +16,6 @@ import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockDispenseArmorEvent;
-import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
@@ -25,6 +24,7 @@ import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
+import org.bukkit.event.player.PlayerPickupItemEvent;
 import org.bukkit.event.player.PlayerSwapHandItemsEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -33,6 +33,7 @@ import org.bukkit.inventory.PlayerInventory;
 import me.devtec.craftyserversystem.Loader;
 import me.devtec.craftyserversystem.commands.CssCommand;
 import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
+import me.devtec.shared.Ref;
 import me.devtec.shared.commands.selectors.Selector;
 import me.devtec.shared.commands.structures.CommandStructure;
 import me.devtec.shared.scheduler.Scheduler;
@@ -47,6 +48,7 @@ import me.devtec.theapi.bukkit.xseries.XMaterial;
 public class Invsee extends CssCommand {
 
 	private Listener listener;
+	private Listener swapItemListener;
 	private Map<UUID, GUI> guiHandler = new HashMap<>();
 	private final int HEAD_SLOT = 0;
 	private final int CHESTPLATE_SLOT = 1;
@@ -67,6 +69,46 @@ public class Invsee extends CssCommand {
 	public void register() {
 		if (isRegistered())
 			return;
+
+		if (Ref.isNewerThan(9) && Ref.isOlderThan(13)) // 1.10 - 1.12
+			swapItemListener = new Listener() {
+
+				@EventHandler(ignoreCancelled = true)
+				public void onSwap(PlayerSwapHandItemsEvent e) {
+					GUI gui = guiHandler.get(e.getPlayer().getUniqueId());
+					if (gui != null) {
+						gui.setItem(18 + e.getPlayer().getInventory().getHeldItemSlot(), new EmptyItemGUI(e.getMainHandItem()).setUnstealable(false));
+						gui.setItem(OFFHAND_SLOT, new EmptyItemGUI(e.getOffHandItem()).setUnstealable(false));
+					}
+				}
+			};
+		else if (Ref.isNewerThan(13)) // 1.14+
+			swapItemListener = new Listener() {
+
+				@EventHandler(ignoreCancelled = true)
+				public void onSwap(PlayerSwapHandItemsEvent e) {
+					GUI gui = guiHandler.get(e.getPlayer().getUniqueId());
+					if (gui != null) {
+						gui.setItem(18 + e.getPlayer().getInventory().getHeldItemSlot(), new EmptyItemGUI(e.getMainHandItem()).setUnstealable(false));
+						gui.setItem(OFFHAND_SLOT, new EmptyItemGUI(e.getOffHandItem()).setUnstealable(false));
+					}
+				}
+
+				@EventHandler(ignoreCancelled = true)
+				public void onDispense(BlockDispenseArmorEvent e) {
+					if (e.getTargetEntity().getType() == EntityType.PLAYER) {
+						GUI gui = guiHandler.get(e.getTargetEntity().getUniqueId());
+						if (gui != null)
+							new Tasker() {
+
+								@Override
+								public void run() {
+									updateinv(gui, (Player) e.getTargetEntity());
+								}
+							}.runLater(1);
+					}
+				}
+			};
 
 		listener = new Listener() {
 
@@ -170,9 +212,9 @@ public class Invsee extends CssCommand {
 					case DROP_ONE_CURSOR:
 					case DROP_ONE_SLOT:
 					case PLACE_ONE: {
-						gui.setItem(slot, new EmptyItemGUI(e.getCurrentItem().getType().isAir() ? e.getCursor().asOne() : e.getCurrentItem().asQuantity(e.getCurrentItem().getAmount() + 1))
+						gui.setItem(slot, new EmptyItemGUI(e.getCurrentItem().getType() == Material.AIR ? asOne(e.getCursor()) : asQuantity(e.getCurrentItem(), e.getCurrentItem().getAmount() + 1))
 								.setUnstealable(false));
-						ItemStack cursor = e.getCursor().clone().subtract(1);
+						ItemStack cursor = subtract(e.getCursor(), 1);
 						if (cursor.getAmount() == 0)
 							gui.remove(CURSOR_SLOT);
 						else
@@ -181,19 +223,19 @@ public class Invsee extends CssCommand {
 					}
 					case PLACE_SOME:
 						int remaining = e.getCurrentItem().getAmount() + e.getCursor().getAmount() - e.getCurrentItem().getMaxStackSize();
-						gui.setItem(slot, new EmptyItemGUI(e.getCurrentItem().clone().add(e.getCursor().getAmount())).setUnstealable(false));
-						gui.setItem(CURSOR_SLOT, new EmptyItemGUI(e.getCursor().asQuantity(remaining)).setUnstealable(false));
+						gui.setItem(slot, new EmptyItemGUI(add(e.getCurrentItem(), e.getCursor().getAmount())).setUnstealable(false));
+						gui.setItem(CURSOR_SLOT, new EmptyItemGUI(asQuantity(e.getCursor(), remaining)).setUnstealable(false));
 						break;
 					case PICKUP_HALF:
-						gui.setItem(slot, new EmptyItemGUI(e.getCurrentItem().asQuantity(e.getCurrentItem().getAmount() / 2)).setUnstealable(false));
-						ItemStack cursor = e.getCursor().clone().subtract(e.getCursor().getAmount() / 2);
+						gui.setItem(slot, new EmptyItemGUI(asQuantity(e.getCurrentItem(), e.getCurrentItem().getAmount() / 2)).setUnstealable(false));
+						ItemStack cursor = subtract(e.getCursor(), e.getCursor().getAmount() / 2);
 						if (cursor.getAmount() == 0)
 							gui.remove(CURSOR_SLOT);
 						else
 							gui.setItem(CURSOR_SLOT, new EmptyItemGUI(cursor).setUnstealable(false));
 						break;
 					case PICKUP_ONE:
-						gui.setItem(slot, new EmptyItemGUI(e.getCurrentItem().asOne()).setUnstealable(false));
+						gui.setItem(slot, new EmptyItemGUI(asOne(e.getCurrentItem())).setUnstealable(false));
 						gui.setItem(CURSOR_SLOT, new EmptyItemGUI(e.getCursor()).setUnstealable(false));
 						break;
 					case PICKUP_SOME:
@@ -214,7 +256,7 @@ public class Invsee extends CssCommand {
 					case HOTBAR_MOVE_AND_READD:
 					case HOTBAR_SWAP:
 						ItemStack currentItem = e.getClick() == ClickType.NUMBER_KEY ? e.getWhoClicked().getInventory().getItem(e.getHotbarButton()) : e.getCurrentItem();
-						if (e.getCurrentItem().getType().isAir())
+						if (e.getCurrentItem().getType() == Material.AIR)
 							gui.remove(e.getHotbarButton() + 18);
 						else
 							gui.setItem(e.getHotbarButton() + 18, new EmptyItemGUI(e.getCurrentItem()).setUnstealable(false));
@@ -226,7 +268,7 @@ public class Invsee extends CssCommand {
 					case PLACE_ALL:
 						gui.setItem(slot,
 								new EmptyItemGUI(e.getCursor().isSimilar(e.getCurrentItem())
-										? e.getCursor().asQuantity(Math.min(e.getCursor().getAmount() + e.getCurrentItem().getAmount(), e.getCursor().getMaxStackSize()))
+										? asQuantity(e.getCursor(), Math.min(e.getCursor().getAmount() + e.getCurrentItem().getAmount(), e.getCursor().getMaxStackSize()))
 										: e.getCursor()).setUnstealable(false));
 						gui.removeItem(CURSOR_SLOT);
 						break;
@@ -237,6 +279,30 @@ public class Invsee extends CssCommand {
 						break;
 					}
 				}
+			}
+
+			private ItemStack asQuantity(ItemStack origin, int amount) {
+				ItemStack stack = origin.clone();
+				stack.setAmount(amount);
+				return stack;
+			}
+
+			private ItemStack add(ItemStack origin, int amount) {
+				ItemStack stack = origin.clone();
+				stack.setAmount(stack.getAmount() + amount);
+				return stack;
+			}
+
+			private ItemStack subtract(ItemStack origin, int amount) {
+				ItemStack stack = origin.clone();
+				stack.setAmount(stack.getAmount() - amount);
+				return stack;
+			}
+
+			private ItemStack asOne(ItemStack origin) {
+				ItemStack stack = origin.clone();
+				stack.setAmount(1);
+				return stack;
 			}
 
 			@EventHandler(ignoreCancelled = true)
@@ -260,42 +326,16 @@ public class Invsee extends CssCommand {
 			}
 
 			@EventHandler(ignoreCancelled = true)
-			public void onPickup(EntityPickupItemEvent e) {
-				if (e.getEntity().getType() == EntityType.PLAYER) {
-					GUI gui = guiHandler.get(e.getEntity().getUniqueId());
-					if (gui != null)
-						new Tasker() {
-
-							@Override
-							public void run() {
-								updateinv(gui, (Player) e.getEntity());
-							}
-						}.runLater(1);
-				}
-			}
-
-			@EventHandler(ignoreCancelled = true)
-			public void onSwap(PlayerSwapHandItemsEvent e) {
+			public void onPickup(PlayerPickupItemEvent e) {
 				GUI gui = guiHandler.get(e.getPlayer().getUniqueId());
-				if (gui != null) {
-					gui.setItem(18 + e.getPlayer().getInventory().getHeldItemSlot(), new EmptyItemGUI(e.getMainHandItem()).setUnstealable(false));
-					gui.setItem(OFFHAND_SLOT, new EmptyItemGUI(e.getOffHandItem()).setUnstealable(false));
-				}
-			}
+				if (gui != null)
+					new Tasker() {
 
-			@EventHandler(ignoreCancelled = true)
-			public void onDispense(BlockDispenseArmorEvent e) {
-				if (e.getTargetEntity().getType() == EntityType.PLAYER) {
-					GUI gui = guiHandler.get(e.getTargetEntity().getUniqueId());
-					if (gui != null)
-						new Tasker() {
-
-							@Override
-							public void run() {
-								updateinv(gui, (Player) e.getTargetEntity());
-							}
-						}.runLater(1);
-				}
+						@Override
+						public void run() {
+							updateinv(gui, e.getPlayer());
+						}
+					}.runLater(1);
 			}
 
 			@EventHandler
@@ -317,17 +357,13 @@ public class Invsee extends CssCommand {
 			public void onEat(PlayerItemConsumeEvent e) {
 				GUI gui = guiHandler.get(e.getPlayer().getUniqueId());
 				if (gui != null)
-					if (e.getReplacement() == null) {
-						if (e.getItem().getAmount() == 1)
-							gui.remove(18 + e.getPlayer().getInventory().getHeldItemSlot());
-						else
-							gui.setItem(18 + e.getPlayer().getInventory().getHeldItemSlot(), new EmptyItemGUI(e.getItem().asQuantity(e.getItem().getAmount() - 1)).setUnstealable(false));
-					} else
-						BukkitLoader.getNmsProvider().postToMainThread(() -> updateinv(gui, e.getPlayer()));
+					BukkitLoader.getNmsProvider().postToMainThread(() -> updateinv(gui, e.getPlayer()));
 			}
 
 		};
 		Bukkit.getPluginManager().registerEvents(listener, Loader.getPlugin());
+		if (swapItemListener != null)
+			Bukkit.getPluginManager().registerEvents(swapItemListener, Loader.getPlugin());
 
 		CommandStructure<Player> cmd = CommandStructure.create(Player.class, P_DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
 			msgUsage(sender, "cmd");
@@ -353,6 +389,9 @@ public class Invsee extends CssCommand {
 		if (listener != null) {
 			HandlerList.unregisterAll(listener);
 			listener = null;
+			if (swapItemListener != null)
+				HandlerList.unregisterAll(swapItemListener);
+			swapItemListener = null;
 		}
 	}
 
@@ -404,7 +443,8 @@ public class Invsee extends CssCommand {
 							target.setItemOnCursor(slot.getValue());
 							break;
 						case OFFHAND_SLOT:
-							inv.setItemInOffHand(slot.getValue());
+							if (Ref.isNewerThan(8))
+								inv.setItemInOffHand(slot.getValue());
 							break;
 						case CRAFT_0_SLOT:
 							if (isOpenPlayerInv)
@@ -450,7 +490,8 @@ public class Invsee extends CssCommand {
 							target.setItemOnCursor(newItem);
 							break;
 						case OFFHAND_SLOT:
-							inv.setItemInOffHand(newItem);
+							if (Ref.isNewerThan(8))
+								inv.setItemInOffHand(newItem);
 							break;
 						case CRAFT_0_SLOT:
 							if (isOpenPlayerInv)
@@ -533,11 +574,14 @@ public class Invsee extends CssCommand {
 						gui.setItem(i, new EmptyItemGUI(target.getItemOnCursor()).setUnstealable(false));
 				break;
 			case OFFHAND_SLOT:
-				if (!Objects.equals(inv.getItemInOffHand(), gui.getItem(i)))
-					if (isEmpty(inv.getItemInOffHand()))
-						gui.remove(i);
-					else
-						gui.setItem(i, new EmptyItemGUI(inv.getItemInOffHand()).setUnstealable(false));
+				if (Ref.isNewerThan(8)) {
+					if (!Objects.equals(inv.getItemInOffHand(), gui.getItem(i)))
+						if (isEmpty(inv.getItemInOffHand()))
+							gui.remove(i);
+						else
+							gui.setItem(i, new EmptyItemGUI(inv.getItemInOffHand()).setUnstealable(false));
+				} else
+					gui.setItem(i, EMPTY);
 				break;
 			case CRAFT_0_SLOT:
 				if (isOpenPlayerInv)

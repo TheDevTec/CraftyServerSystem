@@ -3,6 +3,8 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="lib" path="D:/jars/depends/Vault.jar"/>
+	<classpathentry kind="lib" path="D:/jars/depends/LuckPerms-Bukkit-5.4.113(1).jar"/>
+	<classpathentry kind="lib" path="D:/build/TheAPI.jar"/>
 	<classpathentry kind="lib" path="D:/jars/mc/1.20_R3/adventure-api-4.15.0.jar"/>
 	<classpathentry kind="lib" path="D:/jars/mc/1.20_R3/adventure-key-4.15.0.jar"/>
 	<classpathentry kind="lib" path="D:/jars/mc/1.20_R3/authlib-6.0.52.jar"/>
@@ -28,7 +30,5 @@
 	<classpathentry kind="lib" path="D:/jars/mc/1.20_R3/paper-1.20.4.jar"/>
 	<classpathentry kind="lib" path="D:/jars/mc/1.20_R3/paper-api-1.20.4-R0.1-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="D:/jars/mc/1.20_R3/slf4j-api-2.0.9.jar"/>
-	<classpathentry kind="lib" path="D:/jars/depends/LuckPerms-Bukkit-5.4.113(1).jar"/>
-	<classpathentry kind="lib" path="D:/build/TheAPI.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

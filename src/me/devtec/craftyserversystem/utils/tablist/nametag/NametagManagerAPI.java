@@ -4,7 +4,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -134,7 +133,8 @@ public class NametagManagerAPI {
 		Class<?> outEntity = Ref.nms("network.protocol.game", "PacketPlayOutEntity");
 		Class<?> outVelocity = Ref.nms("network.protocol.game", "PacketPlayOutEntityVelocity");
 		Class<?> outEntityLook = Ref.nms("network.protocol.game", "PacketPlayOutEntity$PacketPlayOutEntityLook");
-		Class<?> outMount = Ref.nms("network.protocol.game", "PacketPlayOutMount");
+		Class<?> outMount = Ref.nms("network.protocol.game", "PacketPlayOutMount") == null ? Ref.nms("network.protocol.game", "PacketPlayOutAttachEntity")
+				: Ref.nms("network.protocol.game", "PacketPlayOutMount");
 		Class<?> outMetadata = Ref.nms("network.protocol.game", "PacketPlayOutEntityMetadata");
 		Class<?> outDestroy = Ref.nms("network.protocol.game", "PacketPlayOutEntityDestroy");
 		Class<?> clientBundle = Ref.nms("network.protocol.game", "ClientboundBundlePacket");
@@ -147,7 +147,28 @@ public class NametagManagerAPI {
 				: Ref.nms("network.protocol.game", "PacketPlayOutPlayerInfo");
 		Class<?> clientPlayerInfoRemove = Ref.nms("network.protocol.game", "ClientboundPlayerInfoRemovePacket");
 		Class<?> entityPose = Ref.nms("world.entity", "EntityPose");
+		Class<?> outBed = Ref.nms("", "PacketPlayOutBed");
+		Class<?> outAnimation = Ref.nms("", "PacketPlayOutAnimation");
+		Field bedId = Ref.field(outBed, int.class);
 		Field[] xyz = new Field[3];
+		if (Ref.isOlderThan(12)) {
+			boolean firstInt = true;
+			for (Field field : Ref.getDeclaredFields(outTeleport))
+				if (field.getType() == int.class) {
+					if (firstInt) {
+						firstInt = false;
+						continue;
+					}
+					if (xyz[0] == null)
+						xyz[0] = field;
+					else if (xyz[1] == null)
+						xyz[1] = field;
+					else if (xyz[2] == null) {
+						xyz[2] = field;
+						break;
+					}
+				}
+		}
 		for (Field field : Ref.getDeclaredFields(outTeleport))
 			if (field.getType() == double.class)
 				if (xyz[0] == null)
@@ -159,22 +180,24 @@ public class NametagManagerAPI {
 					break;
 				}
 		Field[] mxyz = new Field[3];
-		for (Field field : Ref.getDeclaredFields(inVehicleMove))
-			if (field.getType() == double.class)
-				if (mxyz[0] == null)
-					mxyz[0] = field;
-				else if (mxyz[1] == null)
-					mxyz[1] = field;
-				else if (mxyz[2] == null) {
-					mxyz[2] = field;
-					break;
-				}
+		if (inVehicleMove != null)
+			for (Field field : Ref.getDeclaredFields(inVehicleMove))
+				if (field.getType() == double.class)
+					if (mxyz[0] == null)
+						mxyz[0] = field;
+					else if (mxyz[1] == null)
+						mxyz[1] = field;
+					else if (mxyz[2] == null) {
+						mxyz[2] = field;
+						break;
+					}
 		listener = new PacketListener() {
 			// move
 			Field entityId = Ref.field(outEntity, "a");
 			// mount
-			Field idField = Ref.field(outMount, int.class);
-			Field mobsField = Ref.field(outMount, int[].class);
+			Field idField = Ref.isOlderThan(12) ? Ref.field(outMount, "c") : Ref.field(outMount, int.class);
+			Field mobsField = Ref.field(outMount, int[].class) == null ? Ref.field(outMount, "b") : Ref.field(outMount, int[].class);
+			Field isLeashed = Ref.field(outMount, "a");
 			// destroy
 			Field integersField = Ref.field(outDestroy, "a");
 			// teleport
@@ -199,9 +222,9 @@ public class NametagManagerAPI {
 			Field metaData = Ref.field(outMetadata, List.class);
 			Field playerInfoUuidField = Ref.isNewerThan(19) || Ref.serverVersionInt() == 19 && Ref.serverVersionRelease() >= 2
 					? Ref.field(Ref.nms("network.protocol.game", "ClientboundPlayerInfoUpdatePacket$b"), UUID.class)
-					: Ref.field(Ref.nms("network.protocol.game", "PacketPlayOutPlayerInfo$PlayerInfoData"), "c");
+					: Ref.field(Ref.nms("network.protocol.game", "PacketPlayOutPlayerInfo$PlayerInfoData"), Ref.getClass("com.mojang.authlib.GameProfile"));
 			Field valueField = Ref.isNewerThan(19) || Ref.serverVersionInt() == 19 && Ref.serverVersionRelease() >= 2 ? Ref.field(Ref.nms("network.syncher", "DataWatcher$b"), "c")
-					: Ref.field(Ref.nms("network.syncher", "DataWatcher$Item"), "b");
+					: Ref.field(Ref.isOlderThan(12) ? Ref.nms("network.syncher", "DataWatcher$WatchableObject") : Ref.nms("network.syncher", "DataWatcher$Item"), Ref.isOlderThan(12) ? "c" : "b");
 
 			@Override
 			public void playOut(String name, PacketContainer packetContainer, ChannelContainer channel) {
@@ -213,14 +236,12 @@ public class NametagManagerAPI {
 					NametagPlayer player = lookupById(id);
 					if (player != null) {
 						NametagHologram hologram = player.getNametag();
-						hologram.shouldTeleport(hologram.getPlayer().getLocation());
+						hologram.shouldTeleport(hologram.getPlayer().getVehicle() != null ? hologram.getPlayer().getVehicle().getLocation() : hologram.getPlayer().getLocation());
 					} else {
 						List<NametagPlayer> ridingPlayers = watchingEntityMove.get(id);
 						if (ridingPlayers != null)
 							synchronized (ridingPlayers) {
-								Iterator<NametagPlayer> itr = ridingPlayers.iterator();
-								while (itr.hasNext()) {
-									NametagPlayer riding = itr.next();
+								for (NametagPlayer riding : ridingPlayers) {
 									NametagHologram hologram = riding.getNametag();
 									hologram.shouldTeleport(hologram.getPlayer().getLocation());
 								}
@@ -263,7 +284,7 @@ public class NametagManagerAPI {
 			@Override
 			public void playIn(String name, PacketContainer packetContainer, ChannelContainer channel) {
 				Object packet = packetContainer.getPacket();
-				if (packet.getClass().isAssignableFrom(inVehicleMove)) {
+				if (inVehicleMove != null && packet.getClass().isAssignableFrom(inVehicleMove)) {
 					NametagPlayer spawned = lookupByName(name);
 					if (spawned == null) {
 						UUID uuid = API.offlineCache().lookupId(name);
@@ -341,7 +362,7 @@ public class NametagManagerAPI {
 								; // Await connection
 							NametagPlayer spawned;
 							spawned = lookupByUuidOrCreate(joinedPlayer, uuid);
-							receiverPlayer.addTabSorting(spawned);
+							spawned.addTabSorting(receiverPlayer);
 						}
 					}
 					return;
@@ -371,9 +392,28 @@ public class NametagManagerAPI {
 					if (player != null)
 						for (Object item : (List<?>) Ref.get(packet, metaData)) {
 							Object pose = Ref.get(item, valueField);
+							if (Ref.isOlderThan(13)) {
+								if (pose instanceof Byte)
+									switch ((byte) pose) {
+									case (byte) 0x02:
+										player.getNametag().setPosWithoutUpdate(player.getPlayer().getLocation());
+										player.getNametag().updateHeight(true, false, false, false);
+										break;
+									case (byte) 0x80:
+										player.getNametag().setPosWithoutUpdate(player.getPlayer().getLocation());
+										player.getNametag().updateHeight(false, true, false, false);
+										break;
+									default:
+										player.getNametag().setPosWithoutUpdate(player.getPlayer().getLocation());
+										player.getNametag().updateHeight(false, false, false, false);
+										break;
+									}
+								return;
+							}
 							if (pose.getClass().isAssignableFrom(entityPose))
 								switch (pose.toString()) {
 								case "CROUCHING":
+								case "SNEAKING":
 									player.getNametag().setPosWithoutUpdate(player.getPlayer().getLocation());
 									player.getNametag().updateHeight(true, false, false, false);
 									break;
@@ -391,6 +431,24 @@ public class NametagManagerAPI {
 						}
 					return;
 				}
+				if (outBed != null && packet.getClass().isAssignableFrom(outBed)) {
+					NametagPlayer player = lookupById((int) Ref.get(packet, bedId));
+					if (player != null) {
+						player.getNametag().setPosWithoutUpdate(player.getPlayer().getLocation());
+						player.getNametag().updateHeight(false, true, false, false);
+					}
+					return;
+				}
+				if (outBed != null && packet.getClass().isAssignableFrom(outAnimation)) {
+					if ((int) Ref.get(packet, "b") == 2) {
+						NametagPlayer player = lookupById((int) Ref.get(packet, "a"));
+						if (player != null) {
+							player.getNametag().setPosWithoutUpdate(player.getPlayer().getLocation());
+							player.getNametag().updateHeight(false, false, false, false);
+						}
+					}
+					return;
+				}
 				if (packet.getClass().isAssignableFrom(outDestroy)) { // Used only when player switch world/gamemode or dies
 					NametagPlayer receiver = lookupByName(name);
 					if (receiver == null)
@@ -400,39 +458,63 @@ public class NametagManagerAPI {
 						for (int i : (List<Integer>) obj) { // IntList
 							NametagPlayer despawning = lookupById(i);
 							if (despawning != null)
-								if (!despawning.getPlayer().isOnline() || despawning.getPlayer().getGameMode() == GameMode.SPECTATOR || !receiver.getPlayer().canSee(despawning.getPlayer()))
-									despawning.hideNametag(receiver);
+								despawning.hideNametag(receiver);
 						}
 					else
 						for (int i : (int[]) obj) { // int[]
 							NametagPlayer despawning = lookupById(i);
 							if (despawning != null)
-								if (!despawning.getPlayer().isOnline() || despawning.getPlayer().getGameMode() == GameMode.SPECTATOR || !receiver.getPlayer().canSee(despawning.getPlayer()))
-									despawning.hideNametag(receiver);
+								despawning.hideNametag(receiver);
 						}
 					return;
 				}
 				if (packet.getClass().isAssignableFrom(outMount)) { // Ride
 					int id = (int) Ref.get(packet, idField);
-					int[] mobs = (int[]) Ref.get(packet, mobsField);
-					List<NametagPlayer> ridingBefore = watchingEntityMove.get(id);
-					if (ridingBefore == null) {
-						List<NametagPlayer> players = mobs.length == 0 ? Collections.emptyList() : Collections.synchronizedList(new ArrayList<>());
-						for (int i : mobs) {
-							NametagPlayer riding = lookupById(i);
-							if (riding != null) {
+					if (Ref.isOlderThan(12)) {
+						boolean lead = (int) Ref.get(packet, isLeashed) == 1;
+						if (lead)
+							return;
+
+						int attachedMob = (int) Ref.get(packet, mobsField);
+						if (attachedMob == -1) { // Dismount
+							List<NametagPlayer> ridingBefore = watchingEntityMove.get(id);
+							synchronized (ridingBefore) {
+								for (NametagPlayer player : ridingBefore)
+									// Dismount
+									player.getNametag().updateHeight(false, false, false, false);
+								watchingEntityMove.remove(id);
+								return;
+							}
+						} else {
+							List<NametagPlayer> players = Collections.synchronizedList(new ArrayList<>());
+							NametagPlayer riding = lookupById(attachedMob);
+							if (riding != null && riding.getPlayer().getVehicle() != null) {
 								players.add(riding);
 								// Mount
 								riding.getNametag().setPosWithoutUpdate(riding.getPlayer().getVehicle().getLocation());
 								riding.getNametag().updateHeight(false, false, true, false);
 							}
+							if (players.isEmpty())
+								watchingEntityMove.remove(id);
+							else
+								watchingEntityMove.put(id, players);
 						}
-						if (players.isEmpty())
-							watchingEntityMove.remove(id);
-						else
+					} else {
+						int[] mobs = (int[]) Ref.get(packet, mobsField);
+						List<NametagPlayer> ridingBefore = watchingEntityMove.get(id);
+						if (ridingBefore == null) { // mount
+							List<NametagPlayer> players = mobs.length == 0 ? Collections.emptyList() : Collections.synchronizedList(new ArrayList<>());
+							for (int i : mobs) {
+								NametagPlayer riding = lookupById(i);
+								if (riding != null) {
+									players.add(riding);
+									// Mount
+									riding.getNametag().setPosWithoutUpdate(riding.getPlayer().getVehicle().getLocation());
+									riding.getNametag().updateHeight(false, false, true, false);
+								}
+							}
 							watchingEntityMove.put(id, players);
-					} else
-						synchronized (ridingBefore) {
+						} else {// mount & dismount
 							List<NametagPlayer> players = mobs.length == 0 ? Collections.emptyList() : new ArrayList<>();
 							for (int i : mobs) {
 								NametagPlayer riding = lookupById(i);
@@ -443,20 +525,27 @@ public class NametagManagerAPI {
 									riding.getNametag().updateHeight(false, false, true, false);
 								}
 							}
-
-							ridingBefore.removeAll(players);
-							for (NametagPlayer player : ridingBefore)
-								// Dismount
-								player.getNametag().updateHeight(false, false, false, false);
 							if (players.isEmpty())
 								watchingEntityMove.remove(id);
+							else {
+								watchingEntityMove.put(id, players);
+								ridingBefore.removeAll(players);
+								for (NametagPlayer dismounted : ridingBefore) {
+									dismounted.getNametag().setPosWithoutUpdate(dismounted.getPlayer().getLocation());
+									dismounted.getNametag().updateHeight(false, false, false, false);
+								}
+							}
 						}
+					}
 					return;
 				}
 				if (packet.getClass().isAssignableFrom(outTeleport)) {
 					NametagPlayer player = lookupById((int) Ref.get(packet, entityIdField));
 					if (player != null)
-						player.getNametag().shouldTeleport((double) Ref.get(packet, xField), (double) Ref.get(packet, yField), (double) Ref.get(packet, zField));
+						if (Ref.isOlderThan(12))
+							player.getNametag().shouldTeleport((int) Ref.get(packet, xField) / 32.0, (int) Ref.get(packet, yField) / 32.0, (int) Ref.get(packet, zField) / 32.0);
+						else
+							player.getNametag().shouldTeleport((double) Ref.get(packet, xField), (double) Ref.get(packet, yField), (double) Ref.get(packet, zField));
 					return;
 				}
 				if (packet.getClass().isAssignableFrom(outScoreboardTeam) && nametagVisibility != null)

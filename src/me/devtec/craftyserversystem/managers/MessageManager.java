@@ -272,7 +272,7 @@ public class MessageManager {
 					} else if (find[1] == 5) {
 						String id = UUID.randomUUID().toString();
 						GUI inv = new GUI(config.getString("placeholders.inventory.inv-title").replace("{player}", owner.getName()), 36);
-						inv.getInventory().setStorageContents(owner.getInventory().getStorageContents());
+						inv.getInventory().setContents(owner.getInventory().getContents());
 						synchronized (PreCommandListener.guis) {
 							PreCommandListener.guis.put(id, inv);
 						}
@@ -292,7 +292,7 @@ public class MessageManager {
 					} else if (find[1] == 4) {
 						String id = UUID.randomUUID().toString();
 						GUI inv = new GUI(config.getString("placeholders.enderchest.inv-title").replace("{player}", owner.getName()), owner.getEnderChest().getSize());
-						inv.getInventory().setStorageContents(owner.getEnderChest().getStorageContents());
+						inv.getInventory().setContents(owner.getEnderChest().getContents());
 						synchronized (PreCommandListener.guis) {
 							PreCommandListener.guis.put(id, inv);
 						}

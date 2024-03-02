@@ -119,6 +119,7 @@ public class TablistListener implements CssListener {
 								.add("ping", BukkitLoader.getNmsProvider().getPing(userData.getPlayer())).add("online", BukkitLoader.getOnlinePlayers().size())
 								.add("max_players", Bukkit.getMaxPlayers())
 								.add("balance", API.get().getEconomyHook().format(API.get().getEconomyHook().getBalance(userData.getPlayer().getName(), userData.getPlayer().getWorld().getName())))
+								.add("money", API.get().getEconomyHook().format(API.get().getEconomyHook().getBalance(userData.getPlayer().getName(), userData.getPlayer().getWorld().getName())))
 								.add("health", userData.getPlayer().getHealth()).add("food", userData.getPlayer().getFoodLevel()).add("x", loc.getX()).add("y", loc.getY()).add("z", loc.getZ())
 								.add("world", loc.getWorld().getName()));
 					}
@@ -127,7 +128,9 @@ public class TablistListener implements CssListener {
 			for (Player player : BukkitLoader.getOnlinePlayers()) {
 				Location loc = player.getLocation();
 				data.put(player.getUniqueId(),
-						generateData(player).process(PlaceholdersExecutor.i().papi(player.getUniqueId()).add("player", player.getName())
+						generateData(player).process(PlaceholdersExecutor.i().papi(player.getUniqueId()).add("player", player.getName()).add("ping", BukkitLoader.getNmsProvider().getPing(player))
+								.add("online", BukkitLoader.getOnlinePlayers().size()).add("max_players", Bukkit.getMaxPlayers())
+								.add("balance", API.get().getEconomyHook().format(API.get().getEconomyHook().getBalance(player.getName(), player.getWorld().getName())))
 								.add("money", API.get().getEconomyHook().format(API.get().getEconomyHook().getBalance(player.getName(), player.getWorld().getName()))).add("health", player.getHealth())
 								.add("food", player.getFoodLevel()).add("x", loc.getX()).add("y", loc.getY()).add("z", loc.getZ()).add("world", loc.getWorld().getName())));
 			}
@@ -191,7 +194,9 @@ public class TablistListener implements CssListener {
 		Player player = e.getPlayer();
 		Location loc = player.getLocation();
 		data.put(player.getUniqueId(),
-				generateData(e.getPlayer()).process(PlaceholdersExecutor.i().papi(player.getUniqueId()).add("player", player.getName())
+				generateData(e.getPlayer()).process(PlaceholdersExecutor.i().papi(player.getUniqueId()).add("player", player.getName()).add("ping", BukkitLoader.getNmsProvider().getPing(player))
+						.add("online", BukkitLoader.getOnlinePlayers().size()).add("max_players", Bukkit.getMaxPlayers())
+						.add("balance", API.get().getEconomyHook().format(API.get().getEconomyHook().getBalance(player.getName(), player.getWorld().getName())))
 						.add("money", API.get().getEconomyHook().format(API.get().getEconomyHook().getBalance(player.getName(), player.getWorld().getName()))).add("health", player.getHealth())
 						.add("food", player.getFoodLevel()).add("x", loc.getX()).add("y", loc.getY()).add("z", loc.getZ()).add("world", loc.getWorld().getName())));
 	}
@@ -214,7 +219,9 @@ public class TablistListener implements CssListener {
 		Player player = e.getPlayer();
 		Location loc = player.getLocation();
 		data.put(player.getUniqueId(),
-				generateData(e.getPlayer()).process(PlaceholdersExecutor.i().papi(player.getUniqueId()).add("player", player.getName())
+				generateData(e.getPlayer()).process(PlaceholdersExecutor.i().papi(player.getUniqueId()).add("player", player.getName()).add("ping", BukkitLoader.getNmsProvider().getPing(player))
+						.add("online", BukkitLoader.getOnlinePlayers().size()).add("max_players", Bukkit.getMaxPlayers())
+						.add("balance", API.get().getEconomyHook().format(API.get().getEconomyHook().getBalance(player.getName(), player.getWorld().getName())))
 						.add("money", API.get().getEconomyHook().format(API.get().getEconomyHook().getBalance(player.getName(), player.getWorld().getName()))).add("health", player.getHealth())
 						.add("food", player.getFoodLevel()).add("x", loc.getX()).add("y", loc.getY()).add("z", loc.getZ()).add("world", loc.getWorld().getName())));
 	}

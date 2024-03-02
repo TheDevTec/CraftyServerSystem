@@ -242,9 +242,11 @@ public class Tp extends CssCommand {
 					double finalX = useMath ? MathUtils.calculate(x.replace("~", player.getLocation().getX() + "")) : ParseUtils.getDouble(x.replace("~", player.getLocation().getX() + ""));
 					double finalY = useMath ? MathUtils.calculate(y.replace("~", player.getLocation().getY() + "")) : ParseUtils.getDouble(y.replace("~", player.getLocation().getY() + ""));
 					double finalZ = useMath ? MathUtils.calculate(z.replace("~", player.getLocation().getZ() + "")) : ParseUtils.getDouble(z.replace("~", player.getLocation().getZ() + ""));
-					float finalYaw = yaw == null ? 0F : useMath ? (float) MathUtils.calculate(yaw.replace("~", player.getYaw() + "")) : ParseUtils.getFloat(yaw.replace("~", player.getYaw() + ""));
+					float finalYaw = yaw == null ? 0F
+							: useMath ? (float) MathUtils.calculate(yaw.replace("~", player.getLocation().getYaw() + "")) : ParseUtils.getFloat(yaw.replace("~", player.getLocation().getYaw() + ""));
 					float finalPitch = pitch == null ? 0F
-							: useMath ? (float) MathUtils.calculate(pitch.replace("~", player.getPitch() + "")) : ParseUtils.getFloat(pitch.replace("~", player.getPitch() + ""));
+							: useMath ? (float) MathUtils.calculate(pitch.replace("~", player.getLocation().getPitch() + ""))
+									: ParseUtils.getFloat(pitch.replace("~", player.getLocation().getPitch() + ""));
 					PlaceholdersExecutor executor = PlaceholdersExecutor.i().add("sender", sender.getName()).add("target", player.getName()).add("x", finalX).add("y", finalY).add("z", finalZ)
 							.add("yaw", finalYaw).add("pitch", finalPitch).add("world", player.getWorld().getName());
 					if (sender.equals(player))
@@ -263,9 +265,11 @@ public class Tp extends CssCommand {
 					double finalX = useMath ? MathUtils.calculate(x.replace("~", player.getLocation().getX() + "")) : ParseUtils.getDouble(x.replace("~", player.getLocation().getX() + ""));
 					double finalY = useMath ? MathUtils.calculate(y.replace("~", player.getLocation().getY() + "")) : ParseUtils.getDouble(y.replace("~", player.getLocation().getY() + ""));
 					double finalZ = useMath ? MathUtils.calculate(z.replace("~", player.getLocation().getZ() + "")) : ParseUtils.getDouble(z.replace("~", player.getLocation().getZ() + ""));
-					float finalYaw = yaw == null ? 0F : useMath ? (float) MathUtils.calculate(yaw.replace("~", player.getYaw() + "")) : ParseUtils.getFloat(yaw.replace("~", player.getYaw() + ""));
+					float finalYaw = yaw == null ? 0F
+							: useMath ? (float) MathUtils.calculate(yaw.replace("~", player.getLocation().getYaw() + "")) : ParseUtils.getFloat(yaw.replace("~", player.getLocation().getYaw() + ""));
 					float finalPitch = pitch == null ? 0F
-							: useMath ? (float) MathUtils.calculate(pitch.replace("~", player.getPitch() + "")) : ParseUtils.getFloat(pitch.replace("~", player.getPitch() + ""));
+							: useMath ? (float) MathUtils.calculate(pitch.replace("~", player.getLocation().getPitch() + ""))
+									: ParseUtils.getFloat(pitch.replace("~", player.getLocation().getPitch() + ""));
 					PlaceholdersExecutor executor = PlaceholdersExecutor.i().add("sender", sender.getName()).add("target", player.getName()).add("x", finalX).add("y", finalY).add("z", finalZ)
 							.add("yaw", finalYaw).add("pitch", finalPitch).add("world", world.getName());
 					if (sender.equals(player))

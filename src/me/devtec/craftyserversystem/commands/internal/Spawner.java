@@ -2,11 +2,13 @@ package me.devtec.craftyserversystem.commands.internal;
 
 import java.util.List;
 
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.util.BlockIterator;
 
 import me.devtec.craftyserversystem.commands.CssCommand;
 import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
@@ -28,16 +30,28 @@ public class Spawner extends CssCommand {
 		}).permission(getPerm("cmd"))
 				// Entity type
 				.selector(Selector.ENTITY_TYPE, (sender, structure, args) -> {
-					spawner(sender.getTargetBlockExact(15), true, sender, EntityType.valueOf(args[0].toUpperCase()));
+					spawner(getLookingBlock(sender, 15), true, sender, EntityType.valueOf(args[0].toUpperCase()));
 				})
 				// silent
 				.argument("-s", (sender, structure, args) -> {
-					spawner(sender.getTargetBlockExact(15), false, sender, EntityType.valueOf(args[0].toUpperCase()));
+					spawner(getLookingBlock(sender, 15), false, sender, EntityType.valueOf(args[0].toUpperCase()));
 				});
 		// register
 		List<String> cmds = getCommands();
 		if (!cmds.isEmpty())
 			this.cmd = addBypassSettings(cmd).build().register(cmds.remove(0), cmds.toArray(new String[0]));
+	}
+
+	public static Block getLookingBlock(Player player, int range) {
+		BlockIterator iter = new BlockIterator(player, range);
+		Block lastBlock = iter.next();
+		while (iter.hasNext()) {
+			lastBlock = iter.next();
+			if (lastBlock.getType() == Material.AIR || lastBlock.getType().name().equals("CAVE_AIR") || lastBlock.isLiquid() || !lastBlock.getType().isSolid())
+				continue;
+			break;
+		}
+		return lastBlock;
 	}
 
 	private void spawner(Block target, boolean sendMessage, CommandSender sender, EntityType type) {
