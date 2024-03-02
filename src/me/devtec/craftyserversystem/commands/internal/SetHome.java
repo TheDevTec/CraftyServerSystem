@@ -1,6 +1,8 @@
 package me.devtec.craftyserversystem.commands.internal;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.bukkit.entity.Player;
 
@@ -18,8 +20,9 @@ public class SetHome extends CssCommand {
 			return;
 
 		CommandStructure<Player> cmd = CommandStructure.create(Player.class, P_DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
-			List<String> homes = HomeManager.get().getHomes(sender.getName());
-			homes.remove("home");
+			Set<String> homes = HomeManager.get().getHomes(sender.getName());
+			if (!homes.isEmpty())
+				homes.remove("home");
 			if (homes.size() >= HomeManager.get().getMaximumHomes(sender.getName())) {
 				msgUsage(sender, "cmd");
 				return;
@@ -31,8 +34,9 @@ public class SetHome extends CssCommand {
 		}).permission(getPerm("cmd"));
 		// home
 		cmd.argument(null, 1, (sender, structure, args) -> {
-			List<String> homes = HomeManager.get().getHomes(sender.getName());
-			homes.remove(args[0].toLowerCase());
+			Set<String> homes = HomeManager.get().getHomes(sender.getName());
+			if (!homes.isEmpty())
+				homes.remove(args[0].toLowerCase());
 			int maxHomes = HomeManager.get().getMaximumHomes(sender.getName());
 			if (homes.size() >= maxHomes) {
 				msg(sender, "overlimit", PlaceholdersExecutor.i().add("totalHomes", homes.size()).add("maxHomes", maxHomes));
@@ -43,7 +47,9 @@ public class SetHome extends CssCommand {
 			msg(sender, "set", PlaceholdersExecutor.i().add("home", args[0].toLowerCase()).add("x", pos.getX()).add("y", pos.getY()).add("z", pos.getZ()).add("yaw", pos.getYaw())
 					.add("pitch", pos.getPitch()).add("world", pos.getWorldName()));
 		}, (sender, structure, args) -> {
-			List<String> homes = HomeManager.get().getHomes(sender.getName());
+			Set<String> homes = HomeManager.get().getHomes(sender.getName());
+			if (homes.isEmpty())
+				homes = new HashSet<>();
 			homes.add("{homeName}");
 			return homes;
 		});

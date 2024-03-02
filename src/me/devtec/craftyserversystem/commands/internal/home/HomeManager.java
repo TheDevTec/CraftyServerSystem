@@ -1,10 +1,9 @@
 package me.devtec.craftyserversystem.commands.internal.home;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import me.devtec.craftyserversystem.annotations.IgnoredClass;
 import me.devtec.shared.API;
@@ -30,8 +29,8 @@ public class HomeManager {
 	}
 
 	@Nonnull
-	public List<String> getHomes(@Nonnull String player) {
-		return API.offlineCache().lookupQuery(player) == null ? Collections.emptyList() : new ArrayList<>(API.getUser(player).getKeys("css.home"));
+	public Set<String> getHomes(@Nonnull String player) {
+		return API.offlineCache().lookupQuery(player) == null ? Collections.emptySet() : API.getUser(player).getKeys("css.home");
 	}
 
 	@Nullable

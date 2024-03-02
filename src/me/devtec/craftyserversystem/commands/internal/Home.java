@@ -32,7 +32,7 @@ public class Home extends CssCommand {
 				msg(sender, "no-home", PlaceholdersExecutor.EMPTY);
 				return;
 			}
-			String home = HomeManager.get().getHomes(sender.getName()).contains("home") ? "home" : HomeManager.get().getHomes(sender.getName()).get(0);
+			String home = HomeManager.get().getHomes(sender.getName()).contains("home") ? "home" : HomeManager.get().getHomes(sender.getName()).iterator().next();
 			Position pos = HomeManager.get().getHomePosition(sender.getName(), home);
 			sender.teleport(pos.toLocation());
 			msg(sender, "teleport", PlaceholdersExecutor.i().add("home", home));
