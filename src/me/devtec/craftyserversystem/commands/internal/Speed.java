@@ -66,7 +66,7 @@ public class Speed extends CssCommand {
 				msgOut(target, (target.isFlying() ? "flyspeed." : "walkspeed.") + "other.target", placeholders);
 				msgOut(sender, (target.isFlying() ? "flyspeed." : "walkspeed.") + "other.sender", placeholders);
 			} else
-				msgOut(target, (target.isFlying() ? "flyspeed." : "walkspeed.") + "self", PlaceholdersExecutor.i().add("target", target.getName()));
+				msgOut(target, (target.isFlying() ? "flyspeed." : "walkspeed.") + "self", PlaceholdersExecutor.i().add("target", target.getName()).add("value", Math.max(0, Math.min(10, speed))));
 	}
 
 }

@@ -63,7 +63,7 @@ public class WalkSpeed extends CssCommand {
 				msg(target, "other.target", placeholders);
 				msg(sender, "other.sender", placeholders);
 			} else
-				msg(target, "self", PlaceholdersExecutor.i().add("target", target.getName()));
+				msg(target, "self", PlaceholdersExecutor.i().add("target", target.getName()).add("value", Math.max(0, Math.min(10, speed))));
 	}
 
 }
