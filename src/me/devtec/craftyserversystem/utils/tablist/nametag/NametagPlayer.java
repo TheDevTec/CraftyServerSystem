@@ -60,8 +60,11 @@ public class NametagPlayer {
 	public NametagPlayer initNametag(@Nonnull Player player) {
 		Location loc = player.getLocation();
 		nametag = new NametagHologram(player, player.getWorld(), loc.getX(), loc.getY(), loc.getZ(), nametagGenerator.apply(player));
-		BukkitLoader.getPacketHandler().send(player, NametagHologram.createTeamPacket(0, name, "z_nametag"));
-		BukkitLoader.getPacketHandler().send(player, NametagHologram.createTeamPacket(0, name, teamName));
+		return this;
+	}
+
+	public NametagPlayer afterJoin() {
+		BukkitLoader.getPacketHandler().send(getPlayer(), NametagHologram.createTeamPacket(0, name, teamName));
 		return this;
 	}
 
@@ -106,12 +109,8 @@ public class NametagPlayer {
 	}
 
 	public void addTabSorting(@Nonnull NametagPlayer player) {
-		if (withProfile.add(player)) {
-			BukkitLoader.getPacketHandler().send(player.getPlayer(), NametagHologram.createTeamPacket(0, name, "z_nametag"));
+		if (withProfile.add(player))
 			BukkitLoader.getPacketHandler().send(player.getPlayer(), NametagHologram.createTeamPacket(0, name, teamName));
-			BukkitLoader.getPacketHandler().send(getPlayer(), NametagHologram.createTeamPacket(0, player.name, player.teamName));
-			BukkitLoader.getPacketHandler().send(getPlayer(), NametagHologram.createTeamPacket(0, player.name, "z_nametag"));
-		}
 	}
 
 	public void removeTabSorting(@Nonnull NametagPlayer player) {
@@ -142,6 +141,8 @@ public class NametagPlayer {
 
 	@Comment(comment = "Internal code - Called only when player quit server in the PlayerQuitEvent event")
 	public void onQuit() {
+		for (NametagPlayer whoSee : getWhoSeeTabSorting())
+			BukkitLoader.getPacketHandler().send(getPlayer(), NametagHologram.createTeamPacket(1, whoSee.name, whoSee.teamName));
 		BukkitLoader.getPacketHandler().send(getPlayer(), NametagHologram.createTeamPacket(1, name, teamName));
 		if (getPlayer().getVehicle() != null)
 			NametagManagerAPI.get().watchingEntityMove.remove(getPlayer().getVehicle().getEntityId());

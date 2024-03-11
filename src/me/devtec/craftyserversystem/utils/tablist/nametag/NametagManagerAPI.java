@@ -559,7 +559,7 @@ public class NametagManagerAPI {
 		};
 		listener.register();
 		for (Player online : BukkitLoader.getOnlinePlayers())
-			lookupByUuidOrCreate(online, online.getUniqueId());
+			lookupByUuidOrCreate(online, online.getUniqueId()).afterJoin();
 
 		// Init online players
 		for (NametagPlayer player : players)
@@ -604,6 +604,14 @@ public class NametagManagerAPI {
 			if (player.getTeamName().equals(teamName))
 				++amount;
 		return amount;
+	}
+
+	public List<String> getPlayersInTeam(String teamName) {
+		List<String> result = new ArrayList<>();
+		for (NametagPlayer player : players)
+			if (player.getTeamName().equals(teamName))
+				result.add(player.getName());
+		return result;
 	}
 
 }
