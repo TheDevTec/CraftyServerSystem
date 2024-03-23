@@ -12,7 +12,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 import me.devtec.craftyserversystem.api.API;
@@ -189,7 +188,8 @@ public class TablistListener implements CssListener {
 	}
 
 	@EventHandler
-	public void onLogin(PlayerLoginEvent e) {
+	public void onJoin(PlayerJoinEvent e) {
+		BukkitLoader.getNmsProvider().postToMainThread(() -> NametagManagerAPI.get().getPlayer(e.getPlayer()).afterJoin());
 		if (disabledInWorlds.contains(e.getPlayer().getWorld().getName()))
 			return;
 		Player player = e.getPlayer();
@@ -200,11 +200,6 @@ public class TablistListener implements CssListener {
 						.add("balance", API.get().getEconomyHook().format(API.get().getEconomyHook().getBalance(player.getName(), player.getWorld().getName())))
 						.add("money", API.get().getEconomyHook().format(API.get().getEconomyHook().getBalance(player.getName(), player.getWorld().getName()))).add("health", player.getHealth())
 						.add("food", player.getFoodLevel()).add("x", loc.getX()).add("y", loc.getY()).add("z", loc.getZ()).add("world", loc.getWorld().getName())));
-	}
-
-	@EventHandler
-	public void onJoin(PlayerJoinEvent e) {
-		BukkitLoader.getNmsProvider().postToMainThread(() -> NametagManagerAPI.get().getPlayer(e.getPlayer()).afterJoin());
 	}
 
 	@EventHandler
