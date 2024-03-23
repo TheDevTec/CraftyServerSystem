@@ -199,7 +199,7 @@ warp:
   self:
     success: "{prefix} Hey traveler! Warping you to warp &e{warp}&7."
     failed:
-      money: "{prefix} You're too poor. The teleportation to the warp &e{warp} &7costs &e${cost}&7."
+      money: "{prefix} You're too poor. The teleport to the warp &e{warp} &7costs &e${cost}&7."
       perm: "{prefix} Are you powerless? Because it seems that &eyou're not allowed to teleport&7 to the warp &e{warp}&7."
   #  {sender}, {target}, {warp}, {cost}, {permission}
   other:
@@ -208,8 +208,8 @@ warp:
       sender: "{prefix} Alright, commander! &e{target}&7's warping to warp &e{warp}&7."
     failed:
       money:
-        target: "{prefix} You're too poor. The teleportation to the warp &e{warp} &7costs &e${cost}&7."
-        sender: "{prefix} Player &e{target}&7's too poor. The teleportation to the warp &e{warp} &7costs &e${cost}&7."
+        target: "{prefix} You're too poor. The teleport to the warp &e{warp} &7costs &e${cost}&7."
+        sender: "{prefix} Player &e{target}&7's too poor. The teleport to the warp &e{warp} &7costs &e${cost}&7."
       perm:
         target: "{prefix} Unfortunately, it seems that &eyou're not allowed to teleport&7 to the warp &e{warp}&7."
         sender: "{prefix} Bad luck! Player &e{target}'s not allowed to teleport&7 to the warp &e{warp}&7."
@@ -281,27 +281,35 @@ tpa:
   # {sender}, {target}
   success:
     sender: "{prefix} Are you feeling lonely? Anyway, you have sent a &eteleport request&7 to player &e{target}&7."
-    target: "{prefix} If you feel lonely, you can &eaccept&7 a &e{sender}'s request of teleportation&7 to you."
+    target: "{prefix} If you feel lonely, you can &eaccept&7 a &e{sender}'s request of teleport&7 to you."
   # {target}
   failed:
-    self: "{prefix} Alright, imaginary friends are fine, but &eyou can't send teleportation requests to yourself&7!"
+    self: "{prefix} Alright, imaginary friends are fine, but &eyou can't send teleport requests to yourself&7!"
     invalid: "{prefix} Unfortunately, player &e{target} &7is &eoffline&7."
     denied_toggled: "{prefix} Ha! &e{target} &7doesn't like people so he &edenied all requests&7!"
-    sender: "{prefix} Well, you have &ealready a pending teleportation request&7 from this player."
-    target: "{prefix} Don't be so anxious! This player &ealready has a pending teleportation request&7 from you."
+    sender: "{prefix} Well, you have &ealready a pending teleport request&7 from this player."
+    target: "{prefix} Don't be so anxious! This player &ealready has a pending teleport request&7 from you."
 
 tpahere:
   # {sender}, {target}
   success:
-    sender: "{prefix} For some reason, you have &esuccessfully sent a teleportation request&7 to player &e{target}&7."
+    sender: "{prefix} For some reason, you have &esuccessfully sent a teleport request&7 to player &e{target}&7."
     target: "{prefix} Player &e{sender} &7feels lonely. He has sent you a &erequest to teleport to him&7."
   # {target}
   failed:
-    self: "{prefix} What are you trying to do? You can't send &eteleportation requests to yourself&7, find some friends!"
+    self: "{prefix} What are you trying to do? You can't send &eteleport requests to yourself&7, find some friends!"
     invalid: "{prefix} Unfortunately, player &e{target} &7is &eoffline&7."
     denied_toggled: "{prefix} Ha! &e{target} &7doesn't like people so he &edenied all requests&7!"
-    sender: "{prefix} Well, you have &ealready a pending teleportation request&7 from this player."
-    target: "{prefix} Don't be so anxious! This player &ealready has a pending teleportation request&7 from you."
+    sender: "{prefix} Well, you have &ealready a pending teleport request&7 from this player."
+    target: "{prefix} Don't be so anxious! This player &ealready has a pending teleport request&7 from you."
+
+tphere:
+  # {sender}, {target}
+  success:
+    sender: "{prefix} For some reason, you have &esuccessfully teleported&7 player &e{target}&7 to you."
+    target: "{prefix} Player &e{sender} &7feels lonely. He &eteleported you to him&7."
+  failed:
+    self: "{prefix} What are you trying to do? You can't &eteleport to yourself&7!"
 
 tpaccept:
   # {sender}, {target}
@@ -312,7 +320,7 @@ tpaccept:
   tpa:
     sender: "{prefix} Ready to meet some new people? You have &eaccepted a request to teleport&7 a player &e{target} to you&7."
     target: "{prefix} Player &e{sender} &7wants to meet new people so he has &eaccepted your request to teleport to him&7."
-  no-requests: "{prefix} You're all alone! You don't have &eany teleportation requests&7.."
+  no-requests: "{prefix} You're all alone! You don't have &eany teleport requests&7.."
 
 tpdeny:
   # {sender}, {target}
@@ -330,8 +338,8 @@ tptoggle:
   # {target}
   never-joined: "{prefix} Player &e{target} not found&7. If he's your imaginary friend, you should talk to him about connecting to our network!"
   global:
-    enabled: "{prefix} Socializing has begun! &eTeleportation requests have been globally turned on&7."
-    disabled: "{prefix} Get back under the rock! &eTeleportation requests have been globally turned off&7."
+    enabled: "{prefix} Socializing has begun! &eteleport requests have been globally turned on&7."
+    disabled: "{prefix} Get back under the rock! &eteleport requests have been globally turned off&7."
   # {target}
   user:
     added: "{prefix} Oh! You finally found a friend! You have &esuccessfully added player {target} &7to the toggle list of teleport requests."

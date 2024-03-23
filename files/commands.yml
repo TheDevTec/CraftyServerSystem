@@ -387,7 +387,14 @@ tp:
     loc: "/tp {player} {x} {y} {z} [yaw] [pitch]"
     self-loc: "/tp {x} {y} {z} [yaw] [pitch]"
   perms:
-    cmd: "css.cmd.teleport"
+    cmd: "css.cmd.tp"
+
+tphere:
+  cmd: [tphere]
+  usage:
+    cmd: "/tphere {player} - Teleport player to you"
+  perms:
+    cmd: "css.cmd.tphere"
   
 kit:
   cmd: [kit,kits]
