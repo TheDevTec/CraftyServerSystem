@@ -30,8 +30,9 @@ public class StringContainerWithPositions {
 
 	private void ensureCapacityInternal(final int minimumCapacity) {
 		if (minimumCapacity - value.length > 0) {
-			value = Arrays.copyOf(value, newCapacity(minimumCapacity));
-			realPos = Arrays.copyOf(realPos, newCapacity(minimumCapacity));
+			int size = newCapacity(minimumCapacity);
+			value = Arrays.copyOf(value, size);
+			realPos = Arrays.copyOf(realPos, size);
 		}
 	}
 
