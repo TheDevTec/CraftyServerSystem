@@ -35,13 +35,13 @@ public class God extends CssCommand {
 			if (API.get().getConfigManager().getMain().getBoolean("god.anti-void-damage-listener"))
 				listener = new Listener() {
 
-					@EventHandler
+					@EventHandler(ignoreCancelled = true)
 					public void playerVoid(EntityDamageEvent e) {
 						if (e.getEntityType() == EntityType.PLAYER && isAllowed((Player) e.getEntity()))
 							e.setCancelled(true);
 					}
 
-					@EventHandler
+					@EventHandler(ignoreCancelled = true)
 					public void playerFood(FoodLevelChangeEvent e) {
 						if (e.getEntityType() == EntityType.PLAYER && isAllowed((Player) e.getEntity()))
 							e.setCancelled(true);
@@ -50,13 +50,13 @@ public class God extends CssCommand {
 			else
 				listener = new Listener() {
 
-					@EventHandler
+					@EventHandler(ignoreCancelled = true)
 					public void playerVoid(EntityDamageEvent e) {
 						if (e.getCause() != DamageCause.VOID && e.getEntityType() == EntityType.PLAYER && isAllowed((Player) e.getEntity()))
 							e.setCancelled(true);
 					}
 
-					@EventHandler
+					@EventHandler(ignoreCancelled = true)
 					public void playerFood(FoodLevelChangeEvent e) {
 						if (e.getEntityType() == EntityType.PLAYER && isAllowed((Player) e.getEntity()))
 							e.setCancelled(true);
@@ -65,19 +65,19 @@ public class God extends CssCommand {
 		else if (API.get().getConfigManager().getMain().getBoolean("god.anti-void-damage-listener"))
 			listener = new Listener() {
 
-				@EventHandler
+				@EventHandler(ignoreCancelled = true)
 				public void playerVoid(EntityDamageEvent e) {
 					if (e.getCause() == DamageCause.VOID && e.getEntityType() == EntityType.PLAYER && isAllowed((Player) e.getEntity()))
 						e.setCancelled(true);
 				}
 
-				@EventHandler
+				@EventHandler(ignoreCancelled = true)
 				public void playerFood(FoodLevelChangeEvent e) {
 					if (e.getEntityType() == EntityType.PLAYER && isAllowed((Player) e.getEntity()))
 						e.setCancelled(true);
 				}
 
-				@EventHandler
+				@EventHandler(ignoreCancelled = true)
 				public void playerAir(EntityAirChangeEvent e) {
 					if (e.getEntityType() == EntityType.PLAYER && isAllowed((Player) e.getEntity()) && ((Player) e.getEntity()).getRemainingAir() > e.getAmount())
 						e.setCancelled(true);
@@ -86,13 +86,13 @@ public class God extends CssCommand {
 		else
 			listener = new Listener() {
 
-				@EventHandler
+				@EventHandler(ignoreCancelled = true)
 				public void playerFood(FoodLevelChangeEvent e) {
 					if (e.getEntityType() == EntityType.PLAYER && isAllowed((Player) e.getEntity()))
 						e.setCancelled(true);
 				}
 
-				@EventHandler
+				@EventHandler(ignoreCancelled = true)
 				public void playerAir(EntityAirChangeEvent e) {
 					if (e.getEntityType() == EntityType.PLAYER && isAllowed((Player) e.getEntity()) && ((Player) e.getEntity()).getRemainingAir() > e.getAmount())
 						e.setCancelled(true);
