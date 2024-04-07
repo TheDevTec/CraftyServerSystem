@@ -674,7 +674,9 @@ public class ChatHandlers {
 			}
 
 			char origin = input.charAt(i);
-			if (origin == ' ')
+			if (origin == ' ' || origin == '	' || origin == '_' || origin == '*' || origin == '.' || origin == ',' || origin == '\'' || origin == '"' || origin == ')' || origin == '('
+					|| origin == ']' || origin == '[' || origin == '<' || origin == '>' || origin == '-' || origin == '+' || origin == '/' || origin == '\\' || origin == '&' || origin == '§'
+					|| origin == ';')
 				continue;
 			char c = Character.toLowerCase(origin);
 			switch (c) {
@@ -809,7 +811,9 @@ public class ChatHandlers {
 			}
 
 			char origin = input.charAt(i);
-			if (origin == ' ')
+			if (origin == ' ' || origin == '	' || origin == '_' || origin == '*' || origin == '.' || origin == ',' || origin == '\'' || origin == '"' || origin == ')' || origin == '('
+					|| origin == ']' || origin == '[' || origin == '<' || origin == '>' || origin == '-' || origin == '+' || origin == '/' || origin == '\\' || origin == '&' || origin == '§'
+					|| origin == ';')
 				continue;
 			char c = Character.toLowerCase(origin);
 			switch (c) {
