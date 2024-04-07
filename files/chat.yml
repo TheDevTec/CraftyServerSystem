@@ -20,13 +20,13 @@ placeholders:
 
 antiSwear:
   enabled: true
-  words: ["sex", "gai", "gei", "gay", "gey", "gej", "gaj", "kkt", "kokot", "kreten", "devko", "devki", "devka", "curak", "curac", "kund", "mrd", "penis", "vagin", "kurv", "idiot", "pica", "pico", "pici", "pice", "picu", "fuck", "suck", "dick", "fck", "cock", "bitch", "sperm", "masturb", "dement","demence","penys","srack","vagyn","kripl","krypl","debil","debyl"]
+  words: ["cigan","cikan","negr","nigga","sex", "gai", "gei", "gay", "gey", "gej", "gaj", "kkt", "kokot", "kreten", "devko", "devki", "devka", "curak", "curac", "kund", "mrd", "penis", "vagin", "kurv", "idiot", "pica", "pico", "pici", "pice", "picu", "fuck", "suck", "dick", "fck", "cock", "bitch", "sperm", "masturb", "dement","demence","penys","srack","vagyn","kripl","krypl","debil","debyl","picka","picko","picky","picki"]
   block-event: false
   # if block-event is set to false, replacement is used.
   replacement: "****"
   # css.chat.bypass.antiswear
   bypass-enabled: false
-  allowed-phrases: ["kund:sekund","kkt:ak kter","kkt:ak ktor","debyl:kde byl","debil:kde bil","pice:opice","mrd:smrdi","mrd:smrde"]
+  allowed-phrases: ["negr:negramot","cock:čočka","pice:slepice","picka:slepickám","picka:slepičkám","picka:slepickam","picka:slepička","picky:slepičky","kund:sekund","kkt:ak kter","kkt:ak ktor","debyl:kde byl","debil:kde bil","pice:opice","mrd:smrdi","mrd:smrde","picky:pick y","pick o","pick e","pick a"] 
 
 chat-placeholders:
   shrug:

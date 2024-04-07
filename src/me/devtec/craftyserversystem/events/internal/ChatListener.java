@@ -25,6 +25,7 @@ import me.devtec.craftyserversystem.api.API;
 import me.devtec.craftyserversystem.events.CssListener;
 import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
 import me.devtec.craftyserversystem.utils.ChatHandlers;
+import me.devtec.shared.Pair;
 import me.devtec.shared.annotations.Nonnull;
 import me.devtec.shared.annotations.Nullable;
 import me.devtec.shared.dataholder.Config;
@@ -69,7 +70,7 @@ public class ChatListener implements CssListener {
 	@Nonnull
 	private List<String> words;
 	private boolean bypassAntiSwear;
-	private List<String[]> allowedPhrases;
+	private List<Pair> allowedPhrases;
 
 	// AntiAd pattern
 	private boolean antiAdEnabled;
@@ -92,6 +93,7 @@ public class ChatListener implements CssListener {
 		return getConfig().getBoolean("enabled");
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void reload() {
 		antiSpamEnabled = getConfig().getBoolean("antiSpam.enabled");
@@ -124,17 +126,21 @@ public class ChatListener implements CssListener {
 		addColors = replacement.indexOf('§') != -1;
 		words = getConfig().getStringList("antiSwear.words");
 		allowedPhrases = new ArrayList<>();
-		for (String phrase : getConfig().getStringList("antiSwear.allowed-phrases")) {
+		phraseLoop: for (String phrase : getConfig().getStringList("antiSwear.allowed-phrases")) {
 			if (phrase.indexOf(":") == -1) {
 				Loader.getPlugin().getLogger().warning("Failed loading allowed phrase '" + phrase + "' - Incorrect format! Format must be: 'swearWord:allowedPhrase'");
 				continue;
 			}
-			String[] info = new String[3];
 			String[] split = phrase.split(":");
-			info[0] = split[0];
-			info[1] = split[1].replace(" ", "");
-			info[2] = split[1];
-			allowedPhrases.add(info);
+			for (Pair pair : allowedPhrases)
+				if (pair.getKey().equals(split[0])) {
+					((List<String[]>) pair.getValue()).add(new String[] { split[1].replace(" ", ""), split[1] });
+					continue phraseLoop;
+				}
+			List<String[]> list;
+			Pair pair = Pair.of(split[0], list = new ArrayList<>());
+			list.add(new String[] { split[1].replace(" ", ""), split[1] });
+			allowedPhrases.add(pair);
 		}
 		bypassAntiSwear = getConfig().getBoolean("antiSwear.bypass-enabled");
 		antiAdEnabled = getConfig().getBoolean("antiAd.enabled");
@@ -214,7 +220,7 @@ public class ChatListener implements CssListener {
 
 		placeholders.add("player", placeholders.apply(getConfig().getString("formats." + userGroup + ".name")));
 		placeholders.add("message", modifiedMessage);
-		placeholders.add("message", placeholders.applyAfterColorize(getConfig().getString("formats." + userGroup + ".message")));
+		placeholders.add("message", placeholders.apply(getConfig().getString("formats." + userGroup + ".message")));
 
 		Player player = e.getPlayer();
 

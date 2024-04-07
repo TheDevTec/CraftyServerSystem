@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import me.devtec.shared.Pair;
 import me.devtec.shared.dataholder.StringContainer;
 import me.devtec.shared.sorting.SortingAPI;
 import me.devtec.shared.sorting.SortingAPI.ComparableObject;
@@ -652,7 +653,8 @@ public class ChatHandlers {
 	}
 
 	// return true - if found any vulgarism
-	public static boolean antiSwear(String input, List<String> words, List<String[]> allowedPhrases, int[][] ignoredSections) {
+	@SuppressWarnings("unchecked")
+	public static boolean antiSwear(String input, List<String> words, List<Pair> allowedPhrases, int[][] ignoredSections) {
 		StringContainerWithPositions filtered = new StringContainerWithPositions(input.length());
 		int posOfSection = 0;
 		int[] currentSection = ignoredSections == null ? null : ignoredSections[posOfSection];
@@ -731,28 +733,52 @@ public class ChatHandlers {
 			int posStart = 0;
 			int pos = filtered.indexOf(word, posStart);
 			if (pos != -1) {
-				int lengthWithoutSpaces = 0;
-				String phrase = null;
-				String compare = null;
+				List<String[]> phrases = null;
+				String[] currentPhrase = null;
 				int startAt = -1;
-				for (String[] phraseSplit : allowedPhrases)
-					if (phraseSplit[0].equals(word)) {
-						compare = phraseSplit[1];
-						startAt = filtered.indexOf(compare);
-						lengthWithoutSpaces = compare.length();
-						if (startAt != -1) {
-							phrase = phraseSplit[2];
-							break;
+				for (Pair allowedPhrase : allowedPhrases)
+					if (allowedPhrase.getKey().equals(word)) {
+						phrases = (List<String[]>) allowedPhrase.getValue();
+						for (String[] phrase : phrases) {
+							int foundStartAt = filtered.indexOf(phrase[0]);
+							if (foundStartAt != -1 && (startAt == -1 || foundStartAt < startAt)) {
+								startAt = foundStartAt;
+								currentPhrase = phrase;
+							}
 						}
+						break;
 					}
-				while (pos != -1) {
+				searchEngine: while (pos != -1) {
 					if (startAt == -1)
 						return true;
 					int realPos = filtered.posAt(startAt);
-					if (realPos + phrase.length() > input.length() || !input.substring(realPos, realPos + phrase.length()).equalsIgnoreCase(phrase))
+					for (String[] phrase1 : phrases)
+						if (realPos + phrase1[0].length() <= input.length() && input.substring(realPos, realPos + phrase1[0].length()).equalsIgnoreCase(phrase1[0])) {
+							int startLookingFrom = Math.max(startAt, posStart - phrase1[1].length());
+							posStart = pos + phrase1[1].length();
+							startAt = -1;
+							for (String[] phrase : phrases) {
+								int foundStartAt = filtered.indexOf(phrase[0], startLookingFrom);
+								if (foundStartAt != -1 && (startAt == -1 || foundStartAt < startAt)) {
+									startAt = foundStartAt;
+									currentPhrase = phrase;
+								}
+							}
+							pos = filtered.indexOf(word, posStart);
+							continue searchEngine;
+						}
+					if (realPos + currentPhrase[0].length() > input.length() || !input.substring(realPos, realPos + currentPhrase[0].length()).equalsIgnoreCase(currentPhrase[0]))
 						return true;
-					startAt = filtered.indexOf(compare, Math.max(startAt, posStart - compare.length()));
-					posStart = pos + lengthWithoutSpaces;
+					int startLookingFrom = Math.max(startAt, posStart - currentPhrase[1].length());
+					posStart = pos + currentPhrase[1].length();
+					startAt = -1;
+					for (String[] phrase : phrases) {
+						int foundStartAt = filtered.indexOf(phrase[0], startLookingFrom);
+						if (foundStartAt != -1 && (startAt == -1 || foundStartAt < startAt)) {
+							startAt = foundStartAt;
+							currentPhrase = phrase;
+						}
+					}
 					pos = filtered.indexOf(word, posStart);
 				}
 			}
@@ -761,7 +787,8 @@ public class ChatHandlers {
 	}
 
 	// find vulgarism and replace it
-	public static String antiSwearReplace(String input, List<String> words, List<String[]> allowedPhrases, int[][] ignoredSections, String replacement, boolean shouldAddColors) {
+	@SuppressWarnings("unchecked")
+	public static String antiSwearReplace(String input, List<String> words, List<Pair> allowedPhrases, int[][] ignoredSections, String replacement, boolean shouldAddColors) {
 		StringContainerWithPositions filtered = new StringContainerWithPositions(input.length());
 		int posOfSection = 0;
 		int[] currentSection = ignoredSections == null ? null : ignoredSections[posOfSection];
@@ -845,24 +872,40 @@ public class ChatHandlers {
 			int posStart = 0;
 			int pos = filtered.indexOf(word, posStart);
 			if (pos != -1) {
-				int lengthWithoutSpaces = 0;
-				String phrase = null;
-				String compare = null;
+				List<String[]> phrases = null;
+				String[] currentPhrase = null;
 				int startAt = -1;
-				for (String[] phraseSplit : allowedPhrases)
-					if (phraseSplit[0].equals(word)) {
-						compare = phraseSplit[1];
-						startAt = filtered.indexOf(compare);
-						lengthWithoutSpaces = compare.length();
-						if (startAt != -1) {
-							phrase = phraseSplit[2];
-							break;
+				for (Pair allowedPhrase : allowedPhrases)
+					if (allowedPhrase.getKey().equals(word)) {
+						phrases = (List<String[]>) allowedPhrase.getValue();
+						for (String[] phrase : phrases) {
+							int foundStartAt = filtered.indexOf(phrase[0]);
+							if (foundStartAt != -1 && (startAt == -1 || foundStartAt < startAt)) {
+								startAt = foundStartAt;
+								currentPhrase = phrase;
+							}
 						}
+						break;
 					}
-				while (pos != -1) {
+				searchEngine: while (pos != -1) {
 					if (startAt != -1) {
 						int realPos = filtered.posAt(startAt);
-						if (realPos + phrase.length() > input.length() || !input.substring(realPos, realPos + phrase.length()).equalsIgnoreCase(phrase)) {
+						for (String[] phrase1 : phrases)
+							if (realPos + phrase1[0].length() <= input.length() && input.substring(realPos, realPos + phrase1[0].length()).equalsIgnoreCase(phrase1[0])) {
+								int startLookingFrom = Math.max(startAt, posStart - phrase1[1].length());
+								posStart = pos + phrase1[1].length();
+								startAt = -1;
+								for (String[] phrase : phrases) {
+									int foundStartAt = filtered.indexOf(phrase[0], startLookingFrom);
+									if (foundStartAt != -1 && (startAt == -1 || foundStartAt < startAt)) {
+										startAt = foundStartAt;
+										currentPhrase = phrase;
+									}
+								}
+								pos = filtered.indexOf(word, posStart);
+								continue searchEngine;
+							}
+						if (realPos + currentPhrase[0].length() > input.length() || !input.substring(realPos, realPos + currentPhrase[0].length()).equalsIgnoreCase(currentPhrase[0])) {
 							if (container == null)
 								container = new StringContainer(input);
 							if (positionAndLength == null)
@@ -871,11 +914,27 @@ public class ChatHandlers {
 							positionAndLength.put(realPos, filtered.posAt(pos + word.length() - 1) + 1);
 							pos = filtered.indexOf(word, posStart);
 							posStart = pos + word.length();
-							startAt = filtered.indexOf(compare, Math.max(startAt, posStart - compare.length()));
+							int startLookingFrom = Math.max(startAt, posStart - currentPhrase[1].length());
+							startAt = -1;
+							for (String[] phrase : phrases) {
+								int foundStartAt = filtered.indexOf(phrase[0], startLookingFrom);
+								if (foundStartAt != -1 && (startAt == -1 || foundStartAt < startAt)) {
+									startAt = foundStartAt;
+									currentPhrase = phrase;
+								}
+							}
 							continue;
 						}
-						startAt = filtered.indexOf(compare, Math.max(startAt, posStart - compare.length()));
-						posStart = pos + lengthWithoutSpaces;
+						int startLookingFrom = Math.max(startAt, posStart - currentPhrase[1].length());
+						posStart = pos + currentPhrase[1].length();
+						startAt = -1;
+						for (String[] phrase : phrases) {
+							int foundStartAt = filtered.indexOf(phrase[0], startLookingFrom);
+							if (foundStartAt != -1 && (startAt == -1 || foundStartAt < startAt)) {
+								startAt = foundStartAt;
+								currentPhrase = phrase;
+							}
+						}
 					} else {
 						if (container == null)
 							container = new StringContainer(input);
