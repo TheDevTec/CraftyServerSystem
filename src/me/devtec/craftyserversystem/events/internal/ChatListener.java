@@ -139,7 +139,7 @@ public class ChatListener implements CssListener {
 				}
 			List<String[]> list;
 			Pair pair = Pair.of(split[0], list = new ArrayList<>());
-			list.add(new String[] { split[1].replace(" ", ""), split[1] });
+			list.add(new String[] { replacePhrase(split[1]), split[1] });
 			allowedPhrases.add(pair);
 		}
 		bypassAntiSwear = getConfig().getBoolean("antiSwear.bypass-enabled");
@@ -154,6 +154,70 @@ public class ChatListener implements CssListener {
 		for (String key : getConfig().getKeys("chat-placeholders"))
 			chatPlaceholders.put(getConfig().getString("chat-placeholders." + key + ".text"), getConfig().getString("chat-placeholders." + key + ".replacement"));
 		entrySetOfChatPlaceholders = chatPlaceholders.entrySet();
+	}
+
+	private String replacePhrase(String input) {
+		StringContainer replaced = new StringContainer(input.length());
+		char prev = 0;
+		int times = 0;
+		for (int i = 0; i < input.length(); ++i) {
+			char origin = input.charAt(i);
+			if (origin == ' ')
+				continue;
+			char c = Character.toLowerCase(origin);
+			switch (c) {
+			case 'é':
+			case 'ě':
+				c = 'e';
+				break;
+			case 'š':
+			case 'ś':
+				c = 's';
+				break;
+			case 'č':
+			case 'ć':
+				c = 'c';
+				break;
+			case 'ť':
+				c = 't';
+				break;
+			case 'ř':
+			case 'ŕ':
+				c = 'r';
+				break;
+			case 'ž':
+			case 'ź':
+				c = 'z';
+				break;
+			case 'ý':
+				c = 'y';
+				break;
+			case 'í':
+				c = 'i';
+				break;
+			case 'á':
+				c = 'a';
+				break;
+			case '3':
+				c = 'e';
+				break;
+			case '0':
+				c = 'o';
+				break;
+			case '1':
+				c = 't';
+				break;
+			case '5':
+				c = 's';
+				break;
+			}
+			if (prev == c && (c == 'k' ? ++times >= 2 : true))
+				continue;
+			replaced.append(c);
+			times = 0;
+			prev = c;
+		}
+		return replaced.toString();
 	}
 
 	@EventHandler(priority = EventPriority.HIGHEST)
