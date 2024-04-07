@@ -27,6 +27,7 @@ import me.devtec.craftyserversystem.Loader;
 import me.devtec.craftyserversystem.api.API;
 import me.devtec.craftyserversystem.events.internal.PreCommandListener;
 import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
+import me.devtec.shared.Ref;
 import me.devtec.shared.components.ClickEvent;
 import me.devtec.shared.components.Component;
 import me.devtec.shared.components.ComponentAPI;
@@ -272,7 +273,10 @@ public class MessageManager {
 					} else if (find[1] == 5) {
 						String id = UUID.randomUUID().toString();
 						GUI inv = new GUI(config.getString("placeholders.inventory.inv-title").replace("{player}", owner.getName()), 36);
-						inv.getInventory().setContents(owner.getInventory().getContents());
+						if (Ref.isNewerThan(8))
+							inv.getInventory().setContents(owner.getInventory().getStorageContents());
+						else
+							inv.getInventory().setContents(owner.getInventory().getContents());
 						synchronized (PreCommandListener.guis) {
 							PreCommandListener.guis.put(id, inv);
 						}
