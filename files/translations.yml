@@ -574,6 +574,19 @@ cssgui:
     target: "{prefix} Opening custom gui with id &e{id}"
     sender: "{prefix} Opening custom gui with id &e{id} &7to player &e{target}"
 
+# {sender}, {destination}
+back:
+  destination:
+    death: "death"
+    teleport: "previous"
+  self: "{prefix} Teleporting back to your {destination} position"
+  other:
+    sender: "{prefix} Teleporting {target} back to his {destination} position"
+    target: "{prefix} Teleporting back to your {destination} position"
+  failed:
+    self: "{prefix} Failed to teleport you to your {destination} position"
+    other: "{prefix} Failed to teleport {target} to his {destination} position"
+
 cssuser:
   get: "{prefix} Value in the section &e{path} &7of user &e{user} &7is set to &e{value}"
   does-not-exist: "{prefix} Section &e{path} &7of user &e{user} &7doesn't exist"

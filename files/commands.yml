@@ -592,6 +592,22 @@ scoreboardhide:
     cmd: "css.cmd.scoreboardhide"
     other: "css.cmd.scoreboardhide.other"
 
+back:
+  usage:
+    cmd: "/back [player] {death/teleport}"
+  cmd: [back]
+  perms:
+    # main section
+    cmd: "css.cmd.back"
+    # sub-section
+    death: "css.cmd.back.death"
+    teleport: "css.cmd.back.teleport"
+    # main section
+    other: "css.cmd.back.other"
+    # sub-section
+    other-death: "css.cmd.back.other.death"
+    other-teleport: "css.cmd.back.other.teleport"
+
 cssgui:
   usage:
     cmd: "/cssgui [gui-id] {player}"
