@@ -753,7 +753,7 @@ public class ChatHandlers {
 						return true;
 					int realPos = filtered.posAt(startAt);
 					for (String[] phrase1 : phrases)
-						if (realPos + phrase1[0].length() <= input.length() && input.substring(realPos, realPos + phrase1[0].length()).equalsIgnoreCase(phrase1[0])) {
+						if (realPos + phrase1[1].length() <= input.length() && input.substring(realPos, realPos + phrase1[1].length()).equalsIgnoreCase(phrase1[1])) {
 							int startLookingFrom = Math.max(startAt, posStart - phrase1[1].length());
 							posStart = pos + phrase1[1].length();
 							startAt = -1;
@@ -767,7 +767,7 @@ public class ChatHandlers {
 							pos = filtered.indexOf(word, posStart);
 							continue searchEngine;
 						}
-					if (realPos + currentPhrase[0].length() > input.length() || !input.substring(realPos, realPos + currentPhrase[0].length()).equalsIgnoreCase(currentPhrase[0]))
+					if (realPos + currentPhrase[1].length() > input.length() || !input.substring(realPos, realPos + currentPhrase[1].length()).equalsIgnoreCase(currentPhrase[1]))
 						return true;
 					int startLookingFrom = Math.max(startAt, posStart - currentPhrase[1].length());
 					posStart = pos + currentPhrase[1].length();
@@ -891,7 +891,7 @@ public class ChatHandlers {
 					if (startAt != -1) {
 						int realPos = filtered.posAt(startAt);
 						for (String[] phrase1 : phrases)
-							if (realPos + phrase1[0].length() <= input.length() && input.substring(realPos, realPos + phrase1[0].length()).equalsIgnoreCase(phrase1[0])) {
+							if (realPos + phrase1[1].length() <= input.length() && input.substring(realPos, realPos + phrase1[1].length()).equalsIgnoreCase(phrase1[1])) {
 								int startLookingFrom = Math.max(startAt, posStart - phrase1[1].length());
 								posStart = pos + phrase1[1].length();
 								startAt = -1;
@@ -905,7 +905,7 @@ public class ChatHandlers {
 								pos = filtered.indexOf(word, posStart);
 								continue searchEngine;
 							}
-						if (realPos + currentPhrase[0].length() > input.length() || !input.substring(realPos, realPos + currentPhrase[0].length()).equalsIgnoreCase(currentPhrase[0])) {
+						if (realPos + currentPhrase[1].length() > input.length() || !input.substring(realPos, realPos + currentPhrase[1].length()).equalsIgnoreCase(currentPhrase[1])) {
 							if (container == null)
 								container = new StringContainer(input);
 							if (positionAndLength == null)
