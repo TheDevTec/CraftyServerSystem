@@ -27,6 +27,7 @@ public class UserTablistData extends TablistData {
 	private static final Object emptyTabPacket = BukkitLoader.getNmsProvider().packetPlayerListHeaderFooter(Component.EMPTY_COMPONENT, Component.EMPTY_COMPONENT);
 
 	private Player player;
+	private String previousName;
 	private String previousHeader;
 	private String previousFooter;
 	private YellowNumberDisplayMode previous;
@@ -41,6 +42,7 @@ public class UserTablistData extends TablistData {
 		previous = previousData.previous;
 		previousHeader = previousData.previousHeader;
 		previousFooter = previousData.previousFooter;
+		previousName=previousData.previousName;
 		yellowNumber.putAll(previousData.yellowNumber);
 	}
 
@@ -68,14 +70,16 @@ public class UserTablistData extends TablistData {
 		String header = headerContainer.toString();
 		String footer = footerContainer.toString();
 		if (!(header.equals(previousHeader) && footer.equals(previousFooter))) {
-			Object tabPacket = BukkitLoader.getNmsProvider().packetPlayerListHeaderFooter(ComponentAPI.fromString(header), ComponentAPI.fromString(footer));
-			BukkitLoader.getPacketHandler().send(player, tabPacket);
 			previousHeader = header;
 			previousFooter = footer;
+			Object tabPacket = BukkitLoader.getNmsProvider().packetPlayerListHeaderFooter(ComponentAPI.fromString(header), ComponentAPI.fromString(footer));
+			BukkitLoader.getPacketHandler().send(player, tabPacket);
 		}
 		String playerlistName = placeholders.apply(getTabNameFormat().replace("{player}", player.getName()).replace("{prefix}", getTabPrefix()).replace("{suffix}", getTabSuffix()));
-		if (!player.getPlayerListName().equals(playerlistName))
+		if (!playerlistName.equals(previousName)) {
+			previousName=playerlistName;
 			player.setPlayerListName(playerlistName);
+		}
 		NametagPlayer nametag = NametagManagerAPI.get().getPlayer(player);
 		nametag.setNametagGenerator(generateFunction(getTagNameFormat(), placeholders));
 		nametag.getNametag().setText(nametag.getNametagGenerator().apply(player));
