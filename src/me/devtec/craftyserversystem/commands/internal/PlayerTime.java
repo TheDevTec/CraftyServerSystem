@@ -125,7 +125,7 @@ public class PlayerTime extends CssCommand {
 			this.cmd = addBypassSettings(cmd).build().register(cmds.remove(0), cmds.toArray(new String[0]));
 	}
 
-	private void reset(CommandSender sender, Player target, boolean sendMessages) {
+	public void reset(CommandSender sender, Player target, boolean sendMessages) {
 		target.resetPlayerTime();
 		if (sendMessages)
 			if (!sender.equals(target)) {
@@ -136,7 +136,7 @@ public class PlayerTime extends CssCommand {
 				msgOut(target, "playtime-reset.self");
 	}
 
-	private void setDay(CommandSender sender, Player target, boolean sendMessages) {
+	public void setDay(CommandSender sender, Player target, boolean sendMessages) {
 		target.setPlayerTime(1000, false);
 		if (sendMessages)
 			if (!sender.equals(target)) {
@@ -147,7 +147,7 @@ public class PlayerTime extends CssCommand {
 				msgOut(sender, "playerday.self");
 	}
 
-	private void setNoon(CommandSender sender, Player target, boolean sendMessages) {
+	public void setNoon(CommandSender sender, Player target, boolean sendMessages) {
 		target.setPlayerTime(6000, false);
 		if (sendMessages)
 			if (!sender.equals(target)) {
@@ -158,7 +158,7 @@ public class PlayerTime extends CssCommand {
 				msgOut(sender, "playernoon.self");
 	}
 
-	private void setNight(CommandSender sender, Player target, boolean sendMessages) {
+	public void setNight(CommandSender sender, Player target, boolean sendMessages) {
 		target.setPlayerTime(13000, false);
 		if (sendMessages)
 			if (!sender.equals(target)) {
@@ -169,7 +169,7 @@ public class PlayerTime extends CssCommand {
 				msgOut(sender, "playernight.self");
 	}
 
-	private void setMidnight(CommandSender sender, Player target, boolean sendMessages) {
+	public void setMidnight(CommandSender sender, Player target, boolean sendMessages) {
 		target.setPlayerTime(18000, false);
 		if (sendMessages)
 			if (!sender.equals(target)) {

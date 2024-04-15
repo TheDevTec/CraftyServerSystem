@@ -74,7 +74,7 @@ public class CssGui extends CssCommand {
 			this.cmd = addBypassSettings(cmd).build().register(cmds.remove(0), cmds.toArray(new String[0]));
 	}
 
-	private void openMenu(CommandSender sender, Player target, String id, boolean sendMessage) {
+	public void openMenu(CommandSender sender, Player target, String id, boolean sendMessage) {
 		int menuId = MENU_ID.getAndIncrement();
 		MenuBuilder builder = menus.get(id.toLowerCase());
 		GUI gui;

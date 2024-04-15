@@ -43,7 +43,7 @@ public class Thunder extends CssCommand {
 			this.cmd = addBypassSettings(cmd).build().register(cmds.remove(0), cmds.toArray(new String[0]));
 	}
 
-	private void setThunder(CommandSender sender, World world, boolean sendMessages) {
+	public void setThunder(CommandSender sender, World world, boolean sendMessages) {
 		world.setStorm(true);
 		world.setThundering(true);
 		world.setWeatherDuration(36000);

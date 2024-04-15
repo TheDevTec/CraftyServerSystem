@@ -54,7 +54,7 @@ public class Spawn extends CssCommand {
 			this.cmd = addBypassSettings(cmd).build().register(cmds.remove(0), cmds.toArray(new String[0]));
 	}
 
-	private void spawn(Player target, boolean sendMessage, CommandSender sender) {
+	public void spawn(Player target, boolean sendMessage, CommandSender sender) {
 		if (sendMessage)
 			if (target.equals(sender)) {
 				PlaceholdersExecutor placeholders = PlaceholdersExecutor.i().add("target", target.getName());

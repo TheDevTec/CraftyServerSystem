@@ -51,7 +51,7 @@ public class Heal extends CssCommand {
 			this.cmd = addBypassSettings(cmd).build().register(cmds.remove(0), cmds.toArray(new String[0]));
 	}
 
-	private void heal(Player target, boolean sendMessage, CommandSender sender) {
+	public void heal(Player target, boolean sendMessage, CommandSender sender) {
 		target.setHealth(target.getMaxHealth());
 		target.setFoodLevel(20);
 		target.setSaturation(10);

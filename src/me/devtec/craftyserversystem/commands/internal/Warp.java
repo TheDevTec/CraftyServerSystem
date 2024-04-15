@@ -144,7 +144,7 @@ public class Warp extends CssCommand {
 			this.cmd = addBypassSettings(cmd).build().register(cmds.remove(0), cmds.toArray(new String[0]));
 	}
 
-	private void updateMenu(Config config) {
+	public void updateMenu(Config config) {
 		Map<Character, ItemGUI> items = new HashMap<>();
 		Map<Character, MenuItem> menuItems = new HashMap<>();
 
@@ -293,7 +293,7 @@ public class Warp extends CssCommand {
 		return totalSpaces;
 	}
 
-	private void warp(Player target, String warpName, boolean sendMessage, boolean instant, CommandSender sender) {
+	public void warp(Player target, String warpName, boolean sendMessage, boolean instant, CommandSender sender) {
 		WarpInfo warp = WarpManager.getProvider().get(warpName);
 		WarpResult result = warp.warp(target, instant);
 		if (sendMessage)

@@ -100,25 +100,25 @@ public class Time extends CssCommand {
 			this.cmd = addBypassSettings(cmd).build().register(cmds.remove(0), cmds.toArray(new String[0]));
 	}
 
-	private void setDay(CommandSender sender, World target, boolean sendMessage) {
+	public void setDay(CommandSender sender, World target, boolean sendMessage) {
 		target.setTime(1000);
 		if (sendMessage)
 			msgOut(sender, "time.day", PlaceholdersExecutor.i().add("world", target.getName()));
 	}
 
-	private void setNoon(CommandSender sender, World target, boolean sendMessage) {
+	public void setNoon(CommandSender sender, World target, boolean sendMessage) {
 		target.setTime(6000);
 		if (sendMessage)
 			msgOut(sender, "time.noon", PlaceholdersExecutor.i().add("world", target.getName()));
 	}
 
-	private void setNight(CommandSender sender, World target, boolean sendMessage) {
+	public void setNight(CommandSender sender, World target, boolean sendMessage) {
 		target.setTime(13000);
 		if (sendMessage)
 			msgOut(sender, "time.night", PlaceholdersExecutor.i().add("world", target.getName()));
 	}
 
-	private void setMidnight(CommandSender sender, World target, boolean sendMessage) {
+	public void setMidnight(CommandSender sender, World target, boolean sendMessage) {
 		target.setTime(18000);
 		if (sendMessage)
 			msgOut(sender, "time.midnight", PlaceholdersExecutor.i().add("world", target.getName()));

@@ -54,7 +54,7 @@ public class Spawner extends CssCommand {
 		return lastBlock;
 	}
 
-	private void spawner(Block target, boolean sendMessage, CommandSender sender, EntityType type) {
+	public void spawner(Block target, boolean sendMessage, CommandSender sender, EntityType type) {
 		if (XMaterial.matchXMaterial(target.getType()) != XMaterial.SPAWNER) {
 			msg(sender, "not-spawner");
 			return;
@@ -68,7 +68,7 @@ public class Spawner extends CssCommand {
 			msg(sender, "changed", PlaceholdersExecutor.i().add("type", getFormattedNameOf(type)));
 	}
 
-	private String getFormattedNameOf(EntityType type) {
+	public String getFormattedNameOf(EntityType type) {
 		StringContainer container = new StringContainer(type.name().length());
 		boolean first = true;
 		for (String split : type.name().split("_")) {

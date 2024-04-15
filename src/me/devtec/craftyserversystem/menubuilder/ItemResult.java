@@ -11,18 +11,18 @@ import me.devtec.shared.annotations.Comment;
 import me.devtec.shared.utility.ColorUtils;
 import me.devtec.theapi.bukkit.BukkitLoader;
 import me.devtec.theapi.bukkit.game.ItemMaker;
-import me.devtec.theapi.bukkit.game.ItemMaker.HeadItemMaker;
+import me.devtec.theapi.bukkit.game.itemmakers.HeadItemMaker;
 
 public interface ItemResult {
-	public ItemMaker getItem();
+	ItemMaker getItem();
 
-	public List<String> getCommands();
+	List<String> getCommands();
 
-	public List<String> getMessages();
+	List<String> getMessages();
 
-	public CooldownHolder getCooldown();
+	CooldownHolder getCooldown();
 
-	public default void onClick(Player player) {
+	default void onClick(Player player) {
 		for (String message : getMessages())
 			player.sendMessage(ColorUtils.colorize(message.replace("{player}", player.getName())));
 		if (!getCommands().isEmpty())
@@ -35,7 +35,7 @@ public interface ItemResult {
 	}
 
 	@Comment(comment = "This ItemResult cannot be cached")
-	public default boolean containPlaceholders() {
+	default boolean containPlaceholders() {
 		int firstAt;
 		if (getItem().getDisplayName() != null)
 			if (getItem().getDisplayName().indexOf('{') != -1 && getItem().getDisplayName().indexOf('}') != -1
@@ -55,18 +55,17 @@ public interface ItemResult {
 		return false;
 	}
 
-	public ButtonType getButtonType();
+	ButtonType getButtonType();
 
-	public default String getOpenMenuId() {
+	default String getOpenMenuId() {
 		return null;
 	}
 
-	public boolean updateItemAfterUse();
+	boolean updateItemAfterUse();
 
-	public boolean updateGuiAfterUse();
+	boolean updateGuiAfterUse();
 
-	public static ItemResult of(ItemMaker maker, List<String> commands, List<String> messages, CooldownHolder cooldown, ButtonType type, String openMenuId, boolean updateItem,
-			boolean updateWholeGui) {
+	static ItemResult of(ItemMaker maker, List<String> commands, List<String> messages, CooldownHolder cooldown, ButtonType type, String openMenuId, boolean updateItem, boolean updateWholeGui) {
 		return new ItemResult() {
 			boolean containPlaceholders = ItemResult.super.containPlaceholders();
 

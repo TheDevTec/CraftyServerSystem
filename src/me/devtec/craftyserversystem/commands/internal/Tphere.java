@@ -45,7 +45,7 @@ public class Tphere extends CssCommand {
 			this.cmd = addBypassSettings(cmd).build().register(cmds.remove(0), cmds.toArray(new String[0]));
 	}
 
-	private void teleport(Player target, boolean sendMessage, Player sender) {
+	public void teleport(Player target, boolean sendMessage, Player sender) {
 		if (target.equals(sender)) {
 			msg(sender, "failed.self", PlaceholdersExecutor.EMPTY);
 			return;

@@ -2,6 +2,7 @@ package me.devtec.craftyserversystem.commands.internal;
 
 import java.util.List;
 
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import me.devtec.craftyserversystem.commands.CssCommand;
@@ -21,12 +22,17 @@ public class DelHome extends CssCommand {
 		}).permission(getPerm("cmd"));
 		// home
 		cmd.callableArgument((sender, structure, args) -> HomeManager.get().getHomes(sender.getName()), 1, (sender, structure, args) -> {
-			HomeManager.get().delHome(sender.getName(), args[0].toLowerCase());
-			msg(sender, "del", PlaceholdersExecutor.i().add("home", args[0].toLowerCase()));
+			delHome(sender.getName(), args[0].toLowerCase(), true, sender);
 		});
 		// register
 		List<String> cmds = getCommands();
 		if (!cmds.isEmpty())
 			this.cmd = addBypassSettings(cmd).build().register(cmds.remove(0), cmds.toArray(new String[0]));
+	}
+
+	public void delHome(String owner, String homeName, boolean sendMessage, CommandSender sender) {
+		HomeManager.get().delHome(owner, homeName);
+		if (sendMessage)
+			msg(sender, "del", PlaceholdersExecutor.i().add("owner", owner).add("home", homeName));
 	}
 }

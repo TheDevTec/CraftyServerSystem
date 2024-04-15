@@ -63,7 +63,7 @@ public class Skull extends CssCommand {
 			this.cmd = addBypassSettings(cmd).build().register(cmds.remove(0), cmds.toArray(new String[0]));
 	}
 
-	private void giveHead(CommandSender sender, Player target, String owner, boolean sendMessages) {
+	public void giveHead(CommandSender sender, Player target, String owner, boolean sendMessages) {
 		ItemStack head;
 		if (owner.endsWith(".png"))
 			head = ItemMaker.ofHead().skinUrl(owner).displayName("URL Generated Head").build();

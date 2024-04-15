@@ -104,7 +104,7 @@ public class Thor extends CssCommand {
 		return lastBlock;
 	}
 
-	private void smite(Player target, boolean sendMessage, boolean onlyEffect, CommandSender sender) {
+	public void smite(Player target, boolean sendMessage, boolean onlyEffect, CommandSender sender) {
 		if (onlyEffect)
 			target.getWorld().strikeLightningEffect(target.getLocation());
 		else
@@ -125,7 +125,7 @@ public class Thor extends CssCommand {
 				msg(target, "self.attack", PlaceholdersExecutor.i().add("target", target.getName()));
 	}
 
-	private void smite(Location looking, boolean sendMessage, boolean onlyEffect, CommandSender sender) {
+	public void smite(Location looking, boolean sendMessage, boolean onlyEffect, CommandSender sender) {
 		if (onlyEffect)
 			looking.getWorld().strikeLightningEffect(looking);
 		else

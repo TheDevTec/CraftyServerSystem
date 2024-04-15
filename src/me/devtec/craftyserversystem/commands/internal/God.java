@@ -132,7 +132,7 @@ public class God extends CssCommand {
 			this.cmd = addBypassSettings(cmd).build().register(cmds.remove(0), cmds.toArray(new String[0]));
 	}
 
-	private void setGod(Player target, boolean godStatus, boolean sendMessage, CommandSender sender) {
+	public void setGod(Player target, boolean godStatus, boolean sendMessage, CommandSender sender) {
 		if (godStatus) {
 			if (Ref.isOlderThan(12))
 				me.devtec.shared.API.getUser(target.getUniqueId()).set("css.god", true);
@@ -160,7 +160,7 @@ public class God extends CssCommand {
 		}
 	}
 
-	private boolean isAllowed(Player target) {
+	public boolean isAllowed(Player target) {
 		if (Ref.isOlderThan(12))
 			return me.devtec.shared.API.getUser(target.getUniqueId()).getBoolean("css.god");
 		return target.isInvulnerable();

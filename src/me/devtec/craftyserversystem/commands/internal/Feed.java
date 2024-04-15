@@ -49,7 +49,7 @@ public class Feed extends CssCommand {
 			this.cmd = addBypassSettings(cmd).build().register(cmds.remove(0), cmds.toArray(new String[0]));
 	}
 
-	private void feed(Player target, boolean sendMessage, CommandSender sender) {
+	public void feed(Player target, boolean sendMessage, CommandSender sender) {
 		target.setFoodLevel(20);
 		target.setSaturation(10);
 		target.setExhaustion(0);

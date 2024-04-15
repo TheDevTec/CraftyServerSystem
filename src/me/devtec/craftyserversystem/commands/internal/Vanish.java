@@ -133,7 +133,7 @@ public class Vanish extends CssCommand {
 		return false;
 	}
 
-	private void setVanish(CommandSender sender, Player target, boolean status, boolean sendMessages) {
+	public void setVanish(CommandSender sender, Player target, boolean status, boolean sendMessages) {
 		VanishToggleEvent event = new VanishToggleEvent(target.getUniqueId(), status);
 		EventManager.call(event);
 		if (event.isCancelled())

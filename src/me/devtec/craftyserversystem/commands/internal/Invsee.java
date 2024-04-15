@@ -395,7 +395,7 @@ public class Invsee extends CssCommand {
 		}
 	}
 
-	private void invsee(Player sender, Player target) {
+	public void invsee(Player sender, Player target) {
 		PlaceholdersExecutor ex = PlaceholdersExecutor.i().add("target", target.getName());
 		msg(sender, "open", ex);
 		GUI gui = guiHandler.get(target.getUniqueId());
@@ -622,7 +622,7 @@ public class Invsee extends CssCommand {
 			}
 	}
 
-	private static boolean isEmpty(ItemStack stack) {
+	private boolean isEmpty(ItemStack stack) {
 		return stack == null || stack.getType() == Material.AIR || stack.getAmount() == 0;
 	}
 

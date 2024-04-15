@@ -55,7 +55,7 @@ public class FlySpeed extends CssCommand {
 			this.cmd = addBypassSettings(cmd).build().register(cmds.remove(0), cmds.toArray(new String[0]));
 	}
 
-	private void speed(Player target, float speed, boolean sendMessage, CommandSender sender) {
+	public void speed(Player target, float speed, boolean sendMessage, CommandSender sender) {
 		target.setFlySpeed(Math.max(0, Math.min(1, speed / 10)));
 		if (sendMessage)
 			if (!sender.equals(target)) {

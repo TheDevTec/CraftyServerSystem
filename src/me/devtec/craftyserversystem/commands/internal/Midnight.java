@@ -43,7 +43,7 @@ public class Midnight extends CssCommand {
 			this.cmd = addBypassSettings(cmd).build().register(cmds.remove(0), cmds.toArray(new String[0]));
 	}
 
-	private void setMidnight(CommandSender sender, World world, boolean sendMessages) {
+	public void setMidnight(CommandSender sender, World world, boolean sendMessages) {
 		world.setTime(18000);
 		if (sendMessages)
 			msgOut(sender, "time.midnight", PlaceholdersExecutor.i().add("world", world.getName()));

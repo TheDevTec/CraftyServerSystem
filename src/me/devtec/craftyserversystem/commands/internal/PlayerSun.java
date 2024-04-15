@@ -35,7 +35,7 @@ public class PlayerSun extends CssCommand {
 			this.cmd = addBypassSettings(cmd).build().register(cmds.remove(0), cmds.toArray(new String[0]));
 	}
 
-	private void setSun(CommandSender sender, Player target) {
+	public void setSun(CommandSender sender, Player target) {
 		target.setPlayerWeather(WeatherType.CLEAR);
 		if (!sender.equals(target)) {
 			PlaceholdersExecutor PLACEHOLDERS = PlaceholdersExecutor.i().add("sender", sender.getName()).add("target", target.getName());

@@ -43,7 +43,7 @@ public class Sun extends CssCommand {
 			this.cmd = addBypassSettings(cmd).build().register(cmds.remove(0), cmds.toArray(new String[0]));
 	}
 
-	private void setSun(CommandSender sender, World world, boolean sendMessages) {
+	public void setSun(CommandSender sender, World world, boolean sendMessages) {
 		world.setStorm(false);
 		world.setThundering(false);
 		world.setWeatherDuration(36000);

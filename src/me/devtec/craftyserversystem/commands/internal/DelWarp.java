@@ -20,7 +20,7 @@ public class DelWarp extends CssCommand {
 		CommandStructure<CommandSender> cmd = CommandStructure.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
 			msgUsage(sender, "cmd");
 		}).permission(getPerm("cmd")).callableArgument((sender, structure, args) -> StringUtils.copyPartialMatches(args[0], WarpManager.getProvider().getWarps()), (sender, structure, args) -> {
-			delWarp(args[0].toLowerCase(), sender);
+			delWarp(args[0].toLowerCase(), true, sender);
 		});
 
 		// register
@@ -29,10 +29,12 @@ public class DelWarp extends CssCommand {
 			this.cmd = addBypassSettings(cmd).build().register(cmds.remove(0), cmds.toArray(new String[0]));
 	}
 
-	private void delWarp(String warpName, CommandSender sender) {
+	public void delWarp(String warpName, boolean sendMessage, CommandSender sender) {
 		if (WarpManager.getProvider().delete(warpName)) {
-			PlaceholdersExecutor placeholders = PlaceholdersExecutor.i().add("warp", warpName);
-			msg(sender, "deleted", placeholders);
+			if (sendMessage) {
+				PlaceholdersExecutor placeholders = PlaceholdersExecutor.i().add("warp", warpName);
+				msg(sender, "deleted", placeholders);
+			}
 			Warp.callMenuUpdate();
 		}
 	}

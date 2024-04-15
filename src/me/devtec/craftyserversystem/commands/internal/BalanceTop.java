@@ -98,7 +98,7 @@ public class BalanceTop extends CssCommand {
 			this.cmd = addBypassSettings(cmd).build().register(cmds.remove(0), cmds.toArray(new String[0]));
 	}
 
-	private void listBalanceTop(CommandSender sender, ComparableObject<String, Double>[] comparableObjects, int page, int maxEntries) {
+	public void listBalanceTop(CommandSender sender, ComparableObject<String, Double>[] comparableObjects, int page, int maxEntries) {
 		if (comparableObjects == null) {
 			msg(sender, "loading");
 			return;
@@ -117,7 +117,7 @@ public class BalanceTop extends CssCommand {
 		msg(sender, "footer", PlaceholdersExecutor.i().add("page", page).add("totalPages", totalPages).add("previousPage", Math.max(1, page - 1)).add("nextPage", Math.min(totalPages, page + 1)));
 	}
 
-	private String getWorldGroup(CommandSender sender) {
+	public String getWorldGroup(CommandSender sender) {
 		EconomyHook hook = API.get().getEconomyHook();
 		String worldGroup = "default";
 		if (hook instanceof CssEconomyHook) {

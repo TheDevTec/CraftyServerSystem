@@ -48,7 +48,7 @@ public class Burn extends CssCommand {
 			this.cmd = addBypassSettings(cmd).build().register(cmds.remove(0), cmds.toArray(new String[0]));
 	}
 
-	private void burn(Player target, boolean sendMessage, CommandSender sender) {
+	public void burn(Player target, boolean sendMessage, CommandSender sender) {
 		target.setFireTicks(72000);
 		if (sendMessage)
 			if (!sender.equals(target)) {

@@ -197,7 +197,7 @@ public class Tp extends CssCommand {
 			this.cmd = addBypassSettings(cmd).build().register(cmds.remove(0), cmds.toArray(new String[0]));
 	}
 
-	private void teleport(CommandSender sender, World world, Collection<? extends Player> players, String x, String y, String z, String yaw, String pitch, boolean individual, boolean useMath) {
+	public void teleport(CommandSender sender, World world, Collection<? extends Player> players, String x, String y, String z, String yaw, String pitch, boolean individual, boolean useMath) {
 		if (!individual) {
 			double finalX = useMath ? MathUtils.calculate(x) : ParseUtils.getDouble(x);
 			double finalY = useMath ? MathUtils.calculate(y) : ParseUtils.getDouble(y);

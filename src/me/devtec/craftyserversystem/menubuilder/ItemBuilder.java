@@ -13,7 +13,7 @@ import me.devtec.shared.placeholders.PlaceholderAPI;
 import me.devtec.shared.utility.ParseUtils;
 import me.devtec.shared.utility.TimeUtils;
 import me.devtec.theapi.bukkit.game.ItemMaker;
-import me.devtec.theapi.bukkit.game.ItemMaker.HeadItemMaker;
+import me.devtec.theapi.bukkit.game.itemmakers.HeadItemMaker;
 
 public class ItemBuilder {
 
@@ -572,7 +572,7 @@ public class ItemBuilder {
 		return (pos = value.indexOf('(')) != -1 ? value.substring(pos, value.length() - 1) : null;
 	}
 
-	public static enum ButtonType {
+	public enum ButtonType {
 		NONE, USE_ITEM, OPEN_MENU, CLOSE;
 
 		public static ButtonType parse(String value) {

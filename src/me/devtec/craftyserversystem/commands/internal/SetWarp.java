@@ -33,7 +33,7 @@ public class SetWarp extends CssCommand {
 			this.cmd = addBypassSettings(cmd).build().register(cmds.remove(0), cmds.toArray(new String[0]));
 	}
 
-	private void setWarp(String warpName, Position pos, Player sender) {
+	public void setWarp(String warpName, Position pos, Player sender) {
 		WarpInfo info;
 		if ((info = WarpManager.getProvider().get(warpName)) != null) {
 			info.setPosition(pos);

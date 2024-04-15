@@ -43,7 +43,7 @@ public class Day extends CssCommand {
 			this.cmd = addBypassSettings(cmd).build().register(cmds.remove(0), cmds.toArray(new String[0]));
 	}
 
-	private void setDay(CommandSender sender, World world, boolean sendMessages) {
+	public void setDay(CommandSender sender, World world, boolean sendMessages) {
 		world.setTime(1000);
 		if (sendMessages)
 			msgOut(sender, "time.day", PlaceholdersExecutor.i().add("world", world.getName()));

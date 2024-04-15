@@ -37,7 +37,7 @@ public class GetPos extends CssCommand {
 			this.cmd = addBypassSettings(cmd).build().register(cmds.remove(0), cmds.toArray(new String[0]));
 	}
 
-	private void getPos(Player target, CommandSender sender) {
+	public void getPos(Player target, CommandSender sender) {
 		Location loc = target.getLocation();
 		PlaceholdersExecutor placeholders = PlaceholdersExecutor.i().add("target", target.getName()).add("x", loc.getX()).add("y", loc.getY()).add("z", loc.getZ()).add("yaw", loc.getYaw())
 				.add("pitch", loc.getPitch()).add("world", loc.getWorld().getName());

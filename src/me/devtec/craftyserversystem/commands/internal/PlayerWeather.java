@@ -87,7 +87,7 @@ public class PlayerWeather extends CssCommand {
 			this.cmd = addBypassSettings(cmd).build().register(cmds.remove(0), cmds.toArray(new String[0]));
 	}
 
-	private void reset(CommandSender sender, Player target, boolean sendMessages) {
+	public void reset(CommandSender sender, Player target, boolean sendMessages) {
 		target.resetPlayerWeather();
 		if (sendMessages)
 			if (!sender.equals(target)) {
@@ -98,7 +98,7 @@ public class PlayerWeather extends CssCommand {
 				msgOut(target, "playerweather-reset.self");
 	}
 
-	private void setSun(CommandSender sender, Player target, boolean sendMessages) {
+	public void setSun(CommandSender sender, Player target, boolean sendMessages) {
 		target.setPlayerWeather(WeatherType.CLEAR);
 		if (sendMessages)
 			if (!sender.equals(target)) {
@@ -109,7 +109,7 @@ public class PlayerWeather extends CssCommand {
 				msgOut(sender, "playersun.self");
 	}
 
-	private void setRain(CommandSender sender, Player target, boolean sendMessages) {
+	public void setRain(CommandSender sender, Player target, boolean sendMessages) {
 		target.setPlayerWeather(WeatherType.DOWNFALL);
 		if (sendMessages)
 			if (!sender.equals(target)) {

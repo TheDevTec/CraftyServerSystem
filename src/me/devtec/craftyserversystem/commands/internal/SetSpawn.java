@@ -30,12 +30,14 @@ public class SetSpawn extends CssCommand {
 			this.cmd = addBypassSettings(cmd).build().register(cmds.remove(0), cmds.toArray(new String[0]));
 	}
 
-	private void setSpawn(Position pos, CommandSender sender) {
+	public void setSpawn(Position pos, CommandSender sender) {
 		API.get().getConfigManager().setSpawn(pos);
-		PlaceholdersExecutor placeholders = PlaceholdersExecutor.i().add("world", pos.getWorldName()).add("x", StringUtils.formatDouble(FormatType.NORMAL, pos.getX()))
-				.add("y", StringUtils.formatDouble(FormatType.NORMAL, pos.getY())).add("z", StringUtils.formatDouble(FormatType.NORMAL, pos.getZ()))
-				.add("yaw", StringUtils.formatDouble(FormatType.NORMAL, pos.getYaw())).add("pitch", StringUtils.formatDouble(FormatType.NORMAL, pos.getPitch()));
-		msg(sender, "set", placeholders);
+		if (sender != null) {
+			PlaceholdersExecutor placeholders = PlaceholdersExecutor.i().add("world", pos.getWorldName()).add("x", StringUtils.formatDouble(FormatType.NORMAL, pos.getX()))
+					.add("y", StringUtils.formatDouble(FormatType.NORMAL, pos.getY())).add("z", StringUtils.formatDouble(FormatType.NORMAL, pos.getZ()))
+					.add("yaw", StringUtils.formatDouble(FormatType.NORMAL, pos.getYaw())).add("pitch", StringUtils.formatDouble(FormatType.NORMAL, pos.getPitch()));
+			msg(sender, "set", placeholders);
+		}
 	}
 
 }

@@ -1,25 +1,54 @@
 package me.devtec.craftyserversystem.commands.internal;
 
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.HandlerList;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerChangedWorldEvent;
+import org.bukkit.event.player.PlayerTeleportEvent;
 
+import me.devtec.craftyserversystem.Loader;
 import me.devtec.craftyserversystem.commands.CssCommand;
 import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
 import me.devtec.shared.Ref;
 import me.devtec.shared.commands.selectors.Selector;
 import me.devtec.shared.commands.structures.CommandStructure;
+import me.devtec.shared.dataholder.cache.TempMap;
 import me.devtec.theapi.bukkit.BukkitLoader;
 
 public class Gamemode extends CssCommand {
+
+	private Listener listener;
 
 	@Override
 	public void register() {
 		if (isRegistered())
 			return;
+
+		listener = new Listener() {
+			private Map<UUID, GameMode> tempMap = new TempMap<>(20 * 5);
+
+			@EventHandler
+			public void onPreWorldChange(PlayerTeleportEvent e) {
+				if (!e.getFrom().getWorld().equals(e.getTo().getWorld()))
+					tempMap.put(e.getPlayer().getUniqueId(), e.getPlayer().getGameMode());
+			}
+
+			@EventHandler
+			public void onWorldChange(PlayerChangedWorldEvent e) {
+				GameMode previous;
+				if ((previous = tempMap.remove(e.getPlayer().getUniqueId())) != null)
+					e.getPlayer().setGameMode(previous);
+			}
+		};
+		Bukkit.getPluginManager().registerEvents(listener, Loader.getPlugin());
 
 		CommandStructure<CommandSender> cmd = CommandStructure.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
 			msgUsage(sender, "cmd");
@@ -141,7 +170,16 @@ public class Gamemode extends CssCommand {
 			this.cmd = addBypassSettings(cmd).build().register(cmds.remove(0), cmds.toArray(new String[0]));
 	}
 
-	private void setGameMode(Player target, GameMode mode, boolean sendMessage, CommandSender sender) {
+	@Override
+	public void unregister() {
+		super.unregister();
+		if (listener != null) {
+			HandlerList.unregisterAll(listener);
+			listener = null;
+		}
+	}
+
+	public void setGameMode(Player target, GameMode mode, boolean sendMessage, CommandSender sender) {
 		if (sendMessage)
 			if (target.equals(sender)) {
 				PlaceholdersExecutor placeholders = PlaceholdersExecutor.i().add("target", target.getName()).add("gamemode", mode.name().toLowerCase());

@@ -42,7 +42,7 @@ public class PlayerNight extends CssCommand {
 			this.cmd = addBypassSettings(cmd).build().register(cmds.remove(0), cmds.toArray(new String[0]));
 	}
 
-	private void setNight(CommandSender sender, Player target, boolean sendMessages) {
+	public void setNight(CommandSender sender, Player target, boolean sendMessages) {
 		target.setPlayerTime(13000, false);
 		if (sendMessages)
 			if (!sender.equals(target)) {

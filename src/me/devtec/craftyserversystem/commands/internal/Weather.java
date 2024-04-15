@@ -81,7 +81,7 @@ public class Weather extends CssCommand {
 			this.cmd = addBypassSettings(cmd).build().register(cmds.remove(0), cmds.toArray(new String[0]));
 	}
 
-	private void setSun(CommandSender sender, World world, boolean sendMessages) {
+	public void setSun(CommandSender sender, World world, boolean sendMessages) {
 		world.setStorm(false);
 		world.setThundering(false);
 		world.setWeatherDuration(36000);
@@ -89,7 +89,7 @@ public class Weather extends CssCommand {
 			msgOut(sender, "weather.sun", PlaceholdersExecutor.i().add("world", world.getName()));
 	}
 
-	private void setRain(CommandSender sender, World world, boolean sendMessages) {
+	public void setRain(CommandSender sender, World world, boolean sendMessages) {
 		world.setStorm(true);
 		world.setThundering(false);
 		world.setWeatherDuration(36000);
@@ -97,7 +97,7 @@ public class Weather extends CssCommand {
 			msgOut(sender, "weather.rain", PlaceholdersExecutor.i().add("world", world.getName()));
 	}
 
-	private void setThunder(CommandSender sender, World world, boolean sendMessages) {
+	public void setThunder(CommandSender sender, World world, boolean sendMessages) {
 		world.setStorm(true);
 		world.setThundering(false);
 		world.setWeatherDuration(36000);

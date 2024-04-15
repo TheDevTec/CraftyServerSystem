@@ -13,7 +13,9 @@ import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
+import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.PlayerTeleportEvent;
 
 import me.devtec.craftyserversystem.Loader;
 import me.devtec.craftyserversystem.api.API;
@@ -21,11 +23,12 @@ import me.devtec.craftyserversystem.commands.CssCommand;
 import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
 import me.devtec.shared.commands.selectors.Selector;
 import me.devtec.shared.commands.structures.CommandStructure;
+import me.devtec.shared.dataholder.cache.TempList;
 
 public class Fly extends CssCommand {
 
 	private Listener listener;
-	private List<UUID> fallDamageCancel = new ArrayList<>();
+	private List<UUID> fallDamageCancel = null;
 
 	@Override
 	public void register() {
@@ -33,6 +36,7 @@ public class Fly extends CssCommand {
 			return;
 
 		if (API.get().getConfigManager().getMain().getBoolean("fly.anti-fall-damage-listener")) {
+			fallDamageCancel = new ArrayList<>();
 			listener = new Listener() {
 
 				@EventHandler
@@ -46,9 +50,38 @@ public class Fly extends CssCommand {
 				public void quit(PlayerQuitEvent e) {
 					fallDamageCancel.remove(e.getPlayer().getUniqueId());
 				}
+
+				private List<UUID> tempList = new TempList<>(20 * 5);
+
+				@EventHandler
+				public void onPreWorldChange(PlayerTeleportEvent e) {
+					if (!e.getFrom().getWorld().equals(e.getTo().getWorld()) && isAllowed(e.getPlayer()))
+						tempList.add(e.getPlayer().getUniqueId());
+				}
+
+				@EventHandler
+				public void onWorldChange(PlayerChangedWorldEvent e) {
+					if (tempList.remove(e.getPlayer().getUniqueId()))
+						setFly(e.getPlayer(), true, false, e.getPlayer());
+				}
 			};
-			Bukkit.getPluginManager().registerEvents(listener, Loader.getPlugin());
-		}
+		} else
+			listener = new Listener() {
+				private List<UUID> tempList = new TempList<>(20 * 5);
+
+				@EventHandler
+				public void onPreWorldChange(PlayerTeleportEvent e) {
+					if (!e.getFrom().getWorld().equals(e.getTo().getWorld()) && isAllowed(e.getPlayer()))
+						tempList.add(e.getPlayer().getUniqueId());
+				}
+
+				@EventHandler
+				public void onWorldChange(PlayerChangedWorldEvent e) {
+					if (tempList.remove(e.getPlayer().getUniqueId()))
+						setFly(e.getPlayer(), true, false, e.getPlayer());
+				}
+			};
+		Bukkit.getPluginManager().registerEvents(listener, Loader.getPlugin());
 
 		CommandStructure<CommandSender> cmd = CommandStructure.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
 			if (!(sender instanceof Player)) {
@@ -82,7 +115,7 @@ public class Fly extends CssCommand {
 			this.cmd = addBypassSettings(cmd).build().register(cmds.remove(0), cmds.toArray(new String[0]));
 	}
 
-	private void setFly(Player target, boolean flyStatus, boolean sendMessage, CommandSender sender) {
+	public void setFly(Player target, boolean flyStatus, boolean sendMessage, CommandSender sender) {
 		if (flyStatus) {
 			target.setAllowFlight(true);
 			if (target.getLocation().add(0, -0.5, 0).getBlock().isEmpty())
@@ -95,7 +128,7 @@ public class Fly extends CssCommand {
 				} else
 					msg(target, "self.true", PlaceholdersExecutor.i().add("target", target.getName()));
 		} else {
-			if (listener != null && target.getLocation().add(0, -0.5, 0).getBlock().isEmpty())
+			if (fallDamageCancel != null && listener != null && target.getLocation().add(0, -0.5, 0).getBlock().isEmpty())
 				fallDamageCancel.add(target.getUniqueId());
 			target.setFlying(false);
 			target.setAllowFlight(false);
@@ -109,7 +142,7 @@ public class Fly extends CssCommand {
 		}
 	}
 
-	private boolean isAllowed(Player sender) {
+	public boolean isAllowed(Player sender) {
 		return sender.getAllowFlight();
 	}
 
@@ -119,6 +152,7 @@ public class Fly extends CssCommand {
 		if (listener != null) {
 			HandlerList.unregisterAll(listener);
 			fallDamageCancel.clear();
+			fallDamageCancel = null;
 			listener = null;
 		}
 	}

@@ -42,7 +42,7 @@ public class PlayerDay extends CssCommand {
 			this.cmd = addBypassSettings(cmd).build().register(cmds.remove(0), cmds.toArray(new String[0]));
 	}
 
-	private void setDay(CommandSender sender, Player target, boolean sendMessages) {
+	public void setDay(CommandSender sender, Player target, boolean sendMessages) {
 		target.setPlayerTime(1000, false);
 		if (sendMessages)
 			if (!sender.equals(target)) {

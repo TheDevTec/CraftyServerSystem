@@ -54,7 +54,7 @@ public class ScoreboardHide extends CssCommand {
 			this.cmd = addBypassSettings(cmd).build().register(cmds.remove(0), cmds.toArray(new String[0]));
 	}
 
-	private void toggle(CommandSender sender, Player target, boolean sendMessages) {
+	public void toggle(CommandSender sender, Player target, boolean sendMessages) {
 		UserScoreboardData data = ScoreboardListener.data.get(target.getUniqueId());
 		if (data == null)
 			return;
@@ -69,7 +69,7 @@ public class ScoreboardHide extends CssCommand {
 				msg(sender, "self." + status, PlaceholdersExecutor.EMPTY);
 	}
 
-	private void setStatus(CommandSender sender, Player target, boolean sendMessages, boolean status) {
+	public void setStatus(CommandSender sender, Player target, boolean sendMessages, boolean status) {
 		UserScoreboardData data = ScoreboardListener.data.get(target.getUniqueId());
 		if (data == null)
 			return;

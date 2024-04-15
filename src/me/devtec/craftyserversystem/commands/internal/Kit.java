@@ -30,7 +30,7 @@ import me.devtec.theapi.bukkit.xseries.XMaterial;
 
 public class Kit extends CssCommand {
 
-	private static Map<String, KitSample> kits = new HashMap<>();
+	private Map<String, KitSample> kits = new HashMap<>();
 
 	@Override
 	public void register() {
@@ -131,7 +131,11 @@ public class Kit extends CssCommand {
 		kits.clear();
 	}
 
-	private void useKit(Player target, KitSample kit, boolean ignoreCost, boolean ignoreCooldown, boolean sendMessage, CommandSender sender) {
+	public Map<String, KitSample> getKits() {
+		return kits;
+	}
+
+	public void useKit(Player target, KitSample kit, boolean ignoreCost, boolean ignoreCooldown, boolean sendMessage, CommandSender sender) {
 		PlaceholdersExecutor placeholders = PlaceholdersExecutor.i().papi(target.getUniqueId()).add("kit", kit.getName()).add("cost", kit.getCost()).add("admin", sender.getName())
 				.add("target", target.getName()).add("player", target.getName());
 		if (!ignoreCooldown && !kit.getCooldown().tryWithoutWriting(target)) {
