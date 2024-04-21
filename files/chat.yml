@@ -27,7 +27,7 @@ antiSwear:
   # css.chat.bypass.antiswear
   bypass-enabled: false
   # Format: swearWord:allowedPhrase
-  allowed-phrases: ["negr:negramot","cock:čočka","pice:slepice","picka:slepickám","picka:slepičkám","picka:slepickam","picka:slepička","picky:slepičky","kund:sekund","kkt:ak kter","kkt:ak ktor","debyl:kde byl","debil:kde bil","pice:opice","mrd:smrdi","mrd:smrde","picky:pick y","picko:pick o","picka:pick a"] 
+  allowed-phrases: ["negr:negramot","cock:čočka","cock:čočky","pice:slepice","picka:slepickám","picka:slepičkám","picka:slepickam","picka:slepička","picky:slepičky","kund:sekund","kkt:ak kter","kkt:ak ktor","debyl:kde byl","debil:kde bil","pice:opice","mrd:smrdi","mrd:smrde","picky:pick y","picko:pick o","picka:pick a"] 
 
 chat-placeholders:
   shrug:
