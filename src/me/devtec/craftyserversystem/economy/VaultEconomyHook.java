@@ -36,8 +36,13 @@ public class VaultEconomyHook implements EconomyHook {
 	}
 
 	public static void registerOurEconomy() {
-		Loader.getPlugin().getLogger().info("Registering own Economy service.");
+		Loader.getPlugin().getLogger().info("Registering our Economy service.");
 		Bukkit.getServicesManager().register(Economy.class, (CssEconomyVaultImplementation) ((CssEconomyHook) API.get().getEconomyHook()).economy, Loader.getPlugin(), ServicePriority.Normal);
+	}
+
+	public static void unregisterOurEconomy() {
+		Loader.getPlugin().getLogger().info("Unregistering our Economy service.");
+		Bukkit.getServicesManager().unregister(((CssEconomyHook) API.get().getEconomyHook()).economy);
 	}
 
 	@Override

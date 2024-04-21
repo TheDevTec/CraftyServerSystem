@@ -1,3 +1,11 @@
+css:
+  usage:
+    cmd:
+    - "/css reload"
+    - "/css version"
+  cmd: [css,craftyserversystem]
+  perms:
+    cmd: "css.cmd.css"
 fly:
   usage:
     other: "/fly [player] {true/false}"

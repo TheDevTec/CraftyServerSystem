@@ -1,4 +1,16 @@
 # global placeholder: {prefix}
+css:
+  reload:
+  - "{prefix} Plugin reloaded in &a{time}ms&7!"
+  - "{prefix} &cSome features require a server restart for the changes to take effect!"
+  version:
+  - ""
+  - "{prefix} CSS Version: &e{version}"
+  - "{prefix} CSS Authors: &e{authors}"
+  - ""
+  - "{prefix} Join our Discord server and get access to the latest builds!"
+  - "{prefix} Discord: &ehttps://discord.gg/APwYKQRxby"
+  - ""
 
 fly:
   self:

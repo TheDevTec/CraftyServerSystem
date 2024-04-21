@@ -205,6 +205,7 @@ public class API {
 					"&cCraftyServerSystem &8» &aWe recommend to change &2Json reader & writer &afrom &e&nGuava&r&a to our own &2&nTheAPI&r&a in the &cplugins/TheAPI/config.yml &afile on line &c\"default-json-handler\""));
 			Bukkit.getConsoleSender().sendMessage("");
 		}
+
 		// Register our economy hook
 		Config economy = getConfigManager().getEconomy();
 		if (economy.getBoolean("enabled")) {
@@ -276,5 +277,84 @@ public class API {
 		if (!ScoreboardListener.data.isEmpty())
 			for (UserScoreboardData data : ScoreboardListener.data.values())
 				data.removeScoreboard();
+		if (Bukkit.getPluginManager().getPlugin("Vault") != null) {
+			Config economy = getConfigManager().getEconomy();
+			if (economy.getBoolean("enabled"))
+				VaultEconomyHook.unregisterOurEconomy();
+		}
+		setEconomyHook(new EmptyEconomyHook());
+	}
+
+	public void reload() {
+		// Unload
+		if (getSqlConnection() != null)
+			try {
+				getSqlConnection().close();
+				sqlDatabase = null;
+			} catch (SQLException e) {
+			}
+		getCommandManager().unregister();
+		getListenerManager().unregister();
+		if (NametagManagerAPI.get().isLoaded())
+			NametagManagerAPI.get().unload();
+		if (!TablistListener.data.isEmpty())
+			for (UserTablistData data : TablistListener.data.values())
+				data.removeTablist();
+		if (!ScoreboardListener.data.isEmpty())
+			for (UserScoreboardData data : ScoreboardListener.data.values())
+				data.removeScoreboard();
+		if (Bukkit.getPluginManager().getPlugin("Vault") != null) {
+			Config economy = getConfigManager().getEconomy();
+			if (economy.getBoolean("enabled"))
+				VaultEconomyHook.unregisterOurEconomy();
+		}
+		setEconomyHook(new EmptyEconomyHook());
+		// Load
+		getConfigManager().reloadAll();
+		// Login to the database
+		Config config = getConfigManager().getMain();
+		if (config.getBoolean("sql.enabled")) {
+			DatabaseType databaseType = DatabaseType.valueOf(config.getString("sql.type").toUpperCase());
+			try {
+				SqlDatabaseSettings sqlSettings = new SqlDatabaseSettings(databaseType, config.getString("sql.ip"), 3306, config.getString("sql.database"), config.getString("sql.username"),
+						config.getString("sql.password"));
+				if (!config.getString("sql.attributes").trim().isEmpty())
+					sqlSettings.attributes(config.getString("sql.attributes"));
+				sqlDatabase = DatabaseAPI.openConnection(databaseType, sqlSettings);
+				// Create tables
+				if (config.getBoolean("vanish.store-in-sql"))
+					sqlDatabase.createTable("css_vanish", new Row[] { new Row("id", SqlFieldType.VARCHAR, 48) });
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+
+		// Register our economy hook
+		Config economy = getConfigManager().getEconomy();
+		if (economy.getBoolean("enabled")) {
+			Map<String, List<String>> map = null;
+			if (economy.getBoolean("settings.per-world-economy")) {
+				map = new HashMap<>();
+				for (String key : economy.getKeys("per-world-groups"))
+					map.put(key, economy.getStringList("per-world-groups." + key));
+			}
+			if (Bukkit.getPluginManager().getPlugin("Vault") == null) {
+				this.economy = new CssEconomy(economy.getDouble("settings.startup-money"),
+						economy.getString("settings.minimum-money").equals("UNLIMITED") ? Double.NEGATIVE_INFINITY : economy.getDouble("settings.minimum-money"),
+						economy.getString("settings.maximum-money").equals("UNLIMITED") ? Double.POSITIVE_INFINITY : economy.getDouble("settings.maximum-money"), map != null, map);
+				setEconomyHook(new CssEconomyHook(this.economy));
+			} else {
+				Constructor<?> cons = Ref.constructor(Ref.getClass("me.devtec.craftyserversystem.economy.CssEconomyVaultImplementation"), double.class, double.class, double.class, boolean.class,
+						Map.class);
+				this.economy = (CssEconomy) Ref.newInstance(cons, economy.getDouble("settings.startup-money"),
+						economy.getString("settings.minimum-money").equals("UNLIMITED") ? Double.NEGATIVE_INFINITY : economy.getDouble("settings.minimum-money"),
+						economy.getString("settings.maximum-money").equals("UNLIMITED") ? Double.POSITIVE_INFINITY : economy.getDouble("settings.maximum-money"), map != null, map);
+				setEconomyHook(new CssEconomyHook(this.economy));
+				VaultEconomyHook.registerOurEconomy();
+			}
+		}
+
+		getCommandManager().register();
+		getListenerManager().register();
 	}
 }
