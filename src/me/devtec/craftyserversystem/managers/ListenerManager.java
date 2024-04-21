@@ -10,7 +10,6 @@ import java.util.jar.JarFile;
 
 import org.bukkit.Bukkit;
 import org.bukkit.event.HandlerList;
-import org.bukkit.event.Listener;
 
 import me.devtec.craftyserversystem.Loader;
 import me.devtec.craftyserversystem.annotations.IgnoredClass;
@@ -38,7 +37,7 @@ public class ListenerManager {
 	}
 
 	/**
-	 * 
+	 *
 	 * @return List<CssListener instance>
 	 * @throws Exception
 	 */
@@ -66,31 +65,34 @@ public class ListenerManager {
 			CssListener listener = itr.next();
 			if (!listener.isEnabled()) {
 				itr.remove();
-				HandlerList.unregisterAll((Listener) listener);
+				HandlerList.unregisterAll(listener);
 				continue;
 			}
 			listener.reload();
 			if (!listener.isEnabled()) { // This is probably not our listener
 				itr.remove();
-				HandlerList.unregisterAll((Listener) listener);
+				HandlerList.unregisterAll(listener);
 			}
 		}
 	}
 
 	public void register(CssListener listener) {
 		listener.reload();
-		Bukkit.getPluginManager().registerEvents((Listener) listener, Loader.getPlugin());
+		Bukkit.getPluginManager().registerEvents(listener, Loader.getPlugin());
 		registered.add(listener);
 	}
 
 	public void unregister(CssListener listener) {
 		registered.remove(listener);
-		HandlerList.unregisterAll((Listener) listener);
+		HandlerList.unregisterAll(listener);
+		listener.unregister();
 	}
 
 	public void unregister() {
-		for (CssListener listener : registered)
-			HandlerList.unregisterAll((Listener) listener);
+		for (CssListener listener : registered) {
+			HandlerList.unregisterAll(listener);
+			listener.unregister();
+		}
 		registered.clear();
 	}
 

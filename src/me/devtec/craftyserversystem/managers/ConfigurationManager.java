@@ -25,6 +25,7 @@ public class ConfigurationManager {
 	private Config economy;
 	private Config placeholders;
 	private Config customGuis;
+	private Config serverMotd;
 	private String prefix = "";
 	private Position spawn;
 	private long teleportRequestTime;
@@ -43,6 +44,7 @@ public class ConfigurationManager {
 		economy = new Config(FILES_PATH + "economy.yml");
 		customGuis = new Config(FILES_PATH + "custom-guis.yml");
 		placeholders = new Config(FILES_PATH + "placeholders.yml");
+		serverMotd = new Config(FILES_PATH + "server-motd.yml");
 	}
 
 	public ConfigurationManager initFromJar() {
@@ -59,6 +61,8 @@ public class ConfigurationManager {
 		merge(economy, "economy.yml");
 		merge(placeholders, "placeholders.yml");
 		merge(customGuis, "custom-guis.yml");
+		if (!serverMotd.exists("motds"))
+			merge(serverMotd, "server-motd.yml");
 		prefix = getMain().getString("prefix", "");
 		teleportRequestTime = TimeUtils.timeFromString(getMain().getString("teleport-request-time"));
 		return this;
@@ -68,6 +72,10 @@ public class ConfigurationManager {
 		ClassLoader classLoader = Loader.getPlugin().getClass().getClassLoader();
 		if (origin.merge(new Config().reload(StreamUtils.fromStream(classLoader.getResourceAsStream("files/" + path))), MergeStandards.DEFAULT))
 			origin.save("yaml");
+	}
+
+	public String getPrefix() {
+		return prefix;
 	}
 
 	public long getTeleportRequestTime() {
@@ -126,26 +134,8 @@ public class ConfigurationManager {
 		return placeholders;
 	}
 
-	public void reloadAll() {
-		getMain().reload();
-		getTranslations().reload();
-		getCommands().reload();
-		getCooldowns().reload();
-		getScoreboard().reload();
-		getJoin().reload();
-		getQuit().reload();
-		getChat().reload();
-		getTab().reload();
-		getKits().reload();
-		getEconomy().reload();
-		getPlaceholders().reload();
-		getCustomGuis().reload();
-		prefix = getMain().getString("prefix", "");
-		teleportRequestTime = TimeUtils.timeFromString(getMain().getString("teleport-request-time"));
-	}
-
-	public String getPrefix() {
-		return prefix;
+	public Config getServerMotd() {
+		return serverMotd;
 	}
 
 	public Config getJoin() {
@@ -170,5 +160,24 @@ public class ConfigurationManager {
 
 	public Config getCustomGuis() {
 		return customGuis;
+	}
+
+	public void reloadAll() {
+		getMain().reload();
+		getTranslations().reload();
+		getCommands().reload();
+		getCooldowns().reload();
+		getScoreboard().reload();
+		getJoin().reload();
+		getQuit().reload();
+		getChat().reload();
+		getTab().reload();
+		getKits().reload();
+		getEconomy().reload();
+		getPlaceholders().reload();
+		getCustomGuis().reload();
+		getServerMotd().reload();
+		prefix = getMain().getString("prefix", "");
+		teleportRequestTime = TimeUtils.timeFromString(getMain().getString("teleport-request-time"));
 	}
 }

@@ -1,0 +1,53 @@
+enabled: true
+
+# You can make as much as you want!
+# Every server list reflesh will retrieve random selected motd from this collection
+motds:
+  0:
+    # You can modify path to server icon
+    # Server icon must still have size 64x64 pixels
+    icon: server-icon.png
+    motd: "            &6Crafty Server &8| &aJOIN NOW!\n            &7This server is using CSS!"
+    slots:
+      # If you disable this, online players with enabled listing will be displayed instead.
+      modified-list: true
+      # You can also use there placeholders from PAPI
+      list:
+      - ""
+      - "&7Feel free to join our Discord:"
+      - "&ehttps://discord.gg/APwYKQRxby"
+      - ""
+      - "&7Online players:"
+      - "&e{online}/100"
+      - ""
+      # You can use here math or modify it and make fake online count!
+      # Also be aware that some voting sites forbid this use.
+      # You can also use there placeholders from PAPI
+      online: {online}
+      max-online: {max-players}
+    # Leave this empty ("") to make it default
+    version: "&aJOIN NOW!"
+  1:
+    # You can modify path to server icon
+    # Server icon must still have size 64x64 pixels
+    icon: server-icon.png
+    motd: "            &eCrafty Server &8| &2JOIN NOW!\n            &7This server is using CSS!"
+    slots:
+      # If you disable this, online players with enabled listing will be displayed instead.
+      modified-list: true
+      # You can also use there placeholders from PAPI
+      list:
+      - ""
+      - "&7Feel free to join our Discord:"
+      - "&ehttps://discord.gg/APwYKQRxby"
+      - ""
+      - "&7Online players:"
+      - "&e{online}/100"
+      - ""
+      # You can use here math or modify it and make fake online count!
+      # Also be aware that some voting sites forbid this use.
+      # You can also use there placeholders from PAPI
+      online: {online}
+      max-online: {max-players}
+    # Leave this empty ("") to make it default
+    version: "&aJOIN NOW!"

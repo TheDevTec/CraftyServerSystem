@@ -5,9 +5,13 @@ import org.bukkit.event.Listener;
 import me.devtec.shared.dataholder.Config;
 
 public interface CssListener extends Listener {
-	public Config getConfig();
+	Config getConfig();
 
-	public boolean isEnabled();
+	boolean isEnabled();
 
-	public void reload();
+	void reload();
+
+	default void unregister() {
+
+	}
 }
