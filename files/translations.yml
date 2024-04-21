@@ -395,14 +395,17 @@ balance:
 pay:
   # {target}
   no-account: "{prefix} Why are you wasting my time by searching for &e{target}&7, who has never connected to our network?"
-  # {sender}, {target}, {balance}
+  # {sender}, {target}, {balance}, {balance_without_fee}, {fee}
   success:
-    sender: "{prefix} You have paid &e${balance} &7to &e{target}&7."
-    target: "{prefix} Money has been received! &e{sender} &7has paid you &e${balance}&7."
+    sender: "{prefix} You have paid &e${balance_without_fee} &7to &e{target}&7. &8&o(&c&o-${fee} fee&8&o)"
+    target: "{prefix} Money has been received! &e{sender} &7has paid you &e${balance_without_fee}&7. &8&o(&c&o-${fee} fee&8&o)"
   failed:
     # {target}
     money: "{prefix} What are you trying to do? You don't have enough money for that. Go to work!"
     self: "{prefix} I know, it would be so nice to have friends, but you can't pay to yourself and think that it was your imaginary friend - Fred!"
+    # {limit}, {period}
+    over-limit: "{prefix} Unfortunately you have reached your sending limit in this period, try it later! &8&o(${limit}/{period})"
+    must-be-above-zero: "{prefix} I'm sorry, but it doesn't work that way... amount must logically be more than 0!"
     
 # {target}, {balance}
 economy:
