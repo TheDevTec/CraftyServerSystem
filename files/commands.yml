@@ -218,8 +218,8 @@ heal:
   cmd: [heal]
   cooldown: "healing" # group name from the cooldowns.yml file
   perms:
-    cmd: "css.heal.god"
-    other: "css.heal.god.other"
+    cmd: "css.heal.heal"
+    other: "css.heal.heal.other"
 
 feed:
   usage:
@@ -420,6 +420,8 @@ pay:
     cmd: "/pay {player} {balance}"
   perms:
     cmd: "css.cmd.pay"
+    bypass-limit: "css.cmd.pay.bypass-limit"
+    bypass-fee: "css.cmd.pay.bypass-fee"
 
 balance:
   cmd: [balance,bal]
