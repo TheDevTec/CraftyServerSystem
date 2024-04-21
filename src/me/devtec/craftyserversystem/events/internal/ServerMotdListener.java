@@ -49,7 +49,7 @@ public class ServerMotdListener implements CssListener {
 					list.add(GameProfileHandler.of(value, UUID.randomUUID()));
 			}
 			Motd motd = new Motd(getConfig().getString("motds." + key + ".slots.online"), getConfig().getString("motds." + key + ".slots.max-online"), list,
-					getConfig().getString("motds." + key + ".motd"), getConfig().getString("motds." + key + ".icon"),
+					getConfig().getString("motds." + key + ".motd").replace("\\n", "\n"), getConfig().getString("motds." + key + ".icon"),
 					getConfig().getString("motds." + key + ".version") == null || getConfig().getString("motds." + key + ".version").isEmpty() ? null
 							: getConfig().getString("motds." + key + ".version"));
 			motds.add(motd);
