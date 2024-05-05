@@ -25,6 +25,7 @@ import me.devtec.shared.Ref;
 import me.devtec.shared.annotations.Nonnull;
 import me.devtec.shared.dataholder.cache.ConcurrentSet;
 import me.devtec.theapi.bukkit.BukkitLoader;
+import me.devtec.theapi.bukkit.nms.utils.TeamUtils;
 import me.devtec.theapi.bukkit.packetlistener.ChannelContainer;
 import me.devtec.theapi.bukkit.packetlistener.PacketContainer;
 import me.devtec.theapi.bukkit.packetlistener.PacketListener;
@@ -45,14 +46,6 @@ public class NametagManagerAPI {
 
 	protected volatile Map<Integer, List<NametagPlayer>> watchingEntityMove = new ConcurrentHashMap<>();
 	private TeamManager teamManager = new DefaultTeamManager();
-	// Reflections
-	private static Field nametagVisibility;
-	static {
-		if (Ref.isNewerThan(16))
-			nametagVisibility = Ref.field(Ref.nms("network.protocol.game", "PacketPlayOutScoreboardTeam$b"), "d");
-		else if (Ref.isNewerThan(7))
-			nametagVisibility = Ref.field(Ref.nms("network.protocol.game", "PacketPlayOutScoreboardTeam"), "e");
-	}
 
 	private NametagManagerAPI() {
 
@@ -128,27 +121,121 @@ public class NametagManagerAPI {
 			break;
 		}
 		teamManager.reload();
+		Class<?> entityTypes, outEntity, outVelocity, outEntityLook, outMount, outMetadata, outDestroy, clientBundle, outTeleport, inVehicleMove, outScoreboardTeam, outSpawnEntity,
+				clientPlayerInfoUpdate, clientPlayerInfoRemove, entityPose, outBed, outAnimation;
+		// move
+		Field entityId;
+		// mount
+		Field idField;
+		Field mobsField;
+		Field isLeashed;
+		// destroy
+		Field integersField;
+		// teleport
+		Field entityIdField;
+		Field optionalField;
+		Field uuidField;
+		Field entityTypeField;
+		Field listBField;
+		Field clientPlayerInfoLegacyAction;
+		Field listUuidsField;
+		Field listUuidsFieldUpdate;
+		Field iterableField;
+		Field metaEntityId;
+		Field velocityEntityId;
+		Field metaData;
+		Field playerInfoUuidField;
+		Field valueField;
+		Field animationEntityId, animationId;
+		if (BukkitLoader.NO_OBFUSCATED_NMS_MODE) {
+			entityTypes = Ref.nms("world.entity", "EntityType");
+			outEntity = Ref.nms("network.protocol.game", "ClientboundMoveEntityPacket");
+			outVelocity = Ref.nms("network.protocol.game", "ClientboundSetEntityMotionPacket");
+			outEntityLook = Ref.nms("network.protocol.game", "ClientboundMoveEntityPacket$Rot");
+			outMount = Ref.nms("network.protocol.game", "ClientboundSetEntityLinkPacket");
+			outMetadata = Ref.nms("network.protocol.game", "ClientboundSetEntityDataPacket");
+			outDestroy = Ref.nms("network.protocol.game", "ClientboundRemoveEntitiesPacket");
+			clientBundle = Ref.nms("network.protocol.game", "ClientboundBundlePacket");
+			outTeleport = Ref.nms("network.protocol.game", "ClientboundTeleportEntityPacket");
+			inVehicleMove = Ref.nms("network.protocol.game", "ServerboundMoveVehiclePacket");
+			outScoreboardTeam = Ref.nms("network.protocol.game", "ClientboundSetPlayerTeamPacket");
+			outSpawnEntity = Ref.nms("network.protocol.game", "ClientboundAddEntityPacket");
+			clientPlayerInfoUpdate = Ref.nms("network.protocol.game", "ClientboundPlayerInfoUpdatePacket");
+			clientPlayerInfoRemove = Ref.nms("network.protocol.game", "ClientboundPlayerInfoRemovePacket");
+			entityPose = Ref.nms("world.entity", "Pose");
+			outBed = null;
+			outAnimation = null;
+			// Init fields
+			entityId = Ref.field(outEntity, "entityId");
+			idField = Ref.field(outMount, "sourceId");
+			mobsField = Ref.field(outMount, "destId");
+			isLeashed = null;
+			integersField = Ref.field(outDestroy, "entityIds");
+			entityIdField = Ref.field(outTeleport, int.class);
+			optionalField = Ref.field(outScoreboardTeam, Optional.class);
+			uuidField = Ref.field(outSpawnEntity, UUID.class);
+			entityTypeField = Ref.field(outSpawnEntity, entityTypes);
+			listBField = Ref.field(clientPlayerInfoUpdate, List.class);
+			clientPlayerInfoLegacyAction = null;
+			listUuidsField = Ref.field(clientPlayerInfoRemove, List.class);
+			listUuidsFieldUpdate = Ref.field(clientPlayerInfoUpdate, List.class);
+			iterableField = Ref.field(clientBundle, Iterable.class);
+			metaEntityId = Ref.field(outMetadata, int.class);
+			velocityEntityId = Ref.field(outVelocity, int.class);
+			metaData = Ref.field(outMetadata, List.class);
+			playerInfoUuidField = Ref.field(Ref.nms("network.protocol.game", "ClientboundPlayerInfoUpdatePacket$Entry"), UUID.class);
+			valueField = Ref.field(Ref.nms("network.syncher", "SynchedEntityData$DataValue"), "value");
+			animationEntityId = null;
+			animationId = null;
+		} else {
+			entityTypes = Ref.nms("world.entity", "EntityTypes");
+			outEntity = Ref.nms("network.protocol.game", "PacketPlayOutEntity");
+			outVelocity = Ref.nms("network.protocol.game", "PacketPlayOutEntityVelocity");
+			outEntityLook = Ref.nms("network.protocol.game", "PacketPlayOutEntity$PacketPlayOutEntityLook");
+			outMount = Ref.nms("network.protocol.game", "PacketPlayOutMount") == null ? Ref.nms("network.protocol.game", "PacketPlayOutAttachEntity")
+					: Ref.nms("network.protocol.game", "PacketPlayOutMount");
+			outMetadata = Ref.nms("network.protocol.game", "PacketPlayOutEntityMetadata");
+			outDestroy = Ref.nms("network.protocol.game", "PacketPlayOutEntityDestroy");
+			clientBundle = Ref.nms("network.protocol.game", "ClientboundBundlePacket");
+			outTeleport = Ref.nms("network.protocol.game", "PacketPlayOutEntityTeleport");
+			inVehicleMove = Ref.nms("network.protocol.game", "PacketPlayInVehicleMove");
+			outScoreboardTeam = Ref.nms("network.protocol.game", "PacketPlayOutScoreboardTeam");
+			outSpawnEntity = Ref.nms("network.protocol.game", "PacketPlayOutNamedEntitySpawn") == null ? Ref.nms("network.protocol.game", "PacketPlayOutSpawnEntity")
+					: Ref.nms("network.protocol.game", "PacketPlayOutNamedEntitySpawn");
+			clientPlayerInfoUpdate = Ref.isNewerThan(19) || Ref.serverVersionInt() == 19 && Ref.serverVersionRelease() >= 2 ? Ref.nms("network.protocol.game", "ClientboundPlayerInfoUpdatePacket")
+					: Ref.nms("network.protocol.game", "PacketPlayOutPlayerInfo");
+			clientPlayerInfoRemove = Ref.nms("network.protocol.game", "ClientboundPlayerInfoRemovePacket");
+			entityPose = Ref.nms("world.entity", "EntityPose");
+			outBed = Ref.nms("", "PacketPlayOutBed");
+			outAnimation = Ref.nms("network.protocol.game", "ClientboundAnimatePacket") == null ? Ref.nms("network.protocol.game", "PacketPlayOutAnimation")
+					: Ref.nms("network.protocol.game", "ClientboundAnimatePacket");
+			// Init fields
+			entityId = Ref.field(outEntity, "a");
+			idField = Ref.isOlderThan(12) ? Ref.field(outMount, "c") : Ref.field(outMount, int.class);
+			mobsField = Ref.field(outMount, int[].class) == null ? Ref.field(outMount, "b") : Ref.field(outMount, int[].class);
+			isLeashed = Ref.field(outMount, "a");
+			integersField = Ref.field(outDestroy, "a");
+			entityIdField = Ref.field(outTeleport, int.class);
+			optionalField = Ref.field(outScoreboardTeam, Optional.class);
+			uuidField = Ref.field(outSpawnEntity, UUID.class);
+			entityTypeField = Ref.field(outSpawnEntity, entityTypes);
+			listBField = Ref.field(clientPlayerInfoUpdate, List.class);
+			clientPlayerInfoLegacyAction = Ref.field(clientPlayerInfoUpdate, "a");
+			listUuidsField = Ref.field(clientPlayerInfoRemove, List.class);
+			listUuidsFieldUpdate = Ref.field(clientPlayerInfoUpdate, List.class);
+			iterableField = Ref.field(clientBundle, Iterable.class);
+			metaEntityId = Ref.field(outMetadata, int.class);
+			velocityEntityId = Ref.field(outVelocity, int.class);
+			metaData = Ref.field(outMetadata, List.class);
+			playerInfoUuidField = Ref.isNewerThan(19) || Ref.serverVersionInt() == 19 && Ref.serverVersionRelease() >= 2
+					? Ref.field(Ref.nms("network.protocol.game", "ClientboundPlayerInfoUpdatePacket$b"), UUID.class)
+					: Ref.field(Ref.nms("network.protocol.game", "PacketPlayOutPlayerInfo$PlayerInfoData"), Ref.getClass("com.mojang.authlib.GameProfile"));
+			valueField = Ref.isNewerThan(19) || Ref.serverVersionInt() == 19 && Ref.serverVersionRelease() >= 2 ? Ref.field(Ref.nms("network.syncher", "DataWatcher$b"), "c")
+					: Ref.field(Ref.isOlderThan(12) ? Ref.nms("network.syncher", "DataWatcher$WatchableObject") : Ref.nms("network.syncher", "DataWatcher$Item"), Ref.isOlderThan(12) ? "c" : "b");
+			animationId = Ref.field(outAnimation, "b");
+			animationEntityId = Ref.field(outAnimation, "a");
+		}
 
-		Class<?> entityTypes = Ref.nms("world.entity", "EntityTypes");
-		Class<?> outEntity = Ref.nms("network.protocol.game", "PacketPlayOutEntity");
-		Class<?> outVelocity = Ref.nms("network.protocol.game", "PacketPlayOutEntityVelocity");
-		Class<?> outEntityLook = Ref.nms("network.protocol.game", "PacketPlayOutEntity$PacketPlayOutEntityLook");
-		Class<?> outMount = Ref.nms("network.protocol.game", "PacketPlayOutMount") == null ? Ref.nms("network.protocol.game", "PacketPlayOutAttachEntity")
-				: Ref.nms("network.protocol.game", "PacketPlayOutMount");
-		Class<?> outMetadata = Ref.nms("network.protocol.game", "PacketPlayOutEntityMetadata");
-		Class<?> outDestroy = Ref.nms("network.protocol.game", "PacketPlayOutEntityDestroy");
-		Class<?> clientBundle = Ref.nms("network.protocol.game", "ClientboundBundlePacket");
-		Class<?> outTeleport = Ref.nms("network.protocol.game", "PacketPlayOutEntityTeleport");
-		Class<?> inVehicleMove = Ref.nms("network.protocol.game", "PacketPlayInVehicleMove");
-		Class<?> outScoreboardTeam = Ref.nms("network.protocol.game", "PacketPlayOutScoreboardTeam");
-		Class<?> outSpawnEntity = Ref.nms("network.protocol.game", "PacketPlayOutNamedEntitySpawn") == null ? Ref.nms("network.protocol.game", "PacketPlayOutSpawnEntity")
-				: Ref.nms("network.protocol.game", "PacketPlayOutNamedEntitySpawn");
-		Class<?> clientPlayerInfoUpdate = Ref.isNewerThan(19) || Ref.serverVersionInt() == 19 && Ref.serverVersionRelease() >= 2 ? Ref.nms("network.protocol.game", "ClientboundPlayerInfoUpdatePacket")
-				: Ref.nms("network.protocol.game", "PacketPlayOutPlayerInfo");
-		Class<?> clientPlayerInfoRemove = Ref.nms("network.protocol.game", "ClientboundPlayerInfoRemovePacket");
-		Class<?> entityPose = Ref.nms("world.entity", "EntityPose");
-		Class<?> outBed = Ref.nms("", "PacketPlayOutBed");
-		Class<?> outAnimation = Ref.nms("", "PacketPlayOutAnimation");
 		Field bedId = Ref.field(outBed, int.class);
 		Field[] xyz = new Field[3];
 		if (Ref.isOlderThan(12)) {
@@ -192,39 +279,13 @@ public class NametagManagerAPI {
 						break;
 					}
 		listener = new PacketListener() {
-			// move
-			Field entityId = Ref.field(outEntity, "a");
-			// mount
-			Field idField = Ref.isOlderThan(12) ? Ref.field(outMount, "c") : Ref.field(outMount, int.class);
-			Field mobsField = Ref.field(outMount, int[].class) == null ? Ref.field(outMount, "b") : Ref.field(outMount, int[].class);
-			Field isLeashed = Ref.field(outMount, "a");
-			// destroy
-			Field integersField = Ref.field(outDestroy, "a");
-			// teleport
-			Field entityIdField = Ref.field(outTeleport, int.class);
 			Field xField = xyz[0];
 			Field yField = xyz[1];
 			Field zField = xyz[2];
 			Field movexField = mxyz[0];
 			Field moveyField = mxyz[1];
 			Field movezField = mxyz[2];
-			Field optionalField = Ref.field(outScoreboardTeam, Optional.class);
-			Field uuidField = Ref.field(outSpawnEntity, UUID.class);
-			Field entityTypeField = Ref.field(outSpawnEntity, entityTypes);
-			Field listBField = Ref.field(clientPlayerInfoUpdate, List.class);
-			Field clientPlayerInfoLegacyAction = Ref.field(clientPlayerInfoUpdate, "a");
-			Field listUuidsField = Ref.field(clientPlayerInfoRemove, List.class);
-			Field listUuidsFieldUpdate = Ref.field(clientPlayerInfoUpdate, List.class);
-			Field iterableField = Ref.field(clientBundle, Iterable.class);
 			Object entityTypePlayer = findEntityType();
-			Field metaEntityId = Ref.field(outMetadata, int.class);
-			Field velocityEntityId = Ref.field(outVelocity, int.class);
-			Field metaData = Ref.field(outMetadata, List.class);
-			Field playerInfoUuidField = Ref.isNewerThan(19) || Ref.serverVersionInt() == 19 && Ref.serverVersionRelease() >= 2
-					? Ref.field(Ref.nms("network.protocol.game", "ClientboundPlayerInfoUpdatePacket$b"), UUID.class)
-					: Ref.field(Ref.nms("network.protocol.game", "PacketPlayOutPlayerInfo$PlayerInfoData"), Ref.getClass("com.mojang.authlib.GameProfile"));
-			Field valueField = Ref.isNewerThan(19) || Ref.serverVersionInt() == 19 && Ref.serverVersionRelease() >= 2 ? Ref.field(Ref.nms("network.syncher", "DataWatcher$b"), "c")
-					: Ref.field(Ref.isOlderThan(12) ? Ref.nms("network.syncher", "DataWatcher$WatchableObject") : Ref.nms("network.syncher", "DataWatcher$Item"), Ref.isOlderThan(12) ? "c" : "b");
 
 			@Override
 			public void playOut(String name, PacketContainer packetContainer, ChannelContainer channel) {
@@ -269,7 +330,7 @@ public class NametagManagerAPI {
 			}
 
 			private Object findEntityType() {
-				Class<?> nmsHuman = Ref.nms("world.entity.player", "EntityHuman");
+				Class<?> nmsHuman = Ref.nms("world.entity.player", BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "Player" : "EntityHuman");
 				for (Field field : Ref.getAllFields(entityTypes))
 					try {
 						if (field.getType().equals(entityTypes) && field.getGenericType() instanceof ParameterizedType
@@ -440,8 +501,8 @@ public class NametagManagerAPI {
 					return;
 				}
 				if (outBed != null && packet.getClass().isAssignableFrom(outAnimation)) {
-					if ((int) Ref.get(packet, "b") == 2) {
-						NametagPlayer player = lookupById((int) Ref.get(packet, "a"));
+					if ((int) Ref.get(packet, animationId) == 2) {
+						NametagPlayer player = lookupById((int) Ref.get(packet, animationEntityId));
 						if (player != null) {
 							player.getNametag().setPosWithoutUpdate(player.getPlayer().getLocation());
 							player.getNametag().updateHeight(false, false, false, false);
@@ -548,13 +609,13 @@ public class NametagManagerAPI {
 							player.getNametag().shouldTeleport((double) Ref.get(packet, xField), (double) Ref.get(packet, yField), (double) Ref.get(packet, zField));
 					return;
 				}
-				if (packet.getClass().isAssignableFrom(outScoreboardTeam) && nametagVisibility != null)
+				if (packet.getClass().isAssignableFrom(outScoreboardTeam) && TeamUtils.nametagVisibility != null)
 					if (Ref.isNewerThan(16)) {
 						Optional<?> optional = (Optional<?>) Ref.get(packet, optionalField);
 						if (optional.isPresent())
-							Ref.set(optional.get(), nametagVisibility, "never");
+							Ref.set(optional.get(), TeamUtils.nametagVisibility, "never");
 					} else
-						Ref.set(packet, nametagVisibility, "never");
+						Ref.set(packet, TeamUtils.nametagVisibility, "never");
 			}
 		};
 		listener.register();

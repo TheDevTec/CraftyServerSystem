@@ -14,8 +14,10 @@ import me.devtec.craftyserversystem.utils.tablist.nametag.hologram.NametagHologr
 import me.devtec.shared.annotations.Comment;
 import me.devtec.shared.annotations.Nonnull;
 import me.devtec.shared.annotations.Nullable;
+import me.devtec.shared.components.Component;
 import me.devtec.shared.dataholder.cache.ConcurrentSet;
 import me.devtec.theapi.bukkit.BukkitLoader;
+import me.devtec.theapi.bukkit.nms.utils.TeamUtils;
 
 public class NametagPlayer {
 	private static final AtomicInteger id = new AtomicInteger(0);
@@ -64,7 +66,7 @@ public class NametagPlayer {
 	}
 
 	public NametagPlayer afterJoin() {
-		BukkitLoader.getPacketHandler().send(getPlayer(), NametagHologram.createTeamPacket(0, name, teamName));
+		BukkitLoader.getPacketHandler().send(getPlayer(), TeamUtils.createTeamPacket(0, TeamUtils.white, Component.EMPTY_COMPONENT, Component.EMPTY_COMPONENT, name, teamName));
 		return this;
 	}
 
@@ -81,16 +83,16 @@ public class NametagPlayer {
 			targets.add(player.getPlayer());
 
 		if (NametagManagerAPI.get().getPlayerCountInTeam(teamName) > 1)
-			BukkitLoader.getPacketHandler().send(targets, NametagHologram.createTeamPacket(4, name, teamName));
+			BukkitLoader.getPacketHandler().send(targets, TeamUtils.createTeamPacket(4, TeamUtils.white, Component.EMPTY_COMPONENT, Component.EMPTY_COMPONENT, name, teamName));
 		else
-			BukkitLoader.getPacketHandler().send(targets, NametagHologram.createTeamPacket(1, name, teamName));
-		BukkitLoader.getPacketHandler().send(targets, NametagHologram.createTeamPacket(0, name, newTeamName));
+			BukkitLoader.getPacketHandler().send(targets, TeamUtils.createTeamPacket(1, TeamUtils.white, Component.EMPTY_COMPONENT, Component.EMPTY_COMPONENT, name, teamName));
+		BukkitLoader.getPacketHandler().send(targets, TeamUtils.createTeamPacket(0, TeamUtils.white, Component.EMPTY_COMPONENT, Component.EMPTY_COMPONENT, name, newTeamName));
 
 		if (NametagManagerAPI.get().getPlayerCountInTeam(teamName) > 1)
-			BukkitLoader.getPacketHandler().send(getPlayer(), NametagHologram.createTeamPacket(4, name, teamName));
+			BukkitLoader.getPacketHandler().send(getPlayer(), TeamUtils.createTeamPacket(4, TeamUtils.white, Component.EMPTY_COMPONENT, Component.EMPTY_COMPONENT, name, teamName));
 		else
-			BukkitLoader.getPacketHandler().send(getPlayer(), NametagHologram.createTeamPacket(1, name, teamName));
-		BukkitLoader.getPacketHandler().send(getPlayer(), NametagHologram.createTeamPacket(0, name, newTeamName));
+			BukkitLoader.getPacketHandler().send(getPlayer(), TeamUtils.createTeamPacket(1, TeamUtils.white, Component.EMPTY_COMPONENT, Component.EMPTY_COMPONENT, name, teamName));
+		BukkitLoader.getPacketHandler().send(getPlayer(), TeamUtils.createTeamPacket(0, TeamUtils.white, Component.EMPTY_COMPONENT, Component.EMPTY_COMPONENT, name, newTeamName));
 		teamName = newTeamName;
 	}
 
@@ -110,15 +112,15 @@ public class NametagPlayer {
 
 	public void addTabSorting(@Nonnull NametagPlayer player) {
 		if (withProfile.add(player))
-			BukkitLoader.getPacketHandler().send(player.getPlayer(), NametagHologram.createTeamPacket(0, name, teamName));
+			BukkitLoader.getPacketHandler().send(player.getPlayer(), TeamUtils.createTeamPacket(0, TeamUtils.white, Component.EMPTY_COMPONENT, Component.EMPTY_COMPONENT, name, teamName));
 	}
 
 	public void removeTabSorting(@Nonnull NametagPlayer player) {
 		if (withProfile.remove(player))
 			if (NametagManagerAPI.get().getPlayerCountInTeam(teamName) > 1)
-				BukkitLoader.getPacketHandler().send(player.getPlayer(), NametagHologram.createTeamPacket(4, name, teamName));
+				BukkitLoader.getPacketHandler().send(player.getPlayer(), TeamUtils.createTeamPacket(4, TeamUtils.white, Component.EMPTY_COMPONENT, Component.EMPTY_COMPONENT, name, teamName));
 			else
-				BukkitLoader.getPacketHandler().send(player.getPlayer(), NametagHologram.createTeamPacket(1, name, teamName));
+				BukkitLoader.getPacketHandler().send(player.getPlayer(), TeamUtils.createTeamPacket(1, TeamUtils.white, Component.EMPTY_COMPONENT, Component.EMPTY_COMPONENT, name, teamName));
 	}
 
 	@Nonnull
@@ -142,8 +144,8 @@ public class NametagPlayer {
 	@Comment(comment = "Internal code - Called only when player quit server in the PlayerQuitEvent event")
 	public void onQuit() {
 		for (NametagPlayer whoSee : getWhoSeeTabSorting())
-			BukkitLoader.getPacketHandler().send(getPlayer(), NametagHologram.createTeamPacket(1, whoSee.name, whoSee.teamName));
-		BukkitLoader.getPacketHandler().send(getPlayer(), NametagHologram.createTeamPacket(1, name, teamName));
+			BukkitLoader.getPacketHandler().send(getPlayer(), TeamUtils.createTeamPacket(1, TeamUtils.white, Component.EMPTY_COMPONENT, Component.EMPTY_COMPONENT, whoSee.name, whoSee.teamName));
+		BukkitLoader.getPacketHandler().send(getPlayer(), TeamUtils.createTeamPacket(1, TeamUtils.white, Component.EMPTY_COMPONENT, Component.EMPTY_COMPONENT, name, teamName));
 		if (getPlayer().getVehicle() != null)
 			NametagManagerAPI.get().watchingEntityMove.remove(getPlayer().getVehicle().getEntityId());
 		synchronized (NametagManagerAPI.get().getPlayers()) {

@@ -19,7 +19,8 @@ public class Hologram implements HologramHolder {
 			name = findDataWatcherObject(Ref.nms("world.entity", "Entity"), String.class);
 	}
 	static Object showName = Ref.isOlderThan(12) ? 3 : findDataWatcherObject(Ref.nms("world.entity", "Entity"), Boolean.class);
-	static Object properties = Ref.isOlderThan(12) ? 10 : findDataWatcherObject(Ref.nms("world.entity.decoration", "EntityArmorStand"), Byte.class);
+	static Object properties = Ref.isOlderThan(12) ? 10
+			: findDataWatcherObject(Ref.nms("world.entity.decoration", BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "ArmorStand" : "EntityArmorStand"), Byte.class);
 
 	protected int id;
 	protected UUID uuid;
@@ -40,7 +41,8 @@ public class Hologram implements HologramHolder {
 	private static final Object findDataWatcherObject(Class<?> inside, Class<?> holder) {
 		for (Field field : Ref.getAllFields(inside))
 			try {
-				if (field.getType().equals(Ref.nms("network.syncher", "DataWatcherObject")) && field.getGenericType() instanceof ParameterizedType) {
+				if (field.getType().equals(Ref.nms("network.syncher", BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "EntityDataAccessor" : "DataWatcherObject"))
+						&& field.getGenericType() instanceof ParameterizedType) {
 					if (((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0] instanceof ParameterizedType)
 						if (((ParameterizedType) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0]).getRawType().equals(holder))
 							return Ref.get(null, field);

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 
 import org.bukkit.entity.Player;
@@ -22,6 +23,7 @@ import me.devtec.shared.utility.MathUtils;
 import me.devtec.theapi.bukkit.BukkitLoader;
 import me.devtec.theapi.bukkit.nms.NmsProvider.Action;
 import me.devtec.theapi.bukkit.nms.NmsProvider.DisplayType;
+import me.devtec.theapi.bukkit.nms.utils.TeamUtils;
 
 public class UserTablistData extends TablistData {
 	private static final Object emptyTabPacket = BukkitLoader.getNmsProvider().packetPlayerListHeaderFooter(Component.EMPTY_COMPONENT, Component.EMPTY_COMPONENT);
@@ -42,7 +44,7 @@ public class UserTablistData extends TablistData {
 		previous = previousData.previous;
 		previousHeader = previousData.previousHeader;
 		previousFooter = previousData.previousFooter;
-		previousName=previousData.previousName;
+		previousName = previousData.previousName;
 		yellowNumber.putAll(previousData.yellowNumber);
 	}
 
@@ -69,7 +71,7 @@ public class UserTablistData extends TablistData {
 		}
 		String header = headerContainer.toString();
 		String footer = footerContainer.toString();
-		if (!(header.equals(previousHeader) && footer.equals(previousFooter))) {
+		if ((!header.equals(previousHeader) || !footer.equals(previousFooter))) {
 			previousHeader = header;
 			previousFooter = footer;
 			Object tabPacket = BukkitLoader.getNmsProvider().packetPlayerListHeaderFooter(ComponentAPI.fromString(header), ComponentAPI.fromString(footer));
@@ -77,7 +79,7 @@ public class UserTablistData extends TablistData {
 		}
 		String playerlistName = placeholders.apply(getTabNameFormat().replace("{player}", player.getName()).replace("{prefix}", getTabPrefix()).replace("{suffix}", getTabSuffix()));
 		if (!playerlistName.equals(previousName)) {
-			previousName=playerlistName;
+			previousName = playerlistName;
 			player.setPlayerListName(playerlistName);
 		}
 		NametagPlayer nametag = NametagManagerAPI.get().getPlayer(player);
@@ -94,7 +96,7 @@ public class UserTablistData extends TablistData {
 			// create
 			BukkitLoader.getPacketHandler().send(player, createObjectivePacket(0, "css_yn", player.getName(), getYellowNumberDisplayMode() == YellowNumberDisplayMode.INTEGER));
 			Object packet = BukkitLoader.getNmsProvider().packetScoreboardDisplayObjective(0, null);
-			Ref.set(packet, "b", "css_yn");
+			Ref.set(packet, BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "objectiveName" : "b", "css_yn");
 			BukkitLoader.getPacketHandler().send(player, packet);
 		}
 		if (getYellowNumberDisplayMode() != YellowNumberDisplayMode.NONE) {
@@ -121,24 +123,7 @@ public class UserTablistData extends TablistData {
 	}
 
 	private Object createObjectivePacket(int mode, String sbname, String displayName, boolean displayAsInteger) {
-		Object packet = BukkitLoader.getNmsProvider().packetScoreboardObjective();
-		if (Ref.isNewerThan(16)) {
-			Ref.set(packet, "d", sbname);
-			Ref.set(packet, "e", BukkitLoader.getNmsProvider().toIChatBaseComponent(ComponentAPI.fromString(displayName)));
-			Ref.set(packet, "f", BukkitLoader.getNmsProvider().getEnumScoreboardHealthDisplay(displayAsInteger ? DisplayType.INTEGER : DisplayType.HEARTS));
-			if (Ref.isNewerThan(20) || Ref.serverVersionInt() == 20 && Ref.serverVersionRelease() >= 3)
-				Ref.set(packet, "g", null);
-			Ref.set(packet, Ref.isNewerThan(20) || Ref.serverVersionInt() == 20 && Ref.serverVersionRelease() >= 3 ? "h" : "g", mode);
-		} else {
-			Ref.set(packet, "a", sbname);
-			Ref.set(packet, "b", Ref.isNewerThan(12) ? BukkitLoader.getNmsProvider().toIChatBaseComponent(ComponentAPI.fromString(displayName)) : displayName);
-			if (Ref.isNewerThan(7)) {
-				Ref.set(packet, "c", BukkitLoader.getNmsProvider().getEnumScoreboardHealthDisplay(displayAsInteger ? DisplayType.INTEGER : DisplayType.HEARTS));
-				Ref.set(packet, "d", mode);
-			} else
-				Ref.set(packet, "c", mode);
-		}
-		return packet;
+		return TeamUtils.createObjectivePacket(mode, sbname, Component.fromString(displayName), Optional.ofNullable(null), displayAsInteger ? DisplayType.INTEGER : DisplayType.HEARTS);
 	}
 
 	private Function<Player, String> generateFunction(String format, PlaceholdersExecutor placeholders) {

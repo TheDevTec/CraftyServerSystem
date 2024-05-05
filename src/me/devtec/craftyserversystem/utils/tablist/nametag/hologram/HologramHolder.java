@@ -7,19 +7,21 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import me.devtec.shared.Ref;
 import me.devtec.shared.utility.MathUtils;
+import me.devtec.theapi.bukkit.BukkitLoader;
 
 public interface HologramHolder {
 
-	static AtomicInteger integer = (AtomicInteger) Ref.getStatic(Ref.field(Ref.nms("world.entity", "Entity"), AtomicInteger.class));
-	static Field entityCount = Ref.field(Ref.nms("world.entity", "Entity"), "entityCount");
+	AtomicInteger integer = (AtomicInteger) Ref.getStatic(Ref.field(Ref.nms("world.entity", "Entity"), AtomicInteger.class));
+	Field entityCount = Ref.field(Ref.nms("world.entity", "Entity"), "entityCount");
 
-	static Class<?> metadataClass = Ref.nms("network.protocol.game", "PacketPlayOutEntityMetadata");
-	static Constructor<?> metadataConstructor = Ref.constructor(metadataClass, int.class, List.class);
-	static Class<?> entityTeleport = Ref.nms("network.protocol.game", "PacketPlayOutEntityTeleport");
-	static Field entityId = Ref.field(entityTeleport, "a"), posX = Ref.field(entityTeleport, "b"), posY = Ref.field(entityTeleport, "c"), posZ = Ref.field(entityTeleport, "d"),
-			onGround = Ref.field(entityTeleport, "g");
-	static Field metadataId = Ref.isNewerThan(19) || Ref.serverVersionInt() == 19 && Ref.serverVersionRelease() >= 2 ? null : Ref.field(metadataClass, int.class);
-	static Field metadataList = Ref.field(metadataClass, List.class);
+	Class<?> metadataClass = Ref.nms("network.protocol.game", BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "ClientboundSetEntityDataPacket" : "PacketPlayOutEntityMetadata");
+	Constructor<?> metadataConstructor = Ref.constructor(metadataClass, int.class, List.class);
+	Class<?> entityTeleport = Ref.nms("network.protocol.game", BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "ClientboundTeleportEntityPacket" : "PacketPlayOutEntityTeleport");
+	Field entityId = Ref.field(entityTeleport, BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "id" : "a"), posX = Ref.field(entityTeleport, BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "x" : "b"),
+			posY = Ref.field(entityTeleport, BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "y" : "c"), posZ = Ref.field(entityTeleport, BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "z" : "d"),
+			onGround = Ref.field(entityTeleport, BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "onGround" : "g");
+	Field metadataId = Ref.isNewerThan(19) || Ref.serverVersionInt() == 19 && Ref.serverVersionRelease() >= 2 ? null : Ref.field(metadataClass, int.class);
+	Field metadataList = Ref.field(metadataClass, List.class);
 
 	static Object packetMetadata(int id, List<?> list) {
 		try {
@@ -56,7 +58,7 @@ public interface HologramHolder {
 		}
 	}
 
-	public static int increaseAndGetId() {
+	static int increaseAndGetId() {
 		if (integer != null)
 			return integer.incrementAndGet();
 		int count = (int) Ref.getStatic(entityCount);

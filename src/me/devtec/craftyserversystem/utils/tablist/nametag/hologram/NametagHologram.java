@@ -16,22 +16,19 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 
-import com.google.common.collect.ImmutableList;
-
 import me.devtec.craftyserversystem.utils.tablist.nametag.NametagPlayer;
 import me.devtec.shared.Ref;
-import me.devtec.shared.components.Component;
 import me.devtec.shared.components.ComponentAPI;
 import me.devtec.shared.dataholder.cache.ConcurrentSet;
 import me.devtec.shared.utility.MathUtils;
 import me.devtec.theapi.bukkit.BukkitLoader;
-import me.devtec.theapi.bukkit.nms.utils.TeamUtils;
 
 public class NametagHologram extends Hologram {
 
 	private static final Object entityTypeArmorStand = findEntityType();
-	private static Constructor<?> spawnEntityPacket = Ref.constructor(Ref.nms("network.protocol.game", "PacketPlayOutSpawnEntity"), int.class, UUID.class, double.class, double.class, double.class,
-			float.class, float.class, Ref.nms("world.entity", "EntityTypes"), int.class, Ref.nms("world.phys", "Vec3D"), double.class);
+	private static Constructor<?> spawnEntityPacket = Ref.constructor(Ref.nms("network.protocol.game", BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "ClientboundAddEntityPacket" : "PacketPlayOutSpawnEntity"),
+			int.class, UUID.class, double.class, double.class, double.class, float.class, float.class, Ref.nms("world.entity", BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "EntityType" : "EntityTypes"),
+			int.class, Ref.nms("world.phys", BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "Vec3" : "Vec3D"), double.class);
 	private static byte LEGACY_SPAWN_PACKET;
 	static {
 		if (spawnEntityPacket == null) {
@@ -44,11 +41,13 @@ public class NametagHologram extends Hologram {
 			LEGACY_SPAWN_PACKET = 2;
 		}
 	}
-	private static final Object zero = Ref.isNewerThan(18) ? Ref.getStatic(Ref.nms("world.phys", "Vec3D"), "b") : Ref.getStatic(Ref.nms("world.phys", "Vec3D"), "a");
+	private static final Object zero = Ref.isNewerThan(18)
+			? BukkitLoader.NO_OBFUSCATED_NMS_MODE ? Ref.getStatic(Ref.nms("world.phys", "Vec3"), "ZERO") : Ref.getStatic(Ref.nms("world.phys", "Vec3D"), "b")
+			: Ref.getStatic(Ref.nms("world.phys", "Vec3D"), "a");
 
 	private static Object findEntityType() {
-		Class<?> entityTypes = Ref.nms("world.entity", "EntityTypes");
-		Class<?> nmsHuman = Ref.nms("world.entity.decoration", "EntityArmorStand");
+		Class<?> entityTypes = Ref.nms("world.entity", BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "EntityType" : "EntityTypes");
+		Class<?> nmsHuman = Ref.nms("world.entity.decoration", BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "ArmorStand" : "EntityArmorStand");
 		for (Field field : Ref.getAllFields(entityTypes))
 			try {
 				if (field.getType().equals(entityTypes) && field.getGenericType() instanceof ParameterizedType
@@ -129,8 +128,10 @@ public class NametagHologram extends Hologram {
 		despawnPacket = BukkitLoader.getNmsProvider().packetEntityDestroy(id);
 	}
 
-	private static Constructor<?> dataWatcherItem = Ref.constructor(Ref.nms("network.syncher", "DataWatcher$Item"), Ref.nms("network.syncher", "DataWatcherObject"), Object.class);
-	private static Method dataWatcherMakeInstance = Ref.method(Ref.nms("network.syncher", "DataWatcher$Item"), "e");
+	private static Constructor<?> dataWatcherItem = Ref.constructor(Ref.nms("network.syncher", BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "SynchedEntityData$DataValue" : "DataWatcher$Item"),
+			Ref.nms("network.syncher", BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "EntityDataAccessor" : "DataWatcherObject"), Object.class);
+	private static Method dataWatcherMakeInstance = Ref.method(Ref.nms("network.syncher", BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "SynchedEntityData$DataValue" : "DataWatcher$Item"),
+			BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "value" : "e");
 	static {
 		if (dataWatcherMakeInstance == null)
 			dataWatcherMakeInstance = Ref.method(Ref.nms("network.syncher", "DataWatcher$Item"), "a");
@@ -362,45 +363,6 @@ public class NametagHologram extends Hologram {
 			super.hide(asPlayer.getPlayer());
 		}
 		whichCanSee.clear();
-	}
-
-	public static Object createTeamPacket(int mode, String holderName, String teamName) {
-		Object packet = BukkitLoader.getNmsProvider().packetScoreboardTeam();
-		Object nameList = ImmutableList.of(holderName);
-		String always = "always";
-		if (Ref.isNewerThan(16)) {
-			Ref.set(packet, "i", teamName);
-			try {
-				Object o = Ref.newUnsafeInstance(TeamUtils.sbTeam);
-				Ref.set(o, "a", BukkitLoader.getNmsProvider().chatBase("{\"text\":\"\"}"));
-				Ref.set(o, "b", BukkitLoader.getNmsProvider().toIChatBaseComponent((Component) null));
-				Ref.set(o, "c", BukkitLoader.getNmsProvider().toIChatBaseComponent((Component) null));
-				Ref.set(o, "d", "never");
-				Ref.set(o, "e", always);
-				Ref.set(o, "f", TeamUtils.white);
-				Ref.set(packet, "k", Optional.of(o));
-			} catch (Exception var10) {
-			}
-			Ref.set(packet, "h", mode);
-			Ref.set(packet, "j", nameList);
-		} else {
-			Ref.set(packet, "a", teamName);
-			Ref.set(packet, "b", Ref.isNewerThan(12) ? BukkitLoader.getNmsProvider().chatBase("{\"text\":\"\"}") : "");
-			Ref.set(packet, "c", Ref.isNewerThan(12) ? BukkitLoader.getNmsProvider().toIChatBaseComponent((Component) null) : "");
-			Ref.set(packet, "d", Ref.isNewerThan(12) ? BukkitLoader.getNmsProvider().toIChatBaseComponent((Component) null) : "");
-			if (Ref.isNewerThan(7)) {
-				Ref.set(packet, "e", "never");
-				Ref.set(packet, "f", Ref.isNewerThan(8) ? always : -1);
-				if (Ref.isNewerThan(8))
-					Ref.set(packet, "g", Ref.isNewerThan(12) ? TeamUtils.white : -1);
-				Ref.set(packet, Ref.isNewerThan(8) ? "i" : "h", mode);
-				Ref.set(packet, Ref.isNewerThan(8) ? "h" : "g", nameList);
-			} else {
-				Ref.set(packet, "f", mode);
-				Ref.set(packet, "e", nameList);
-			}
-		}
-		return packet;
 	}
 
 	public void sneak(boolean sneaking) {
