@@ -14,6 +14,7 @@ public class TpaRequest {
 	private boolean teleportToTarget;
 
 	public TpaRequest(UUID sender, UUID target, long expireAt, boolean teleportToTarget) {
+		this.sender = sender;
 		this.target = target;
 		this.expireAt = expireAt;
 		this.teleportToTarget = teleportToTarget;
