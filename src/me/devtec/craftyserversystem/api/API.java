@@ -14,6 +14,7 @@ import me.devtec.craftyserversystem.Loader;
 import me.devtec.craftyserversystem.commands.CssCommand;
 import me.devtec.craftyserversystem.commands.internal.BalanceTop;
 import me.devtec.craftyserversystem.commands.internal.Vanish;
+import me.devtec.craftyserversystem.commands.internal.bansystem.BanAPI;
 import me.devtec.craftyserversystem.economy.CssEconomy;
 import me.devtec.craftyserversystem.economy.CssEconomyHook;
 import me.devtec.craftyserversystem.economy.EconomyHook;
@@ -267,6 +268,7 @@ public class API {
 	}
 
 	public void shutdown() {
+		BanAPI.shutdown();
 		placeholder.unregister();
 		metrics.shutdown();
 		if (NametagManagerAPI.get().isLoaded())
@@ -287,6 +289,7 @@ public class API {
 
 	public void reload() {
 		// Unload
+		BanAPI.shutdown();
 		if (getSqlConnection() != null)
 			try {
 				getSqlConnection().close();

@@ -90,6 +90,10 @@ public class ConfigurationManager {
 		return new Config(FILES_PATH + "storage/warps.yml");
 	}
 
+	public Config getBansStorage() {
+		return new Config(FILES_PATH + "storage/banlist.yml");
+	}
+
 	public Position getSpawn() {
 		return spawn;
 	}
