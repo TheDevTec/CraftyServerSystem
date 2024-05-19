@@ -22,7 +22,7 @@ public class Kick extends CssCommand {
 
 		CommandStructure<CommandSender> cmd = CommandStructure.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
 			msgUsage(sender, "cmd");
-		}).argument(null, (sender, structure, args) -> {
+		}).permission(getPerm("cmd")).argument(null, (sender, structure, args) -> {
 			String player = args[0];
 			String reason = null;
 			BanAPI.kick(player, sender.getName(), reason);
@@ -36,7 +36,7 @@ public class Kick extends CssCommand {
 			String player = args[0];
 			String reason = StringUtils.buildString(1, args);
 			BanAPI.kick(player, sender.getName(), reason);
-		}, (sender, structure, args) -> Arrays.asList("{reason}")).permission(getPerm("cmd"));
+		}, (sender, structure, args) -> Arrays.asList("{reason}"));
 		// register
 		List<String> cmds = getCommands();
 		if (!cmds.isEmpty())

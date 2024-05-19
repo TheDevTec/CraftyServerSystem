@@ -427,13 +427,12 @@ economy:
   add: "{prefix} Alright, banker! You have successfully added balance of &e${balance} &7to &e{target}&7."
   remove: "{prefix} Alright, banker! You have successfully removed balance of &e${balance} &7from &e{target}&7."
   
+# {page}, {totalPages}, {nextPage}, {previousPage}
 balancetop:
   loading: "{prefix} Wait a second! Those rich guys are hiding lots of their money, we are still counting!"
-  # {page}, {totalPages}
   header: "{prefix} Balance Top {page}/{totalPages}"
   # {position}, {target}, {balance}
   key: "{prefix} &6{position}. &e{target} &7- &e${balance}"
-  # {nextPage}, {previousPage}
   footer: ""
  
 home:
@@ -582,7 +581,17 @@ scoreboardhide:
     true: "{prefix} Scoreboard has been hidden."
     false: "{prefix} Scoreboard has been displayed."
 
-# {user}, {admin}, {reason}, {id}
+# {user}
+unban:
+  success: "{prefix} User &e{user} &7unbanned."
+  failed: "{prefix} User &e{user} &7isn't banned."
+  
+# {user}
+unmute:
+  success: "{prefix} User &e{user} &7unmuted."
+  failed: "{prefix} User &e{user} &7isn't muted."
+
+# {user}, {startDate}, {admin}, {reason}, {id}
 bansystem:
   banned:
     perm: "&8[&c&lBAN&8] &e{admin} &7perm banned &e{user} &7for &f{reason}"
@@ -594,7 +603,46 @@ bansystem:
     temp: "&8[&c&lMUTE&8] &e{admin} &7muted &e{user} &7for &e{expireAfter} &7for &f{reason}"
   warned: "&8[&c&lWARN&8] &e{admin} &7warned &e{user} &7for &f{reason}"
   kicked: "&8[&c&lKICK&8] &e{admin} &7kicked &e{user} &7for &f{reason}"
-  
+
+# {user}, {startDate}, {admin}, {reason}, {id}, {page}, {totalPages}, {nextPage}, {previousPage}
+banlist:
+  header: "{prefix} Banlist of user &e{user}&7 {page}/{totalPages}"
+  # {position}
+  entry:
+    active:
+      ban:
+        perm: "{prefix} &6{position}. &aBan&8&o({startDate}) &7by &e{admin} &7for &f{reason}"
+        # {expireAfter}, {expireDate}
+        temp: "{prefix} &6{position}. &aTemp Ban&8&o({startDate} &7- &8&o{expireDate}) &7by &e{admin} &7for &f{reason}"
+      mute:
+        perm: "{prefix} &6{position}. &aMute&8&o({startDate}) &7by &e{admin} &7for &f{reason}"
+        # {expireAfter}, {expireDate}
+        temp: "{prefix} &6{position}. &aTemp Mute&8&o({startDate} &7- &8&o{expireDate}) &7by &e{admin} &7for &f{reason}"
+      warn: "{prefix} &6{position}. &aWarn&8&o({startDate}) &7by &e{admin} &7for &f{reason}"
+      kick: "{prefix} &6{position}. &aKick&8&o({startDate}) &7by &e{admin} &7for &f{reason}"
+    inactive:
+      ban:
+        perm: "{prefix} &6{position}. &cBan&8&o({startDate}) &7by &e{admin} &7for &f{reason}"
+        # {expireAfter}, {expireDate}
+        temp: "{prefix} &6{position}. &cTemp Ban&8&o({startDate} &7- &8&o{expireDate}) &7by &e{admin} &7for &f{reason}"
+      mute:
+        perm: "{prefix} &6{position}. &cMute&8&o({startDate}) &7by &e{admin} &7for &f{reason}"
+        # {expireAfter}, {expireDate}
+        temp: "{prefix} &6{position}. &cTemp Mute&8&o({startDate} &7- &8&o{expireDate}) &7by &e{admin} &7for &f{reason}"
+      warn: "{prefix} &6{position}. &cWarn&8&o({startDate}) &7by &e{admin} &7for &f{reason}"
+      kick: "{prefix} &6{position}. &cKick&8&o({startDate}) &7by &e{admin} &7for &f{reason}"
+    cancelled:
+      ban:
+        perm: "{prefix} &6{position}. &eBan&8&o({startDate}) &7by &e{admin} &7for &f{reason}"
+        # {expireAfter}, {expireDate}
+        temp: "{prefix} &6{position}. &eTemp Ban&8&o({startDate} &7- &8&o{expireDate}) &7by &e{admin} &7for &f{reason}"
+      mute:
+        perm: "{prefix} &6{position}. &eMute&8&o({startDate}) &7by &e{admin} &7for &f{reason}"
+        # {expireAfter}, {expireDate}
+        temp: "{prefix} &6{position}. &eTemp Mute&8&o({startDate} &7- &8&o{expireDate}) &7by &e{admin} &7for &f{reason}"
+      warn: "{prefix} &6{position}. &eWarn&8&o({startDate}) &7by &e{admin} &7for &f{reason}"
+      kick: "{prefix} &6{position}. &eKick&8&o({startDate}) &7by &e{admin} &7for &f{reason}"
+  footer: ""
 
 # {sender}, {destination}
 back:

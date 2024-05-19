@@ -95,10 +95,19 @@ public class BanAPI {
 				public List<Entry> retrieveHistory(String userName, String userIp, int limit) {
 					List<Entry> history = new ArrayList<>();
 					try {
-						Result result = API.get().getSqlConnection().select(SelectQuery.table("banlist").where("user", userName).or().where("user", userIp).limit(limit));
-						while (result != null) {
-							history.add(Entry.fromQuery(result));
-							result = result.next();
+						if (userName == null || userIp == null) {
+							String onlyOneName = userIp == null ? userName : userIp;
+							Result result = API.get().getSqlConnection().select(SelectQuery.table("banlist").where("user", onlyOneName).limit(limit));
+							while (result != null) {
+								history.add(Entry.fromQuery(result));
+								result = result.next();
+							}
+						} else {
+							Result result = API.get().getSqlConnection().select(SelectQuery.table("banlist").where("user", userName).or().where("user", userIp).limit(limit));
+							while (result != null) {
+								history.add(Entry.fromQuery(result));
+								result = result.next();
+							}
 						}
 					} catch (SQLException e) {
 						e.printStackTrace();
@@ -114,7 +123,7 @@ public class BanAPI {
 				@Override
 				public int generateId() {
 					try {
-						Result result = API.get().getSqlConnection().select(SelectQuery.table("banlist", "id").sortBy("id").sortType(Sorting.UP).limit(1));
+						Result result = API.get().getSqlConnection().select(SelectQuery.table("banlist", "id").sortBy("id").sortType(Sorting.HIGHEST_TO_LOWEST).limit(1));
 						if (result == null)
 							return 0;
 						return ParseUtils.getInt(result.getValue()[0]) + 1;
@@ -128,14 +137,26 @@ public class BanAPI {
 				public List<Entry> retrieveActivePunishments(String userName, String userIp) {
 					List<Entry> history = new ArrayList<>();
 					try {
-						Result result = API.get().getSqlConnection()
-								.select(SelectQuery.table("banlist").where("user", userName).where("cancelled", "0").or().where("user", userIp).where("cancelled", "0"));
-						while (result != null) {
-							Entry entry = Entry.fromQuery(result);
-							if ((entry.getType() == BanType.BAN || entry.getType() == BanType.MUTE)
-									&& (entry.getDuration() == 0 || entry.getStartDate() + entry.getDuration() - System.currentTimeMillis() / 1000 > 0))
-								history.add(entry);
-							result = result.next();
+						if (userName == null || userIp == null) {
+							String onlyOneName = userIp == null ? userName : userIp;
+							Result result = API.get().getSqlConnection().select(SelectQuery.table("banlist").where("user", onlyOneName).where("cancelled", "0"));
+							while (result != null) {
+								Entry entry = Entry.fromQuery(result);
+								if ((entry.getType() == BanType.BAN || entry.getType() == BanType.MUTE)
+										&& (entry.getDuration() == 0 || entry.getStartDate() + entry.getDuration() - System.currentTimeMillis() / 1000 > 0))
+									history.add(entry);
+								result = result.next();
+							}
+						} else {
+							Result result = API.get().getSqlConnection()
+									.select(SelectQuery.table("banlist").where("user", userName).where("cancelled", "0").or().where("user", userIp).where("cancelled", "0"));
+							while (result != null) {
+								Entry entry = Entry.fromQuery(result);
+								if ((entry.getType() == BanType.BAN || entry.getType() == BanType.MUTE)
+										&& (entry.getDuration() == 0 || entry.getStartDate() + entry.getDuration() - System.currentTimeMillis() / 1000 > 0))
+									history.add(entry);
+								result = result.next();
+							}
 						}
 					} catch (SQLException e) {
 						e.printStackTrace();
@@ -183,26 +204,44 @@ public class BanAPI {
 				}
 
 				@Override
-				public List<Entry> retrieveHistory(String user, String userIp, int limit) {
+				public List<Entry> retrieveHistory(String userName, String userIp, int limit) {
 					if (limit == 0) {
 						List<Entry> result = new ArrayList<>();
-						for (Entry key : history) {
-							if (!key.getUser().equals(user) && !key.getUser().equals(userIp))
-								continue;
-							result.add(key);
-						}
+						if (userName == null || userIp == null) {
+							String onlyOneName = userIp == null ? userName : userIp;
+							for (Entry key : history) {
+								if (!key.getUser().equals(onlyOneName))
+									continue;
+								result.add(key);
+							}
+						} else
+							for (Entry key : history) {
+								if (!key.getUser().equals(userName) && !key.getUser().equals(userIp))
+									continue;
+								result.add(key);
+							}
 						return result;
 					}
 					int i = 0;
-					List<Entry> history = new ArrayList<>();
-					for (Entry key : history) {
-						if (!key.getUser().equals(user) && !key.getUser().equals(userIp))
-							continue;
-						if (i++ == limit)
-							break;
-						history.add(key);
-					}
-					return history;
+					List<Entry> result = new ArrayList<>();
+					if (userName == null || userIp == null) {
+						String onlyOneName = userIp == null ? userName : userIp;
+						for (Entry key : history) {
+							if (!key.getUser().equals(onlyOneName))
+								continue;
+							if (i++ == limit)
+								break;
+							result.add(key);
+						}
+					} else
+						for (Entry key : history) {
+							if (!key.getUser().equals(userName) && !key.getUser().equals(userIp))
+								continue;
+							if (i++ == limit)
+								break;
+							result.add(key);
+						}
+					return result;
 				}
 
 				@Override
@@ -218,15 +257,25 @@ public class BanAPI {
 				}
 
 				@Override
-				public List<Entry> retrieveActivePunishments(String user, String userIp) {
+				public List<Entry> retrieveActivePunishments(String userName, String userIp) {
 					List<Entry> result = new ArrayList<>();
-					for (Entry key : history) {
-						long dur;
-						if (!key.getUser().equals(user) && !key.getUser().equals(userIp) || key.isCancelled() || key.getType() != BanType.BAN && key.getType() != BanType.MUTE
-								|| (dur = key.getDuration()) != 0 && key.getStartDate() + dur - System.currentTimeMillis() / 1000 <= 0)
-							continue;
-						result.add(key);
-					}
+					if (userName == null || userIp == null) {
+						String onlyOneName = userIp == null ? userName : userIp;
+						for (Entry key : history) {
+							long dur;
+							if (!key.getUser().equals(onlyOneName) || key.isCancelled() || key.getType() != BanType.BAN && key.getType() != BanType.MUTE
+									|| (dur = key.getDuration()) != 0 && key.getStartDate() + dur - System.currentTimeMillis() / 1000 <= 0)
+								continue;
+							result.add(key);
+						}
+					} else
+						for (Entry key : history) {
+							long dur;
+							if (!key.getUser().equals(userName) && !key.getUser().equals(userIp) || key.isCancelled() || key.getType() != BanType.BAN && key.getType() != BanType.MUTE
+									|| (dur = key.getDuration()) != 0 && key.getStartDate() + dur - System.currentTimeMillis() / 1000 <= 0)
+								continue;
+							result.add(key);
+						}
 					return result;
 				}
 			};
@@ -248,7 +297,7 @@ public class BanAPI {
 		management.saveEntry(entry);
 		PlaceholdersExecutor executor = PlaceholdersExecutor.i().add("user", entry.getUser()).add("reason", entry.getReason() == null ? "Uknown" : entry.getReason())
 				.add("admin", entry.getAdmin() == null ? "Console" : entry.getAdmin()).add("id", entry.getId() + "")
-				.add("startDate", format.format(Date.from(Instant.ofEpochMilli(entry.getStartDate()))));
+				.add("startDate", format.format(Date.from(Instant.ofEpochSecond(entry.getStartDate()))));
 		List<CommandSender> admins = new ArrayList<>();
 		admins.add(Bukkit.getConsoleSender());
 		for (Player player : BukkitLoader.getOnlinePlayers())
@@ -277,7 +326,7 @@ public class BanAPI {
 		management.saveEntry(entry);
 		PlaceholdersExecutor executor = PlaceholdersExecutor.i().add("user", entry.getUser()).add("reason", entry.getReason() == null ? "Uknown" : entry.getReason())
 				.add("admin", entry.getAdmin() == null ? "Console" : entry.getAdmin()).add("id", entry.getId() + "")
-				.add("startDate", format.format(Date.from(Instant.ofEpochMilli(entry.getStartDate())))).add("expireAfter", TimeUtils.timeToString(entry.getDuration()))
+				.add("startDate", format.format(Date.from(Instant.ofEpochSecond(entry.getStartDate())))).add("expireAfter", TimeUtils.timeToString(entry.getDuration()))
 				.add("expireDate", format.format(Date.from(Instant.ofEpochSecond(entry.getStartDate() + time))));
 		List<CommandSender> admins = new ArrayList<>();
 		admins.add(Bukkit.getConsoleSender());
@@ -305,7 +354,7 @@ public class BanAPI {
 		management.saveEntry(entry);
 		PlaceholdersExecutor executor = PlaceholdersExecutor.i().add("user", entry.getUser()).add("reason", entry.getReason() == null ? "Uknown" : entry.getReason())
 				.add("admin", entry.getAdmin() == null ? "Console" : entry.getAdmin()).add("id", entry.getId() + "")
-				.add("startDate", format.format(Date.from(Instant.ofEpochMilli(entry.getStartDate()))));
+				.add("startDate", format.format(Date.from(Instant.ofEpochSecond(entry.getStartDate()))));
 		List<CommandSender> admins = new ArrayList<>();
 		admins.add(Bukkit.getConsoleSender());
 		for (Player player : BukkitLoader.getOnlinePlayers())
@@ -336,7 +385,7 @@ public class BanAPI {
 		management.saveEntry(entry);
 		PlaceholdersExecutor executor = PlaceholdersExecutor.i().add("user", entry.getUser()).add("reason", entry.getReason() == null ? "Uknown" : entry.getReason())
 				.add("admin", entry.getAdmin() == null ? "Console" : entry.getAdmin()).add("id", entry.getId() + "")
-				.add("startDate", format.format(Date.from(Instant.ofEpochMilli(entry.getStartDate())))).add("expireAfter", TimeUtils.timeToString(entry.getDuration()))
+				.add("startDate", format.format(Date.from(Instant.ofEpochSecond(entry.getStartDate())))).add("expireAfter", TimeUtils.timeToString(entry.getDuration()))
 				.add("expireDate", format.format(Date.from(Instant.ofEpochSecond(entry.getStartDate() + time))));
 		List<CommandSender> admins = new ArrayList<>();
 		admins.add(Bukkit.getConsoleSender());
@@ -366,7 +415,7 @@ public class BanAPI {
 		management.saveEntry(entry);
 		PlaceholdersExecutor executor = PlaceholdersExecutor.i().add("user", entry.getUser()).add("reason", entry.getReason() == null ? "Uknown" : entry.getReason())
 				.add("admin", entry.getAdmin() == null ? "Console" : entry.getAdmin()).add("id", entry.getId() + "")
-				.add("startDate", format.format(Date.from(Instant.ofEpochMilli(entry.getStartDate()))));
+				.add("startDate", format.format(Date.from(Instant.ofEpochSecond(entry.getStartDate()))));
 		List<CommandSender> admins = new ArrayList<>();
 		admins.add(Bukkit.getConsoleSender());
 		for (Player player : BukkitLoader.getOnlinePlayers())
@@ -393,7 +442,7 @@ public class BanAPI {
 		management.saveEntry(entry);
 		PlaceholdersExecutor executor = PlaceholdersExecutor.i().add("user", entry.getUser()).add("reason", entry.getReason() == null ? "Uknown" : entry.getReason())
 				.add("admin", entry.getAdmin() == null ? "Console" : entry.getAdmin()).add("id", entry.getId() + "")
-				.add("startDate", format.format(Date.from(Instant.ofEpochMilli(entry.getStartDate()))));
+				.add("startDate", format.format(Date.from(Instant.ofEpochSecond(entry.getStartDate()))));
 		List<CommandSender> admins = new ArrayList<>();
 		admins.add(Bukkit.getConsoleSender());
 		for (Player player : BukkitLoader.getOnlinePlayers())
@@ -548,6 +597,11 @@ public class BanAPI {
 
 	public static SimpleDateFormat getTimeFormat() {
 		return format;
+	}
+
+	public static void saveModifiedEntry(Entry entry) {
+		if (management != null)
+			management.saveEntry(entry);
 	}
 
 }

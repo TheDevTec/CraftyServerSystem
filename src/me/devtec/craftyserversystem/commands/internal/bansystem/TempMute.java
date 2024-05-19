@@ -81,10 +81,10 @@ public class TempMute extends CssCommand {
 							PlaceholdersExecutor executor;
 							if (entry.getDuration() == 0)
 								executor = PlaceholdersExecutor.i().add("reason", entry.getReason()).add("admin", entry.getAdmin() == null ? "Console" : entry.getAdmin()).add("id", entry.getId() + "")
-										.add("startDate", BanAPI.getTimeFormat().format(Date.from(Instant.ofEpochMilli(entry.getStartDate()))));
+										.add("startDate", BanAPI.getTimeFormat().format(Date.from(Instant.ofEpochSecond(entry.getStartDate()))));
 							else
 								executor = PlaceholdersExecutor.i().add("reason", entry.getReason()).add("admin", entry.getAdmin() == null ? "Console" : entry.getAdmin()).add("id", entry.getId() + "")
-										.add("startDate", BanAPI.getTimeFormat().format(Date.from(Instant.ofEpochMilli(entry.getStartDate()))))
+										.add("startDate", BanAPI.getTimeFormat().format(Date.from(Instant.ofEpochSecond(entry.getStartDate()))))
 										.add("expireAfter", TimeUtils.timeToString(System.currentTimeMillis() / 1000 - entry.getStartDate() + entry.getDuration()))
 										.add("expireDate", BanAPI.getTimeFormat().format(Date.from(Instant.ofEpochSecond(entry.getStartDate() + entry.getDuration()))));
 
@@ -99,7 +99,7 @@ public class TempMute extends CssCommand {
 
 		CommandStructure<CommandSender> cmd = CommandStructure.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
 			msgUsage(sender, "cmd");
-		}).argument(null, (sender, structure, args) -> {
+		}).permission(getPerm("cmd")).argument(null, (sender, structure, args) -> {
 			msgUsage(sender, "cmd");
 		}, (sender, structure, args) -> {
 			List<String> list = new ArrayList<>();
@@ -131,7 +131,7 @@ public class TempMute extends CssCommand {
 			String player = args[0];
 			String reason = StringUtils.buildString(2, args);
 			BanAPI.tempMute(player, sender.getName(), TimeUtils.timeFromString(args[1]), reason);
-		}, (sender, structure, args) -> Arrays.asList("{reason}")).permission(getPerm("cmd"));
+		}, (sender, structure, args) -> Arrays.asList("{reason}"));
 		// register
 		List<String> cmds = getCommands();
 		if (!cmds.isEmpty())

@@ -47,13 +47,13 @@ public class Ban extends CssCommand {
 						if (entry.getDuration() == 0)
 							banMessage = ColorUtils.colorize(StringUtils.join(API.get().getConfigManager().getMain().getStringList("bansystem.banned"), "\n").replace("{reason}", entry.getReason())
 									.replace("{admin}", entry.getAdmin() == null ? "Console" : entry.getAdmin()).replace("id", entry.getId() + "")
-									.replace("{startDate}", BanAPI.getTimeFormat().format(Date.from(Instant.ofEpochMilli(entry.getStartDate())))));
+									.replace("{startDate}", BanAPI.getTimeFormat().format(Date.from(Instant.ofEpochSecond(entry.getStartDate())))));
 						else
 							banMessage = ColorUtils.colorize(StringUtils.join(API.get().getConfigManager().getMain().getStringList("bansystem.temp-banned"), "\n")
 									.replace("{reason}", entry.getReason()).replace("{admin}", entry.getAdmin() == null ? "Console" : entry.getAdmin()).replace("id", entry.getId() + "")
 									.replace("{expireAfter}", TimeUtils.timeToString(System.currentTimeMillis() / 1000 - entry.getStartDate() + entry.getDuration()))
 									.replace("{expireDate}", BanAPI.getTimeFormat().format(Date.from(Instant.ofEpochSecond(entry.getStartDate() + entry.getDuration()))))
-									.replace("{startDate}", BanAPI.getTimeFormat().format(Date.from(Instant.ofEpochMilli(entry.getStartDate())))));
+									.replace("{startDate}", BanAPI.getTimeFormat().format(Date.from(Instant.ofEpochSecond(entry.getStartDate())))));
 						String stripped = ColorUtils.strip(banMessage);
 						ConsoleBanFilter.addMessage("UUID of player " + e.getName() + " is " + e.getUniqueId(), "");
 						ConsoleBanFilter.addMessage("Disconnecting " + e.getName() + " (" + e.getAddress().toString(), stripped);
@@ -67,7 +67,7 @@ public class Ban extends CssCommand {
 
 		CommandStructure<CommandSender> cmd = CommandStructure.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
 			msgUsage(sender, "cmd");
-		}).argument(null, (sender, structure, args) -> {
+		}).permission(getPerm("cmd")).argument(null, (sender, structure, args) -> {
 			String player = args[0];
 			String reason = null;
 			BanAPI.ban(player, sender.getName(), reason);
@@ -81,7 +81,7 @@ public class Ban extends CssCommand {
 			String player = args[0];
 			String reason = StringUtils.buildString(1, args);
 			BanAPI.ban(player, sender.getName(), reason);
-		}, (sender, structure, args) -> Arrays.asList("{reason}")).permission(getPerm("cmd"));
+		}, (sender, structure, args) -> Arrays.asList("{reason}"));
 		// register
 		List<String> cmds = getCommands();
 		if (!cmds.isEmpty())

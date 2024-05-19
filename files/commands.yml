@@ -652,6 +652,15 @@ cssuser:
   perms:
     cmd: "css.cmd.cssuser"
 
+# ban system
+banlist:
+  usage:
+    cmd: "/banlist [player/ip] {oage}"
+  cmd: [banlist]
+  perms:
+    cmd: "css.cmd.banlist"
+
+# ban system
 ban:
   usage:
     cmd: "/ban [player/ip] {reason}"
@@ -660,6 +669,15 @@ ban:
     cmd: "css.cmd.ban"
     broadcast: "css.cmd.ban"
 
+# ban system
+unban:
+  usage:
+    cmd: "/unban [player/ip]"
+  cmd: [unban]
+  perms:
+    cmd: "css.cmd.unban"
+
+# ban system
 tempban:
   usage:
     cmd: "/tempban [player/ip] [time] {reason}"
@@ -668,6 +686,7 @@ tempban:
     cmd: "css.cmd.tempban"
     broadcast: "css.cmd.tempban"
 
+# ban system
 mute:
   usage:
     cmd: "/mute [player/ip] {reason}"
@@ -676,6 +695,15 @@ mute:
     cmd: "css.cmd.mute"
     broadcast: "css.cmd.mute"
 
+# ban system
+unmute:
+  usage:
+    cmd: "/unmute [player/ip]"
+  cmd: [unmute]
+  perms:
+    cmd: "css.cmd.unmute"
+
+# ban system
 tempmute:
   usage:
     cmd: "/tempmute [player/ip] [time] {reason}"
@@ -684,6 +712,7 @@ tempmute:
     cmd: "css.cmd.tempmute"
     broadcast: "css.cmd.tempmute"
 
+# ban system
 kick:
   usage:
     cmd: "/kick [player/ip] {reason}"
@@ -692,6 +721,7 @@ kick:
     cmd: "css.cmd.kick"
     broadcast: "css.cmd.kick"
 
+# ban system
 warn:
   usage:
     cmd: "/warn [player/ip] {reason}"
