@@ -128,9 +128,9 @@ public class NametagHologram extends Hologram {
 		despawnPacket = BukkitLoader.getNmsProvider().packetEntityDestroy(id);
 	}
 
-	private static Constructor<?> dataWatcherItem = Ref.constructor(Ref.nms("network.syncher", BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "SynchedEntityData$DataValue" : "DataWatcher$Item"),
+	private static Constructor<?> dataWatcherItem = Ref.constructor(Ref.nms("network.syncher", BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "SynchedEntityData$DataItem" : "DataWatcher$Item"),
 			Ref.nms("network.syncher", BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "EntityDataAccessor" : "DataWatcherObject"), Object.class);
-	private static Method dataWatcherMakeInstance = Ref.method(Ref.nms("network.syncher", BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "SynchedEntityData$DataValue" : "DataWatcher$Item"),
+	private static Method dataWatcherMakeInstance = Ref.method(Ref.nms("network.syncher", BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "SynchedEntityData$DataItem" : "DataWatcher$Item"),
 			BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "value" : "e");
 	static {
 		if (dataWatcherMakeInstance == null)
