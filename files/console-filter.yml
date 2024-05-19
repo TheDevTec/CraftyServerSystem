@@ -1,0 +1,7 @@
+enabled: false
+
+# Regex is used to compare Strings
+list:
+  - '^UUID of player \w+ is [0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
+  - '^\w+\[.*?\] logged in with entity id [0-9]+ at \(.*?\)$'
+  - '^\w+ lost connection: .*'
