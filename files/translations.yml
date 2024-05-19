@@ -582,26 +582,40 @@ scoreboardhide:
     true: "{prefix} Scoreboard has been hidden."
     false: "{prefix} Scoreboard has been displayed."
 
-cssgui:
-  self: "{prefix} Opening custom gui with id &e{id}"
-  #  {sender}, {target}
-  other:
-    target: "{prefix} Opening custom gui with id &e{id}"
-    sender: "{prefix} Opening custom gui with id &e{id} &7to player &e{target}"
+# {user}, {admin}, {reason}, {id}
+bansystem:
+  banned:
+    perm: "&8[&c&lBAN&8] &e{admin} &7perm banned &e{user} &7for &f{reason}"
+    # {expireAfter}, {expireDate}
+    temp: "&8[&c&lBAN&8] &e{admin} &7banned &e{user} &7for &e{expireAfter} &7for &f{reason}"
+  muted:
+    perm: "&8[&c&lMUTE&8] &e{admin} &7perm muted &e{user} &7for &f{reason}"
+    # {expireAfter}, {expireDate}
+    temp: "&8[&c&lMUTE&8] &e{admin} &7muted &e{user} &7for &e{expireAfter} &7for &f{reason}"
+  warned: "&8[&c&lWARN&8] &e{admin} &7warned &e{user} &7for &f{reason}"
+  kicked: "&8[&c&lKICK&8] &e{admin} &7kicked &e{user} &7for &f{reason}"
+  
 
 # {sender}, {destination}
 back:
   destination:
     death: "death"
     teleport: "previous"
-  self: "{prefix} Teleporting back to your {destination} position"
+  self: "{prefix} Are you lost? Alright, you're back to your {destination} position."
   other:
-    sender: "{prefix} Teleporting {target} back to his {destination} position"
-    target: "{prefix} Teleporting back to your {destination} position"
+    sender: "{prefix} &e{target} &7seems lost! Let's bring him back to his {destination} position."
+    target: "{prefix} You had to be lost! Welcome back to your {destination} position."
   failed:
-    self: "{prefix} Failed to teleport you to your {destination} position"
-    other: "{prefix} Failed to teleport {target} to his {destination} position"
+    self: "{prefix} Seems like the teleport machine is broken! You can't be teleported to your {destination} position."
+    other: "{prefix} The teleport machine is broken! &e{target} &7can't be teleported to his {destination} position"
 
+# {id}
+cssgui:
+  self: "{prefix} Opening custom gui with id &e{id}"
+  #  {sender}, {target}
+  other:
+    target: "{prefix} Opening custom gui with id &e{id}"
+    sender: "{prefix} Opening custom gui with id &e{id} &7to player &e{target}"
 cssuser:
   get: "{prefix} Value in the section &e{path} &7of user &e{user} &7is set to &e{value}"
   does-not-exist: "{prefix} Section &e{path} &7of user &e{user} &7doesn't exist"

@@ -20,6 +20,7 @@ import me.devtec.craftyserversystem.economy.CssEconomyHook;
 import me.devtec.craftyserversystem.economy.VaultEconomyHook;
 import me.devtec.craftyserversystem.permission.LuckPermsPermissionHook;
 import me.devtec.craftyserversystem.permission.VaultPermissionHook;
+import me.devtec.craftyserversystem.utils.CraftyVersionChecker;
 
 public class Loader extends JavaPlugin {
 
@@ -50,7 +51,58 @@ public class Loader extends JavaPlugin {
 				return false;
 			}
 		}
+		try {
+			if (isOlderThan(Bukkit.getPluginManager().getPlugin("TheAPI").getDescription().getVersion(), CraftyVersionChecker.versionOfTheAPIFromSpigot())) {
+				File file = new File("plugins/update/TheAPI.jar");
+				try {
+					downloadFileFromUrl(new URL("https://api.spiget.org/v2/resources/72679/download"), file);
+					if (isOlderThan(Bukkit.getPluginManager().getPlugin("TheAPI").getDescription().getVersion(), "12.7")) {
+						plugin.getLogger().severe("Downloaded required & newest update of TheAPI plugin, please restart server.");
+						Bukkit.getPluginManager().disablePlugin(plugin);
+						return false;
+					}
+					plugin.getLogger().severe("Downloaded newest update of TheAPI plugin, please restart server.");
+					return true;
+				} catch (Exception e) {
+					e.printStackTrace();
+					plugin.getLogger().severe("Failed to download newest update of TheAPI plugin (library)");
+					plugin.getLogger().severe("Disabling plugin...");
+					Bukkit.getPluginManager().disablePlugin(plugin);
+					return false;
+				}
+			}
+		} catch (Exception e) {
+		}
 		return true;
+	}
+
+	public static boolean isOlderThan(String version, String compareVersion) {
+		if (version == null || compareVersion == null)
+			return true;
+
+		version = version.replaceAll("[^0-9.]+", "").trim();
+		compareVersion = compareVersion.replaceAll("[^0-9.]+", "").trim();
+
+		if (version.isEmpty() || compareVersion.isEmpty())
+			return true;
+
+		String[] primaryVersion = version.split("\\.");
+		String[] compareToVersion = compareVersion.split("\\.");
+
+		int max = Math.max(primaryVersion.length, compareToVersion.length);
+		for (int i = 0; i <= max; ++i) {
+			String number = i >= primaryVersion.length ? "0" : "1" + primaryVersion[i];
+			if (compareToVersion.length <= i) {
+				if (compareToVersion.length == i && compareToVersion.length == max)
+					break;
+				return false;
+			}
+			if (Integer.parseInt(number) > Integer.parseInt("1" + compareToVersion[i]))
+				return false;
+			if (Integer.parseInt(number) < Integer.parseInt("1" + compareToVersion[i]))
+				return true;
+		}
+		return false;
 	}
 
 	public void downloadFileFromUrl(URL url, File file) {
@@ -84,8 +136,10 @@ public class Loader extends JavaPlugin {
 
 	@Override
 	public void onEnable() {
-		if (API.get().getCommandManager() == null)
+		if (API.get().getCommandManager() == null) {
+			Bukkit.getPluginManager().disablePlugin(plugin);
 			return;
+		}
 		if (Bukkit.getPluginManager().isPluginEnabled("LuckPerms"))
 			API.get().setPermissionHook(new LuckPermsPermissionHook());
 		if (Bukkit.getPluginManager().isPluginEnabled("Vault")) {

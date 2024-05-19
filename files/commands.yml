@@ -651,3 +651,51 @@ cssuser:
   cmd: [cssuser]
   perms:
     cmd: "css.cmd.cssuser"
+
+ban:
+  usage:
+    cmd: "/ban [player/ip] {reason}"
+  cmd: [ban]
+  perms:
+    cmd: "css.cmd.ban"
+    broadcast: "css.cmd.ban"
+
+tempban:
+  usage:
+    cmd: "/tempban [player/ip] [time] {reason}"
+  cmd: [tempban]
+  perms:
+    cmd: "css.cmd.tempban"
+    broadcast: "css.cmd.tempban"
+
+mute:
+  usage:
+    cmd: "/mute [player/ip] {reason}"
+  cmd: [mute]
+  perms:
+    cmd: "css.cmd.mute"
+    broadcast: "css.cmd.mute"
+
+tempmute:
+  usage:
+    cmd: "/tempmute [player/ip] [time] {reason}"
+  cmd: [tempmute]
+  perms:
+    cmd: "css.cmd.tempmute"
+    broadcast: "css.cmd.tempmute"
+
+kick:
+  usage:
+    cmd: "/kick [player/ip] {reason}"
+  cmd: [kick]
+  perms:
+    cmd: "css.cmd.kick"
+    broadcast: "css.cmd.kick"
+
+warn:
+  usage:
+    cmd: "/warn [player/ip] {reason}"
+  cmd: [warn]
+  perms:
+    cmd: "css.cmd.warn"
+    broadcast: "css.cmd.warn"

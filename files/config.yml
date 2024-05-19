@@ -36,6 +36,57 @@ homes:
 
 broadcast: "&0[&c&lBROADCAST&0] &e{message}"
 
+# {reason}, {admin}, {id}, {startDate}
+# for temp mute & ban: {expireDate}, {expireAfter}
+bansystem:
+  timeFormat: "dd.MM.YY HH:mm"
+  banned:
+  - ""
+  - "&4&l❗ &c&lBANNED &4&l❗"
+  - ""
+  - "&7Banned by &6{admin}"
+  - "&7Reason: &f{reason}"
+  - ""
+  - "&4&l❗ &cThis ban is permanent &4&l❗"
+  temp-banned:
+  - ""
+  - "&4&l❗ &c&lBANNED &4&l❗"
+  - ""
+  - "&7Banned by &6{admin}"
+  - "&7Reason: &f{reason}"
+  - ""
+  - "&4&l❗ &cThis ban expires in &e{expireAfter} &4&l❗"
+  muted:
+  - ""
+  - "&4&l❗ &c&lMUTED &4&l❗"
+  - ""
+  - "&7Muted by &6{admin}"
+  - "&7Reason: &f{reason}"
+  - ""
+  - "&4&l❗ &cThis mute is permanent &4&l❗"
+  temp-muted:
+  - ""
+  - "&4&l❗ &c&lMUTED &4&l❗"
+  - ""
+  - "&7Muted by &6{admin}"
+  - "&7Reason: &f{reason}"
+  - ""
+  - "&4&l❗ &cThis mute expires in &e{expireAfter} &4&l❗"
+  kicked:
+  - ""
+  - "&4&l❗ &c&lKICKED &4&l❗"
+  - ""
+  - "&7You were kicked by &6{admin}"
+  - "&7Reason: &f{reason}"
+  - ""
+  warned:
+  - ""
+  - "&4&l❗ &c&lWARN &4&l❗"
+  - ""
+  - "&7You were warned by &6{admin}"
+  - "&7Reason: &f{reason}"
+  - ""
+
 warp:
   # When you use command /warp as Player, menu with warps will be opened to you instead of help message
   enable-menu: true

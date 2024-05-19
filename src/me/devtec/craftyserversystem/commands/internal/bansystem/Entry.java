@@ -30,11 +30,11 @@ public class Entry {
 	}
 
 	public Entry(int id, BanType type, String user, String reason, String admin, long duration) {
-		this(id, type, user, reason, admin, duration, System.currentTimeMillis() / 1000, true);
+		this(id, type, user, reason, admin, duration, System.currentTimeMillis() / 1000, false);
 	}
 
 	public Entry(int id, BanType type, String user, String reason, long duration) {
-		this(id, type, user, reason, null, duration, System.currentTimeMillis() / 1000, true);
+		this(id, type, user, reason, null, duration, System.currentTimeMillis() / 1000, false);
 	}
 
 	public BanType getType() {
@@ -78,5 +78,14 @@ public class Entry {
 	public static Entry fromQuery(Result result) {
 		return new Entry(ParseUtils.getInt(result.getValue()[0]), BanType.valueOf(result.getValue()[1].toUpperCase()), result.getValue()[2], result.getValue()[3], result.getValue()[4],
 				ParseUtils.getLong(result.getValue()[5]), ParseUtils.getLong(result.getValue()[6]), ParseUtils.getInt(result.getValue()[7]) == 1);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj instanceof Entry) {
+			Entry second = (Entry) obj;
+			return second.getId() == getId() && second.getType().equals(getType());
+		}
+		return false;
 	}
 }

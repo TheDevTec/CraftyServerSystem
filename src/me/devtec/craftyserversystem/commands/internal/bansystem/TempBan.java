@@ -24,7 +24,7 @@ import me.devtec.shared.utility.StringUtils;
 import me.devtec.shared.utility.TimeUtils;
 import me.devtec.theapi.bukkit.BukkitLoader;
 
-public class Ban extends CssCommand {
+public class TempBan extends CssCommand {
 
 	private Listener listener;
 
@@ -68,9 +68,7 @@ public class Ban extends CssCommand {
 		CommandStructure<CommandSender> cmd = CommandStructure.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
 			msgUsage(sender, "cmd");
 		}).argument(null, (sender, structure, args) -> {
-			String player = args[0];
-			String reason = null;
-			BanAPI.ban(player, sender.getName(), reason);
+			msgUsage(sender, "cmd");
 		}, (sender, structure, args) -> {
 			List<String> list = new ArrayList<>();
 			for (Player player : BukkitLoader.getOnlinePlayers())
@@ -79,8 +77,28 @@ public class Ban extends CssCommand {
 			return list;
 		}).argument(null, (sender, structure, args) -> {
 			String player = args[0];
-			String reason = StringUtils.buildString(1, args);
-			BanAPI.ban(player, sender.getName(), reason);
+			String reason = null;
+			BanAPI.tempBan(player, sender.getName(), TimeUtils.timeFromString(args[1]), reason);
+		}, (sender, structure, args) -> {
+			List<String> list = new ArrayList<>();
+			if (args[1].isEmpty()) {
+				list.add("1h");
+				list.add("6h");
+				list.add("7d");
+				list.add("14d");
+				list.add("1mon");
+			} else if (Character.isDigit(args[1].charAt(args[1].length() - 1))) {
+				list.add(args[1]);
+				list.add(args[1] + "h");
+				list.add(args[1] + "d");
+				list.add(args[1] + "mon");
+			} else
+				list.add(args[1]);
+			return list;
+		}).argument(null, (sender, structure, args) -> {
+			String player = args[0];
+			String reason = StringUtils.buildString(2, args);
+			BanAPI.tempBan(player, sender.getName(), TimeUtils.timeFromString(args[1]), reason);
 		}, (sender, structure, args) -> Arrays.asList("{reason}")).permission(getPerm("cmd"));
 		// register
 		List<String> cmds = getCommands();
