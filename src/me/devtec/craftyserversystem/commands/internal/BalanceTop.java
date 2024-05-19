@@ -109,12 +109,14 @@ public class BalanceTop extends CssCommand {
 			page = 1;
 		if (page > totalPages)
 			page = totalPages;
-		msg(sender, "header", PlaceholdersExecutor.i().add("page", page).add("totalPages", totalPages));
+		PlaceholdersExecutor placeholders = PlaceholdersExecutor.i().add("page", page).add("totalPages", totalPages).add("previousPage", Math.max(1, page - 1)).add("nextPage",
+				Math.min(totalPages, page + 1));
+		msg(sender, "header", placeholders);
 		for (int i = page * maxEntries - maxEntries; i < page * maxEntries && i < comparableObjects.length; ++i) {
 			ComparableObject<String, Double> comp = comparableObjects[i];
 			msg(sender, "key", PlaceholdersExecutor.i().add("position", i + 1).add("target", comp.getKey()).add("balance", hook.format(comp.getValue())));
 		}
-		msg(sender, "footer", PlaceholdersExecutor.i().add("page", page).add("totalPages", totalPages).add("previousPage", Math.max(1, page - 1)).add("nextPage", Math.min(totalPages, page + 1)));
+		msg(sender, "footer", placeholders);
 	}
 
 	public String getWorldGroup(CommandSender sender) {
