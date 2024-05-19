@@ -367,6 +367,7 @@ public class API {
 				VaultEconomyHook.registerOurEconomy();
 			}
 		}
+		getCommandsAPI().getBanAPI().init();
 
 		getCommandManager().register();
 		getListenerManager().register();
