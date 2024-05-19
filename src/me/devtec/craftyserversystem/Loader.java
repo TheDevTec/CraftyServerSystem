@@ -56,7 +56,7 @@ public class Loader extends JavaPlugin {
 				File file = new File("plugins/update/TheAPI.jar");
 				try {
 					downloadFileFromUrl(new URL("https://api.spiget.org/v2/resources/72679/download"), file);
-					if (isOlderThan(Bukkit.getPluginManager().getPlugin("TheAPI").getDescription().getVersion(), "12.7")) {
+					if (isOlderThan(Bukkit.getPluginManager().getPlugin("TheAPI").getDescription().getVersion(), "12.8")) {
 						plugin.getLogger().severe("Downloaded required & newest update of TheAPI plugin, please restart server.");
 						Bukkit.getPluginManager().disablePlugin(plugin);
 						return false;
