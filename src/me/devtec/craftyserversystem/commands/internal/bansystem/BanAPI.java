@@ -30,39 +30,33 @@ import me.devtec.theapi.bukkit.BukkitLoader;
 @IgnoredClass
 public class BanAPI {
 
-	private static BanManagement management;
-	private static SimpleDateFormat format;
+	private static BanAPI instance;
+	private BanManagement management;
+	private SimpleDateFormat format;
 
-	public interface BanManagement {
-		int generateId();
-
-		void saveEntry(Entry entry);
-
-		List<Entry> retrieveHistory(String userName, String userIp, int limit);
-
-		List<Entry> retrieveHistory(int limit);
-
-		List<Entry> retrieveActivePunishments(String userName, String userIp);
-
-		List<Entry> retrieveActivePunishments(String userName, String userIp, BanType type);
-
-		List<Entry> retrieveActivePunishments(BanType type);
-
-		List<Entry> retrieveActivePunishments();
-
-		void save();
+	private BanAPI() {
+		init();
 	}
 
-	public static BanManagement getManagement() {
-		init();
+	public static BanAPI get() {
+		if (instance == null)
+			instance = new BanAPI();
+		return instance;
+	}
+
+	public SimpleDateFormat getTimeFormat() {
+		return format;
+	}
+
+	public BanManagement getManagement() {
 		return management;
 	}
 
-	public static void setBanManagement(BanManagement management) {
-		BanAPI.management = management;
+	public void setBanManagement(BanManagement management) {
+		this.management = management;
 	}
 
-	public static void init() {
+	public void init() {
 		if (management != null)
 			return;
 		format = new SimpleDateFormat(API.get().getConfigManager().getMain().getString("bansystem.timeFormat"));
@@ -409,7 +403,7 @@ public class BanAPI {
 		}
 	}
 
-	public static void shutdown() {
+	public void shutdown() {
 		if (management == null)
 			return;
 		management.save();
@@ -417,7 +411,7 @@ public class BanAPI {
 	}
 
 	// String can be IP address or username
-	public static Entry ban(String user, String administrator, String reason) {
+	public Entry ban(String user, String administrator, String reason) {
 		BanManagement management = getManagement();
 		Entry entry = new Entry(management.generateId(), BanType.BAN, user, reason, administrator, 0);
 		management.saveEntry(entry);
@@ -444,7 +438,7 @@ public class BanAPI {
 		return entry;
 	}
 
-	public static Entry tempBan(String user, String administrator, long time, String reason) {
+	public Entry tempBan(String user, String administrator, long time, String reason) {
 		if (time < 0)
 			time = 0;
 		BanManagement management = getManagement();
@@ -474,7 +468,7 @@ public class BanAPI {
 		return entry;
 	}
 
-	public static Entry mute(String user, String administrator, String reason) {
+	public Entry mute(String user, String administrator, String reason) {
 		BanManagement management = getManagement();
 		Entry entry = new Entry(management.generateId(), BanType.MUTE, user, reason, administrator, 0);
 		management.saveEntry(entry);
@@ -503,7 +497,7 @@ public class BanAPI {
 		return entry;
 	}
 
-	public static Entry tempMute(String user, String administrator, long time, String reason) {
+	public Entry tempMute(String user, String administrator, long time, String reason) {
 		if (time < 0)
 			time = 0;
 		BanManagement management = getManagement();
@@ -535,7 +529,7 @@ public class BanAPI {
 		return entry;
 	}
 
-	public static Entry kick(String user, String administrator, String reason) {
+	public Entry kick(String user, String administrator, String reason) {
 		BanManagement management = getManagement();
 		Entry entry = new Entry(management.generateId(), BanType.KICK, user, reason, administrator, 0);
 		management.saveEntry(entry);
@@ -562,7 +556,7 @@ public class BanAPI {
 		return entry;
 	}
 
-	public static Entry warn(String user, String administrator, String reason) {
+	public Entry warn(String user, String administrator, String reason) {
 		BanManagement management = getManagement();
 		Entry entry = new Entry(management.generateId(), BanType.WARN, user, reason, administrator, 0);
 		management.saveEntry(entry);
@@ -591,37 +585,37 @@ public class BanAPI {
 		return entry;
 	}
 
-	public static List<Entry> getHistory(String userName, String userIp, int limit) {
+	public List<Entry> getHistory(String userName, String userIp, int limit) {
 		BanManagement management = getManagement();
 		return management.retrieveHistory(userName, userIp, limit);
 	}
 
-	public static List<Entry> getHistory(int limit) {
+	public List<Entry> getHistory(int limit) {
 		BanManagement management = getManagement();
 		return management.retrieveHistory(limit);
 	}
 
-	public static List<Entry> getActivePunishments(String userName, String userIp) {
+	public List<Entry> getActivePunishments(String userName, String userIp) {
 		BanManagement management = getManagement();
 		return management.retrieveActivePunishments(userName, userIp);
 	}
 
-	public static List<Entry> getActivePunishments(String userName, String userIp, BanType type) {
+	public List<Entry> getActivePunishments(String userName, String userIp, BanType type) {
 		BanManagement management = getManagement();
 		return management.retrieveActivePunishments(userName, userIp, type);
 	}
 
-	public static List<Entry> getActivePunishments(BanType type) {
+	public List<Entry> getActivePunishments(BanType type) {
 		BanManagement management = getManagement();
 		return management.retrieveActivePunishments(type);
 	}
 
-	public static List<Entry> getActivePunishments() {
+	public List<Entry> getActivePunishments() {
 		BanManagement management = getManagement();
 		return management.retrieveActivePunishments();
 	}
 
-	public static void saveModifiedEntry(Entry entry) {
+	public void saveModifiedEntry(Entry entry) {
 		BanManagement management = getManagement();
 		management.saveEntry(entry);
 	}
@@ -670,7 +664,7 @@ public class BanAPI {
 		return mode == 2 && count < 5 && count > 0;
 	}
 
-	private static boolean isIPv4(String input) {
+	public static boolean isIPv4(String input) {
 		if (input.length() < 7)
 			return false;
 		byte mode = 0;
@@ -739,8 +733,23 @@ public class BanAPI {
 		return group == 3 && count != 0;
 	}
 
-	public static SimpleDateFormat getTimeFormat() {
-		return format;
-	}
+	public interface BanManagement {
+		int generateId();
 
+		void saveEntry(Entry entry);
+
+		List<Entry> retrieveHistory(String userName, String userIp, int limit);
+
+		List<Entry> retrieveHistory(int limit);
+
+		List<Entry> retrieveActivePunishments(String userName, String userIp);
+
+		List<Entry> retrieveActivePunishments(String userName, String userIp, BanType type);
+
+		List<Entry> retrieveActivePunishments(BanType type);
+
+		List<Entry> retrieveActivePunishments();
+
+		void save();
+	}
 }

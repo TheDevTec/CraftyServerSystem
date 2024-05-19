@@ -14,7 +14,6 @@ import me.devtec.craftyserversystem.Loader;
 import me.devtec.craftyserversystem.commands.CssCommand;
 import me.devtec.craftyserversystem.commands.internal.BalanceTop;
 import me.devtec.craftyserversystem.commands.internal.Vanish;
-import me.devtec.craftyserversystem.commands.internal.bansystem.BanAPI;
 import me.devtec.craftyserversystem.economy.CssEconomy;
 import me.devtec.craftyserversystem.economy.CssEconomyHook;
 import me.devtec.craftyserversystem.economy.EconomyHook;
@@ -58,6 +57,7 @@ public class API {
 	private CooldownManager cdManager;
 	private MessageManager msgManager;
 	private ListenerManager listenerManager;
+	private CommandsAPI commandsApi;
 
 	private PermissionHook permissionHook = new EmptyPermissionHook();
 	private EconomyHook economyHook = new EmptyEconomyHook();
@@ -86,6 +86,16 @@ public class API {
 	 */
 	public ConfigurationManager getConfigManager() {
 		return cfgManager;
+	}
+
+	/**
+	 * Our own BanAPI with which you can manage bans, mutes, history and active
+	 * punishments
+	 *
+	 * @return BanAPI
+	 */
+	public CommandsAPI getCommandsAPI() {
+		return commandsApi;
 	}
 
 	/**
@@ -200,6 +210,7 @@ public class API {
 		cdManager = new CooldownManager();
 		msgManager = new MessageManager();
 		listenerManager = new ListenerManager();
+		commandsApi = new CommandsAPI();
 		if (Json.reader().getClass() == ModernJsonReader.class || Json.writer().getClass() == ModernJsonWriter.class) {
 			Bukkit.getConsoleSender().sendMessage("");
 			Bukkit.getConsoleSender().sendMessage(ColorUtils.colorize(
@@ -268,7 +279,7 @@ public class API {
 	}
 
 	public void shutdown() {
-		BanAPI.shutdown();
+		getCommandsAPI().getBanAPI().shutdown();
 		placeholder.unregister();
 		metrics.shutdown();
 		if (NametagManagerAPI.get().isLoaded())
@@ -289,7 +300,7 @@ public class API {
 
 	public void reload() {
 		// Unload
-		BanAPI.shutdown();
+		getCommandsAPI().getBanAPI().shutdown();
 		if (getSqlConnection() != null)
 			try {
 				getSqlConnection().close();

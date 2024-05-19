@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.bukkit.command.CommandSender;
 
+import me.devtec.craftyserversystem.api.API;
 import me.devtec.craftyserversystem.commands.CssCommand;
 import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
 import me.devtec.shared.commands.structures.CommandStructure;
@@ -21,9 +22,9 @@ public class Unban extends CssCommand {
 		}).permission(getPerm("cmd")).argument(null, (sender, structure, args) -> {
 			String player = args[0];
 			boolean modified = false;
-			for (Entry entry : BanAPI.getActivePunishments(player, null, BanType.BAN)) {
+			for (Entry entry : API.get().getCommandsAPI().getBanAPI().getActivePunishments(player, null, BanType.BAN)) {
 				entry.setCancelled(true);
-				BanAPI.saveModifiedEntry(entry);
+				API.get().getCommandsAPI().getBanAPI().saveModifiedEntry(entry);
 				modified = true;
 			}
 			if (modified)
@@ -32,7 +33,7 @@ public class Unban extends CssCommand {
 				msg(sender, "failed", PlaceholdersExecutor.i().add("user", player));
 		}, (sender, structure, args) -> {
 			List<String> list = new ArrayList<>();
-			for (Entry entry : BanAPI.getActivePunishments(BanType.BAN))
+			for (Entry entry : API.get().getCommandsAPI().getBanAPI().getActivePunishments(BanType.BAN))
 				list.add(entry.getUser());
 			return list;
 		});
@@ -40,12 +41,6 @@ public class Unban extends CssCommand {
 		List<String> cmds = getCommands();
 		if (!cmds.isEmpty())
 			this.cmd = addBypassSettings(cmd).build().register(cmds.remove(0), cmds.toArray(new String[0]));
-	}
-
-	@Override
-	public void unregister() {
-		super.unregister();
-		BanAPI.shutdown();
 	}
 
 }

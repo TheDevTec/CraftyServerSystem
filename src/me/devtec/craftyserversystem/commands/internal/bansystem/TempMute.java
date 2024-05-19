@@ -72,7 +72,7 @@ public class TempMute extends CssCommand {
 
 			@EventHandler(ignoreCancelled = true)
 			public void asyncChat(AsyncPlayerChatEvent e) {
-				for (Entry entry : BanAPI.getActivePunishments(e.getPlayer().getName(), e.getPlayer().getAddress().getAddress().getHostAddress()))
+				for (Entry entry : API.get().getCommandsAPI().getBanAPI().getActivePunishments(e.getPlayer().getName(), e.getPlayer().getAddress().getAddress().getHostAddress()))
 					if (entry.getType() == BanType.MUTE) {
 						e.setCancelled(true);
 						if (cd.accept(e.getPlayer())) {
@@ -81,14 +81,14 @@ public class TempMute extends CssCommand {
 								executor = PlaceholdersExecutor.i()
 										.add("reason", entry.getReason() == null ? API.get().getConfigManager().getMain().getString("bansystem.not-specified-reason") : entry.getReason())
 										.add("admin", entry.getAdmin() == null ? "Console" : entry.getAdmin()).add("id", entry.getId() + "")
-										.add("startDate", BanAPI.getTimeFormat().format(Date.from(Instant.ofEpochSecond(entry.getStartDate()))));
+										.add("startDate", API.get().getCommandsAPI().getBanAPI().getTimeFormat().format(Date.from(Instant.ofEpochSecond(entry.getStartDate()))));
 							else
 								executor = PlaceholdersExecutor.i()
 										.add("reason", entry.getReason() == null ? API.get().getConfigManager().getMain().getString("bansystem.not-specified-reason") : entry.getReason())
 										.add("admin", entry.getAdmin() == null ? "Console" : entry.getAdmin()).add("id", entry.getId() + "")
-										.add("startDate", BanAPI.getTimeFormat().format(Date.from(Instant.ofEpochSecond(entry.getStartDate()))))
+										.add("startDate", API.get().getCommandsAPI().getBanAPI().getTimeFormat().format(Date.from(Instant.ofEpochSecond(entry.getStartDate()))))
 										.add("expireAfter", TimeUtils.timeToString(entry.getStartDate() + entry.getDuration() - System.currentTimeMillis() / 1000))
-										.add("expireDate", BanAPI.getTimeFormat().format(Date.from(Instant.ofEpochSecond(entry.getStartDate() + entry.getDuration()))));
+										.add("expireDate", API.get().getCommandsAPI().getBanAPI().getTimeFormat().format(Date.from(Instant.ofEpochSecond(entry.getStartDate() + entry.getDuration()))));
 
 							API.get().getMsgManager().sendMessageFromFile(API.get().getConfigManager().getMain(), entry.getDuration() == 0 ? "bansystem.muted" : "bansystem.temp-muted", executor,
 									e.getPlayer());
@@ -117,7 +117,7 @@ public class TempMute extends CssCommand {
 		}).argument(null, (sender, structure, args) -> {
 			String player = args[0];
 			String reason = null;
-			BanAPI.tempMute(player, sender.getName(), TimeUtils.timeFromString(args[1]), reason);
+			API.get().getCommandsAPI().getBanAPI().tempMute(player, sender.getName(), TimeUtils.timeFromString(args[1]), reason);
 		}, (sender, structure, args) -> {
 			List<String> list = new ArrayList<>();
 			if (args[1].isEmpty()) {
@@ -137,7 +137,7 @@ public class TempMute extends CssCommand {
 		}).argument(null, (sender, structure, args) -> {
 			String player = args[0];
 			String reason = StringUtils.buildString(2, args);
-			BanAPI.tempMute(player, sender.getName(), TimeUtils.timeFromString(args[1]), reason);
+			API.get().getCommandsAPI().getBanAPI().tempMute(player, sender.getName(), TimeUtils.timeFromString(args[1]), reason);
 		}, (sender, structure, args) -> API.get().getConfigManager().getMain().getStringList("bansystem.tab-completer-reasons"));
 		// register
 		List<String> cmds = getCommands();
@@ -152,7 +152,6 @@ public class TempMute extends CssCommand {
 			HandlerList.unregisterAll(listener);
 			listener = null;
 		}
-		BanAPI.shutdown();
 	}
 
 }

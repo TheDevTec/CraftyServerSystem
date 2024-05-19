@@ -24,7 +24,7 @@ public class Kick extends CssCommand {
 		}).permission(getPerm("cmd")).argument(null, (sender, structure, args) -> {
 			String player = args[0];
 			String reason = null;
-			BanAPI.kick(player, sender.getName(), reason);
+			API.get().getCommandsAPI().getBanAPI().kick(player, sender.getName(), reason);
 		}, (sender, structure, args) -> {
 			List<String> list = new ArrayList<>();
 			if (API.get().getConfigManager().getMain().getBoolean("bansystem.tab-completer-list-player-ips"))
@@ -39,18 +39,12 @@ public class Kick extends CssCommand {
 		}).argument(null, (sender, structure, args) -> {
 			String player = args[0];
 			String reason = StringUtils.buildString(1, args);
-			BanAPI.kick(player, sender.getName(), reason);
+			API.get().getCommandsAPI().getBanAPI().kick(player, sender.getName(), reason);
 		}, (sender, structure, args) -> API.get().getConfigManager().getMain().getStringList("bansystem.tab-completer-reasons"));
 		// register
 		List<String> cmds = getCommands();
 		if (!cmds.isEmpty())
 			this.cmd = addBypassSettings(cmd).build().register(cmds.remove(0), cmds.toArray(new String[0]));
-	}
-
-	@Override
-	public void unregister() {
-		super.unregister();
-		BanAPI.shutdown();
 	}
 
 }

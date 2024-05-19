@@ -28,7 +28,7 @@ public class Banlist extends CssCommand {
 			msgUsage(sender, "cmd");
 		}).permission(getPerm("cmd")).argument(null, (sender, structure, args) -> {
 			String player = args[0];
-			sendList(sender, player, BanAPI.getHistory(player, null, 0), 1);
+			sendList(sender, player, API.get().getCommandsAPI().getBanAPI().getHistory(player, null, 0), 1);
 		}, (sender, structure, args) -> {
 			List<String> list = new ArrayList<>();
 			for (Player player : BukkitLoader.getOnlinePlayers())
@@ -37,7 +37,7 @@ public class Banlist extends CssCommand {
 			return list;
 		}).selector(Selector.INTEGER, (sender, structure, args) -> {
 			String player = args[0];
-			sendList(sender, player, BanAPI.getHistory(player, null, 0), ParseUtils.getInt(args[1]));
+			sendList(sender, player, API.get().getCommandsAPI().getBanAPI().getHistory(player, null, 0), ParseUtils.getInt(args[1]));
 		});
 		// register
 		List<String> cmds = getCommands();
@@ -64,13 +64,13 @@ public class Banlist extends CssCommand {
 			if (entry.getDuration() == 0)
 				executor = PlaceholdersExecutor.i().add("reason", entry.getReason() == null ? API.get().getConfigManager().getMain().getString("bansystem.not-specified-reason") : entry.getReason())
 						.add("admin", entry.getAdmin() == null ? "Console" : entry.getAdmin()).add("id", entry.getId() + "")
-						.add("startDate", BanAPI.getTimeFormat().format(Date.from(Instant.ofEpochSecond(entry.getStartDate()))));
+						.add("startDate", API.get().getCommandsAPI().getBanAPI().getTimeFormat().format(Date.from(Instant.ofEpochSecond(entry.getStartDate()))));
 			else
 				executor = PlaceholdersExecutor.i().add("reason", entry.getReason() == null ? API.get().getConfigManager().getMain().getString("bansystem.not-specified-reason") : entry.getReason())
 						.add("admin", entry.getAdmin() == null ? "Console" : entry.getAdmin()).add("id", entry.getId() + "")
-						.add("startDate", BanAPI.getTimeFormat().format(Date.from(Instant.ofEpochSecond(entry.getStartDate()))))
+						.add("startDate", API.get().getCommandsAPI().getBanAPI().getTimeFormat().format(Date.from(Instant.ofEpochSecond(entry.getStartDate()))))
 						.add("expireAfter", TimeUtils.timeToString(entry.getStartDate() + entry.getDuration() - System.currentTimeMillis() / 1000))
-						.add("expireDate", BanAPI.getTimeFormat().format(Date.from(Instant.ofEpochSecond(entry.getStartDate() + entry.getDuration()))));
+						.add("expireDate", API.get().getCommandsAPI().getBanAPI().getTimeFormat().format(Date.from(Instant.ofEpochSecond(entry.getStartDate() + entry.getDuration()))));
 			String statusPath = entry.isCancelled() ? "cancelled"
 					: entry.getDuration() == 0 ? "active" : entry.getStartDate() + entry.getDuration() - System.currentTimeMillis() / 1000 <= 0 ? "inactive" : "active";
 			switch (entry.getType()) {
@@ -89,12 +89,6 @@ public class Banlist extends CssCommand {
 			}
 			msg(sender, "footer", placeholders);
 		}
-	}
-
-	@Override
-	public void unregister() {
-		super.unregister();
-		BanAPI.shutdown();
 	}
 
 }

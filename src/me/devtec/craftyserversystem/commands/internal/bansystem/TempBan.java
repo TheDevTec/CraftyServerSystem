@@ -39,7 +39,7 @@ public class TempBan extends CssCommand {
 			public void asyncLogin(AsyncPlayerPreLoginEvent e) {
 				if (e.getLoginResult() != Result.ALLOWED)
 					return;
-				for (Entry entry : BanAPI.getActivePunishments(e.getName(), e.getAddress().getHostAddress()))
+				for (Entry entry : API.get().getCommandsAPI().getBanAPI().getActivePunishments(e.getName(), e.getAddress().getHostAddress()))
 					if (entry.getType() == BanType.BAN) {
 						e.setLoginResult(Result.KICK_BANNED);
 						String banMessage;
@@ -47,14 +47,15 @@ public class TempBan extends CssCommand {
 							banMessage = ColorUtils.colorize(StringUtils.join(API.get().getConfigManager().getMain().getStringList("bansystem.banned"), "\n")
 									.replace("{reason}", entry.getReason() == null ? API.get().getConfigManager().getMain().getString("bansystem.not-specified-reason") : entry.getReason())
 									.replace("{admin}", entry.getAdmin() == null ? "Console" : entry.getAdmin()).replace("id", entry.getId() + "")
-									.replace("{startDate}", BanAPI.getTimeFormat().format(Date.from(Instant.ofEpochSecond(entry.getStartDate())))));
+									.replace("{startDate}", API.get().getCommandsAPI().getBanAPI().getTimeFormat().format(Date.from(Instant.ofEpochSecond(entry.getStartDate())))));
 						else
 							banMessage = ColorUtils.colorize(StringUtils.join(API.get().getConfigManager().getMain().getStringList("bansystem.temp-banned"), "\n")
 									.replace("{reason}", entry.getReason() == null ? API.get().getConfigManager().getMain().getString("bansystem.not-specified-reason") : entry.getReason())
 									.replace("{admin}", entry.getAdmin() == null ? "Console" : entry.getAdmin()).replace("id", entry.getId() + "")
 									.replace("{expireAfter}", TimeUtils.timeToString(entry.getStartDate() + entry.getDuration() - System.currentTimeMillis() / 1000))
-									.replace("{expireDate}", BanAPI.getTimeFormat().format(Date.from(Instant.ofEpochSecond(entry.getStartDate() + entry.getDuration()))))
-									.replace("{startDate}", BanAPI.getTimeFormat().format(Date.from(Instant.ofEpochSecond(entry.getStartDate())))));
+									.replace("{expireDate}",
+											API.get().getCommandsAPI().getBanAPI().getTimeFormat().format(Date.from(Instant.ofEpochSecond(entry.getStartDate() + entry.getDuration()))))
+									.replace("{startDate}", API.get().getCommandsAPI().getBanAPI().getTimeFormat().format(Date.from(Instant.ofEpochSecond(entry.getStartDate())))));
 						String stripped = ColorUtils.strip(banMessage);
 						ConsoleBanFilter.addMessage("UUID of player " + e.getName() + " is " + e.getUniqueId(), "");
 						ConsoleBanFilter.addMessage("Disconnecting " + e.getName() + " (" + e.getAddress().toString(), stripped);
@@ -84,7 +85,7 @@ public class TempBan extends CssCommand {
 		}).argument(null, (sender, structure, args) -> {
 			String player = args[0];
 			String reason = null;
-			BanAPI.tempBan(player, sender.getName(), TimeUtils.timeFromString(args[1]), reason);
+			API.get().getCommandsAPI().getBanAPI().tempBan(player, sender.getName(), TimeUtils.timeFromString(args[1]), reason);
 		}, (sender, structure, args) -> {
 			List<String> list = new ArrayList<>();
 			if (args[1].isEmpty()) {
@@ -104,7 +105,7 @@ public class TempBan extends CssCommand {
 		}).argument(null, (sender, structure, args) -> {
 			String player = args[0];
 			String reason = StringUtils.buildString(2, args);
-			BanAPI.tempBan(player, sender.getName(), TimeUtils.timeFromString(args[1]), reason);
+			API.get().getCommandsAPI().getBanAPI().tempBan(player, sender.getName(), TimeUtils.timeFromString(args[1]), reason);
 		}, (sender, structure, args) -> API.get().getConfigManager().getMain().getStringList("bansystem.tab-completer-reasons"));
 		// register
 		List<String> cmds = getCommands();
@@ -119,7 +120,6 @@ public class TempBan extends CssCommand {
 			HandlerList.unregisterAll(listener);
 			listener = null;
 		}
-		BanAPI.shutdown();
 	}
 
 }
