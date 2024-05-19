@@ -44,7 +44,22 @@ public class BanAPI {
 
 		List<Entry> retrieveActivePunishments(String userName, String userIp);
 
+		List<Entry> retrieveActivePunishments(String userName, String userIp, BanType type);
+
+		List<Entry> retrieveActivePunishments(BanType type);
+
+		List<Entry> retrieveActivePunishments();
+
 		void save();
+	}
+
+	public static BanManagement getManagement() {
+		init();
+		return management;
+	}
+
+	public static void setBanManagement(BanManagement management) {
+		BanAPI.management = management;
 	}
 
 	public static void init() {
@@ -157,6 +172,70 @@ public class BanAPI {
 									history.add(entry);
 								result = result.next();
 							}
+						}
+					} catch (SQLException e) {
+						e.printStackTrace();
+					}
+					return history;
+				}
+
+				@Override
+				public List<Entry> retrieveActivePunishments(String userName, String userIp, BanType type) {
+					List<Entry> history = new ArrayList<>();
+					try {
+						if (userName == null || userIp == null) {
+							String onlyOneName = userIp == null ? userName : userIp;
+							Result result = API.get().getSqlConnection().select(SelectQuery.table("banlist").where("user", onlyOneName).where("type", type.name()).where("cancelled", "0"));
+							while (result != null) {
+								Entry entry = Entry.fromQuery(result);
+								if (entry.getDuration() == 0 || entry.getStartDate() + entry.getDuration() - System.currentTimeMillis() / 1000 > 0)
+									history.add(entry);
+								result = result.next();
+							}
+						} else {
+							Result result = API.get().getSqlConnection().select(SelectQuery.table("banlist").where("user", userName).where("type", type.name()).where("cancelled", "0").or()
+									.where("user", userIp).where("type", type.name()).where("cancelled", "0"));
+							while (result != null) {
+								Entry entry = Entry.fromQuery(result);
+								if (entry.getDuration() == 0 || entry.getStartDate() + entry.getDuration() - System.currentTimeMillis() / 1000 > 0)
+									history.add(entry);
+								result = result.next();
+							}
+						}
+					} catch (SQLException e) {
+						e.printStackTrace();
+					}
+					return history;
+				}
+
+				@Override
+				public List<Entry> retrieveActivePunishments() {
+					List<Entry> history = new ArrayList<>();
+					try {
+						Result result = API.get().getSqlConnection().select(SelectQuery.table("banlist").where("cancelled", "0"));
+						while (result != null) {
+							Entry entry = Entry.fromQuery(result);
+							if ((entry.getType() == BanType.BAN || entry.getType() == BanType.MUTE)
+									&& (entry.getDuration() == 0 || entry.getStartDate() + entry.getDuration() - System.currentTimeMillis() / 1000 > 0))
+								history.add(entry);
+							result = result.next();
+						}
+					} catch (SQLException e) {
+						e.printStackTrace();
+					}
+					return history;
+				}
+
+				@Override
+				public List<Entry> retrieveActivePunishments(BanType type) {
+					List<Entry> history = new ArrayList<>();
+					try {
+						Result result = API.get().getSqlConnection().select(SelectQuery.table("banlist").where("cancelled", "0").where("type", type.name()));
+						while (result != null) {
+							Entry entry = Entry.fromQuery(result);
+							if (entry.getDuration() == 0 || entry.getStartDate() + entry.getDuration() - System.currentTimeMillis() / 1000 > 0)
+								history.add(entry);
+							result = result.next();
 						}
 					} catch (SQLException e) {
 						e.printStackTrace();
@@ -278,6 +357,54 @@ public class BanAPI {
 						}
 					return result;
 				}
+
+				@Override
+				public List<Entry> retrieveActivePunishments(String userName, String userIp, BanType type) {
+					List<Entry> result = new ArrayList<>();
+					if (userName == null || userIp == null) {
+						String onlyOneName = userIp == null ? userName : userIp;
+						for (Entry key : history) {
+							long dur;
+							if (!key.getUser().equals(onlyOneName) || key.isCancelled() || key.getType() != type
+									|| (dur = key.getDuration()) != 0 && key.getStartDate() + dur - System.currentTimeMillis() / 1000 <= 0)
+								continue;
+							result.add(key);
+						}
+					} else
+						for (Entry key : history) {
+							long dur;
+							if (!key.getUser().equals(userName) && !key.getUser().equals(userIp) || key.isCancelled() || key.getType() != type
+									|| (dur = key.getDuration()) != 0 && key.getStartDate() + dur - System.currentTimeMillis() / 1000 <= 0)
+								continue;
+							result.add(key);
+						}
+					return result;
+				}
+
+				@Override
+				public List<Entry> retrieveActivePunishments() {
+					List<Entry> result = new ArrayList<>();
+					for (Entry key : history) {
+						long dur;
+						if (key.isCancelled() || key.getType() != BanType.BAN && key.getType() != BanType.MUTE
+								|| (dur = key.getDuration()) != 0 && key.getStartDate() + dur - System.currentTimeMillis() / 1000 <= 0)
+							continue;
+						result.add(key);
+					}
+					return result;
+				}
+
+				@Override
+				public List<Entry> retrieveActivePunishments(BanType type) {
+					List<Entry> result = new ArrayList<>();
+					for (Entry key : history) {
+						long dur;
+						if (key.isCancelled() || key.getType() != type || (dur = key.getDuration()) != 0 && key.getStartDate() + dur - System.currentTimeMillis() / 1000 <= 0)
+							continue;
+						result.add(key);
+					}
+					return result;
+				}
 			};
 		}
 	}
@@ -291,11 +418,11 @@ public class BanAPI {
 
 	// String can be IP address or username
 	public static Entry ban(String user, String administrator, String reason) {
-		if (management == null)
-			return null;
+		BanManagement management = getManagement();
 		Entry entry = new Entry(management.generateId(), BanType.BAN, user, reason, administrator, 0);
 		management.saveEntry(entry);
-		PlaceholdersExecutor executor = PlaceholdersExecutor.i().add("user", entry.getUser()).add("reason", entry.getReason() == null ? "Uknown" : entry.getReason())
+		PlaceholdersExecutor executor = PlaceholdersExecutor.i().add("user", entry.getUser())
+				.add("reason", entry.getReason() == null ? API.get().getConfigManager().getMain().getString("bansystem.not-specified-reason") : entry.getReason())
 				.add("admin", entry.getAdmin() == null ? "Console" : entry.getAdmin()).add("id", entry.getId() + "")
 				.add("startDate", format.format(Date.from(Instant.ofEpochSecond(entry.getStartDate()))));
 		List<CommandSender> admins = new ArrayList<>();
@@ -318,13 +445,13 @@ public class BanAPI {
 	}
 
 	public static Entry tempBan(String user, String administrator, long time, String reason) {
-		if (management == null)
-			return null;
 		if (time < 0)
 			time = 0;
+		BanManagement management = getManagement();
 		Entry entry = new Entry(management.generateId(), BanType.BAN, user, reason, administrator, time);
 		management.saveEntry(entry);
-		PlaceholdersExecutor executor = PlaceholdersExecutor.i().add("user", entry.getUser()).add("reason", entry.getReason() == null ? "Uknown" : entry.getReason())
+		PlaceholdersExecutor executor = PlaceholdersExecutor.i().add("user", entry.getUser())
+				.add("reason", entry.getReason() == null ? API.get().getConfigManager().getMain().getString("bansystem.not-specified-reason") : entry.getReason())
 				.add("admin", entry.getAdmin() == null ? "Console" : entry.getAdmin()).add("id", entry.getId() + "")
 				.add("startDate", format.format(Date.from(Instant.ofEpochSecond(entry.getStartDate())))).add("expireAfter", TimeUtils.timeToString(entry.getDuration()))
 				.add("expireDate", format.format(Date.from(Instant.ofEpochSecond(entry.getStartDate() + time))));
@@ -348,11 +475,11 @@ public class BanAPI {
 	}
 
 	public static Entry mute(String user, String administrator, String reason) {
-		if (management == null)
-			return null;
+		BanManagement management = getManagement();
 		Entry entry = new Entry(management.generateId(), BanType.MUTE, user, reason, administrator, 0);
 		management.saveEntry(entry);
-		PlaceholdersExecutor executor = PlaceholdersExecutor.i().add("user", entry.getUser()).add("reason", entry.getReason() == null ? "Uknown" : entry.getReason())
+		PlaceholdersExecutor executor = PlaceholdersExecutor.i().add("user", entry.getUser())
+				.add("reason", entry.getReason() == null ? API.get().getConfigManager().getMain().getString("bansystem.not-specified-reason") : entry.getReason())
 				.add("admin", entry.getAdmin() == null ? "Console" : entry.getAdmin()).add("id", entry.getId() + "")
 				.add("startDate", format.format(Date.from(Instant.ofEpochSecond(entry.getStartDate()))));
 		List<CommandSender> admins = new ArrayList<>();
@@ -377,13 +504,13 @@ public class BanAPI {
 	}
 
 	public static Entry tempMute(String user, String administrator, long time, String reason) {
-		if (management == null)
-			return null;
 		if (time < 0)
 			time = 0;
+		BanManagement management = getManagement();
 		Entry entry = new Entry(management.generateId(), BanType.MUTE, user, reason, administrator, time);
 		management.saveEntry(entry);
-		PlaceholdersExecutor executor = PlaceholdersExecutor.i().add("user", entry.getUser()).add("reason", entry.getReason() == null ? "Uknown" : entry.getReason())
+		PlaceholdersExecutor executor = PlaceholdersExecutor.i().add("user", entry.getUser())
+				.add("reason", entry.getReason() == null ? API.get().getConfigManager().getMain().getString("bansystem.not-specified-reason") : entry.getReason())
 				.add("admin", entry.getAdmin() == null ? "Console" : entry.getAdmin()).add("id", entry.getId() + "")
 				.add("startDate", format.format(Date.from(Instant.ofEpochSecond(entry.getStartDate())))).add("expireAfter", TimeUtils.timeToString(entry.getDuration()))
 				.add("expireDate", format.format(Date.from(Instant.ofEpochSecond(entry.getStartDate() + time))));
@@ -409,11 +536,11 @@ public class BanAPI {
 	}
 
 	public static Entry kick(String user, String administrator, String reason) {
-		if (management == null)
-			return null;
+		BanManagement management = getManagement();
 		Entry entry = new Entry(management.generateId(), BanType.KICK, user, reason, administrator, 0);
 		management.saveEntry(entry);
-		PlaceholdersExecutor executor = PlaceholdersExecutor.i().add("user", entry.getUser()).add("reason", entry.getReason() == null ? "Uknown" : entry.getReason())
+		PlaceholdersExecutor executor = PlaceholdersExecutor.i().add("user", entry.getUser())
+				.add("reason", entry.getReason() == null ? API.get().getConfigManager().getMain().getString("bansystem.not-specified-reason") : entry.getReason())
 				.add("admin", entry.getAdmin() == null ? "Console" : entry.getAdmin()).add("id", entry.getId() + "")
 				.add("startDate", format.format(Date.from(Instant.ofEpochSecond(entry.getStartDate()))));
 		List<CommandSender> admins = new ArrayList<>();
@@ -436,11 +563,11 @@ public class BanAPI {
 	}
 
 	public static Entry warn(String user, String administrator, String reason) {
-		if (management == null)
-			return null;
+		BanManagement management = getManagement();
 		Entry entry = new Entry(management.generateId(), BanType.WARN, user, reason, administrator, 0);
 		management.saveEntry(entry);
-		PlaceholdersExecutor executor = PlaceholdersExecutor.i().add("user", entry.getUser()).add("reason", entry.getReason() == null ? "Uknown" : entry.getReason())
+		PlaceholdersExecutor executor = PlaceholdersExecutor.i().add("user", entry.getUser())
+				.add("reason", entry.getReason() == null ? API.get().getConfigManager().getMain().getString("bansystem.not-specified-reason") : entry.getReason())
 				.add("admin", entry.getAdmin() == null ? "Console" : entry.getAdmin()).add("id", entry.getId() + "")
 				.add("startDate", format.format(Date.from(Instant.ofEpochSecond(entry.getStartDate()))));
 		List<CommandSender> admins = new ArrayList<>();
@@ -465,21 +592,38 @@ public class BanAPI {
 	}
 
 	public static List<Entry> getHistory(String userName, String userIp, int limit) {
-		if (management == null)
-			return null;
+		BanManagement management = getManagement();
 		return management.retrieveHistory(userName, userIp, limit);
 	}
 
 	public static List<Entry> getHistory(int limit) {
-		if (management == null)
-			return null;
+		BanManagement management = getManagement();
 		return management.retrieveHistory(limit);
 	}
 
 	public static List<Entry> getActivePunishments(String userName, String userIp) {
-		if (management == null)
-			return null;
+		BanManagement management = getManagement();
 		return management.retrieveActivePunishments(userName, userIp);
+	}
+
+	public static List<Entry> getActivePunishments(String userName, String userIp, BanType type) {
+		BanManagement management = getManagement();
+		return management.retrieveActivePunishments(userName, userIp, type);
+	}
+
+	public static List<Entry> getActivePunishments(BanType type) {
+		BanManagement management = getManagement();
+		return management.retrieveActivePunishments(type);
+	}
+
+	public static List<Entry> getActivePunishments() {
+		BanManagement management = getManagement();
+		return management.retrieveActivePunishments();
+	}
+
+	public static void saveModifiedEntry(Entry entry) {
+		BanManagement management = getManagement();
+		management.saveEntry(entry);
 	}
 
 	public static boolean isIPv6(String user) {
@@ -597,11 +741,6 @@ public class BanAPI {
 
 	public static SimpleDateFormat getTimeFormat() {
 		return format;
-	}
-
-	public static void saveModifiedEntry(Entry entry) {
-		if (management != null)
-			management.saveEntry(entry);
 	}
 
 }

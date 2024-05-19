@@ -2,7 +2,6 @@ package me.devtec.craftyserversystem.commands.internal.bansystem;
 
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -35,7 +34,6 @@ public class Mute extends CssCommand {
 	public void register() {
 		if (isRegistered())
 			return;
-		BanAPI.init();
 
 		CooldownHolder cd;
 		if (API.get().getCooldownManager().getCooldown("banmanager.mute") == null)
@@ -80,12 +78,16 @@ public class Mute extends CssCommand {
 						if (cd.accept(e.getPlayer())) {
 							PlaceholdersExecutor executor;
 							if (entry.getDuration() == 0)
-								executor = PlaceholdersExecutor.i().add("reason", entry.getReason()).add("admin", entry.getAdmin() == null ? "Console" : entry.getAdmin()).add("id", entry.getId() + "")
+								executor = PlaceholdersExecutor.i()
+										.add("reason", entry.getReason() == null ? API.get().getConfigManager().getMain().getString("bansystem.not-specified-reason") : entry.getReason())
+										.add("admin", entry.getAdmin() == null ? "Console" : entry.getAdmin()).add("id", entry.getId() + "")
 										.add("startDate", BanAPI.getTimeFormat().format(Date.from(Instant.ofEpochSecond(entry.getStartDate()))));
 							else
-								executor = PlaceholdersExecutor.i().add("reason", entry.getReason()).add("admin", entry.getAdmin() == null ? "Console" : entry.getAdmin()).add("id", entry.getId() + "")
+								executor = PlaceholdersExecutor.i()
+										.add("reason", entry.getReason() == null ? API.get().getConfigManager().getMain().getString("bansystem.not-specified-reason") : entry.getReason())
+										.add("admin", entry.getAdmin() == null ? "Console" : entry.getAdmin()).add("id", entry.getId() + "")
 										.add("startDate", BanAPI.getTimeFormat().format(Date.from(Instant.ofEpochSecond(entry.getStartDate()))))
-										.add("expireAfter", TimeUtils.timeToString(System.currentTimeMillis() / 1000 - entry.getStartDate() + entry.getDuration()))
+										.add("expireAfter", TimeUtils.timeToString(entry.getStartDate() + entry.getDuration() - System.currentTimeMillis() / 1000))
 										.add("expireDate", BanAPI.getTimeFormat().format(Date.from(Instant.ofEpochSecond(entry.getStartDate() + entry.getDuration()))));
 
 							API.get().getMsgManager().sendMessageFromFile(API.get().getConfigManager().getMain(), entry.getDuration() == 0 ? "bansystem.muted" : "bansystem.temp-muted", executor,
@@ -105,15 +107,20 @@ public class Mute extends CssCommand {
 			BanAPI.mute(player, sender.getName(), reason);
 		}, (sender, structure, args) -> {
 			List<String> list = new ArrayList<>();
-			for (Player player : BukkitLoader.getOnlinePlayers())
-				list.add(player.getName());
+			if (API.get().getConfigManager().getMain().getBoolean("bansystem.tab-completer-list-player-ips"))
+				for (Player player : BukkitLoader.getOnlinePlayers())
+					list.add(player.getAddress().getAddress().getHostAddress());
+			else
+				for (Player player : BukkitLoader.getOnlinePlayers())
+					list.add(player.getName());
 			list.add("{offlinePlayer}");
+			list.add("{ip}");
 			return list;
 		}).argument(null, (sender, structure, args) -> {
 			String player = args[0];
 			String reason = StringUtils.buildString(1, args);
 			BanAPI.mute(player, sender.getName(), reason);
-		}, (sender, structure, args) -> Arrays.asList("{reason}"));
+		}, (sender, structure, args) -> API.get().getConfigManager().getMain().getStringList("bansystem.tab-completer-reasons"));
 		// register
 		List<String> cmds = getCommands();
 		if (!cmds.isEmpty())
@@ -127,6 +134,7 @@ public class Mute extends CssCommand {
 			HandlerList.unregisterAll(listener);
 			listener = null;
 		}
+		BanAPI.shutdown();
 	}
 
 }

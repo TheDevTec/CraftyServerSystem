@@ -1,12 +1,12 @@
 package me.devtec.craftyserversystem.commands.internal.bansystem;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import me.devtec.craftyserversystem.api.API;
 import me.devtec.craftyserversystem.commands.CssCommand;
 import me.devtec.shared.commands.structures.CommandStructure;
 import me.devtec.shared.utility.StringUtils;
@@ -18,7 +18,6 @@ public class Kick extends CssCommand {
 	public void register() {
 		if (isRegistered())
 			return;
-		BanAPI.init();
 
 		CommandStructure<CommandSender> cmd = CommandStructure.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
 			msgUsage(sender, "cmd");
@@ -28,19 +27,30 @@ public class Kick extends CssCommand {
 			BanAPI.kick(player, sender.getName(), reason);
 		}, (sender, structure, args) -> {
 			List<String> list = new ArrayList<>();
-			for (Player player : BukkitLoader.getOnlinePlayers())
-				list.add(player.getName());
+			if (API.get().getConfigManager().getMain().getBoolean("bansystem.tab-completer-list-player-ips"))
+				for (Player player : BukkitLoader.getOnlinePlayers())
+					list.add(player.getAddress().getAddress().getHostAddress());
+			else
+				for (Player player : BukkitLoader.getOnlinePlayers())
+					list.add(player.getName());
 			list.add("{offlinePlayer}");
+			list.add("{ip}");
 			return list;
 		}).argument(null, (sender, structure, args) -> {
 			String player = args[0];
 			String reason = StringUtils.buildString(1, args);
 			BanAPI.kick(player, sender.getName(), reason);
-		}, (sender, structure, args) -> Arrays.asList("{reason}"));
+		}, (sender, structure, args) -> API.get().getConfigManager().getMain().getStringList("bansystem.tab-completer-reasons"));
 		// register
 		List<String> cmds = getCommands();
 		if (!cmds.isEmpty())
 			this.cmd = addBypassSettings(cmd).build().register(cmds.remove(0), cmds.toArray(new String[0]));
+	}
+
+	@Override
+	public void unregister() {
+		super.unregister();
+		BanAPI.shutdown();
 	}
 
 }

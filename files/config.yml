@@ -39,6 +39,13 @@ broadcast: "&0[&c&lBROADCAST&0] &e{message}"
 # {reason}, {admin}, {id}, {startDate}
 # for temp mute & ban: {expireDate}, {expireAfter}
 bansystem:
+  not-specified-reason: "Uknown"
+  tab-completer-list-player-ips: false
+  tab-completer-reasons:
+  - "{reason}"
+  - "Breaking Rules"
+  - "Exploiting"
+  - "Hacking"
   timeFormat: "dd.MM.YY HH:mm"
   banned:
   - ""

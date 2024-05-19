@@ -8,6 +8,7 @@ import java.util.List;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import me.devtec.craftyserversystem.api.API;
 import me.devtec.craftyserversystem.commands.CssCommand;
 import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
 import me.devtec.shared.commands.selectors.Selector;
@@ -22,7 +23,6 @@ public class Banlist extends CssCommand {
 	public void register() {
 		if (isRegistered())
 			return;
-		BanAPI.init();
 
 		CommandStructure<CommandSender> cmd = CommandStructure.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
 			msgUsage(sender, "cmd");
@@ -62,15 +62,17 @@ public class Banlist extends CssCommand {
 			Entry entry = entries.get(i);
 			PlaceholdersExecutor executor;
 			if (entry.getDuration() == 0)
-				executor = PlaceholdersExecutor.i().add("reason", entry.getReason()).add("admin", entry.getAdmin() == null ? "Console" : entry.getAdmin()).add("id", entry.getId() + "")
+				executor = PlaceholdersExecutor.i().add("reason", entry.getReason() == null ? API.get().getConfigManager().getMain().getString("bansystem.not-specified-reason") : entry.getReason())
+						.add("admin", entry.getAdmin() == null ? "Console" : entry.getAdmin()).add("id", entry.getId() + "")
 						.add("startDate", BanAPI.getTimeFormat().format(Date.from(Instant.ofEpochSecond(entry.getStartDate()))));
 			else
-				executor = PlaceholdersExecutor.i().add("reason", entry.getReason()).add("admin", entry.getAdmin() == null ? "Console" : entry.getAdmin()).add("id", entry.getId() + "")
+				executor = PlaceholdersExecutor.i().add("reason", entry.getReason() == null ? API.get().getConfigManager().getMain().getString("bansystem.not-specified-reason") : entry.getReason())
+						.add("admin", entry.getAdmin() == null ? "Console" : entry.getAdmin()).add("id", entry.getId() + "")
 						.add("startDate", BanAPI.getTimeFormat().format(Date.from(Instant.ofEpochSecond(entry.getStartDate()))))
-						.add("expireAfter", TimeUtils.timeToString(System.currentTimeMillis() / 1000 - entry.getStartDate() + entry.getDuration()))
+						.add("expireAfter", TimeUtils.timeToString(entry.getStartDate() + entry.getDuration() - System.currentTimeMillis() / 1000))
 						.add("expireDate", BanAPI.getTimeFormat().format(Date.from(Instant.ofEpochSecond(entry.getStartDate() + entry.getDuration()))));
 			String statusPath = entry.isCancelled() ? "cancelled"
-					: entry.getDuration() == 0 ? "active" : System.currentTimeMillis() / 1000 - entry.getStartDate() + entry.getDuration() <= 0 ? "inactive" : "active";
+					: entry.getDuration() == 0 ? "active" : entry.getStartDate() + entry.getDuration() - System.currentTimeMillis() / 1000 <= 0 ? "inactive" : "active";
 			switch (entry.getType()) {
 			case BAN:
 				msg(sender, "entry." + statusPath + ".ban." + (entry.getDuration() == 0 ? "perm" : "temp"), executor.add("position", i + 1));
@@ -87,6 +89,12 @@ public class Banlist extends CssCommand {
 			}
 			msg(sender, "footer", placeholders);
 		}
+	}
+
+	@Override
+	public void unregister() {
+		super.unregister();
+		BanAPI.shutdown();
 	}
 
 }
