@@ -7,6 +7,9 @@ css:
   perms:
     cmd: "css.cmd.css"
 fly:
+  # You can simply disable registering of command via setting value of enabled to false
+  # If "enabled" section is missing, default value is true
+  # enabled: false
   usage:
     other: "/fly [player] {true/false}"
   cmd: [fly]

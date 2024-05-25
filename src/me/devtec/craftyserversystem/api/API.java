@@ -14,6 +14,7 @@ import me.devtec.craftyserversystem.Loader;
 import me.devtec.craftyserversystem.commands.CssCommand;
 import me.devtec.craftyserversystem.commands.internal.BalanceTop;
 import me.devtec.craftyserversystem.commands.internal.Vanish;
+import me.devtec.craftyserversystem.commands.internal.bansystem.BanAPI;
 import me.devtec.craftyserversystem.economy.CssEconomy;
 import me.devtec.craftyserversystem.economy.CssEconomyHook;
 import me.devtec.craftyserversystem.economy.EconomyHook;
@@ -279,7 +280,8 @@ public class API {
 	}
 
 	public void shutdown() {
-		getCommandsAPI().getBanAPI().shutdown();
+		if (BanAPI.isInit())
+			getCommandsAPI().getBanAPI().shutdown();
 		placeholder.unregister();
 		metrics.shutdown();
 		if (NametagManagerAPI.get().isLoaded())
@@ -290,17 +292,16 @@ public class API {
 		if (!ScoreboardListener.data.isEmpty())
 			for (UserScoreboardData data : ScoreboardListener.data.values())
 				data.removeScoreboard();
-		if (Bukkit.getPluginManager().getPlugin("Vault") != null) {
-			Config economy = getConfigManager().getEconomy();
-			if (economy.getBoolean("enabled"))
+		if (Bukkit.getPluginManager().getPlugin("Vault") != null)
+			if (getEconomyHook().getClass().getSimpleName().equals("CssEconomyVaultImplementation"))
 				VaultEconomyHook.unregisterOurEconomy();
-		}
 		setEconomyHook(new EmptyEconomyHook());
 	}
 
 	public void reload() {
 		// Unload
-		getCommandsAPI().getBanAPI().shutdown();
+		if (BanAPI.isInit())
+			getCommandsAPI().getBanAPI().shutdown();
 		if (getSqlConnection() != null)
 			try {
 				getSqlConnection().close();
@@ -317,11 +318,9 @@ public class API {
 		if (!ScoreboardListener.data.isEmpty())
 			for (UserScoreboardData data : ScoreboardListener.data.values())
 				data.removeScoreboard();
-		if (Bukkit.getPluginManager().getPlugin("Vault") != null) {
-			Config economy = getConfigManager().getEconomy();
-			if (economy.getBoolean("enabled"))
+		if (Bukkit.getPluginManager().getPlugin("Vault") != null)
+			if (getEconomyHook().getClass().getSimpleName().equals("CssEconomyVaultImplementation"))
 				VaultEconomyHook.unregisterOurEconomy();
-		}
 		setEconomyHook(new EmptyEconomyHook());
 		// Load
 		getConfigManager().reloadAll();

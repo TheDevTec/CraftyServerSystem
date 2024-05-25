@@ -453,6 +453,8 @@ public class NametagManagerAPI {
 					if (player != null)
 						for (Object item : (List<?>) Ref.get(packet, metaData)) {
 							Object pose = Ref.get(item, valueField);
+							if (pose == null)
+								continue;
 							if (Ref.isOlderThan(13)) {
 								if (pose instanceof Byte)
 									switch ((byte) pose) {

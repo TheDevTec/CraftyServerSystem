@@ -44,6 +44,10 @@ public class BanAPI {
 		return instance;
 	}
 
+	public static boolean isInit() {
+		return instance != null && instance.management != null;
+	}
+
 	public SimpleDateFormat getTimeFormat() {
 		return format;
 	}
@@ -64,8 +68,8 @@ public class BanAPI {
 			try {
 				API.get().getSqlConnection().createTable("banlist",
 						new Row[] { new Row("id", SqlFieldType.INT, 255), new Row("type", SqlFieldType.VARCHAR, 255), new Row("user", SqlFieldType.VARCHAR, 255),
-								new Row("reason", SqlFieldType.VARCHAR, 255, true), new Row("admin", SqlFieldType.VARCHAR, 255, true), new Row("duration", SqlFieldType.LONG, 255, true),
-								new Row("startDate", SqlFieldType.LONG, 255), new Row("cancelled", SqlFieldType.TINYINT, 1) });
+								new Row("reason", SqlFieldType.VARCHAR, 255, true), new Row("admin", SqlFieldType.VARCHAR, 255, true), new Row("duration", SqlFieldType.LONG),
+								new Row("startDate", SqlFieldType.LONG), new Row("cancelled", SqlFieldType.TINYINT, 1) });
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}

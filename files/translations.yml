@@ -607,6 +607,7 @@ bansystem:
 # {user}, {startDate}, {admin}, {reason}, {id}, {page}, {totalPages}, {nextPage}, {previousPage}
 banlist:
   header: "{prefix} Banlist of user &e{user}&7 {page}/{totalPages}"
+  empty: "{prefix} Banlist of user &e{user} &7is empty."
   # {position}
   entry:
     active:
