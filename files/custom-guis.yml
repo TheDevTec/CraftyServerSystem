@@ -134,12 +134,12 @@ gui0:
           - ""
           - "&7Click to claim free diamond!"
           - ""
-      onUse:
-        updateItem: true
-        updateInventory: false
-        commands:
-        - "give {player} diamond 1"
-        messages: []
+          onUse:
+            updateItem: true
+            updateInventory: false
+            commands:
+            - "give {player} diamond 1"
+            messages: []
     s:
       action: USE_ITEM
       item:

@@ -62,7 +62,8 @@ public class ConfigurationManager {
 		merge(kits, "kits.yml");
 		merge(economy, "economy.yml");
 		merge(placeholders, "placeholders.yml");
-		merge(customGuis, "custom-guis.yml");
+		if (customGuis.getKeys().isEmpty())
+			merge(customGuis, "custom-guis.yml");
 		if (!serverMotd.exists("motds"))
 			merge(serverMotd, "server-motd.yml");
 		merge(consoleFilter, "console-filter.yml");
