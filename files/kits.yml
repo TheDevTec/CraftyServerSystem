@@ -55,7 +55,7 @@ first-join:
   # leather.color:#RRGGBB
   #
   # 
-  # In the case of POTION, SPLATH_POTION or LINGERING_POTION:
+  # In the case of POTION, SPLASH_POTION or LINGERING_POTION:
   # potion.color:#RRGGBB
   # potion.effects:["potionEffectType:durability:amplifier:ambient:hasParticles"]
   #       <--- ambient and hasParticles is boolean = true or false --->
