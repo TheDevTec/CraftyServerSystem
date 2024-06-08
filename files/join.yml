@@ -6,7 +6,7 @@ join:
     text: "{prefix} Welcome player {player} on the server!"
     broadcast: []
     commands:
-    - "kit firstJoin {player}"
+    - "kit first-join {player}"
   normal:
     text: "{prefix} Player {player} joined the server"
     broadcast: []
