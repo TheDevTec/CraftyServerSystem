@@ -20,12 +20,12 @@ public interface HologramHolder {
 	Field entityId = Ref.field(entityTeleport, BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "id" : "a"), posX = Ref.field(entityTeleport, BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "x" : "b"),
 			posY = Ref.field(entityTeleport, BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "y" : "c"), posZ = Ref.field(entityTeleport, BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "z" : "d"),
 			onGround = Ref.field(entityTeleport, BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "onGround" : "g");
-	Field metadataId = Ref.isNewerThan(20) || Ref.serverVersionInt() == 19 && Ref.serverVersionRelease() >= 2 ? null : Ref.field(metadataClass, int.class);
+	Field metadataId = Ref.isNewerThan(19) || Ref.serverVersionInt() == 19 && Ref.serverVersionRelease() >= 2 ? null : Ref.field(metadataClass, int.class);
 	Field metadataList = Ref.field(metadataClass, List.class);
 
 	static Object packetMetadata(int id, List<?> list) {
 		try {
-			return Ref.isNewerThan(20) || Ref.serverVersionInt() == 19 && Ref.serverVersionRelease() >= 2 ? Ref.newInstance(metadataConstructor, id, list)
+			return Ref.isNewerThan(19) || Ref.serverVersionInt() == 19 && Ref.serverVersionRelease() >= 2 ? Ref.newInstance(metadataConstructor, id, list)
 					: initMetadataPacket(Ref.newUnsafeInstance(metadataClass), id, list);
 		} catch (Exception e) {
 			return null;

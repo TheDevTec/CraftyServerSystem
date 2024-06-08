@@ -143,7 +143,7 @@ public class NametagHologram extends Hologram {
 	}
 
 	private static Object makeItemInstance(Object dataIndex, Object value) {
-		return Ref.isNewerThan(20) || Ref.serverVersionInt() == 19 && Ref.serverVersionRelease() >= 2 ? Ref.invoke(Ref.newInstance(dataWatcherItem, dataIndex, value), dataWatcherMakeInstance)
+		return Ref.isNewerThan(19) || Ref.serverVersionInt() == 19 && Ref.serverVersionRelease() >= 2 ? Ref.invoke(Ref.newInstance(dataWatcherItem, dataIndex, value), dataWatcherMakeInstance)
 				: Ref.isOlderThan(12)
 						? Ref.newInstance(dataWatcherItem, value.getClass() == String.class ? 4 : 0, (int) dataIndex, value instanceof Boolean ? (boolean) value ? (byte) 1 : (byte) 0 : value)
 						: Ref.newInstance(dataWatcherItem, dataIndex, value);
