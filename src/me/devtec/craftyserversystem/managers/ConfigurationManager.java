@@ -19,6 +19,7 @@ public class ConfigurationManager {
 	private Config join;
 	private Config quit;
 	private Config tab;
+	private Config bossbar;
 	private Config scoreboard;
 	private Config chat;
 	private Config kits;
@@ -41,6 +42,7 @@ public class ConfigurationManager {
 		chat = new Config(FILES_PATH + "events/chat.yml");
 		scoreboard = new Config(FILES_PATH + "events/scoreboard.yml");
 		tab = new Config(FILES_PATH + "events/tablist.yml");
+		bossbar = new Config(FILES_PATH + "events/bossbar.yml");
 		kits = new Config(FILES_PATH + "kits.yml");
 		economy = new Config(FILES_PATH + "economy.yml");
 		customGuis = new Config(FILES_PATH + "custom-guis.yml");
@@ -59,6 +61,7 @@ public class ConfigurationManager {
 		merge(chat, "chat.yml");
 		merge(scoreboard, "scoreboard.yml");
 		merge(tab, "tablist.yml");
+		merge(bossbar, "bossbar.yml");
 		merge(kits, "kits.yml");
 		merge(economy, "economy.yml");
 		merge(placeholders, "placeholders.yml");
@@ -158,6 +161,10 @@ public class ConfigurationManager {
 		return tab;
 	}
 
+	public Config getBossBar() {
+		return bossbar;
+	}
+
 	public Config getQuit() {
 		return quit;
 	}
@@ -184,6 +191,7 @@ public class ConfigurationManager {
 		getQuit().reload();
 		getChat().reload();
 		getTab().reload();
+		getBossBar().reload();
 		getKits().reload();
 		getEconomy().reload();
 		getPlaceholders().reload();

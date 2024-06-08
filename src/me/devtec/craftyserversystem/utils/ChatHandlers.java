@@ -980,6 +980,7 @@ public class ChatHandlers {
 		Map<Integer, String> wordsInRow = new HashMap<>(floodMinWordsBetweenSameToIgnore);
 		Map<String, Integer> counterOfSameWords = new HashMap<>();
 
+		byte urlCount = 0;
 		int start = 0;
 		int[] currentSection = ignoredSections == null ? null : ignoredSections[posOfSection];
 		charLoop: for (int i = 0; i < input.length(); i++) {
@@ -1001,6 +1002,15 @@ public class ChatHandlers {
 			}
 
 			char origin = input.charAt(i);
+			if (origin == 'w') {
+				++times;
+				if (urlCount <= 2) {
+					filtered.append(origin);
+					++urlCount;
+					continue;
+				}
+			} else
+				urlCount = 0;
 			if (origin == ' ') {
 				String word = filtered.substring(start).toLowerCase();
 				if (filtered.charAt(filtered.length() - 1) != ' ')

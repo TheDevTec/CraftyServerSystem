@@ -71,7 +71,7 @@ public class UserTablistData extends TablistData {
 		}
 		String header = headerContainer.toString();
 		String footer = footerContainer.toString();
-		if ((!header.equals(previousHeader) || !footer.equals(previousFooter))) {
+		if (!header.equals(previousHeader) || !footer.equals(previousFooter)) {
 			previousHeader = header;
 			previousFooter = footer;
 			Object tabPacket = BukkitLoader.getNmsProvider().packetPlayerListHeaderFooter(ComponentAPI.fromString(header), ComponentAPI.fromString(footer));
@@ -137,7 +137,7 @@ public class UserTablistData extends TablistData {
 		nametag.remove();
 		BukkitLoader.getPacketHandler().send(yellowNumber.keySet(), BukkitLoader.getNmsProvider().packetScoreboardScore(Action.REMOVE, "css_yn", player.getName(), 0));
 		yellowNumber.clear();
-		BukkitLoader.getPacketHandler().send(player, createObjectivePacket(0, "css_yn", "", previous == YellowNumberDisplayMode.INTEGER));
+		BukkitLoader.getPacketHandler().send(player, createObjectivePacket(1, "css_yn", "", previous == YellowNumberDisplayMode.INTEGER));
 		if (NametagManagerAPI.get().getPlayers().size() == 1)
 			NametagManagerAPI.get().getPlayers().remove(nametag);
 		else

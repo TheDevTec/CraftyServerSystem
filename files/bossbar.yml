@@ -1,0 +1,54 @@
+enabled: false
+
+# per-world-settings
+world:
+  # world name
+  exampleWorld:
+    player:
+      # player name
+      test:
+        text: "Welcome back, {player}!"
+        progress: '100.0'
+        color: "BLUE"
+        style: "SEGMENTED_20"
+    group:
+      # group name
+      default:
+        text: "You're right now playing on the best server ever!"
+        progress: '100.0'
+        color: "YELLOW"
+        style: "SOLID"
+
+# This settings can be overriden by per-world-settings
+# per-player-settings
+player:
+  # player name
+  test:
+    text: "Welcome back, {player}!"
+    progress: '100.0'
+    color: "YELLOW"
+    style: "SOLID"
+
+# This settings can be overriden by per-player-settings
+# per-group-settings
+group:
+  # group name
+  default:
+    text: "Welcome back, {player}!"
+    progress: '100.0'
+    color: "YELLOW"
+    style: "SOLID"
+
+text: "Online players {online}/{max_players}"
+# You can use here placeholders & math to calculate progress!
+# Progress can be between 0.0 and 100.0
+progress: '100.0'
+# BossBar's color & style can be modified only on server version 1.9+
+# Colors: PINK, BLUE, RED, GREEN, YELLOW, PURPLE, WHITE
+color: "YELLOW"
+# Styles: SOLID, SEGMENTED_6, SEGMENTED_10, SEGMENTED_12, SEGMENTED_20
+style: "SOLID"
+
+# How frequently to refresh bossbar data
+# 20 ticks = 1s
+data-reflesh-every-ticks: 1
