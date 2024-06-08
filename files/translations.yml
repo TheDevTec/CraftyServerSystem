@@ -580,6 +580,24 @@ scoreboardhide:
       false: "{prefix} Scoreboard is already displayed."
     true: "{prefix} Scoreboard has been hidden."
     false: "{prefix} Scoreboard has been displayed."
+    
+bossbarhide:
+  other:
+    already-set-to:
+      true: "{prefix} Well, you tried but &e{target}&7's bossbar is already hidden."
+      false: "{prefix} Well, you tried but &e{target}&7's bossbar is already displayed."
+    true:
+      sender: "{prefix} You have made &e{target}&7's bossbar disappear."
+      target: "{prefix} Where did your bossbar go? Ask &e{sender}&7. He made sure that you won't be able to see it."
+    false:
+      sender: "{prefix} You have made &e{target}&7's bossbar displayed."
+      target: "{prefix} If you are wondering why you can see your bossbar, ask &e{sender}&7. He made sure that you will be able to see it."
+  self:
+    already-set-to:
+      true: "{prefix} Bossbar is already hidden."
+      false: "{prefix} Bossbar is already displayed."
+    true: "{prefix} Bossbar has been hidden."
+    false: "{prefix} Bossbar has been displayed."
 
 # {user}
 unban:

@@ -6,6 +6,7 @@ css:
   cmd: [css,craftyserversystem]
   perms:
     cmd: "css.cmd.css"
+
 fly:
   # You can simply disable registering of command via setting value of enabled to false
   # If "enabled" section is missing, default value is true
@@ -596,7 +597,15 @@ invsee:
   cmd: [invsee]
   perms:
     cmd: "css.cmd.invsee"
-    
+
+bossbarhide:
+  usage:
+    cmd: "/bossbarhide [player] {true/false}"
+  cmd: [bossbarhide,barhide]
+  perms:
+    cmd: "css.cmd.bossbarhide"
+    other: "css.cmd.bossbarhide.other"
+
 scoreboardhide:
   usage:
     usage: "/scoreboardhide [player] {true/false}"
