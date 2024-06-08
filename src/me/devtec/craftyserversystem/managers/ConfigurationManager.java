@@ -18,6 +18,7 @@ public class ConfigurationManager {
 	private Config cooldowns;
 	private Config join;
 	private Config quit;
+	private Config death;
 	private Config tab;
 	private Config bossbar;
 	private Config scoreboard;
@@ -39,6 +40,7 @@ public class ConfigurationManager {
 		cooldowns = new Config(FILES_PATH + "cooldowns.yml");
 		join = new Config(FILES_PATH + "events/join.yml");
 		quit = new Config(FILES_PATH + "events/quit.yml");
+		death = new Config(FILES_PATH + "events/death.yml");
 		chat = new Config(FILES_PATH + "events/chat.yml");
 		scoreboard = new Config(FILES_PATH + "events/scoreboard.yml");
 		tab = new Config(FILES_PATH + "events/tablist.yml");
@@ -58,6 +60,7 @@ public class ConfigurationManager {
 		merge(cooldowns, "cooldowns.yml");
 		merge(join, "join.yml");
 		merge(quit, "quit.yml");
+		merge(death, "death.yml");
 		merge(chat, "chat.yml");
 		merge(scoreboard, "scoreboard.yml");
 		merge(tab, "tablist.yml");
@@ -153,6 +156,10 @@ public class ConfigurationManager {
 		return join;
 	}
 
+	public Config getDeath() {
+		return death;
+	}
+
 	public Config getScoreboard() {
 		return scoreboard;
 	}
@@ -189,6 +196,7 @@ public class ConfigurationManager {
 		getScoreboard().reload();
 		getJoin().reload();
 		getQuit().reload();
+		getDeath().reload();
 		getChat().reload();
 		getTab().reload();
 		getBossBar().reload();

@@ -1,0 +1,14 @@
+enabled: true
+
+# When player dies
+death:
+  # Hide death message
+  hide-death-message: false
+  # This is global settings, you can also set per-player permission.
+  # Permission: css.death.keep-inventory
+  keep-inventory: false
+  # This is global settings, you can also set per-player permission.
+  # Permission: css.death.keep-exp
+  keep-exp: false
+  broadcast: []
+  commands: []
