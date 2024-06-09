@@ -549,15 +549,15 @@ enderchest:
 vanish:
   self:
     enabled: "{prefix} You have successfully become a ghost! Or you at least vanished."
-    disabled: "{prefix} You are a ghost no longer! Well, you just turned off your vanish."
+    disabled: "{prefix} You are no longer a ghost! Well, you just turned off your vanish."
   #  {sender}, {target}
   other:
     enabled:
       target: "{prefix} &e{sender}&7 has made you a ghost! Vanish has been turned on."
       sender: "{prefix} You made &e{target}&7 a ghost. His vanish has been turned on."
     disabled:
-      target: "{prefix} You are a ghost no longer! &e{sender}&7 turned off your vanish."
-      sender: "{prefix} &e{target} &7is a ghost no longer! His vanish is turned off."
+      target: "{prefix} You are no longer a ghost! &e{sender}&7 turned off your vanish."
+      sender: "{prefix} &e{target} &7is no longer a ghost! His vanish is turned off."
     
 invsee:
   open: "{prefix} Let's steal something from &e{target}&7's inventory!"
