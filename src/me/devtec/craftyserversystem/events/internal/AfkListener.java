@@ -19,6 +19,7 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 import me.devtec.craftyserversystem.api.API;
+import me.devtec.craftyserversystem.commands.internal.afk.AfkManager;
 import me.devtec.craftyserversystem.events.CssListener;
 import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
 import me.devtec.shared.Pair;
@@ -35,7 +36,7 @@ import me.devtec.theapi.bukkit.packetlistener.PacketListener;
 
 public class AfkListener implements CssListener {
 
-	private static Map<UUID, Long> autoAfk = new ConcurrentHashMap<>();
+	public static Map<UUID, Long> autoAfk;
 	private Map<UUID, int[]> positions;
 	private Map<UUID, Pair> movementLocs;
 	private boolean invClickEvent;
@@ -70,7 +71,8 @@ public class AfkListener implements CssListener {
 		boolean movementEvent = getConfig().getBoolean("afk.movement-reset-afk");
 		boolean sameMovementPattern = getConfig().getBoolean("afk.check-same-pattern-movement");
 		long afkTime = Math.max(TimeUtils.timeFromString(getConfig().getString("afk.time")), 0);
-		if (afkTime != 0)
+		if (afkTime != 0) {
+			autoAfk = new ConcurrentHashMap<>();
 			task = new Tasker() {
 
 				@Override
@@ -91,6 +93,7 @@ public class AfkListener implements CssListener {
 						}
 				}
 			}.runRepeating(20, 20);
+		}
 		if (movementEvent) {
 			positions = new ConcurrentHashMap<>();
 			if (sameMovementPattern)
@@ -160,7 +163,7 @@ public class AfkListener implements CssListener {
 							int[] previous = positions.computeIfAbsent(uuid, id -> new int[] { x, z });
 							if (x != previous[0] || z != previous[1]) {
 								positions.put(uuid, new int[] { x, z });
-								stopAfk(uuid, true);
+								AfkManager.getProvider().stopAfk(uuid, true);
 							}
 						}
 					}
@@ -207,52 +210,20 @@ public class AfkListener implements CssListener {
 		packetListener = null;
 	}
 
-	public static void startAfk(UUID uuid) {
-		autoAfk.put(uuid, 0L);
-		Config user = me.devtec.shared.API.getUser(uuid);
-		if (!user.getBoolean("afk")) {
-			user.set("afk", true);
-			PlaceholdersExecutor placeholders = PlaceholdersExecutor.i().add("player", me.devtec.shared.API.offlineCache().lookupNameById(uuid)).papi(uuid);
-			// Send json message
-			API.get().getMsgManager().sendMessageFromFile(API.get().getConfigManager().getMain(), "afk.start.broadcast", placeholders, BukkitLoader.getOnlinePlayers());
-			BukkitLoader.getNmsProvider().postToMainThread(() -> {
-				for (String cmd : placeholders.apply(API.get().getConfigManager().getMain().getStringList("afk.start.commands")))
-					Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd);
-			});
-		}
-	}
-
-	public static void stopAfk(UUID uuid, boolean processMessages) {
-		autoAfk.put(uuid, System.currentTimeMillis() / 1000);
-		Config user = me.devtec.shared.API.getUser(uuid);
-		if (user.getBoolean("afk")) {
-			user.set("afk", false);
-			if (processMessages) {
-				PlaceholdersExecutor placeholders = PlaceholdersExecutor.i().add("player", me.devtec.shared.API.offlineCache().lookupNameById(uuid)).papi(uuid);
-				// Send json message
-				API.get().getMsgManager().sendMessageFromFile(API.get().getConfigManager().getMain(), "afk.stop.broadcast", placeholders, BukkitLoader.getOnlinePlayers());
-				BukkitLoader.getNmsProvider().postToMainThread(() -> {
-					for (String cmd : placeholders.apply(API.get().getConfigManager().getMain().getStringList("afk.stop.commands")))
-						Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd);
-				});
-			}
-		}
-	}
-
 	@EventHandler
 	public void onJoin(PlayerJoinEvent e) {
-		stopAfk(e.getPlayer().getUniqueId(), false);
+		AfkManager.getProvider().stopAfk(e.getPlayer().getUniqueId(), false);
 	}
 
 	@EventHandler
 	public void onChat(AsyncPlayerChatEvent e) {
-		stopAfk(e.getPlayer().getUniqueId(), true);
+		AfkManager.getProvider().stopAfk(e.getPlayer().getUniqueId(), true);
 	}
 
 	@EventHandler
 	public void onBlockPlace(BlockPlaceEvent e) {
 		if (blockPlace)
-			stopAfk(e.getPlayer().getUniqueId(), true);
+			AfkManager.getProvider().stopAfk(e.getPlayer().getUniqueId(), true);
 	}
 
 	@EventHandler
@@ -267,19 +238,19 @@ public class AfkListener implements CssListener {
 	@EventHandler
 	public void onInvClick(InventoryClickEvent e) {
 		if (invClickEvent)
-			stopAfk(e.getWhoClicked().getUniqueId(), true);
+			AfkManager.getProvider().stopAfk(e.getWhoClicked().getUniqueId(), true);
 	}
 
 	@EventHandler
 	public void onInvDrag(InventoryDragEvent e) {
 		if (invClickEvent)
-			stopAfk(e.getWhoClicked().getUniqueId(), true);
+			AfkManager.getProvider().stopAfk(e.getWhoClicked().getUniqueId(), true);
 	}
 
 	@EventHandler
 	public void onCommand(PlayerCommandPreprocessEvent e) {
 		if (commandEvent && !isAfkCommand(e.getMessage().substring(1).toLowerCase().split(" ")[0]))
-			stopAfk(e.getPlayer().getUniqueId(), true);
+			AfkManager.getProvider().stopAfk(e.getPlayer().getUniqueId(), true);
 	}
 
 	private boolean isAfkCommand(String cmd) {
@@ -287,9 +258,5 @@ public class AfkListener implements CssListener {
 			if (cmd.equals(afkCommand.toLowerCase()))
 				return true;
 		return false;
-	}
-
-	public static boolean isAfk(UUID uniqueId) {
-		return me.devtec.shared.API.getUser(uniqueId).getBoolean("afk");
 	}
 }

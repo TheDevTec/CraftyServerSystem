@@ -7,7 +7,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import me.devtec.craftyserversystem.commands.CssCommand;
-import me.devtec.craftyserversystem.events.internal.AfkListener;
+import me.devtec.craftyserversystem.commands.internal.afk.AfkManager;
 import me.devtec.shared.commands.selectors.Selector;
 import me.devtec.shared.commands.structures.CommandStructure;
 
@@ -23,18 +23,18 @@ public class Afk extends CssCommand {
 				msgUsage(sender, "cmd");
 				return;
 			}
-			if (!AfkListener.isAfk(((Player) sender).getUniqueId()))
-				AfkListener.startAfk(((Player) sender).getUniqueId());
+			if (!AfkManager.getProvider().isAfk(((Player) sender).getUniqueId()))
+				AfkManager.getProvider().startAfk(((Player) sender).getUniqueId(), true);
 			else
-				AfkListener.stopAfk(((Player) sender).getUniqueId(), true);
+				AfkManager.getProvider().stopAfk(((Player) sender).getUniqueId(), true);
 		}).permission(getPerm("cmd"));
 		// other
 		cmd.selector(Selector.PLAYER, (sender, structure, args) -> {
 			Player target = Bukkit.getPlayer(args[0]);
-			if (!AfkListener.isAfk(target.getUniqueId()))
-				AfkListener.startAfk(target.getUniqueId());
+			if (!AfkManager.getProvider().isAfk(target.getUniqueId()))
+				AfkManager.getProvider().startAfk(target.getUniqueId(), true);
 			else
-				AfkListener.stopAfk(target.getUniqueId(), true);
+				AfkManager.getProvider().stopAfk(target.getUniqueId(), true);
 		}).permission(getPerm("other"));
 		// register
 		List<String> cmds = getCommands();

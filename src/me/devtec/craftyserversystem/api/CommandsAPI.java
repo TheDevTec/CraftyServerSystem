@@ -1,5 +1,6 @@
 package me.devtec.craftyserversystem.api;
 
+import me.devtec.craftyserversystem.commands.internal.afk.AfkManager;
 import me.devtec.craftyserversystem.commands.internal.bansystem.BanAPI;
 import me.devtec.craftyserversystem.commands.internal.home.HomeManager;
 import me.devtec.craftyserversystem.commands.internal.msgsystem.MsgManager;
@@ -57,6 +58,15 @@ public class CommandsAPI {
 	 */
 	public WarpManager getWarpManager() {
 		return WarpManager.getProvider();
+	}
+
+	/**
+	 * Our own AfkManager with which you can manage afk status of online players
+	 *
+	 * @return AfkManager
+	 */
+	public AfkManager getAfkManager() {
+		return AfkManager.getProvider();
 	}
 
 }
