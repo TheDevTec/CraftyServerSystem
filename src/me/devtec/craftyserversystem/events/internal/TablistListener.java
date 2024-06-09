@@ -137,6 +137,21 @@ public class TablistListener implements CssListener {
 		}
 	}
 
+	@Override
+	public void unregister() {
+		if (refleshTaskId != 0)
+			Scheduler.cancelTask(refleshTaskId);
+		if (taskId != 0)
+			Scheduler.cancelTask(taskId);
+		if (NametagManagerAPI.get().isLoaded())
+			NametagManagerAPI.get().unload();
+		if (!TablistListener.data.isEmpty()) {
+			for (UserTablistData data : TablistListener.data.values())
+				data.removeTablist();
+			TablistListener.data.clear();
+		}
+	}
+
 	private void fill(TablistData data, String path) {
 		data.setHeader(getConfig().existsKey(path + "header") ? getConfig().getStringList(path + "header") : null);
 		data.setFooter(getConfig().existsKey(path + "footer") ? getConfig().getStringList(path + "footer") : null);

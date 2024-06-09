@@ -22,7 +22,6 @@ import me.devtec.craftyserversystem.economy.EmptyEconomyHook;
 import me.devtec.craftyserversystem.economy.VaultEconomyHook;
 import me.devtec.craftyserversystem.events.internal.BossBarListener;
 import me.devtec.craftyserversystem.events.internal.ScoreboardListener;
-import me.devtec.craftyserversystem.events.internal.TablistListener;
 import me.devtec.craftyserversystem.managers.CommandManager;
 import me.devtec.craftyserversystem.managers.ConfigurationManager;
 import me.devtec.craftyserversystem.managers.CooldownManager;
@@ -32,8 +31,6 @@ import me.devtec.craftyserversystem.permission.EmptyPermissionHook;
 import me.devtec.craftyserversystem.permission.PermissionHook;
 import me.devtec.craftyserversystem.utils.bossbar.UserBossBarData;
 import me.devtec.craftyserversystem.utils.scoreboard.UserScoreboardData;
-import me.devtec.craftyserversystem.utils.tablist.UserTablistData;
-import me.devtec.craftyserversystem.utils.tablist.nametag.NametagManagerAPI;
 import me.devtec.shared.Ref;
 import me.devtec.shared.annotations.Nullable;
 import me.devtec.shared.database.DatabaseAPI;
@@ -276,6 +273,12 @@ public class API {
 					UserScoreboardData online = ScoreboardListener.data.get(player);
 					return online != null ? "" + online.isHidden() : null;
 				}
+				if (text.equals("css_bossbar")) {
+					UserBossBarData online = BossBarListener.data.get(player);
+					return online != null ? "" + online.isHidden() : null;
+				}
+				if (text.equals("css_afk"))
+					return me.devtec.shared.API.getUser(player).getBoolean("afk") + "";
 				return null;
 			}
 		}.register();
@@ -286,23 +289,7 @@ public class API {
 			getCommandsAPI().getBanAPI().shutdown();
 		placeholder.unregister();
 		metrics.shutdown();
-		if (NametagManagerAPI.get().isLoaded())
-			NametagManagerAPI.get().unload();
-		if (!TablistListener.data.isEmpty()) {
-			for (UserTablistData data : TablistListener.data.values())
-				data.removeTablist();
-			TablistListener.data.clear();
-		}
-		if (!BossBarListener.data.isEmpty()) {
-			for (UserBossBarData data : BossBarListener.data.values())
-				data.removeBossBar();
-			BossBarListener.data.clear();
-		}
-		if (!ScoreboardListener.data.isEmpty()) {
-			for (UserScoreboardData data : ScoreboardListener.data.values())
-				data.removeScoreboard();
-			ScoreboardListener.data.clear();
-		}
+		getListenerManager().unregister();
 		if (Bukkit.getPluginManager().getPlugin("Vault") != null)
 			if (getEconomyHook().getClass().getSimpleName().equals("CssEconomyVaultImplementation"))
 				VaultEconomyHook.unregisterOurEconomy();
@@ -321,23 +308,6 @@ public class API {
 			}
 		getCommandManager().unregister();
 		getListenerManager().unregister();
-		if (NametagManagerAPI.get().isLoaded())
-			NametagManagerAPI.get().unload();
-		if (!TablistListener.data.isEmpty()) {
-			for (UserTablistData data : TablistListener.data.values())
-				data.removeTablist();
-			TablistListener.data.clear();
-		}
-		if (!BossBarListener.data.isEmpty()) {
-			for (UserBossBarData data : BossBarListener.data.values())
-				data.removeBossBar();
-			BossBarListener.data.clear();
-		}
-		if (!ScoreboardListener.data.isEmpty()) {
-			for (UserScoreboardData data : ScoreboardListener.data.values())
-				data.removeScoreboard();
-			ScoreboardListener.data.clear();
-		}
 		if (Bukkit.getPluginManager().getPlugin("Vault") != null)
 			if (getEconomyHook().getClass().getSimpleName().equals("CssEconomyVaultImplementation"))
 				VaultEconomyHook.unregisterOurEconomy();

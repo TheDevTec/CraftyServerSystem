@@ -7,3 +7,10 @@ vanish:
     true: " &0[&7V&0]"
     false: ""
     _DEFAULT: "{placeholder}"
+
+afk:
+  placeholder: "%css_afk%"
+  replace:
+    true: "&c▪"
+    false: "&a▪"
+    _DEFAULT: "{placeholder}"

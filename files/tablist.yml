@@ -8,7 +8,7 @@ world:
       # player name
       test:
         tab:
-          prefix: "&6CSS &f"
+          prefix: "{afk} &6CSS &f"
           suffix: ""
         tag:
           prefix: "&6CSS &f"
@@ -20,7 +20,7 @@ world:
       # group name
       default:
         tab:
-          prefix: "&7"
+          prefix: "{afk} &7"
           suffix: ""
         tag:
           prefix: "&7"
@@ -32,7 +32,7 @@ player:
   # player name
   test:
     tab:
-      prefix: "&7Player &f"
+      prefix: "{afk} &7Player &f"
       suffix: ""
     tag:
       prefix: "&7Player &f"
@@ -45,7 +45,7 @@ group:
   default:
     tab:
       format: "{prefix}{player}{suffix}"
-      prefix: "&7Player &f"
+      prefix: "{afk} &7Player &f"
       suffix: "{vanish}"
     tag:
       format: "{prefix}{player}{suffix}"
@@ -69,7 +69,7 @@ footer:
 # Default tab & tag format when group attemp fail
 tab:
   format: "{prefix}{player}{suffix}"
-  prefix: "&cInvalid &f"
+  prefix: "{afk} &cInvalid &f"
   suffix: "{vanish}"
 tag:
   format: "{prefix}{player}{suffix}"

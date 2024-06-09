@@ -15,7 +15,8 @@ public class TablistLP {
 	public TablistLP register(TablistListener instance) {
 		lpListener = LuckPermsProvider.get().getEventBus().subscribe(Loader.getPlugin(), UserDataRecalculateEvent.class, e -> {
 			UserTablistData userData = TablistListener.data.get(e.getUser().getUniqueId());
-			TablistListener.data.put(e.getUser().getUniqueId(), instance.generateData(userData.getPlayer()));
+			if (userData != null)
+				TablistListener.data.put(e.getUser().getUniqueId(), instance.generateData(userData.getPlayer()));
 		});
 		return this;
 	}

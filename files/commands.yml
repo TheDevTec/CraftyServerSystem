@@ -6,6 +6,14 @@ css:
   cmd: [css,craftyserversystem]
   perms:
     cmd: "css.cmd.css"
+    
+afk:
+  usage:
+    cmd: "/afk [player]"
+  cmd: [afk]
+  perms:
+    cmd: "css.cmd.afk"
+    other: "css.cmd.afk.other"
 
 fly:
   # You can simply disable registering of command via setting value of enabled to false

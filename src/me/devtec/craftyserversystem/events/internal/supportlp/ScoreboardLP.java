@@ -15,8 +15,9 @@ public class ScoreboardLP {
 	public ScoreboardLP register(ScoreboardListener instance) {
 		lpListener = LuckPermsProvider.get().getEventBus().subscribe(Loader.getPlugin(), UserDataRecalculateEvent.class, e -> {
 			UserScoreboardData userData = ScoreboardListener.data.get(e.getUser().getUniqueId());
-			if (userData.shouldUpdateData(e.getData().getMetaData().getPrimaryGroup()))
-				ScoreboardListener.data.put(e.getUser().getUniqueId(), instance.generateData(userData.getPlayer()));
+			if (userData != null)
+				if (userData.shouldUpdateData(e.getData().getMetaData().getPrimaryGroup()))
+					ScoreboardListener.data.put(e.getUser().getUniqueId(), instance.generateData(userData.getPlayer()));
 		});
 		return this;
 	}

@@ -1,5 +1,31 @@
 prefix: "&6&lS&f&lerver &8&l»&7"
 
+afk:
+  # Time to to trigger auto-afk
+  # Set to 0 to disable auto-afk function
+  time: 5min
+  # When player click in his inventory, afk time'll reset
+  # Useful when you have minigames on your server or player is long time sorting his chests or something like this
+  inventory-click-reset-afk: true
+  # When player send any command, afk time'll reset
+  command-reset-afk: true
+  # When player's X or Z position is changed, afk time'll reset
+  movement-reset-afk: true
+  # When player place block, afk time'll reset
+  block-place-reset-afk: true
+  # When player is moving in same pattern without changing head position, he will be marked as afk
+  check-same-pattern-movement: true
+  # Commands & broadcast messages when player start afking (via auto-afk or command)
+  start:
+    commands: []
+    broadcast:
+    - "{prefix} &e{player} &7is AFK."
+  # Commands & broadcast messages when player stop afking
+  stop:
+    commands: []
+    broadcast:
+    - "{prefix} &e{player} &7is no longer AFK."
+
 # Used for saving vanish in the database
 sql:
   enabled: false

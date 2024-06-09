@@ -37,6 +37,7 @@ public class ScoreboardListener implements CssListener {
 	private ScoreboardData global;
 	public static Map<UUID, UserScoreboardData> data = new ConcurrentHashMap<>();
 	private int taskId;
+	private int refleshTaskId;
 	private ScoreboardLP lpListener;
 	private List<String> disabledInWorlds;
 
@@ -62,6 +63,8 @@ public class ScoreboardListener implements CssListener {
 		}
 		if (taskId != 0)
 			Scheduler.cancelTask(taskId);
+		if (refleshTaskId != 0)
+			Scheduler.cancelTask(refleshTaskId);
 		disabledInWorlds = getConfig().getStringList("disabled-in-worlds");
 		for (String world : getConfig().getKeys("world")) {
 			PerWorldScoreboardData pw;
@@ -96,7 +99,7 @@ public class ScoreboardListener implements CssListener {
 		global = new ScoreboardData();
 		global.setTitle(getConfig().getString("title"));
 		global.setLines(getConfig().getStringList("lines"));
-		taskId = new Tasker() {
+		refleshTaskId = new Tasker() {
 
 			@Override
 			public void run() {
@@ -125,7 +128,7 @@ public class ScoreboardListener implements CssListener {
 		if (API.get().getPermissionHook().getClass() == LuckPermsPermissionHook.class)
 			lpListener = new ScoreboardLP().register(this);
 		else if (API.get().getPermissionHook().getClass() == VaultPermissionHook.class)
-			new Tasker() {
+			taskId = new Tasker() {
 
 				@Override
 				public void run() {
@@ -136,6 +139,19 @@ public class ScoreboardListener implements CssListener {
 			}.runRepeating(20, 20);
 		for (Player player : BukkitLoader.getOnlinePlayers())
 			data.put(player.getUniqueId(), generateData(player));
+	}
+
+	@Override
+	public void unregister() {
+		if (refleshTaskId != 0)
+			Scheduler.cancelTask(refleshTaskId);
+		if (taskId != 0)
+			Scheduler.cancelTask(taskId);
+		if (!ScoreboardListener.data.isEmpty()) {
+			for (UserScoreboardData data : ScoreboardListener.data.values())
+				data.removeScoreboard();
+			ScoreboardListener.data.clear();
+		}
 	}
 
 	public UserScoreboardData generateData(Player player) {

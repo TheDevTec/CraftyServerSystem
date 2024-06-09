@@ -32,7 +32,7 @@ god:
   #  {sender}, {target}
   other:
     true:
-      target: "{prefix} &e{sender} has made you a god! &eYou're immortal&7!"
+      target: "{prefix} &e{sender} &7has made you a god! &eYou're immortal&7!"
       sender: "{prefix} &e{target} &7has become a god! &eHe's immortal now&7!"
     false:
       target: "{prefix} Seems like &eyou're mortal &7again! &e{sender} &7has removed your powers!"

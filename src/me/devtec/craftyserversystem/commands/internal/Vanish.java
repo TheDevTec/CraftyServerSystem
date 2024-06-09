@@ -10,7 +10,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerLoginEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
 
@@ -43,7 +44,7 @@ public class Vanish extends CssCommand {
 		listener = new Listener() {
 
 			@EventHandler
-			public void login(PlayerLoginEvent e) {
+			public void login(PlayerJoinEvent e) {
 				if (hasVanishEnabled(e.getPlayer().getUniqueId())) {
 					VanishToggleEvent event = new VanishToggleEvent(e.getPlayer().getUniqueId(), true);
 					EventManager.call(event);
@@ -65,12 +66,18 @@ public class Vanish extends CssCommand {
 							e1.printStackTrace();
 						}
 					else
-						API.getUser(e.getPlayer().getUniqueId()).remove("css.vanish");
+						API.getUser(e.getPlayer().getUniqueId()).set("css.vanish", null);
 				}
 				// Hide vanished players before this player
 				for (Player player : BukkitLoader.getOnlinePlayers())
-					if (!player.equals(e.getPlayer()) && getVanish(player) && !player.hasPermission(getPerm("see")))
+					if (!player.equals(e.getPlayer()) && getVanish(player) && !e.getPlayer().hasPermission(getPerm("see")))
 						e.getPlayer().hidePlayer(player);
+			}
+
+			@EventHandler
+			public void quit(PlayerQuitEvent e) {
+				for (MetadataValue value : e.getPlayer().getMetadata("vanish"))
+					e.getPlayer().removeMetadata("vanish", value.getOwningPlugin());
 			}
 
 			private boolean hasVanishEnabled(UUID uuid) {
@@ -164,7 +171,7 @@ public class Vanish extends CssCommand {
 		} else if (event.getStatus())
 			API.getUser(target.getUniqueId()).set("css.vanish", true);
 		else
-			API.getUser(target.getUniqueId()).remove("css.vanish");
+			API.getUser(target.getUniqueId()).set("css.vanish", null);
 
 		if (event.getStatus()) {
 			for (Player player : BukkitLoader.getOnlinePlayers())

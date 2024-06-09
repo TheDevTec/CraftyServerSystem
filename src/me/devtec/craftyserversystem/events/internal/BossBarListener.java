@@ -138,6 +138,19 @@ public class BossBarListener implements CssListener {
 		}
 	}
 
+	@Override
+	public void unregister() {
+		if (refleshTaskId != 0)
+			Scheduler.cancelTask(refleshTaskId);
+		if (taskId != 0)
+			Scheduler.cancelTask(taskId);
+		if (!BossBarListener.data.isEmpty()) {
+			for (UserBossBarData data : BossBarListener.data.values())
+				data.removeBossBar();
+			BossBarListener.data.clear();
+		}
+	}
+
 	private void fill(BossBarData data, String path) {
 		data.setText(getConfig().existsKey(path + "text") ? getConfig().getString(path + "text") : null);
 		data.setProgress(getConfig().existsKey(path + "progress") ? getConfig().getString(path + "progress") : null);

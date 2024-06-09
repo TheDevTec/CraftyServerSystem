@@ -15,7 +15,8 @@ public class BossBarLP {
 	public BossBarLP register(BossBarListener instance) {
 		lpListener = LuckPermsProvider.get().getEventBus().subscribe(Loader.getPlugin(), UserDataRecalculateEvent.class, e -> {
 			UserBossBarData userData = BossBarListener.data.get(e.getUser().getUniqueId());
-			BossBarListener.data.put(e.getUser().getUniqueId(), instance.generateData(userData.getPlayer()));
+			if (userData != null)
+				BossBarListener.data.put(e.getUser().getUniqueId(), instance.generateData(userData.getPlayer()));
 		});
 		return this;
 	}

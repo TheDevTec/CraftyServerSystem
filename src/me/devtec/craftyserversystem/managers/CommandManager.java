@@ -11,6 +11,7 @@ import me.devtec.craftyserversystem.Loader;
 import me.devtec.craftyserversystem.annotations.IgnoredClass;
 import me.devtec.craftyserversystem.commands.CssCommand;
 import me.devtec.shared.dataholder.Config;
+import me.devtec.theapi.bukkit.BukkitLoader;
 
 public class CommandManager {
 
@@ -26,21 +27,23 @@ public class CommandManager {
 		try {
 			Map<String, CssCommand> lookup = lookupForCssCommands();
 			Config commandsFile = cfgManager.getCommands();
-			for (String commandKey : commandsFile.getKeys())
-				if (commandsFile.getBoolean(commandKey + ".enabled", true)) {
-					CssCommand cmd = lookup.get(commandKey);
-					if (cmd == null)
-						continue;
-					cmd.register();
-					registered.put(cmd.section(), cmd);
-				}
+			BukkitLoader.getNmsProvider().postToMainThread(() -> {
+				for (String commandKey : commandsFile.getKeys())
+					if (commandsFile.getBoolean(commandKey + ".enabled", true)) {
+						CssCommand cmd = lookup.get(commandKey);
+						if (cmd == null)
+							continue;
+						cmd.register();
+						registered.put(cmd.section(), cmd);
+					}
+			});
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
 	/**
-	 * 
+	 *
 	 * @return Map<command name in the commands.yml, CssCommand instance>
 	 * @throws Exception
 	 */
@@ -64,9 +67,11 @@ public class CommandManager {
 	}
 
 	public void unregister() {
-		for (CssCommand register : registered.values())
-			register.unregister();
-		registered.clear();
+		BukkitLoader.getNmsProvider().postToMainThread(() -> {
+			for (CssCommand register : registered.values())
+				register.unregister();
+			registered.clear();
+		});
 	}
 
 	public Map<String, CssCommand> getRegistered() {

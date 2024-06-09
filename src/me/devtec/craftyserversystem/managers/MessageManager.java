@@ -15,6 +15,7 @@ import java.util.logging.Logger;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.command.BlockCommandSender;
 import org.bukkit.command.CommandSender;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
@@ -136,6 +137,8 @@ public class MessageManager {
 					for (CommandSender player : receivers)
 						if (player instanceof Player)
 							BukkitLoader.getPacketHandler().send((Player) player, packet);
+						else if (player instanceof BlockCommandSender)
+							BukkitLoader.getNmsProvider().postToMainThread(() -> player.sendMessage(inString));
 						else
 							player.sendMessage(inString);
 					result.complete(inString);
@@ -146,6 +149,8 @@ public class MessageManager {
 					for (CommandSender player : receivers)
 						if (player instanceof Player)
 							BukkitLoader.getPacketHandler().send((Player) player, packet);
+						else if (player instanceof BlockCommandSender)
+							BukkitLoader.getNmsProvider().postToMainThread(() -> player.sendMessage(convertToReadableStringForConsole(component)));
 						else
 							player.sendMessage(convertToReadableStringForConsole(component));
 				}
@@ -186,6 +191,8 @@ public class MessageManager {
 					for (CommandSender player : receivers)
 						if (player instanceof Player)
 							BukkitLoader.getPacketHandler().send((Player) player, packet);
+						else if (player instanceof BlockCommandSender)
+							BukkitLoader.getNmsProvider().postToMainThread(() -> player.sendMessage(BukkitLoader.getNmsProvider().fromIChatBaseComponent(component).toString()));
 						else
 							player.sendMessage(BukkitLoader.getNmsProvider().fromIChatBaseComponent(component).toString());
 				}
@@ -194,6 +201,8 @@ public class MessageManager {
 				for (CommandSender player : receivers)
 					if (player instanceof Player)
 						BukkitLoader.getPacketHandler().send((Player) player, packet);
+					else if (player instanceof BlockCommandSender)
+						BukkitLoader.getNmsProvider().postToMainThread(() -> player.sendMessage(BukkitLoader.getNmsProvider().fromIChatBaseComponent(chatBase).toString()));
 					else
 						player.sendMessage(BukkitLoader.getNmsProvider().fromIChatBaseComponent(chatBase).toString());
 			}
