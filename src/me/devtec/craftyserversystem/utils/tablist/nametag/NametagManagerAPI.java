@@ -298,16 +298,19 @@ public class NametagManagerAPI {
 		Class<?> actionPacketClass = Ref.nms("network.protocol.game", BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "ServerboundPlayerCommandPacket" : "PacketPlayInEntityAction");
 		Class<?> movementPacketClass = Ref.nms("network.protocol.game", BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "ServerboundMovePlayerPacket" : "PacketPlayInFlying");
 		Field changedPosition;
+		Field actionField;
 		if (BukkitLoader.NO_OBFUSCATED_NMS_MODE || Ref.isOlderThan(17)) {
 			Ref.field(movementPacketClass, "x");
 			Ref.field(movementPacketClass, "y");
 			Ref.field(movementPacketClass, "z");
 			changedPosition = Ref.field(movementPacketClass, "hasPos");
+			actionField = Ref.field(actionPacketClass, Ref.isOlderThan(17) ? "animation" : "action");
 		} else {
 			Ref.field(movementPacketClass, "a");
 			Ref.field(movementPacketClass, "b");
 			Ref.field(movementPacketClass, "c");
 			changedPosition = Ref.field(movementPacketClass, "g");
+			actionField = Ref.field(actionPacketClass, "b");
 		}
 		listener = new PacketListener() {
 			Field xField = xyz[0];
@@ -369,11 +372,13 @@ public class NametagManagerAPI {
 				if (packet.getClass().equals(actionPacketClass)) {
 					NametagPlayer player = lookupByName(name);
 					if (player != null)
-						switch (Ref.get(packet, "action").toString()) {
+						switch (Ref.get(packet, actionField).toString()) {
 						case "PRESS_SHIFT_KEY":
+						case "1":
 							player.getNametag().setPosWithoutUpdate(player.getPlayer().getLocation());
 							player.getNametag().updateHeight(true, false, false, false);
 							break;
+						case "2":
 						case "RELEASE_SHIFT_KEY":
 							player.getNametag().setPosWithoutUpdate(player.getPlayer().getLocation());
 							player.getNametag().updateHeight(false, false, false, false);
