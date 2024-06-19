@@ -19,6 +19,7 @@ import me.devtec.craftyserversystem.api.API;
 import me.devtec.craftyserversystem.commands.CssCommand;
 import me.devtec.craftyserversystem.commands.internal.kits.KitSample;
 import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
+import me.devtec.shared.commands.selectors.Selector;
 import me.devtec.shared.commands.structures.CommandStructure;
 import me.devtec.shared.dataholder.Config;
 import me.devtec.shared.json.Json;
@@ -90,6 +91,31 @@ public class Kit extends CssCommand {
 				return;
 			}
 			useKit((Player) sender, kits.get(args[0].toLowerCase()), false, false, true, sender);
+		});
+
+		kitCmd.selector(Selector.ENTITY_SELECTOR, (sender, structure, args) -> {
+			for (Player player : selector(sender, args[1]))
+				useKit(player, kits.get(args[0].toLowerCase()), false, false, true, sender);
+		}).permission(getPerm("other")).callableArgument((sender, structure, args) -> {
+			if (args[2].isEmpty())
+				return perm(sender, "no-cost") && perm(sender, "no-cooldown") ? Arrays.asList("-c", "-w", "-s")
+						: perm(sender, "no-cost") ? Arrays.asList("-c", "-s") : perm(sender, "no-cooldown") ? Arrays.asList("-w", "-s") : Arrays.asList("-s");
+			if (args[2].indexOf('-') != -1) {
+				List<String> result = new ArrayList<>();
+				result.add(args[2]);
+				if (args[2].indexOf('c') == -1 && perm(sender, "no-cost"))
+					result.add(args[2] + 'c');
+				if (args[2].indexOf('w') == -1 && perm(sender, "no-cooldown"))
+					result.add(args[2] + 'w');
+				if (args[2].indexOf('s') == -1)
+					result.add(args[2] + 's');
+				return result;
+			}
+			return Collections.emptyList();
+		}, 1, (sender, structure, args) -> {
+			for (Player player : selector(sender, args[1]))
+				useKit(player, kits.get(args[0].toLowerCase()), perm(sender, "no-cost") ? args[2].indexOf('c') != -1 : false, perm(sender, "no-cooldown") ? args[2].indexOf('w') != -1 : false,
+						args[2].indexOf('s') == -1, sender);
 		});
 
 		kitCmd.callableArgument((sender, structure, args) -> {

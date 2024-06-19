@@ -6,6 +6,7 @@ import java.util.function.Function;
 
 import org.bukkit.entity.Player;
 
+import me.devtec.craftyserversystem.Loader;
 import me.devtec.craftyserversystem.api.API;
 import me.devtec.craftyserversystem.managers.cooldown.CooldownHolder;
 import me.devtec.shared.dataholder.Config;
@@ -133,14 +134,19 @@ public class ItemBuilder {
 					}
 
 					private ItemResult createItemResult(boolean canUse) {
-						if (canUse)
-							return ItemResult.of(ItemMaker.loadMakerFromConfig(config, path + ".item.canUse"), config.getStringList(path + ".item.canUse.onUse.commands"),
-									config.getStringList(path + ".item.canUse.onUse.messages"), cooldown, ButtonType.parse(config.getString(path + ".action")),
-									parseId(config.getString(path + ".action", "")), config.getBoolean(path + ".item.canUse.onUse.updateItem"),
+						if (canUse) {
+							ItemMaker maker = ItemMaker.loadMakerFromConfig(config, path + ".item.canUse");
+							if (maker == null)
+								Loader.getPlugin().getLogger().warning("[CssGui] Failed to load ItemMaker from config path " + path + ".item.canUse");
+							return ItemResult.of(maker, config.getStringList(path + ".item.canUse.onUse.commands"), config.getStringList(path + ".item.canUse.onUse.messages"), cooldown,
+									ButtonType.parse(config.getString(path + ".action")), parseId(config.getString(path + ".action", "")), config.getBoolean(path + ".item.canUse.onUse.updateItem"),
 									config.getBoolean(path + ".item.canUse.onUse.updateInventory"));
-						return ItemResult.of(ItemMaker.loadMakerFromConfig(config, path + ".item.onCooldown"), config.getStringList(path + ".item.onCooldown.onUse.commands"),
-								config.getStringList(path + ".item.onCooldown.onUse.messages"), cooldown, ButtonType.parse(config.getString(path + ".action")),
-								parseId(config.getString(path + ".action", "")), config.getBoolean(path + ".item.onCooldown.onUse.updateItem"),
+						}
+						ItemMaker maker = ItemMaker.loadMakerFromConfig(config, path + ".item.onCooldown");
+						if (maker == null)
+							Loader.getPlugin().getLogger().warning("[CssGui] Failed to load ItemMaker from config path " + path + ".item.onCooldown");
+						return ItemResult.of(maker, config.getStringList(path + ".item.onCooldown.onUse.commands"), config.getStringList(path + ".item.onCooldown.onUse.messages"), cooldown,
+								ButtonType.parse(config.getString(path + ".action")), parseId(config.getString(path + ".action", "")), config.getBoolean(path + ".item.onCooldown.onUse.updateItem"),
 								config.getBoolean(path + ".item.onCooldown.onUse.updateInventory"));
 					}
 				};
@@ -163,7 +169,7 @@ public class ItemBuilder {
 
 							@Override
 							public ItemResult apply(Player player) {
-								boolean status = ParseUtils.getDouble(PlaceholderAPI.apply(placeholder, player.getUniqueId())) >= number;
+								boolean status = number >= ParseUtils.getDouble(PlaceholderAPI.apply(placeholder, player.getUniqueId()));
 								String subpath = !config.exists(path + ".predicate.result." + status) ? "_DEFAULT" : status + "";
 								ItemResult result = cache[status ? 1 : 0];
 								if (result == null) {
@@ -179,13 +185,17 @@ public class ItemBuilder {
 								if (cooldown != null) {
 									String finalPath = cooldown.tryWithoutWriting(player) ? path + ".predicate.result." + subpath + ".item.canUse"
 											: path + ".predicate.result." + subpath + ".item.onCooldown";
-									return ItemResult.of(ItemMaker.loadMakerFromConfig(config, finalPath), config.getStringList(finalPath + ".onUse.commands"),
-											config.getStringList(finalPath + ".onUse.messages"), cooldown, ButtonType.parse(config.getString(finalPath + ".action")),
-											parseId(config.getString(finalPath + ".action", "")), config.getBoolean(finalPath + ".onUse.updateItem"),
-											config.getBoolean(finalPath + ".onUse.updateInventory"));
+									ItemMaker maker = ItemMaker.loadMakerFromConfig(config, finalPath);
+									if (maker == null)
+										Loader.getPlugin().getLogger().warning("[CssGui] Failed to load ItemMaker from config path " + finalPath);
+									return ItemResult.of(maker, config.getStringList(finalPath + ".onUse.commands"), config.getStringList(finalPath + ".onUse.messages"), cooldown,
+											ButtonType.parse(config.getString(finalPath + ".action")), parseId(config.getString(finalPath + ".action", "")),
+											config.getBoolean(finalPath + ".onUse.updateItem"), config.getBoolean(finalPath + ".onUse.updateInventory"));
 								}
-								return ItemResult.of(ItemMaker.loadMakerFromConfig(config, path + ".predicate.result." + subpath + ".item"),
-										config.getStringList(path + ".predicate.result." + subpath + ".onUse.commands"),
+								ItemMaker maker = ItemMaker.loadMakerFromConfig(config, path + ".predicate.result." + subpath + ".item");
+								if (maker == null)
+									Loader.getPlugin().getLogger().warning("[CssGui] Failed to load ItemMaker from config path " + path + ".predicate.result." + subpath + ".item");
+								return ItemResult.of(maker, config.getStringList(path + ".predicate.result." + subpath + ".onUse.commands"),
 										config.getStringList(path + ".predicate.result." + subpath + ".onUse.messages"), cooldown,
 										ButtonType.parse(config.getString(path + ".predicate.result." + subpath + ".action")),
 										parseId(config.getString(path + ".predicate.result." + subpath + ".action", "")),
@@ -202,7 +212,8 @@ public class ItemBuilder {
 
 							@Override
 							public ItemResult apply(Player player) {
-								boolean status = ParseUtils.getDouble(PlaceholderAPI.apply(placeholder, player.getUniqueId())) > number;
+								boolean status = number > ParseUtils.getDouble(PlaceholderAPI.apply(placeholder, player.getUniqueId()));
+								player.sendMessage(number + ":" + ParseUtils.getDouble(PlaceholderAPI.apply(placeholder, player.getUniqueId())) + ":" + status);
 								String subpath = !config.exists(path + ".predicate.result." + status) ? "_DEFAULT" : status + "";
 								ItemResult result = cache[status ? 1 : 0];
 								if (result == null) {
@@ -218,13 +229,17 @@ public class ItemBuilder {
 								if (cooldown != null) {
 									String finalPath = cooldown.tryWithoutWriting(player) ? path + ".predicate.result." + subpath + ".item.canUse"
 											: path + ".predicate.result." + subpath + ".item.onCooldown";
-									return ItemResult.of(ItemMaker.loadMakerFromConfig(config, finalPath), config.getStringList(finalPath + ".onUse.commands"),
-											config.getStringList(finalPath + ".onUse.messages"), cooldown, ButtonType.parse(config.getString(finalPath + ".action")),
-											parseId(config.getString(finalPath + ".action", "")), config.getBoolean(finalPath + ".onUse.updateItem"),
-											config.getBoolean(finalPath + ".onUse.updateInventory"));
+									ItemMaker maker = ItemMaker.loadMakerFromConfig(config, finalPath);
+									if (maker == null)
+										Loader.getPlugin().getLogger().warning("[CssGui] Failed to load ItemMaker from config path " + finalPath);
+									return ItemResult.of(maker, config.getStringList(finalPath + ".onUse.commands"), config.getStringList(finalPath + ".onUse.messages"), cooldown,
+											ButtonType.parse(config.getString(finalPath + ".action")), parseId(config.getString(finalPath + ".action", "")),
+											config.getBoolean(finalPath + ".onUse.updateItem"), config.getBoolean(finalPath + ".onUse.updateInventory"));
 								}
-								return ItemResult.of(ItemMaker.loadMakerFromConfig(config, path + ".predicate.result." + subpath + ".item"),
-										config.getStringList(path + ".predicate.result." + subpath + ".onUse.commands"),
+								ItemMaker maker = ItemMaker.loadMakerFromConfig(config, path + ".predicate.result." + subpath + ".item");
+								if (maker == null)
+									Loader.getPlugin().getLogger().warning("[CssGui] Failed to load ItemMaker from config path " + path + ".predicate.result." + subpath + ".item");
+								return ItemResult.of(maker, config.getStringList(path + ".predicate.result." + subpath + ".onUse.commands"),
 										config.getStringList(path + ".predicate.result." + subpath + ".onUse.messages"), cooldown,
 										ButtonType.parse(config.getString(path + ".predicate.result." + subpath + ".action")),
 										parseId(config.getString(path + ".predicate.result." + subpath + ".action", "")),
@@ -244,7 +259,7 @@ public class ItemBuilder {
 
 							@Override
 							public ItemResult apply(Player player) {
-								boolean status = ParseUtils.getDouble(PlaceholderAPI.apply(placeholder, player.getUniqueId())) <= number;
+								boolean status = number <= ParseUtils.getDouble(PlaceholderAPI.apply(placeholder, player.getUniqueId()));
 								String subpath = !config.exists(path + ".predicate.result." + status) ? "_DEFAULT" : status + "";
 								ItemResult result = cache[status ? 1 : 0];
 								if (result == null) {
@@ -260,13 +275,17 @@ public class ItemBuilder {
 								if (cooldown != null) {
 									String finalPath = cooldown.tryWithoutWriting(player) ? path + ".predicate.result." + subpath + ".item.canUse"
 											: path + ".predicate.result." + subpath + ".item.onCooldown";
-									return ItemResult.of(ItemMaker.loadMakerFromConfig(config, finalPath), config.getStringList(finalPath + ".onUse.commands"),
-											config.getStringList(finalPath + ".onUse.messages"), cooldown, ButtonType.parse(config.getString(finalPath + ".action")),
-											parseId(config.getString(finalPath + ".action", "")), config.getBoolean(finalPath + ".onUse.updateItem"),
-											config.getBoolean(finalPath + ".onUse.updateInventory"));
+									ItemMaker maker = ItemMaker.loadMakerFromConfig(config, finalPath);
+									if (maker == null)
+										Loader.getPlugin().getLogger().warning("[CssGui] Failed to load ItemMaker from config path " + finalPath);
+									return ItemResult.of(maker, config.getStringList(finalPath + ".onUse.commands"), config.getStringList(finalPath + ".onUse.messages"), cooldown,
+											ButtonType.parse(config.getString(finalPath + ".action")), parseId(config.getString(finalPath + ".action", "")),
+											config.getBoolean(finalPath + ".onUse.updateItem"), config.getBoolean(finalPath + ".onUse.updateInventory"));
 								}
-								return ItemResult.of(ItemMaker.loadMakerFromConfig(config, path + ".predicate.result." + subpath + ".item"),
-										config.getStringList(path + ".predicate.result." + subpath + ".onUse.commands"),
+								ItemMaker maker = ItemMaker.loadMakerFromConfig(config, path + ".predicate.result." + subpath + ".item");
+								if (maker == null)
+									Loader.getPlugin().getLogger().warning("[CssGui] Failed to load ItemMaker from config path " + path + ".predicate.result." + subpath + ".item");
+								return ItemResult.of(maker, config.getStringList(path + ".predicate.result." + subpath + ".onUse.commands"),
 										config.getStringList(path + ".predicate.result." + subpath + ".onUse.messages"), cooldown,
 										ButtonType.parse(config.getString(path + ".predicate.result." + subpath + ".action")),
 										parseId(config.getString(path + ".predicate.result." + subpath + ".action", "")),
@@ -283,7 +302,7 @@ public class ItemBuilder {
 
 							@Override
 							public ItemResult apply(Player player) {
-								boolean status = ParseUtils.getDouble(PlaceholderAPI.apply(placeholder, player.getUniqueId())) < number;
+								boolean status = number < ParseUtils.getDouble(PlaceholderAPI.apply(placeholder, player.getUniqueId()));
 								String subpath = !config.exists(path + ".predicate.result." + status) ? "_DEFAULT" : status + "";
 								ItemResult result = cache[status ? 1 : 0];
 								if (result == null) {
@@ -299,13 +318,17 @@ public class ItemBuilder {
 								if (cooldown != null) {
 									String finalPath = cooldown.tryWithoutWriting(player) ? path + ".predicate.result." + subpath + ".item.canUse"
 											: path + ".predicate.result." + subpath + ".item.onCooldown";
-									return ItemResult.of(ItemMaker.loadMakerFromConfig(config, finalPath), config.getStringList(finalPath + ".onUse.commands"),
-											config.getStringList(finalPath + ".onUse.messages"), cooldown, ButtonType.parse(config.getString(finalPath + ".action")),
-											parseId(config.getString(finalPath + ".action", "")), config.getBoolean(finalPath + ".onUse.updateItem"),
-											config.getBoolean(finalPath + ".onUse.updateInventory"));
+									ItemMaker maker = ItemMaker.loadMakerFromConfig(config, finalPath);
+									if (maker == null)
+										Loader.getPlugin().getLogger().warning("[CssGui] Failed to load ItemMaker from config path " + finalPath);
+									return ItemResult.of(maker, config.getStringList(finalPath + ".onUse.commands"), config.getStringList(finalPath + ".onUse.messages"), cooldown,
+											ButtonType.parse(config.getString(finalPath + ".action")), parseId(config.getString(finalPath + ".action", "")),
+											config.getBoolean(finalPath + ".onUse.updateItem"), config.getBoolean(finalPath + ".onUse.updateInventory"));
 								}
-								return ItemResult.of(ItemMaker.loadMakerFromConfig(config, path + ".predicate.result." + subpath + ".item"),
-										config.getStringList(path + ".predicate.result." + subpath + ".onUse.commands"),
+								ItemMaker maker = ItemMaker.loadMakerFromConfig(config, path + ".predicate.result." + subpath + ".item");
+								if (maker == null)
+									Loader.getPlugin().getLogger().warning("[CssGui] Failed to load ItemMaker from config path " + path + ".predicate.result." + subpath + ".item");
+								return ItemResult.of(maker, config.getStringList(path + ".predicate.result." + subpath + ".onUse.commands"),
 										config.getStringList(path + ".predicate.result." + subpath + ".onUse.messages"), cooldown,
 										ButtonType.parse(config.getString(path + ".predicate.result." + subpath + ".action")),
 										parseId(config.getString(path + ".predicate.result." + subpath + ".action", "")),
@@ -344,13 +367,17 @@ public class ItemBuilder {
 									if (cooldown != null) {
 										String finalPath = cooldown.tryWithoutWriting(player) ? path + ".predicate.result." + subpath + ".item.canUse"
 												: path + ".predicate.result." + subpath + ".item.onCooldown";
-										return ItemResult.of(ItemMaker.loadMakerFromConfig(config, finalPath), config.getStringList(finalPath + ".onUse.commands"),
-												config.getStringList(finalPath + ".onUse.messages"), cooldown, ButtonType.parse(config.getString(finalPath + ".action")),
-												parseId(config.getString(finalPath + ".action", "")), config.getBoolean(finalPath + ".onUse.updateItem"),
-												config.getBoolean(finalPath + ".onUse.updateInventory"));
+										ItemMaker maker = ItemMaker.loadMakerFromConfig(config, finalPath);
+										if (maker == null)
+											Loader.getPlugin().getLogger().warning("[CssGui] Failed to load ItemMaker from config path " + finalPath);
+										return ItemResult.of(maker, config.getStringList(finalPath + ".onUse.commands"), config.getStringList(finalPath + ".onUse.messages"), cooldown,
+												ButtonType.parse(config.getString(finalPath + ".action")), parseId(config.getString(finalPath + ".action", "")),
+												config.getBoolean(finalPath + ".onUse.updateItem"), config.getBoolean(finalPath + ".onUse.updateInventory"));
 									}
-									return ItemResult.of(ItemMaker.loadMakerFromConfig(config, path + ".predicate.result." + subpath + ".item"),
-											config.getStringList(path + ".predicate.result." + subpath + ".onUse.commands"),
+									ItemMaker maker = ItemMaker.loadMakerFromConfig(config, path + ".predicate.result." + subpath + ".item");
+									if (maker == null)
+										Loader.getPlugin().getLogger().warning("[CssGui] Failed to load ItemMaker from config path " + path + ".predicate.result." + subpath + ".item");
+									return ItemResult.of(maker, config.getStringList(path + ".predicate.result." + subpath + ".onUse.commands"),
 											config.getStringList(path + ".predicate.result." + subpath + ".onUse.messages"), cooldown,
 											ButtonType.parse(config.getString(path + ".predicate.result." + subpath + ".action")),
 											parseId(config.getString(path + ".predicate.result." + subpath + ".action", "")),
@@ -382,13 +409,17 @@ public class ItemBuilder {
 									if (cooldown != null) {
 										String finalPath = cooldown.tryWithoutWriting(player) ? path + ".predicate.result." + subpath + ".item.canUse"
 												: path + ".predicate.result." + subpath + ".item.onCooldown";
-										return ItemResult.of(ItemMaker.loadMakerFromConfig(config, finalPath), config.getStringList(finalPath + ".onUse.commands"),
-												config.getStringList(finalPath + ".onUse.messages"), cooldown, ButtonType.parse(config.getString(finalPath + ".action")),
-												parseId(config.getString(finalPath + ".action", "")), config.getBoolean(finalPath + ".onUse.updateItem"),
-												config.getBoolean(finalPath + ".onUse.updateInventory"));
+										ItemMaker maker = ItemMaker.loadMakerFromConfig(config, finalPath);
+										if (maker == null)
+											Loader.getPlugin().getLogger().warning("[CssGui] Failed to load ItemMaker from config path " + finalPath);
+										return ItemResult.of(maker, config.getStringList(finalPath + ".onUse.commands"), config.getStringList(finalPath + ".onUse.messages"), cooldown,
+												ButtonType.parse(config.getString(finalPath + ".action")), parseId(config.getString(finalPath + ".action", "")),
+												config.getBoolean(finalPath + ".onUse.updateItem"), config.getBoolean(finalPath + ".onUse.updateInventory"));
 									}
-									return ItemResult.of(ItemMaker.loadMakerFromConfig(config, path + ".predicate.result." + subpath + ".item"),
-											config.getStringList(path + ".predicate.result." + subpath + ".onUse.commands"),
+									ItemMaker maker = ItemMaker.loadMakerFromConfig(config, path + ".predicate.result." + subpath + ".item");
+									if (maker == null)
+										Loader.getPlugin().getLogger().warning("[CssGui] Failed to load ItemMaker from config path " + path + ".predicate.result." + subpath + ".item");
+									return ItemResult.of(maker, config.getStringList(path + ".predicate.result." + subpath + ".onUse.commands"),
 											config.getStringList(path + ".predicate.result." + subpath + ".onUse.messages"), cooldown,
 											ButtonType.parse(config.getString(path + ".predicate.result." + subpath + ".action")),
 											parseId(config.getString(path + ".predicate.result." + subpath + ".action", "")),
@@ -422,13 +453,17 @@ public class ItemBuilder {
 									if (cooldown != null) {
 										String finalPath = cooldown.tryWithoutWriting(player) ? path + ".predicate.result." + subpath + ".item.canUse"
 												: path + ".predicate.result." + subpath + ".item.onCooldown";
-										return ItemResult.of(ItemMaker.loadMakerFromConfig(config, finalPath), config.getStringList(finalPath + ".onUse.commands"),
-												config.getStringList(finalPath + ".onUse.messages"), cooldown, ButtonType.parse(config.getString(finalPath + ".action")),
-												parseId(config.getString(finalPath + ".action", "")), config.getBoolean(finalPath + ".onUse.updateItem"),
-												config.getBoolean(finalPath + ".onUse.updateInventory"));
+										ItemMaker maker = ItemMaker.loadMakerFromConfig(config, finalPath);
+										if (maker == null)
+											Loader.getPlugin().getLogger().warning("[CssGui] Failed to load ItemMaker from config path " + finalPath);
+										return ItemResult.of(maker, config.getStringList(finalPath + ".onUse.commands"), config.getStringList(finalPath + ".onUse.messages"), cooldown,
+												ButtonType.parse(config.getString(finalPath + ".action")), parseId(config.getString(finalPath + ".action", "")),
+												config.getBoolean(finalPath + ".onUse.updateItem"), config.getBoolean(finalPath + ".onUse.updateInventory"));
 									}
-									return ItemResult.of(ItemMaker.loadMakerFromConfig(config, path + ".predicate.result." + subpath + ".item"),
-											config.getStringList(path + ".predicate.result." + subpath + ".onUse.commands"),
+									ItemMaker maker = ItemMaker.loadMakerFromConfig(config, path + ".predicate.result." + subpath + ".item");
+									if (maker == null)
+										Loader.getPlugin().getLogger().warning("[CssGui] Failed to load ItemMaker from config path " + path + ".predicate.result." + subpath + ".item");
+									return ItemResult.of(maker, config.getStringList(path + ".predicate.result." + subpath + ".onUse.commands"),
 											config.getStringList(path + ".predicate.result." + subpath + ".onUse.messages"), cooldown,
 											ButtonType.parse(config.getString(path + ".predicate.result." + subpath + ".action")),
 											parseId(config.getString(path + ".predicate.result." + subpath + ".action", "")),
@@ -460,13 +495,17 @@ public class ItemBuilder {
 								if (cooldown != null) {
 									String finalPath = cooldown.tryWithoutWriting(player) ? path + ".predicate.result." + subpath + ".item.canUse"
 											: path + ".predicate.result." + subpath + ".item.onCooldown";
-									return ItemResult.of(ItemMaker.loadMakerFromConfig(config, finalPath), config.getStringList(finalPath + ".onUse.commands"),
-											config.getStringList(finalPath + ".onUse.messages"), cooldown, ButtonType.parse(config.getString(finalPath + ".action")),
-											parseId(config.getString(finalPath + ".action", "")), config.getBoolean(finalPath + ".onUse.updateItem"),
-											config.getBoolean(finalPath + ".onUse.updateInventory"));
+									ItemMaker maker = ItemMaker.loadMakerFromConfig(config, finalPath);
+									if (maker == null)
+										Loader.getPlugin().getLogger().warning("[CssGui] Failed to load ItemMaker from config path " + finalPath);
+									return ItemResult.of(maker, config.getStringList(finalPath + ".onUse.commands"), config.getStringList(finalPath + ".onUse.messages"), cooldown,
+											ButtonType.parse(config.getString(finalPath + ".action")), parseId(config.getString(finalPath + ".action", "")),
+											config.getBoolean(finalPath + ".onUse.updateItem"), config.getBoolean(finalPath + ".onUse.updateInventory"));
 								}
-								return ItemResult.of(ItemMaker.loadMakerFromConfig(config, path + ".predicate.result." + subpath + ".item"),
-										config.getStringList(path + ".predicate.result." + subpath + ".onUse.commands"),
+								ItemMaker maker = ItemMaker.loadMakerFromConfig(config, path + ".predicate.result." + subpath + ".item");
+								if (maker == null)
+									Loader.getPlugin().getLogger().warning("[CssGui] Failed to load ItemMaker from config path " + path + ".predicate.result." + subpath + ".item");
+								return ItemResult.of(maker, config.getStringList(path + ".predicate.result." + subpath + ".onUse.commands"),
 										config.getStringList(path + ".predicate.result." + subpath + ".onUse.messages"), cooldown,
 										ButtonType.parse(config.getString(path + ".predicate.result." + subpath + ".action")),
 										parseId(config.getString(path + ".predicate.result." + subpath + ".action", "")),
@@ -500,14 +539,19 @@ public class ItemBuilder {
 							if (cooldown != null) {
 								String finalPath = cooldown.tryWithoutWriting(player) ? path + ".predicate.result." + subpath + ".item.canUse"
 										: path + ".predicate.result." + subpath + ".item.onCooldown";
-								return ItemResult.of(ItemMaker.loadMakerFromConfig(config, finalPath), config.getStringList(finalPath + ".onUse.commands"),
-										config.getStringList(finalPath + ".onUse.messages"), cooldown, ButtonType.parse(config.getString(finalPath + ".action")),
-										parseId(config.getString(finalPath + ".action", "")), config.getBoolean(finalPath + ".onUse.updateItem"),
-										config.getBoolean(finalPath + ".onUse.updateInventory"));
+								ItemMaker maker = ItemMaker.loadMakerFromConfig(config, finalPath);
+								if (maker == null)
+									Loader.getPlugin().getLogger().warning("[CssGui] Failed to load ItemMaker from config path " + finalPath);
+								return ItemResult.of(maker, config.getStringList(finalPath + ".onUse.commands"), config.getStringList(finalPath + ".onUse.messages"), cooldown,
+										ButtonType.parse(config.getString(finalPath + ".action")), parseId(config.getString(finalPath + ".action", "")),
+										config.getBoolean(finalPath + ".onUse.updateItem"), config.getBoolean(finalPath + ".onUse.updateInventory"));
 							}
-							return ItemResult.of(ItemMaker.loadMakerFromConfig(config, path + ".predicate.result." + subpath + ".item"),
-									config.getStringList(path + ".predicate.result." + subpath + ".onUse.commands"), config.getStringList(path + ".predicate.result." + subpath + ".onUse.messages"),
-									cooldown, ButtonType.parse(config.getString(path + ".predicate.result." + subpath + ".action")),
+							ItemMaker maker = ItemMaker.loadMakerFromConfig(config, path + ".predicate.result." + subpath + ".item");
+							if (maker == null)
+								Loader.getPlugin().getLogger().warning("[CssGui] Failed to load ItemMaker from config path " + path + ".predicate.result." + subpath + ".item");
+							return ItemResult.of(maker, config.getStringList(path + ".predicate.result." + subpath + ".onUse.commands"),
+									config.getStringList(path + ".predicate.result." + subpath + ".onUse.messages"), cooldown,
+									ButtonType.parse(config.getString(path + ".predicate.result." + subpath + ".action")),
 									parseId(config.getString(path + ".predicate.result." + subpath + ".action", "")), config.getBoolean(path + ".predicate.result." + subpath + ".onUse.updateItem"),
 									config.getBoolean(path + ".predicate.result." + subpath + ".onUse.updateInventory"));
 						}
@@ -535,12 +579,18 @@ public class ItemBuilder {
 					CooldownHolder cooldown = API.get().getCooldownManager().getOrPrepare(config.getString(path + ".predicate.result." + subpath + ".cooldown"));
 					if (cooldown != null) {
 						String finalPath = cooldown.tryWithoutWriting(player) ? path + ".predicate.result." + subpath + ".item.canUse" : path + ".predicate.result." + subpath + ".item.onCooldown";
-						return ItemResult.of(ItemMaker.loadMakerFromConfig(config, finalPath), config.getStringList(finalPath + ".onUse.commands"), config.getStringList(finalPath + ".onUse.messages"),
-								cooldown, ButtonType.parse(config.getString(finalPath + ".action")), parseId(config.getString(finalPath + ".action", "")),
-								config.getBoolean(finalPath + ".onUse.updateItem"), config.getBoolean(finalPath + ".onUse.updateInventory"));
+						ItemMaker maker = ItemMaker.loadMakerFromConfig(config, finalPath);
+						if (maker == null)
+							Loader.getPlugin().getLogger().warning("[CssGui] Failed to load ItemMaker from config path " + finalPath);
+						return ItemResult.of(maker, config.getStringList(finalPath + ".onUse.commands"), config.getStringList(finalPath + ".onUse.messages"), cooldown,
+								ButtonType.parse(config.getString(finalPath + ".action")), parseId(config.getString(finalPath + ".action", "")), config.getBoolean(finalPath + ".onUse.updateItem"),
+								config.getBoolean(finalPath + ".onUse.updateInventory"));
 					}
-					return ItemResult.of(ItemMaker.loadMakerFromConfig(config, path + ".predicate.result." + subpath + ".item"),
-							config.getStringList(path + ".predicate.result." + subpath + ".onUse.commands"), config.getStringList(path + ".predicate.result." + subpath + ".onUse.messages"), cooldown,
+					ItemMaker maker = ItemMaker.loadMakerFromConfig(config, path + ".predicate.result." + subpath + ".item");
+					if (maker == null)
+						Loader.getPlugin().getLogger().warning("[CssGui] Failed to load ItemMaker from config path " + path + ".predicate.result." + subpath + ".item");
+					return ItemResult.of(maker, config.getStringList(path + ".predicate.result." + subpath + ".onUse.commands"),
+							config.getStringList(path + ".predicate.result." + subpath + ".onUse.messages"), cooldown,
 							ButtonType.parse(config.getString(path + ".predicate.result." + subpath + ".action")), parseId(config.getString(path + ".predicate.result." + subpath + ".action", "")),
 							config.getBoolean(path + ".predicate.result." + subpath + ".onUse.updateItem"), config.getBoolean(path + ".predicate.result." + subpath + ".onUse.updateInventory"));
 				}
@@ -555,7 +605,10 @@ public class ItemBuilder {
 			public ItemResult apply(Player player) {
 				ItemResult result = cache;
 				if (result == null) {
-					result = ItemResult.of(ItemMaker.loadMakerFromConfig(config, path + ".item"), config.getStringList(path + ".onUse.commands"), config.getStringList(path + ".onUse.messages"), null,
+					ItemMaker maker = ItemMaker.loadMakerFromConfig(config, path + ".item");
+					if (maker == null)
+						Loader.getPlugin().getLogger().warning("[CssGui] Failed to load ItemMaker from config path " + path + ".item");
+					result = ItemResult.of(maker, config.getStringList(path + ".onUse.commands"), config.getStringList(path + ".onUse.messages"), null,
 							ButtonType.parse(config.getString(path + ".action")), parseId(config.getString(path + ".action", "")), config.getBoolean(path + ".onUse.updateItem"),
 							config.getBoolean(path + ".onUse.updateInventory"));
 					if (!result.containPlaceholders())

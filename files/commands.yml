@@ -423,6 +423,7 @@ kit:
     console: "/kit {kit} {player}"
   perms:
     cmd: "css.cmd.kit"
+    other: "css.cmd.kit.other"
     no-cooldown: "css.cmd.kit.other"
     no-cooldown: "css.cmd.kit.no-cooldown"
     no-cost: "css.cmd.kit.no-cost"
@@ -645,6 +646,8 @@ cssgui:
   perms:
     cmd: "css.cmd.cssgui"
     other: "css.cmd.cssgui.other"
+    per-id: "css.cmd.cssgui.open.{id}"
+    per-id-other: "css.cmd.cssgui.open.{id}.other"
 
 cssuser:
   usage:

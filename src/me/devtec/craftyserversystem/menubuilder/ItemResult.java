@@ -36,6 +36,8 @@ public interface ItemResult {
 
 	@Comment(comment = "This ItemResult cannot be cached")
 	default boolean containPlaceholders() {
+		if (getItem() == null)
+			return false;
 		int firstAt;
 		if (getItem().getDisplayName() != null)
 			if (getItem().getDisplayName().indexOf('{') != -1 && getItem().getDisplayName().indexOf('}') != -1

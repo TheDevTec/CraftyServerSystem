@@ -44,12 +44,18 @@ public class CssGui extends CssCommand {
 			msgUsage(sender, "cmd");
 		}).permission(getPerm("cmd"));
 		// menu
-		cmd.callableArgument((sender, structure, args) -> new ArrayList<>(menus.keySet()), (sender, structure, args) -> {
+		cmd.callableArgument((sender, structure, args) -> {
+			List<String> guis = new ArrayList<>();
+			for (String gui : menus.keySet())
+				if (sender.hasPermission(getPerm("per-id").replace("{id}", gui.toLowerCase())) || sender.hasPermission(getPerm("per-id-other").replace("{id}", gui.toLowerCase())))
+					guis.add(gui);
+			return guis;
+		}, (sender, structure, args) -> {
 			if (sender instanceof Player)
 				openMenu(sender, (Player) sender, args[0], true);
 			else
 				msgUsage(sender, "cmd");
-		}).permission(getPerm("other"))
+		})
 				// silent
 				.argument("-s", (sender, structure, args) -> {
 					if (sender instanceof Player)
@@ -59,12 +65,12 @@ public class CssGui extends CssCommand {
 				})
 				// other
 				.parent().selector(Selector.ENTITY_SELECTOR, (sender, structure, args) -> {
-					for (Player player : selector(sender, args[0]))
+					for (Player player : selector(sender, args[1]))
 						openMenu(sender, player, args[0], true);
 				}).permission(getPerm("other"))
 				// silent
 				.argument("-s", (sender, structure, args) -> {
-					for (Player player : selector(sender, args[0]))
+					for (Player player : selector(sender, args[1]))
 						openMenu(sender, player, args[0], false);
 				});
 
@@ -127,6 +133,7 @@ public class CssGui extends CssCommand {
 					ItemResult itemResult = result.get(entry.getValue());
 					switch (itemResult.getButtonType()) {
 					case CLOSE:
+						itemResult.onClick(player);
 						gui.close(player);
 						break;
 					case OPEN_MENU:
