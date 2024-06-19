@@ -36,10 +36,14 @@ public class DeathListener implements CssListener {
 	public void onDeath(PlayerDeathEvent e) {
 		if (hideMessage)
 			e.setDeathMessage(null);
-		if (keepInventory || e.getPlayer().hasPermission("css.death.keep-inventory"))
+		if (keepInventory || e.getPlayer().hasPermission("css.death.keep-inventory")) {
 			e.setKeepInventory(true);
-		if (keepExp || e.getPlayer().hasPermission("css.death.keep-exp"))
+			e.getDrops().clear();
+		}
+		if (keepExp || e.getPlayer().hasPermission("css.death.keep-exp")) {
 			e.setKeepLevel(true);
+			e.setDroppedExp(0);
+		}
 		PlaceholdersExecutor placeholders = PlaceholdersExecutor.i().add("player", e.getPlayer().getName()).papi(e.getPlayer().getUniqueId());
 		// Send json message
 		API.get().getMsgManager().sendMessageFromFile(getConfig(), "death.broadcast", placeholders, BukkitLoader.getOnlinePlayers());
