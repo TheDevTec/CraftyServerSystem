@@ -279,6 +279,8 @@ public class API {
 				}
 				if (text.equals("css_afk"))
 					return me.devtec.shared.API.getUser(player).getBoolean("afk") + "";
+				if (text.equals("css_chatignore"))
+					return me.devtec.shared.API.getUser(player).getBoolean("css.chatignore") + "";
 				return null;
 			}
 		}.register();
