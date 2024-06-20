@@ -82,6 +82,8 @@ public class ChatListener implements CssListener {
 	private Map<String, String> chatPlaceholders;
 	@Nullable
 	private Set<Entry<String, String>> entrySetOfChatPlaceholders;
+	private boolean enabledChatIgnore;
+	private boolean chatIgnoreOnlyPings;
 
 	@Override
 	public Config getConfig() {
@@ -96,6 +98,8 @@ public class ChatListener implements CssListener {
 	@SuppressWarnings("unchecked")
 	@Override
 	public void reload() {
+		enabledChatIgnore = API.get().getCommandManager().getRegistered().containsKey("chatignore");
+		chatIgnoreOnlyPings = API.get().getConfigManager().getMain().getBoolean("chatIgnore.only-pings-in-chat");
 		antiSpamEnabled = getConfig().getBoolean("antiSpam.enabled");
 		if (prevMsgs == null)
 			prevMsgs = new TempMap<>(TimeUtils.timeFromString(getConfig().getString("antiSpam.cache")) * 20);
@@ -340,14 +344,27 @@ public class ChatListener implements CssListener {
 		for (Entry<String, String> entry : entrySetOfChatPlaceholders)
 			container.replace(entry.getKey(), entry.getValue());
 
-		placeholders.add("message", notificationReplace(player, colorize(player, container, ignoredStrings), e.getRecipients()));
+		List<Player> pinged = enabledChatIgnore && chatIgnoreOnlyPings ? new ArrayList<>() : null;
+		placeholders.add("message", notificationReplace(player, pinged, colorize(player, container, ignoredStrings), e.getRecipients()));
 		e.setMessage(placeholders.get("{message}")); // For other boring plugins
-		e.setFormat(API.get().getMsgManager().sendMessageFromFileWithResult(getConfig(), "formats." + userGroup + ".chat", placeholders, BukkitLoader.getOnlinePlayers(), e.getPlayer()).replace("%",
-				"%%"));
+		if (enabledChatIgnore) {
+			Iterator<Player> receivers = e.getRecipients().iterator();
+			while (receivers.hasNext()) {
+				Player target = receivers.next();
+				if (target.equals(e.getPlayer()))
+					continue;
+				if (me.devtec.shared.API.getUser(target.getUniqueId()).getBoolean("css.chatignore")) {
+					if (chatIgnoreOnlyPings && pinged.contains(target))
+						continue;
+					receivers.remove();
+				}
+			}
+		}
+		e.setFormat(API.get().getMsgManager().sendMessageFromFileWithResult(getConfig(), "formats." + userGroup + ".chat", placeholders, e.getRecipients(), e.getPlayer()).replace("%", "%%"));
 		e.getRecipients().clear(); // We have our own json format (see above)
 	}
 
-	public String notificationReplace(Player pinger, StringContainer container, Set<Player> targets) {
+	public String notificationReplace(Player pinger, List<Player> pinged, StringContainer container, Set<Player> targets) {
 		String notificationColor = API.get().getConfigManager().getChat().getString("notification.color", "§c");
 		for (Player player : targets) {
 			if (pinger.equals(player))
@@ -355,6 +372,8 @@ public class ChatListener implements CssListener {
 			int startAt = container.indexOfIgnoreCase(player.getName());
 			if (startAt != -1) {
 				notify(pinger, player);
+				if (pinged != null)
+					pinged.add(player);
 				int length = player.getName().length() + notificationColor.length();
 				String lastColors = buildLastColors(ColorUtils.getLastColors(container.substring(0, startAt)));
 				String addedColors = lastColors.equals(notificationColor) ? "" : lastColors;

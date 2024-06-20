@@ -518,6 +518,14 @@ msgignore:
   perms:
     cmd: "css.cmd.msgignore"
 
+chatignore:
+  cmd: [chatignore,chati]
+  usage:
+    other: "/chatignore {player}"
+  perms:
+    cmd: "css.cmd.chatignore"
+    other: "css.cmd.chatignore.other"
+
 msgspy:
   cmd: [msgspy]
   usage:

@@ -489,7 +489,19 @@ msgspy:
 msgignore:
   accepting: "{prefix} Did you decide to talk to someone? &e{target}&7 is approved to message you again!"
   ignoring: "{prefix} Well, it is also a option to ignore &e{target}&7."
-  
+
+chatignore:
+  accepting:
+    self: "{prefix} Did you decide to listen to the players in chat again? Now it's possible again!"
+    other:
+      sender: "{prefix} &e{target} &7will no longer ignore chat, what a relief!"
+      target: "{prefix} Did you decide to listen to the players in chat again? Now it's possible again!"
+  ignoring:
+    self: "{prefix} Well, it's also an option to ignore an entire chat."
+    other:
+      sender: "{prefix} &e{target} &7is now ignoring chat, magnificent!"
+      target: "{prefix} Well, it's also an option to ignore an entire chat."
+
 craftingtable:
   self: "{prefix} What are we going to craft?"
   # {sender}, {target}

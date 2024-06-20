@@ -3,9 +3,9 @@ package me.devtec.craftyserversystem.commands.internal.msgsystem;
 import java.util.List;
 
 import me.devtec.craftyserversystem.annotations.IgnoredClass;
+import me.devtec.shared.API;
 import me.devtec.shared.annotations.Nonnull;
 import me.devtec.shared.annotations.Nullable;
-import me.devtec.shared.API;
 import me.devtec.shared.dataholder.Config;
 
 @IgnoredClass
@@ -75,7 +75,8 @@ public class MsgManager {
 	}
 
 	public boolean trySendMessage(@Nullable String player, @Nullable String target) {
-		if (player != null && target != null && getIgnoredPlayers(target).contains(player))
+		if (player != null && target != null && (getIgnoredPlayers(target).contains(player) || me.devtec.craftyserversystem.api.API.get().getCommandManager().getRegistered().containsKey("chatignore")
+				&& API.getUser(target).getBoolean("css.chatignore") && me.devtec.craftyserversystem.api.API.get().getConfigManager().getMain().getBoolean("chatIgnore.hide-pms")))
 			return false;
 		return true;
 	}

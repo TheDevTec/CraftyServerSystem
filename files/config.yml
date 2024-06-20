@@ -1,5 +1,12 @@
 prefix: "&6&lS&f&lerver &8&l»&7"
 
+chatIgnore:
+  # Hide /pm & /r messages
+  hide-pms: false
+  # If you disable this option, all messages in the chat will be hidden.
+  # Also messages in which someone ping you.
+  only-pings-in-chat: true
+
 afk:
   # Time to to trigger auto-afk
   # Set to 0 to disable auto-afk function
