@@ -150,7 +150,7 @@ public class Warp extends CssCommand {
 
 		char warpChar = ' ';
 		int totalSpacesPerPage = countWarpSpaces(config.getStringList("warp.slots"), warpChar);
-		int totalPages = 1 + WarpManager.getProvider().getWarps().size() / totalSpacesPerPage;
+		int totalPages = WarpManager.getProvider().getWarps().size() / totalSpacesPerPage + (WarpManager.getProvider().getWarps().size() % totalSpacesPerPage == 0 ? 0 : 1);
 
 		for (String key : config.getKeys("warp.items")) {
 			String action;
