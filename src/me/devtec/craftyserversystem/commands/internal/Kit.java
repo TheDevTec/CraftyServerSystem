@@ -41,6 +41,7 @@ public class Kit extends CssCommand {
 		Config config = API.get().getConfigManager().getKits();
 		for (String key : config.getKeys()) {
 			KitSample sample = new KitSample(key);
+			sample.setPermission(config.getString(key + ".permission"));
 			sample.setCost(config.getDouble(key + ".settings.cost"));
 			sample.setOverrideContents(config.getBoolean(key + ".settings.override-contents-in-slots"));
 			sample.setDropItems(config.getBoolean(key + ".settings.drop-items-when-full-inv"));
@@ -82,7 +83,7 @@ public class Kit extends CssCommand {
 		CommandStructure<CommandSender> kitCmd = cmd.callableArgument((sender, structure, args) -> {
 			List<String> value = new ArrayList<>();
 			for (KitSample sample : kits.values())
-				if (sample.getCooldown().tryWithoutWriting(sender))
+				if ((sample.getPermission() == null || sample.getPermission() != null && sender.hasPermission(sample.getPermission())) && sample.getCooldown().tryWithoutWriting(sender))
 					value.add(sample.getName());
 			return value;
 		}, (sender, structure, args) -> {
@@ -192,7 +193,7 @@ public class Kit extends CssCommand {
 			}
 			return;
 		}
-		API.get().getMsgManager().sendMessageFromFile(API.get().getConfigManager().getKits(), kit.getName() + ".messages", placeholders, target);
+		API.get().getMsgManager().sendMessageFromFile(kit.getMessages(), placeholders, target);
 		BukkitLoader.getNmsProvider().postToMainThread(() -> {
 			for (ItemStack stack : kit.getContents()) {
 				if (target.getInventory().firstEmpty() == -1)

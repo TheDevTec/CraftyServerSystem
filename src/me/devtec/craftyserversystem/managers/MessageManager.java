@@ -36,6 +36,7 @@ import me.devtec.shared.components.ComponentItem;
 import me.devtec.shared.components.HoverEvent;
 import me.devtec.shared.dataholder.Config;
 import me.devtec.shared.dataholder.StringContainer;
+import me.devtec.shared.json.Json;
 import me.devtec.shared.json.custom.CustomJsonWriter;
 import me.devtec.shared.scheduler.Tasker;
 import me.devtec.shared.utility.ColorUtils;
@@ -57,6 +58,7 @@ public class MessageManager {
 	public class Action {
 		Config config;
 		String path;
+		List<String> messages;
 		PlaceholdersExecutor executor;
 		CommandSender[] receivers;
 		CompletableFuture<String> result;
@@ -65,6 +67,12 @@ public class MessageManager {
 		public Action(Config config, String path, PlaceholdersExecutor executor, CommandSender[] receivers) {
 			this.config = config;
 			this.path = path;
+			this.executor = executor;
+			this.receivers = receivers;
+		}
+
+		public Action(List<String> messages, PlaceholdersExecutor executor, CommandSender[] receivers) {
+			this.messages = messages;
 			this.executor = executor;
 			this.receivers = receivers;
 		}
@@ -79,6 +87,27 @@ public class MessageManager {
 		}
 
 		public void process() {
+			if (path == null && messages != null) {
+				List<Object> components = new ArrayList<>();
+				for (String value : messages)
+					if (value.startsWith("[") && value.endsWith("]") || value.startsWith("{") && value.endsWith("}"))
+						components.add(BukkitLoader.getNmsProvider().chatBase(CustomJsonWriter.toJson(executor.apply(Json.reader().simpleRead(value))))); // Json
+					else
+						components.add(BukkitLoader.getNmsProvider().toIChatBaseComponent(ComponentAPI.fromString(executor.apply(value))));
+				if (components.isEmpty())
+					return;
+				for (Object component : components) {
+					Object packet = BukkitLoader.getNmsProvider().packetChat(ChatType.SYSTEM, component);
+					for (CommandSender player : receivers)
+						if (player instanceof Player)
+							BukkitLoader.getPacketHandler().send((Player) player, packet);
+						else if (player instanceof BlockCommandSender)
+							BukkitLoader.getNmsProvider().postToMainThread(() -> player.sendMessage(BukkitLoader.getNmsProvider().fromIChatBaseComponent(component).toString()));
+						else
+							player.sendMessage(BukkitLoader.getNmsProvider().fromIChatBaseComponent(component).toString());
+				}
+				return;
+			}
 			if (result != null) {
 				if (!config.existsKey(path)) {
 					JavaPlugin.getPlugin(Loader.class).getLogger().severe("Missing translation path '" + path + "', please report this bug to the DevTec team.");
@@ -438,6 +467,10 @@ public class MessageManager {
 
 	public void sendMessageFromFile(Config transFile, String pathToTranslation, PlaceholdersExecutor ex, CommandSender... receivers) {
 		actions.add(new Action(transFile, pathToTranslation, ex, receivers));
+	}
+
+	public void sendMessageFromFile(List<String> messages, PlaceholdersExecutor ex, CommandSender... receivers) {
+		actions.add(new Action(messages, ex, receivers));
 	}
 
 	public String sendMessageFromFileWithResult(Config transFile, String pathToTranslation, PlaceholdersExecutor ex, Collection<? extends CommandSender> receivers, Player player) {

@@ -415,6 +415,11 @@ tphere:
     cmd: "/tphere {player} - Teleport player to you"
   perms:
     cmd: "css.cmd.tphere"
+    
+kiteditor:
+  cmd: [kiteditor]
+  perms:
+    cmd: "css.cmd.kiteditor"
   
 kit:
   cmd: [kit,kits]

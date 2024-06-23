@@ -19,24 +19,24 @@ public class KitSample {
 	private final String name;
 	private List<ItemStack> contents = new ArrayList<>();
 	private List<String> commands = new ArrayList<>();
+	private List<String> messages = new ArrayList<>();
 	private double cost;
 	private boolean overrideContents;
 	private boolean dropItems;
 	private CooldownHolder cooldown;
+	private String permission;
 
 	public KitSample(@Nonnull String name) {
 		this.name = name;
 
-		long time = TimeUtils.timeFromString(API.get().getConfigManager().getKits().getString(name + ".settings.cooldown.time", "0"));
-		String bypassPermPre = API.get().getConfigManager().getKits().getString(name + ".settings.cooldown.bypass-perm");
-		if (bypassPermPre == null || bypassPermPre.trim().isEmpty())
-			bypassPermPre = null;
-		final String bypassPerm = bypassPermPre;
+		String bypassPerm = API.get().getConfigManager().getKits().getString(name + ".settings.cooldown.bypass-perm");
+		if (bypassPerm == null || bypassPerm.trim().isEmpty())
+			bypassPerm = null;
 		cooldown = new CooldownHolder("kit." + name) {
 
 			@Override
 			public boolean accept(CommandSender sender) {
-				if (bypassPerm != null && sender.hasPermission(bypassPerm))
+				if (getBypassPerm() != null && sender.hasPermission(getBypassPerm()))
 					return true; // Skip whole cooldown checker
 
 				long currentTime = System.currentTimeMillis() / 1000;
@@ -44,7 +44,7 @@ public class KitSample {
 				long lastUsedTime = file.getLong("css.cd." + id());
 				long nextUsageIn = lastUsedTime - currentTime;
 				if (nextUsageIn <= 0) {
-					file.set("css.cd." + id(), currentTime + time);
+					file.set("css.cd." + id(), currentTime + getTime());
 					return true;
 				}
 				return false;
@@ -57,7 +57,7 @@ public class KitSample {
 
 			@Override
 			public long remainingTime(CommandSender sender) {
-				if (bypassPerm != null && sender.hasPermission(bypassPerm))
+				if (getBypassPerm() != null && sender.hasPermission(getBypassPerm()))
 					return 0; // Skip whole cooldown checker
 
 				long currentTime = System.currentTimeMillis() / 1000;
@@ -67,6 +67,8 @@ public class KitSample {
 				return Math.max(0, nextUsageIn);
 			}
 		};
+		cooldown.setBypassPerm(bypassPerm);
+		cooldown.setTime(TimeUtils.timeFromString(API.get().getConfigManager().getKits().getString(name + ".settings.cooldown.time", "0")));
 		API.get().getCooldownManager().register(cooldown);
 	}
 
@@ -118,5 +120,21 @@ public class KitSample {
 
 	public void setCommands(List<String> commands) {
 		this.commands = commands;
+	}
+
+	public List<String> getMessages() {
+		return messages;
+	}
+
+	public void setMessages(List<String> messages) {
+		this.messages = messages;
+	}
+
+	public void setPermission(String permission) {
+		this.permission = permission;
+	}
+
+	public String getPermission() {
+		return permission;
 	}
 }

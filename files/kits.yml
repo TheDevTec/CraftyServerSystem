@@ -1,4 +1,5 @@
 first-join:
+  # Leave an empty string (permission: "") for no permissions
   permission: css.kit.first-join
   settings:
     cost: 0.0
