@@ -275,7 +275,6 @@ public class KitEditor extends CssCommand {
 			gui.setItem(i, empty);
 		for (int i = 45; i < 54; ++i)
 			gui.setItem(i, empty);
-		gui.setInsertable(true);
 		gui.setItem(49, new ItemGUI(ItemMaker.of(XMaterial.YELLOW_STAINED_GLASS_PANE).displayName("&eReturn back").lore("", "&8» &7Click to return back to previous menu", "").build()) {
 			@Override
 			public void onClick(Player player, HolderGUI guir, ClickType click) {
@@ -293,7 +292,7 @@ public class KitEditor extends CssCommand {
 				newLore.addAll(maker.getLore());
 			newLore.add("");
 			newLore.add("&8» &7Left + Shift click to remove this item");
-			newLore.add("&8» &7Middle click to copy item into your inventory");
+			newLore.add("&8» &7Right click to copy item into your inventory");
 			maker.lore(newLore);
 			int id = i;
 			gui.addItem(new ItemGUI(maker.build()) {
@@ -302,9 +301,8 @@ public class KitEditor extends CssCommand {
 					if (click.isLeftClick() && click.isShiftClick()) {
 						kit.getContents().remove(id);
 						openContents(player, guiPage, kit, page);
-					} else if (click.isMiddleClick())
-						if (player.getInventory().firstEmpty() != -1)
-							player.getInventory().addItem(item);
+					} else if (click.isRightClick())
+						player.getInventory().addItem(item);
 				}
 			});
 		}
@@ -334,7 +332,7 @@ public class KitEditor extends CssCommand {
 					@Override
 					public void onClose(Player player) {
 						for (int i = 0; i < 45; ++i) {
-							ItemStack item = gui.getItem(i);
+							ItemStack item = getItem(i);
 							if (item != null && item.getType() != Material.AIR)
 								kit.getContents().add(item);
 						}
@@ -342,6 +340,7 @@ public class KitEditor extends CssCommand {
 				};
 				for (int i = 45; i < 54; ++i)
 					gui2.setItem(i, empty);
+				gui2.setInsertable(true);
 				gui2.setItem(49, new ItemGUI(ItemMaker.of(XMaterial.YELLOW_STAINED_GLASS_PANE).displayName("&eReturn back").lore("", "&8» &7Click to return back to previous menu", "").build()) {
 					@Override
 					public void onClick(Player player, HolderGUI guir, ClickType click) {
