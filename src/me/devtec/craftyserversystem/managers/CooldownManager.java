@@ -39,19 +39,18 @@ public class CooldownManager {
 						Loader.getPlugin().getLogger().severe("In cooldown '" + id + "' in the per-group section the group 'default' is missing, set the time to 5min.");
 						timePerGroup.put("default", 300L);
 					}
-					String bypassPermPre = cdConfig.getString(id + ".bypass-perm");
-					if (bypassPermPre == null || bypassPermPre.trim().isEmpty())
-						bypassPermPre = null;
-					final String bypassPerm = bypassPermPre;
+					String bypassPerm = cdConfig.getString(id + ".bypass-perm");
+					if (bypassPerm == null || bypassPerm.trim().isEmpty())
+						bypassPerm = null;
 
 					String msgCdPre = cdConfig.getString(id + ".cooldown-message");
-					boolean sendMessage = msgCdPre != null && !msgCdPre.trim().isEmpty() ? true : false;
+					boolean sendMessage = (msgCdPre != null && !msgCdPre.trim().isEmpty());
 
 					cd = new CooldownHolder(id) {
 
 						@Override
 						public boolean accept(CommandSender sender) {
-							if (bypassPerm != null && sender.hasPermission(bypassPerm))
+							if (getBypassPerm() != null && sender.hasPermission(getBypassPerm()))
 								return true; // Skip whole cooldown checker
 
 							long currentTime = System.currentTimeMillis() / 1000;
@@ -80,7 +79,7 @@ public class CooldownManager {
 
 						@Override
 						public long remainingTime(CommandSender sender) {
-							if (bypassPerm != null && sender.hasPermission(bypassPerm))
+							if (getBypassPerm() != null && sender.hasPermission(getBypassPerm()))
 								return 0; // Skip whole cooldown checker
 
 							long currentTime = System.currentTimeMillis() / 1000;
@@ -90,16 +89,17 @@ public class CooldownManager {
 							return Math.max(0, nextUsageIn);
 						}
 					};
+					cd.setTime(timePerGroup.get("default"));
+					cd.setBypassPerm(bypassPerm);
 				} else {
 					long time = TimeUtils.timeFromString(timeInString);
 					boolean isGlobal = cdConfig.getBoolean(id + ".isGlobal");
-					String bypassPermPre = cdConfig.getString(id + ".bypass-perm");
-					if (bypassPermPre == null || bypassPermPre.trim().isEmpty())
-						bypassPermPre = null;
-					final String bypassPerm = bypassPermPre;
+					String bypassPerm = cdConfig.getString(id + ".bypass-perm");
+					if (bypassPerm == null || bypassPerm.trim().isEmpty())
+						bypassPerm = null;
 
 					String msgCdPre = cdConfig.getString(id + ".cooldown-message");
-					boolean sendMessage = msgCdPre != null && !msgCdPre.trim().isEmpty() ? true : false;
+					boolean sendMessage = (msgCdPre != null && !msgCdPre.trim().isEmpty());
 
 					if (isGlobal)
 						cd = new CooldownHolder(id) {
@@ -107,13 +107,13 @@ public class CooldownManager {
 
 							@Override
 							public boolean accept(CommandSender sender) {
-								if (bypassPerm != null && sender.hasPermission(bypassPerm))
+								if (getBypassPerm() != null && sender.hasPermission(getBypassPerm()))
 									return true; // Skip whole cooldown checker
 
 								long currentTime = System.currentTimeMillis() / 1000;
 								long nextUsageIn = lastUsedTime - currentTime;
 								if (nextUsageIn <= 0) {
-									lastUsedTime = currentTime + time;
+									lastUsedTime = currentTime + getTime();
 									return true;
 								}
 								if (sendMessage)
@@ -129,7 +129,7 @@ public class CooldownManager {
 
 							@Override
 							public long remainingTime(CommandSender sender) {
-								if (bypassPerm != null && sender.hasPermission(bypassPerm))
+								if (getBypassPerm() != null && sender.hasPermission(getBypassPerm()))
 									return 0; // Skip whole cooldown checker
 
 								long currentTime = System.currentTimeMillis() / 1000;
@@ -144,7 +144,7 @@ public class CooldownManager {
 
 							@Override
 							public boolean accept(CommandSender sender) {
-								if (bypassPerm != null && sender.hasPermission(bypassPerm))
+								if (getBypassPerm() != null && sender.hasPermission(getBypassPerm()))
 									return true; // Skip whole cooldown checker
 
 								long currentTime = System.currentTimeMillis() / 1000;
@@ -152,7 +152,7 @@ public class CooldownManager {
 								long lastUsedTime = file.getLong("css.cd." + id());
 								long nextUsageIn = lastUsedTime - currentTime;
 								if (nextUsageIn <= 0) {
-									file.set("css.cd." + id(), currentTime + time);
+									file.set("css.cd." + id(), currentTime + getTime());
 									return true;
 								}
 								if (sendMessage)
@@ -168,7 +168,7 @@ public class CooldownManager {
 
 							@Override
 							public long remainingTime(CommandSender sender) {
-								if (bypassPerm != null && sender.hasPermission(bypassPerm))
+								if (getBypassPerm() != null && sender.hasPermission(getBypassPerm()))
 									return 0; // Skip whole cooldown checker
 
 								long currentTime = System.currentTimeMillis() / 1000;
@@ -178,6 +178,8 @@ public class CooldownManager {
 								return Math.max(0, nextUsageIn);
 							}
 						};
+					cd.setTime(time);
+					cd.setBypassPerm(bypassPerm);
 				}
 				register(cd);
 			}
