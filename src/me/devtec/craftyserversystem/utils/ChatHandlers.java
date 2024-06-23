@@ -20,6 +20,7 @@ public class ChatHandlers {
 	public static boolean antiAd(String input, List<String> whitelist) {
 		if (input == null)
 			return false;
+		
 		Iterator<String> matcher = findWebAddress(input);
 		lookup: while (matcher.hasNext()) {
 			String next = matcher.next();
@@ -30,19 +31,23 @@ public class ChatHandlers {
 			if (next.startsWith("www."))
 				next = next.substring(4);
 
-			for (String wl : whitelist)
+			for (String wl : whitelist) {
 				if (next.startsWith(wl)) {
 					char c;
 					if (next.length() == wl.length() || (c = next.charAt(wl.length())) == '/' || c == '?' || c == '&')
 						continue lookup;
 				}
+			}
+			return true;
 		}
 		matcher = findIpAddress(input);
 		lookup: while (matcher.hasNext()) {
 			String next = matcher.next();
-			for (String wl : whitelist)
+			for (String wl : whitelist) {
 				if (next.startsWith(wl) && next.length() == wl.length())
 					continue lookup;
+			}
+			return true;
 		}
 		return false;
 	}
