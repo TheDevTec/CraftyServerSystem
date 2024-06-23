@@ -183,7 +183,7 @@ public class KitEditor extends CssCommand {
 	}
 
 	protected void openMessages(Player player, int guiPage, KitSample kit, int requestedPage) {
-		int totalPages = kit.getMessages().size() / 36 + (kit.getMessages().size() % 36 == 0 ? 0 : 1);
+		int totalPages = Math.max(1, kit.getMessages().size() / 36 + (kit.getMessages().size() % 36 == 0 ? 0 : 1));
 		if (requestedPage > totalPages)
 			requestedPage = totalPages;
 		if (requestedPage < 1)
@@ -217,7 +217,7 @@ public class KitEditor extends CssCommand {
 			});
 		}
 		if (page != totalPages)
-			gui.setItem(41, new ItemGUI(ItemMaker.ofHead().skinValues(
+			gui.setItem(51, new ItemGUI(ItemMaker.ofHead().skinValues(
 					"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZGQ5OTNiOGMxMzU4ODkxOWI5ZjhiNDJkYjA2NWQ1YWRmZTc4YWYxODI4MTViNGU2ZjBmOTFiYTY4M2RlYWM5In19fQ==")
 					.displayName("&fNext page &e&l>>>").lore("", "&8» &7Click to continue to next page", "").build()) {
 				@Override
@@ -226,7 +226,7 @@ public class KitEditor extends CssCommand {
 				}
 			});
 		if (page != 1)
-			gui.setItem(37,
+			gui.setItem(47,
 					new ItemGUI(ItemMaker.ofHead().skinValues(
 							"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZjRiZmVmMTRlODQyMGEyNTZlNDU3YTRhN2M4ODExMmUxNzk0ODVlNTIzNDU3ZTQzODUxNzdiYWQifX19")
 							.displayName("&e&l<<< &fPrevious page").lore("", "&8» &7Click to return to previous page", "").build()) {
@@ -264,7 +264,7 @@ public class KitEditor extends CssCommand {
 	}
 
 	protected void openContents(Player player, int guiPage, KitSample kit, int requestedPage) {
-		int totalPages = kit.getContents().size() / 36 + (kit.getContents().size() % 36 == 0 ? 0 : 1);
+		int totalPages = Math.max(1, kit.getContents().size() / 36 + (kit.getContents().size() % 36 == 0 ? 0 : 1));
 		if (requestedPage > totalPages)
 			requestedPage = totalPages;
 		if (requestedPage < 1)
@@ -275,6 +275,7 @@ public class KitEditor extends CssCommand {
 			gui.setItem(i, empty);
 		for (int i = 45; i < 54; ++i)
 			gui.setItem(i, empty);
+		gui.setInsertable(true);
 		gui.setItem(49, new ItemGUI(ItemMaker.of(XMaterial.YELLOW_STAINED_GLASS_PANE).displayName("&eReturn back").lore("", "&8» &7Click to return back to previous menu", "").build()) {
 			@Override
 			public void onClick(Player player, HolderGUI guir, ClickType click) {
@@ -308,7 +309,7 @@ public class KitEditor extends CssCommand {
 			});
 		}
 		if (page != totalPages)
-			gui.setItem(41, new ItemGUI(ItemMaker.ofHead().skinValues(
+			gui.setItem(51, new ItemGUI(ItemMaker.ofHead().skinValues(
 					"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZGQ5OTNiOGMxMzU4ODkxOWI5ZjhiNDJkYjA2NWQ1YWRmZTc4YWYxODI4MTViNGU2ZjBmOTFiYTY4M2RlYWM5In19fQ==")
 					.displayName("&fNext page &e&l>>>").lore("", "&8» &7Click to continue to next page", "").build()) {
 				@Override
@@ -317,7 +318,7 @@ public class KitEditor extends CssCommand {
 				}
 			});
 		if (page != 1)
-			gui.setItem(37,
+			gui.setItem(47,
 					new ItemGUI(ItemMaker.ofHead().skinValues(
 							"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZjRiZmVmMTRlODQyMGEyNTZlNDU3YTRhN2M4ODExMmUxNzk0ODVlNTIzNDU3ZTQzODUxNzdiYWQifX19")
 							.displayName("&e&l<<< &fPrevious page").lore("", "&8» &7Click to return to previous page", "").build()) {
@@ -354,7 +355,7 @@ public class KitEditor extends CssCommand {
 	}
 
 	protected void openCommands(Player player, int guiPage, KitSample kit, int requestedPage) {
-		int totalPages = kit.getCommands().size() / 36 + (kit.getCommands().size() % 36 == 0 ? 0 : 1);
+		int totalPages = Math.max(1, kit.getCommands().size() / 36 + (kit.getCommands().size() % 36 == 0 ? 0 : 1));
 		if (requestedPage > totalPages)
 			requestedPage = totalPages;
 		if (requestedPage < 1)
@@ -388,7 +389,7 @@ public class KitEditor extends CssCommand {
 			});
 		}
 		if (page != totalPages)
-			gui.setItem(41, new ItemGUI(ItemMaker.ofHead().skinValues(
+			gui.setItem(51, new ItemGUI(ItemMaker.ofHead().skinValues(
 					"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZGQ5OTNiOGMxMzU4ODkxOWI5ZjhiNDJkYjA2NWQ1YWRmZTc4YWYxODI4MTViNGU2ZjBmOTFiYTY4M2RlYWM5In19fQ==")
 					.displayName("&fNext page &e&l>>>").lore("", "&8» &7Click to continue to next page", "").build()) {
 				@Override
@@ -397,7 +398,7 @@ public class KitEditor extends CssCommand {
 				}
 			});
 		if (page != 1)
-			gui.setItem(37,
+			gui.setItem(47,
 					new ItemGUI(ItemMaker.ofHead().skinValues(
 							"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZjRiZmVmMTRlODQyMGEyNTZlNDU3YTRhN2M4ODExMmUxNzk0ODVlNTIzNDU3ZTQzODUxNzdiYWQifX19")
 							.displayName("&e&l<<< &fPrevious page").lore("", "&8» &7Click to return to previous page", "").build()) {
@@ -580,7 +581,7 @@ public class KitEditor extends CssCommand {
 		AnvilGUI anvil = new AnvilGUI("&fType kit name") {
 			@Override
 			public boolean onInteractItem(Player player, ItemStack newItem, ItemStack oldItem, ClickType type, int slot, boolean guiClick) {
-				if (guiClick && getRenameText() != null && !getRenameText().trim().isEmpty()) {
+				if (guiClick && getRenameText() != null && !getRenameText().trim().isEmpty() && !getRenameText().replace(" ", "").equalsIgnoreCase("kitnamehere")) {
 					KitSample kit = ((Kit) API.get().getCommandManager().getRegistered().get("kit")).getKits().get(getRenameText().replace(" ", ""));
 					if (kit == null) {
 						kit = new KitSample(getRenameText().replace(" ", ""));
