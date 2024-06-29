@@ -492,11 +492,11 @@ public class BanAPI {
 				if (player.getAddress().getAddress().getHostAddress().equals(user))
 					players.add(player);
 			if (!players.isEmpty())
-				API.get().getMsgManager().sendMessageFromFile(API.get().getConfigManager().getMain(), "bansystem.mute", executor, players);
+				API.get().getMsgManager().sendMessageFromFile(API.get().getConfigManager().getMain(), "bansystem.muted", executor, players);
 		} else {
 			Player target = Bukkit.getPlayer(user);
 			if (target != null)
-				API.get().getMsgManager().sendMessageFromFile(API.get().getConfigManager().getMain(), "bansystem.mute", executor, target);
+				API.get().getMsgManager().sendMessageFromFile(API.get().getConfigManager().getMain(), "bansystem.muted", executor, target);
 		}
 		return entry;
 	}
