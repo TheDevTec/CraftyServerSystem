@@ -1,0 +1,124 @@
+enabled: true
+
+disabled-in-worlds:
+- "disabledWorld"
+
+# Displays scoreboard under specified condition (1. priority)
+conditions:
+  vanish:
+    # %placeholder%==VALUE
+    condition: "%css_vanish%==true"
+    title: "&6S&fcoreboard"
+    # {player}, {money}, {health}, {food}, {world}, {x}, {y}, {z} and PlaceholderAPI placeholders
+    # maximum 16 lines
+    lines:
+    - ""
+    - "&7Name:"
+    - " &f» &e{player}"
+    - ""
+    - "&7TPS:"
+    - " &f» &e%server_tps_1%"
+    - ""
+    - "&7Uptime:"
+    - " &f» &e%server_uptime%"
+    - ""
+    - "&eYOU ARE VANISHED!"    
+
+# per-world-settings (2. priority)
+world:
+  # world name
+  exampleWorld:
+    title:
+    lines:
+    - ""
+    player:
+      # player name
+      test:
+        title: "&6S&fcoreboard"
+        # {player}, {money}, {health}, {food}, {world}, {x}, {y}, {z} and PlaceholderAPI placeholders
+        # maximum 16 lines
+        lines:
+        - ""
+        - "&7Name:"
+        - " &f» &e{player}"
+        - ""
+        - "&7Balance:"
+        - " &f» &e€{money}"
+        - ""
+        - "&eplay.example.com"
+    group:
+      # group name
+      default:
+        title: "&6S&fcoreboard"
+        # {player}, {money}, {health}, {food}, {world}, {x}, {y}, {z} and PlaceholderAPI placeholders
+        # maximum 16 lines
+        lines:
+        - ""
+        - "&7Name:"
+        - " &f» &e{player}"
+        - ""
+        - "&7Balance:"
+        - " &f» &e€{money}"
+        - ""
+        - "&eplay.example.com"
+
+# This settings can be overriden by per-world-settings
+# per-player-settings (3. priority)
+player:
+  # group name
+  test:
+    title: "&6S&fcoreboard"
+    # {player}, {money}, {health}, {food}, {world}, {x}, {y}, {z} and PlaceholderAPI placeholders
+    # maximum 16 lines
+    lines:
+    - ""
+    - "&7Name:"
+    - " &f» &e{player}"
+    - ""
+    - "&7Balance:"
+    - " &f» &e€{money}"
+    - ""
+    - "&eplay.example.com"
+
+# This settings can be overriden by per-player-settings
+# per-group-settings (4. priority)
+group:
+  # group name
+  default:
+    title: "&6S&fcoreboard"
+    # {player}, {money}, {health}, {food}, {world}, {x}, {y}, {z} and PlaceholderAPI placeholders
+    # maximum 16 lines
+    lines:
+    - ""
+    - "&7Name:"
+    - " &f» &e{player}"
+    - ""
+    - "&7Balance:"
+    - " &f» &e€{money}"
+    - ""
+    - "&eplay.example.com"
+
+# Global settings
+# This settings can by overriden by per-group-settings
+title: "&6S&fcoreboard"
+# {player}, {money}, {health}, {food}, {world}, {x}, {y}, {z} and PlaceholderAPI placeholders
+# maximum 16 lines
+# 5. priority
+lines:
+- ""
+- "&7Name:"
+- " &f» &e{player}"
+- ""
+- "&7Balance:"
+- " &f» &e€{money}"
+- ""
+- "&eplay.example.com"
+
+settings:
+  # How red numbers in scoreboard should be displayed?
+  # Options: VANILLA (0,1,2,3...) or specific number (like 0)
+  displayNumbers: 0
+  
+  # How frequently to refresh tablist data (tablist, nametag and yellow number)
+  # 20 ticks = 1s
+  data-reflesh-every-ticks: 1

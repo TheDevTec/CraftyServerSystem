@@ -1,0 +1,112 @@
+enabled: true
+
+# Displays scoreboard under specified condition (1. priority)
+conditions:
+  vanish:
+    # %placeholder%==VALUE
+    condition: "%css_vanish%==true"
+    header:
+    - "  &f&lServer name"
+    - "&7Total Online &e{online} &7players:"
+    footer:
+    - "&7Money: &e€{balance}"
+    tab:
+      format: "{prefix}{player}{suffix}"
+      prefix: "{afk} &cInvalid &f"
+      suffix: "{vanish}"
+    tag:
+      format: "{prefix}{player}{suffix}"
+      prefix: "&cInvalid &f"
+      suffix: "{vanish}" 
+
+# per-world-settings (2. priority)
+world:
+  # world name
+  exampleWorld:
+    player:
+      # player name
+      test:
+        tab:
+          prefix: "{afk} &6CSS &f"
+          suffix: ""
+        tag:
+          prefix: "&6CSS &f"
+          suffix: ""
+        yellowNumber:
+          value: "{health}"
+          displayAs: INTEGER
+    group:
+      # group name
+      default:
+        tab:
+          prefix: "{afk} &7"
+          suffix: ""
+        tag:
+          prefix: "&7"
+          suffix: ""
+
+# This settings can be overriden by per-world-settings
+# per-player-settings (3. priority)
+player:
+  # player name
+  test:
+    tab:
+      prefix: "{afk} &7Player &f"
+      suffix: ""
+    tag:
+      prefix: "&7Player &f"
+      suffix: ""
+
+# This settings can be overriden by per-player-settings
+# per-group-settings (4. priority)
+group:
+  # group name
+  default:
+    tab:
+      format: "{prefix}{player}{suffix}"
+      prefix: "{afk} &7Player &f"
+      suffix: "{vanish}"
+    tag:
+      format: "{prefix}{player}{suffix}"
+      prefix: "&7Player &f"
+      suffix: "{vanish}"
+
+yellowNumber:
+  # Must be integer (number)
+  # Accepting placeholders from PlaceholderAPI
+  value: "{ping}"
+  # NONE, INTEGER or HEARTS
+  displayAs: INTEGER
+
+header:
+- "  &f&lServer name"
+- "&7Total Online &e{online} &7players:"
+
+footer:
+- "&7Money: &e€{balance}"
+
+# Default tab & tag format when group attemp fail
+# 5. priority
+tab:
+  format: "{prefix}{player}{suffix}"
+  prefix: "{afk} &cInvalid &f"
+  suffix: "{vanish}"
+tag:
+  format: "{prefix}{player}{suffix}"
+  prefix: "&cInvalid &f"
+  suffix: "{vanish}"
+
+sorting:
+  # PLAYER_NAME(Vanilla), GROUP(Vault), GROUP_WEIGHT(LuckPerms)
+  by: GROUP_WEIGHT
+  # if "by" is set to "GROUP"
+  list:
+  - owner
+  - admin
+  - helper
+  - vip
+  - default
+
+# How frequently to refresh tablist data (tablist, nametag and yellow number)
+# 20 ticks = 1s
+data-reflesh-every-ticks: 1
