@@ -9,7 +9,6 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
@@ -21,7 +20,7 @@ import me.devtec.craftyserversystem.events.CssListener;
 import me.devtec.craftyserversystem.events.internal.supportlp.ScoreboardLP;
 import me.devtec.craftyserversystem.permission.LuckPermsPermissionHook;
 import me.devtec.craftyserversystem.permission.VaultPermissionHook;
-import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
+import me.devtec.craftyserversystem.utils.InternalPlaceholders;
 import me.devtec.craftyserversystem.utils.scoreboard.ConditionScoreboardData;
 import me.devtec.craftyserversystem.utils.scoreboard.PerWorldScoreboardData;
 import me.devtec.craftyserversystem.utils.scoreboard.ScoreboardData;
@@ -143,24 +142,7 @@ public class ScoreboardListener implements CssListener {
 						Player player = Bukkit.getPlayer(entry.getKey());
 						if (player == null || !player.isOnline())
 							continue;
-						Location loc = player.getLocation();
-						entry.getValue()
-								.process(PlaceholdersExecutor.i().papi(player.getUniqueId())
-										.add("player", player.getName())
-										.add("ping", BukkitLoader.getNmsProvider().getPing(player))
-										.add("online", BukkitLoader.getOnlinePlayers().size())
-										.add("max_players", Bukkit.getMaxPlayers())
-										.add("balance",
-												API.get().getEconomyHook()
-														.format(API.get().getEconomyHook().getBalance(player.getName(),
-																player.getWorld().getName())))
-										.add("money",
-												API.get().getEconomyHook()
-														.format(API.get().getEconomyHook().getBalance(player.getName(),
-																player.getWorld().getName())))
-										.add("health", player.getHealth()).add("food", player.getFoodLevel())
-										.add("x", loc.getX()).add("y", loc.getY()).add("z", loc.getZ())
-										.add("world", loc.getWorld().getName()));
+						entry.getValue().process(InternalPlaceholders.generatePlaceholders(player));
 					}
 				}
 			}
@@ -198,13 +180,12 @@ public class ScoreboardListener implements CssListener {
 		UserScoreboardData previous = data.get(player.getUniqueId());
 		UserScoreboardData userData = new UserScoreboardData(player, vaultGroup,
 				previous == null ? false : previous.isHidden());
-		for (ConditionScoreboardData cond : conditions) {
+		for (ConditionScoreboardData cond : conditions)
 			if (cond.canBeApplied(player)) {
 				userData.fillMissing(cond);
 				if (userData.isComplete())
 					return userData.markModified();
 			}
-		}
 		PerWorldScoreboardData pwData;
 		ScoreboardData data;
 		if ((pwData = perWorld.get(player.getWorld().getName())) != null) {

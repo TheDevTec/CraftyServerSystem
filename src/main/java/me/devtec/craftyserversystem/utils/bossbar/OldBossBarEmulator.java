@@ -20,7 +20,7 @@ public class OldBossBarEmulator implements BossBarEmulator {
 
 	@Override
 	public void setText(String text) {
-		if (!removed && bar.getTitle().equals(text))
+		if (removed || bar.getTitle().equals(text))
 			return;
 		removed = false;
 		bar.setTitle(text);
@@ -34,7 +34,7 @@ public class OldBossBarEmulator implements BossBarEmulator {
 	@Override
 	public void setProgress(double progress) {
 		progress = Math.min(100.0, Math.max(0.0, progress / 100));
-		if (!removed && bar.getProgress() == progress)
+		if (removed)
 			return;
 		removed = false;
 		bar.setProgress(progress);

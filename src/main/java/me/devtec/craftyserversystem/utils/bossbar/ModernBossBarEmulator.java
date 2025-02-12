@@ -36,8 +36,6 @@ public class ModernBossBarEmulator implements BossBarEmulator {
 	@Override
 	public void setProgress(double progress) {
 		progress = Math.min(1.0, Math.max(0.0, progress / 100));
-		if (bar.getProgress() == progress)
-			return;
 		bar.setProgress(progress);
 	}
 

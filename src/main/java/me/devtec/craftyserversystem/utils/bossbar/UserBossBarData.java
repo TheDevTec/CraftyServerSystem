@@ -44,15 +44,20 @@ public class UserBossBarData extends BossBarData {
 		if (hidden)
 			return this;
 		for (String placeholder : API.get().getConfigManager().getPlaceholders().getKeys()) {
-			String replaced = PlaceholderAPI.apply(API.get().getConfigManager().getPlaceholders().getString(placeholder + ".placeholder"), player.getUniqueId());
+			String replaced = PlaceholderAPI.apply(
+					API.get().getConfigManager().getPlaceholders().getString(placeholder + ".placeholder"),
+					player.getUniqueId());
 			placeholders.add(placeholder,
 					API.get().getConfigManager().getPlaceholders()
-							.getString(placeholder + ".replace." + replaced, API.get().getConfigManager().getPlaceholders().getString(placeholder + ".replace._DEFAULT", ""))
+							.getString(placeholder + ".replace." + replaced,
+									API.get().getConfigManager().getPlaceholders()
+											.getString(placeholder + ".replace._DEFAULT", ""))
 							.replace("{placeholder}", replaced));
 		}
 		BossBarEmulator bar = bossbar;
 		if (bar == null)
-			bar = bossbar = BossBarEmulator.createInstance(player, getText(), MathUtils.calculate(placeholders.apply(getProgress())));
+			bar = bossbar = BossBarEmulator.createInstance(player, placeholders.apply(getText()),
+					MathUtils.calculate(placeholders.apply(getProgress())));
 		else {
 			if (!bar.canSee(player))
 				bar.addPlayer(player);

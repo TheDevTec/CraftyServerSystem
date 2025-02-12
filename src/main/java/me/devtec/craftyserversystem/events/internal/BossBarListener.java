@@ -1,25 +1,24 @@
 package me.devtec.craftyserversystem.events.internal;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
+import me.devtec.craftyserversystem.Loader;
 import me.devtec.craftyserversystem.api.API;
 import me.devtec.craftyserversystem.events.CssListener;
 import me.devtec.craftyserversystem.events.internal.supportlp.BossBarLP;
 import me.devtec.craftyserversystem.permission.LuckPermsPermissionHook;
-import me.devtec.craftyserversystem.permission.VaultPermissionHook;
-import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
+import me.devtec.craftyserversystem.utils.InternalPlaceholders;
 import me.devtec.craftyserversystem.utils.bossbar.BossBarData;
 import me.devtec.craftyserversystem.utils.bossbar.BossBarEmulator.Color;
 import me.devtec.craftyserversystem.utils.bossbar.BossBarEmulator.Style;
@@ -101,7 +100,7 @@ public class BossBarListener implements CssListener {
 
 			if (API.get().getPermissionHook().getClass() == LuckPermsPermissionHook.class)
 				lpListener = new BossBarLP().register(this);
-			else if (API.get().getPermissionHook().getClass() == VaultPermissionHook.class)
+			else
 				taskId = new Tasker() {
 
 					@Override
@@ -114,27 +113,13 @@ public class BossBarListener implements CssListener {
 
 				@Override
 				public void run() {
-					for (UserBossBarData userData : data.values()) {
-						Location loc = userData.getPlayer().getLocation();
-						userData.process(PlaceholdersExecutor.i().papi(userData.getPlayer().getUniqueId()).add("player", userData.getPlayer().getName())
-								.add("ping", BukkitLoader.getNmsProvider().getPing(userData.getPlayer())).add("online", BukkitLoader.getOnlinePlayers().size())
-								.add("max_players", Bukkit.getMaxPlayers())
-								.add("balance", API.get().getEconomyHook().format(API.get().getEconomyHook().getBalance(userData.getPlayer().getName(), userData.getPlayer().getWorld().getName())))
-								.add("money", API.get().getEconomyHook().format(API.get().getEconomyHook().getBalance(userData.getPlayer().getName(), userData.getPlayer().getWorld().getName())))
-								.add("health", userData.getPlayer().getHealth()).add("food", userData.getPlayer().getFoodLevel()).add("x", loc.getX()).add("y", loc.getY()).add("z", loc.getZ())
-								.add("world", loc.getWorld().getName()));
-					}
+					for (UserBossBarData userData : data.values())
+						userData.process(InternalPlaceholders.generatePlaceholders(userData.getPlayer()));
 				}
 			}.runRepeating(8, Math.max(1, getConfig().getLong("data-reflesh-every-ticks")));
-			for (Player player : BukkitLoader.getOnlinePlayers()) {
-				Location loc = player.getLocation();
+			for (Player player : BukkitLoader.getOnlinePlayers())
 				data.put(player.getUniqueId(),
-						generateData(player).process(PlaceholdersExecutor.i().papi(player.getUniqueId()).add("player", player.getName()).add("ping", BukkitLoader.getNmsProvider().getPing(player))
-								.add("online", BukkitLoader.getOnlinePlayers().size()).add("max_players", Bukkit.getMaxPlayers())
-								.add("balance", API.get().getEconomyHook().format(API.get().getEconomyHook().getBalance(player.getName(), player.getWorld().getName())))
-								.add("money", API.get().getEconomyHook().format(API.get().getEconomyHook().getBalance(player.getName(), player.getWorld().getName()))).add("health", player.getHealth())
-								.add("food", player.getFoodLevel()).add("x", loc.getX()).add("y", loc.getY()).add("z", loc.getZ()).add("world", loc.getWorld().getName())));
-			}
+						generateData(player).process(InternalPlaceholders.generatePlaceholders(player)));
 		}
 	}
 
@@ -156,16 +141,27 @@ public class BossBarListener implements CssListener {
 		data.setProgress(getConfig().existsKey(path + "progress") ? getConfig().getString(path + "progress") : null);
 		String style;
 		if ((style = getConfig().getString(path + "style")) != null)
-			data.setStyle(Style.valueOf(style.toUpperCase()));
+			try {
+				data.setStyle(Style.valueOf(style.toUpperCase()));
+			} catch (Exception | NoSuchFieldError e) {
+				Loader.getPlugin().getLogger().warning("[BossBar] Failed to load bossbar '" + path + "' - Style "
+						+ style + " doesn't exist! Valid styles are: " + Arrays.asList(Style.values()));
+			}
 		String color;
 		if ((color = getConfig().getString(path + "color")) != null)
-			data.setColor(Color.valueOf(color.toUpperCase()));
+			try {
+				data.setColor(Color.valueOf(color.toUpperCase()));
+			} catch (Exception | NoSuchFieldError e) {
+				Loader.getPlugin().getLogger().warning("[BossBar] Failed to load bossbar '" + path + "' - Color "
+						+ color + " doesn't exist! Valid colors are: " + Arrays.asList(Color.values()));
+			}
 	}
 
 	public UserBossBarData generateData(Player player) {
 		String vaultGroup = API.get().getPermissionHook().getGroup(player);
 		UserBossBarData previous = data.get(player.getUniqueId());
-		UserBossBarData userData = new UserBossBarData(player, vaultGroup, previous == null ? false : previous.isHidden(), previous == null ? null : previous.getBossBar());
+		UserBossBarData userData = new UserBossBarData(player, vaultGroup,
+				previous == null ? false : previous.isHidden(), previous == null ? null : previous.getBossBar());
 		PerWorldBossBarData pwData;
 		BossBarData data;
 		if ((pwData = perWorld.get(player.getWorld().getName())) != null) {
@@ -199,17 +195,11 @@ public class BossBarListener implements CssListener {
 
 	@EventHandler
 	public void onJoin(PlayerJoinEvent e) {
-		BukkitLoader.getNmsProvider().postToMainThread(() -> NametagManagerAPI.get().getPlayer(e.getPlayer()).afterJoin());
-		if (disabledInWorlds.contains(e.getPlayer().getWorld().getName()))
-			return;
 		Player player = e.getPlayer();
-		Location loc = player.getLocation();
-		data.put(player.getUniqueId(),
-				generateData(e.getPlayer()).process(PlaceholdersExecutor.i().papi(player.getUniqueId()).add("player", player.getName()).add("ping", BukkitLoader.getNmsProvider().getPing(player))
-						.add("online", BukkitLoader.getOnlinePlayers().size()).add("max_players", Bukkit.getMaxPlayers())
-						.add("balance", API.get().getEconomyHook().format(API.get().getEconomyHook().getBalance(player.getName(), player.getWorld().getName())))
-						.add("money", API.get().getEconomyHook().format(API.get().getEconomyHook().getBalance(player.getName(), player.getWorld().getName()))).add("health", player.getHealth())
-						.add("food", player.getFoodLevel()).add("x", loc.getX()).add("y", loc.getY()).add("z", loc.getZ()).add("world", loc.getWorld().getName())));
+		BukkitLoader.getNmsProvider().postToMainThread(() -> NametagManagerAPI.get().getPlayer(player).afterJoin());
+		if (disabledInWorlds.contains(player.getWorld().getName()))
+			return;
+		data.put(player.getUniqueId(), generateData(player).process(InternalPlaceholders.generatePlaceholders(player)));
 	}
 
 	@EventHandler
@@ -221,19 +211,13 @@ public class BossBarListener implements CssListener {
 
 	@EventHandler
 	public void onWorldChange(PlayerChangedWorldEvent e) {
-		if (disabledInWorlds.contains(e.getPlayer().getWorld().getName())) {
+		Player player = e.getPlayer();
+		if (disabledInWorlds.contains(player.getWorld().getName())) {
 			UserBossBarData user;
-			if ((user = data.remove(e.getPlayer().getUniqueId())) != null)
+			if ((user = data.remove(player.getUniqueId())) != null)
 				user.removeBossBar();
 			return;
 		}
-		Player player = e.getPlayer();
-		Location loc = player.getLocation();
-		data.put(player.getUniqueId(),
-				generateData(e.getPlayer()).process(PlaceholdersExecutor.i().papi(player.getUniqueId()).add("player", player.getName()).add("ping", BukkitLoader.getNmsProvider().getPing(player))
-						.add("online", BukkitLoader.getOnlinePlayers().size()).add("max_players", Bukkit.getMaxPlayers())
-						.add("balance", API.get().getEconomyHook().format(API.get().getEconomyHook().getBalance(player.getName(), player.getWorld().getName())))
-						.add("money", API.get().getEconomyHook().format(API.get().getEconomyHook().getBalance(player.getName(), player.getWorld().getName()))).add("health", player.getHealth())
-						.add("food", player.getFoodLevel()).add("x", loc.getX()).add("y", loc.getY()).add("z", loc.getZ()).add("world", loc.getWorld().getName())));
+		data.put(player.getUniqueId(), generateData(player).process(InternalPlaceholders.generatePlaceholders(player)));
 	}
 }

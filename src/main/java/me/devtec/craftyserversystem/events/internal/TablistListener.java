@@ -7,8 +7,6 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
@@ -19,8 +17,7 @@ import me.devtec.craftyserversystem.api.API;
 import me.devtec.craftyserversystem.events.CssListener;
 import me.devtec.craftyserversystem.events.internal.supportlp.TablistLP;
 import me.devtec.craftyserversystem.permission.LuckPermsPermissionHook;
-import me.devtec.craftyserversystem.permission.VaultPermissionHook;
-import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
+import me.devtec.craftyserversystem.utils.InternalPlaceholders;
 import me.devtec.craftyserversystem.utils.tablist.ConditionTablistData;
 import me.devtec.craftyserversystem.utils.tablist.PerWorldTablistData;
 import me.devtec.craftyserversystem.utils.tablist.TablistData;
@@ -115,7 +112,7 @@ public class TablistListener implements CssListener {
 
 			if (API.get().getPermissionHook().getClass() == LuckPermsPermissionHook.class)
 				lpListener = new TablistLP().register(this);
-			else if (API.get().getPermissionHook().getClass() == VaultPermissionHook.class)
+			else
 				taskId = new Tasker() {
 
 					@Override
@@ -128,45 +125,13 @@ public class TablistListener implements CssListener {
 
 				@Override
 				public void run() {
-					for (UserTablistData userData : data.values()) {
-						Location loc = userData.getPlayer().getLocation();
-						userData.process(PlaceholdersExecutor.i().papi(userData.getPlayer().getUniqueId())
-								.add("player", userData.getPlayer().getName())
-								.add("ping", BukkitLoader.getNmsProvider().getPing(userData.getPlayer()))
-								.add("online", BukkitLoader.getOnlinePlayers().size())
-								.add("max_players", Bukkit.getMaxPlayers())
-								.add("balance", API.get().getEconomyHook()
-										.format(API.get().getEconomyHook().getBalance(userData.getPlayer().getName(),
-												userData.getPlayer().getWorld().getName())))
-								.add("money", API.get().getEconomyHook()
-										.format(API.get().getEconomyHook().getBalance(userData.getPlayer().getName(),
-												userData.getPlayer().getWorld().getName())))
-								.add("health", userData.getPlayer().getHealth())
-								.add("food", userData.getPlayer().getFoodLevel()).add("x", loc.getX())
-								.add("y", loc.getY()).add("z", loc.getZ()).add("world", loc.getWorld().getName()));
-					}
+					for (UserTablistData userData : data.values())
+						userData.process(InternalPlaceholders.generatePlaceholders(userData.getPlayer()));
 				}
 			}.runRepeating(8, Math.max(1, getConfig().getLong("data-reflesh-every-ticks")));
-			for (Player player : BukkitLoader.getOnlinePlayers()) {
-				Location loc = player.getLocation();
+			for (Player player : BukkitLoader.getOnlinePlayers())
 				data.put(player.getUniqueId(),
-						generateData(player).process(
-								PlaceholdersExecutor.i().papi(player.getUniqueId()).add("player", player.getName())
-										.add("ping", BukkitLoader.getNmsProvider().getPing(player))
-										.add("online", BukkitLoader.getOnlinePlayers().size())
-										.add("max_players", Bukkit.getMaxPlayers())
-										.add("balance",
-												API.get().getEconomyHook()
-														.format(API.get().getEconomyHook().getBalance(player.getName(),
-																player.getWorld().getName())))
-										.add("money",
-												API.get().getEconomyHook()
-														.format(API.get().getEconomyHook().getBalance(player.getName(),
-																player.getWorld().getName())))
-										.add("health", player.getHealth()).add("food", player.getFoodLevel())
-										.add("x", loc.getX()).add("y", loc.getY()).add("z", loc.getZ())
-										.add("world", loc.getWorld().getName())));
-			}
+						generateData(player).process(InternalPlaceholders.generatePlaceholders(player)));
 		}
 	}
 
@@ -204,13 +169,12 @@ public class TablistListener implements CssListener {
 		String vaultGroup = API.get().getPermissionHook().getGroup(player);
 		UserTablistData user = data.get(player.getUniqueId());
 		UserTablistData userData = user == null ? new UserTablistData(player) : new UserTablistData(player, user);
-		for (ConditionTablistData cond : conditions) {
+		for (ConditionTablistData cond : conditions)
 			if (cond.canBeApplied(player)) {
 				userData.fillMissing(cond);
 				if (userData.isComplete())
 					return userData;
 			}
-		}
 		PerWorldTablistData pwData;
 		TablistData data;
 		if ((pwData = perWorld.get(player.getWorld().getName())) != null) {
@@ -244,33 +208,17 @@ public class TablistListener implements CssListener {
 
 	@EventHandler
 	public void onJoin(PlayerJoinEvent e) {
+		Player player = e.getPlayer();
 		new Tasker() {
 
 			@Override
 			public void run() {
 				BukkitLoader.getNmsProvider()
-						.postToMainThread(() -> NametagManagerAPI.get().getPlayer(e.getPlayer()).afterJoin());
-				if (disabledInWorlds.contains(e.getPlayer().getWorld().getName()))
+						.postToMainThread(() -> NametagManagerAPI.get().getPlayer(player).afterJoin());
+				if (disabledInWorlds.contains(player.getWorld().getName()))
 					return;
-				Player player = e.getPlayer();
-				Location loc = player.getLocation();
 				data.put(player.getUniqueId(),
-						generateData(e.getPlayer()).process(
-								PlaceholdersExecutor.i().papi(player.getUniqueId()).add("player", player.getName())
-										.add("ping", BukkitLoader.getNmsProvider().getPing(player))
-										.add("online", BukkitLoader.getOnlinePlayers().size())
-										.add("max_players", Bukkit.getMaxPlayers())
-										.add("balance",
-												API.get().getEconomyHook()
-														.format(API.get().getEconomyHook().getBalance(player.getName(),
-																player.getWorld().getName())))
-										.add("money",
-												API.get().getEconomyHook()
-														.format(API.get().getEconomyHook().getBalance(player.getName(),
-																player.getWorld().getName())))
-										.add("health", player.getHealth()).add("food", player.getFoodLevel())
-										.add("x", loc.getX()).add("y", loc.getY()).add("z", loc.getZ())
-										.add("world", loc.getWorld().getName())));
+						generateData(player).process(InternalPlaceholders.generatePlaceholders(player)));
 			}
 		}.runLater(20);
 	}
@@ -284,25 +232,13 @@ public class TablistListener implements CssListener {
 
 	@EventHandler
 	public void onWorldChange(PlayerChangedWorldEvent e) {
-		if (disabledInWorlds.contains(e.getPlayer().getWorld().getName())) {
+		Player player = e.getPlayer();
+		if (disabledInWorlds.contains(player.getWorld().getName())) {
 			UserTablistData user;
-			if ((user = data.remove(e.getPlayer().getUniqueId())) != null)
+			if ((user = data.remove(player.getUniqueId())) != null)
 				user.removeTablist();
 			return;
 		}
-		Player player = e.getPlayer();
-		Location loc = player.getLocation();
-		data.put(player.getUniqueId(), generateData(e.getPlayer()).process(PlaceholdersExecutor.i()
-				.papi(player.getUniqueId()).add("player", player.getName())
-				.add("ping", BukkitLoader.getNmsProvider().getPing(player))
-				.add("online", BukkitLoader.getOnlinePlayers().size()).add("max_players", Bukkit.getMaxPlayers())
-				.add("balance",
-						API.get().getEconomyHook().format(
-								API.get().getEconomyHook().getBalance(player.getName(), player.getWorld().getName())))
-				.add("money",
-						API.get().getEconomyHook().format(
-								API.get().getEconomyHook().getBalance(player.getName(), player.getWorld().getName())))
-				.add("health", player.getHealth()).add("food", player.getFoodLevel()).add("x", loc.getX())
-				.add("y", loc.getY()).add("z", loc.getZ()).add("world", loc.getWorld().getName())));
+		data.put(player.getUniqueId(), generateData(player).process(InternalPlaceholders.generatePlaceholders(player)));
 	}
 }
