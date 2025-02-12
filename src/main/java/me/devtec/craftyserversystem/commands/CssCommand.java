@@ -23,23 +23,9 @@ import me.devtec.theapi.bukkit.BukkitLoader;
 
 public abstract class CssCommand {
 
-	public static final PermissionChecker<CommandSender> DEFAULT_PERMS_CHECKER = (sender, permission, tablist) -> {
-		if (tablist)
-			return sender.hasPermission(permission);
-		if (sender.hasPermission(permission))
-			return true;
-		API.get().getMsgManager().sendMessageFromFile(API.get().getConfigManager().getTranslations(), "other.no-perms", PlaceholdersExecutor.i().add("permission", permission), sender);
-		return false;
-	};
+	public static final PermissionChecker<CommandSender> DEFAULT_PERMS_CHECKER = (sender, permission, tablist) -> sender.hasPermission(permission);
 
-	public static final PermissionChecker<Player> P_DEFAULT_PERMS_CHECKER = (sender, permission, tablist) -> {
-		if (tablist)
-			return sender.hasPermission(permission);
-		if (sender.hasPermission(permission))
-			return true;
-		API.get().getMsgManager().sendMessageFromFile(API.get().getConfigManager().getTranslations(), "other.no-perms", PlaceholdersExecutor.i().add("permission", permission), sender);
-		return false;
-	};
+	public static final PermissionChecker<Player> P_DEFAULT_PERMS_CHECKER = (sender, permission, tablist) -> sender.hasPermission(permission);
 
 	@Nonnull
 	protected CommandHolder<? extends CommandSender> cmd;
@@ -97,7 +83,8 @@ public abstract class CssCommand {
 	}
 
 	public void msg(CommandSender sender, String path, PlaceholdersExecutor ex) {
-		API.get().getMsgManager().sendMessageFromFile(API.get().getConfigManager().getTranslations(), section() + (path.isEmpty() ? "" : "." + path), ex, sender);
+		API.get().getMsgManager().sendMessageFromFile(API.get().getConfigManager().getTranslations(),
+				section() + (path.isEmpty() ? "" : "." + path), ex, sender);
 	}
 
 	public void msgOut(CommandSender sender, String path) {
@@ -109,12 +96,14 @@ public abstract class CssCommand {
 	}
 
 	public void msgUsage(CommandSender sender, String path) {
-		API.get().getMsgManager().sendMessageFromFile(API.get().getConfigManager().getCommands(), section() + ".usage." + path, PlaceholdersExecutor.EMPTY, sender);
+		API.get().getMsgManager().sendMessageFromFile(API.get().getConfigManager().getCommands(),
+				section() + ".usage." + path, PlaceholdersExecutor.EMPTY, sender);
 	}
 
 	@Nonnull
 	public Collection<? extends Player> selector(CommandSender sender, String selector) {
-		char lowerCase = selector.length() == 1 && selector.charAt(0) == '*' ? '*' : selector.length() == 2 && selector.charAt(0) == '@' ? Character.toLowerCase(selector.charAt(1)) : 0;
+		char lowerCase = selector.length() == 1 && selector.charAt(0) == '*' ? '*'
+				: selector.length() == 2 && selector.charAt(0) == '@' ? Character.toLowerCase(selector.charAt(1)) : 0;
 		if (lowerCase != 0)
 			switch (lowerCase) {
 			case 'a':
@@ -142,7 +131,8 @@ public abstract class CssCommand {
 					}
 				}
 				Collection<? extends Player> players = BukkitLoader.getOnlinePlayers();
-				return players.isEmpty() ? Collections.emptyList() : Collections.singleton(nearestPlayer == null ? players.iterator().next() : nearestPlayer);
+				return players.isEmpty() ? Collections.emptyList()
+						: Collections.singleton(nearestPlayer == null ? players.iterator().next() : nearestPlayer);
 			}
 		Player target = Bukkit.getPlayer(selector);
 		return target == null ? Collections.emptyList() : Collections.singleton(target);
