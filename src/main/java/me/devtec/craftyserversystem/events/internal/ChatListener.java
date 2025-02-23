@@ -134,12 +134,11 @@ public class ChatListener implements CssListener {
 		addColors = replacement.indexOf('§') != -1;
 		words = new ArrayList<>();
 		exactWords = new ArrayList<>();
-		for (String word : getConfig().getStringList("antiSwear.words")) {
-			if (word.startsWith("*")) {
+		for (String word : getConfig().getStringList("antiSwear.words"))
+			if (word.startsWith("*"))
 				exactWords.add(word.substring(1));
-			} else
+			else
 				words.add(word);
-		}
 		allowedPhrases = new ArrayList<>();
 		phraseLoop: for (String phrase : getConfig().getStringList("antiSwear.allowed-phrases")) {
 			if (phrase.indexOf(":") == -1) {
@@ -150,12 +149,12 @@ public class ChatListener implements CssListener {
 			String[] split = phrase.split(":");
 			for (Pair pair : allowedPhrases)
 				if (pair.getKey().equals(split[0])) {
-					((List<String>) pair.getValue()).add(split[1]);
+					((List<String>) pair.getValue()).add(split[1].trim());
 					continue phraseLoop;
 				}
 			List<String> list;
 			Pair pair = Pair.of(split[0], list = new ArrayList<>());
-			list.add(split[1]);
+			list.add(split[1].trim());
 			allowedPhrases.add(pair);
 		}
 		bypassAntiSwear = getConfig().getBoolean("antiSwear.bypass-enabled");

@@ -62,41 +62,73 @@ public class StringContainerWithPositions {
 
 	public int[] indexOf(final String value, final int start, boolean ignoreSpaces,
 			boolean removeSequentialDuplicates) {
-		return this.indexOf(start, value, ignoreSpaces, removeSequentialDuplicates);
+		return this.indexOf(start, value, ignoreSpaces, removeSequentialDuplicates, null);
 	}
 
 	protected int[] indexOf(final int start, final String lookingFor, boolean ignoreSpaces,
-			boolean removeSequentialDuplicates) {
-		int min = Math.min(start, count);
-		int size = lookingFor.length();
-		if (min + size > count)
-			return null;
+			boolean removeSequentialDuplicates, String original) {
+		if (original == null) {
+			int min = Math.min(start, count);
+			int size = lookingFor.length();
+			if (min + size > count)
+				return null;
 
-		char firstChar = lookingFor.charAt(0);
-		char prev = 0;
-		for (int i = min; i < count; ++i) {
-			char c = value[i];
-			if (ignoreSpaces && Character.isWhitespace(c))
-				continue;
-			if (c == firstChar) {
-				++i;
-				int foundPos = 1;
-				for (int d = i; d < count; ++d) {
-					char e = value[d];
-					if (ignoreSpaces && Character.isWhitespace(e))
-						continue;
-					if (e == lookingFor.charAt(foundPos)) {
-						if (++foundPos == size) {
-							return new int[] { i - 1, d };
-						}
-					} else if (removeSequentialDuplicates && e == prev)
-						continue;
-					else
-						break;
-					prev = e;
+			char firstChar = lookingFor.charAt(0);
+			char prev = 0;
+			for (int i = min; i < count; ++i) {
+				char c = value[i];
+				if (ignoreSpaces && Character.isWhitespace(c))
+					continue;
+				if (c == firstChar) {
+					++i;
+					int foundPos = 1;
+					for (int d = i; d < count; ++d) {
+						char e = value[d];
+						if (ignoreSpaces && Character.isWhitespace(e))
+							continue;
+						if (e == lookingFor.charAt(foundPos)) {
+							if (++foundPos == size)
+								return new int[] { i - 1, d };
+						} else if (removeSequentialDuplicates && e == prev && !Character.isWhitespace(e))
+							continue;
+						else
+							break;
+						prev = e;
+					}
 				}
+				prev = c;
 			}
-			prev = c;
+		} else {
+			int min = Math.min(start, count);
+			int size = lookingFor.length();
+			if (min + size > count)
+				return null;
+
+			char firstChar = lookingFor.charAt(0);
+			char prev = 0;
+			for (int i = min; i < count; ++i) {
+				char c = original.charAt(realPos[i]);
+				if (ignoreSpaces && Character.isWhitespace(c))
+					continue;
+				if (c == firstChar) {
+					++i;
+					int foundPos = 1;
+					for (int d = i; d < count; ++d) {
+						char e = original.charAt(realPos[d]);
+						if (ignoreSpaces && Character.isWhitespace(e))
+							continue;
+						if (e == lookingFor.charAt(foundPos)) {
+							if (++foundPos == size)
+								return new int[] { i - 1, d };
+						} else if (removeSequentialDuplicates && e == prev && !Character.isWhitespace(e))
+							continue;
+						else
+							break;
+						prev = e;
+					}
+				}
+				prev = c;
+			}
 		}
 		return null;
 

@@ -734,94 +734,93 @@ public class ChatHandlers {
 			filtered.append(simplifyCharacter(Character.toLowerCase(origin)), i);
 		}
 
-		for (String word : words) {
-			if (containsWord(filtered, word, allowedPhrases, true)) {
+		List<int[]> allowedSections = new ArrayList<>();
+		for (String word : words)
+			if (containsWord(input, filtered, word, allowedPhrases, true, allowedSections))
 				return true;
-			}
-		}
 
-		for (String word : exactWords) {
-			if (containsWord(filtered, word, allowedPhrases, false)) {
+		for (String word : exactWords)
+			if (containsWord(input, filtered, word, allowedPhrases, false, allowedSections))
 				return true;
-			}
-		}
 		return false;
 	}
 
 	@SuppressWarnings("unchecked")
-	private static boolean containsWord(StringContainerWithPositions filtered, String word, List<Pair> allowedPhrases,
-			boolean exact) {
+	private static boolean containsWord(String original, StringContainerWithPositions filtered, String word,
+			List<Pair> allowedPhrases, boolean exact, List<int[]> allowedSections) {
 		int[] pos = filtered.indexOf(word, exact, true);
 		loop: while (pos != null) {
-			for (Pair phrase : allowedPhrases) {
-				if (phrase.getKey().equals(word)
-						&& matchesAllowedPhrase(filtered, pos[0], (List<String>) phrase.getValue(), exact)) {
+			for (Pair phrase : allowedPhrases)
+				if (phrase.getKey().equals(word) && matchesAllowedPhrase(filtered, pos[0],
+						(List<String>) phrase.getValue(), exact, allowedSections, original)) {
 					pos = filtered.indexOf(word, pos[0] + 1, exact, false);
 					continue loop;
 				}
-			}
 			return true;
 		}
 		pos = filtered.indexOf(word, exact, false);
 		loop: while (pos != null) {
-			for (Pair phrase : allowedPhrases) {
-				if (phrase.getKey().equals(word)
-						&& matchesAllowedPhrase(filtered, pos[0], (List<String>) phrase.getValue(), exact)) {
+			for (Pair phrase : allowedPhrases)
+				if (phrase.getKey().equals(word) && matchesAllowedPhrase(filtered, pos[0],
+						(List<String>) phrase.getValue(), exact, allowedSections, original)) {
 					pos = filtered.indexOf(word, pos[0] + 1, exact, false);
 					continue loop;
 				}
-			}
 			return true;
 		}
 		return false;
-	}
-
-	@SuppressWarnings("unchecked")
-	private static void retriveWords(StringContainerWithPositions filtered, String word, List<Pair> allowedPhrases,
-			boolean exact, Map<Integer, Integer> positionAndLength) {
-		int[] pos = filtered.indexOf(word, exact, true);
-		loop: while (pos != null) {
-			if (positionAndLength.containsKey(pos[0]))
-				continue;
-			for (Pair phrase : allowedPhrases) {
-				if (phrase.getKey().equals(word)
-						&& matchesAllowedPhrase(filtered, pos[0], (List<String>) phrase.getValue(), exact)) {
-					pos = filtered.indexOf(word, pos[0] + 1, exact, false);
-					continue loop;
-				} else
-					positionAndLength.put(pos[0], pos[1]);
-			}
-
-		}
-		pos = filtered.indexOf(word, exact, false);
-		loop: while (pos != null) {
-			if (positionAndLength.containsKey(pos[0]))
-				continue;
-			for (Pair phrase : allowedPhrases) {
-				if (phrase.getKey().equals(word)
-						&& matchesAllowedPhrase(filtered, pos[0], (List<String>) phrase.getValue(), exact)) {
-					pos = filtered.indexOf(word, pos[0] + 1, exact, false);
-					continue loop;
-				} else
-					positionAndLength.put(pos[0], pos[1]);
-			}
-
-		}
 	}
 
 	private static boolean matchesAllowedPhrase(StringContainerWithPositions filtered, int pos, List<String> phrases,
-			boolean exact) {
+			boolean exact, List<int[]> allowedSections, String origin) {
+		for (int[] i : allowedSections)
+			if (i[0] >= pos && i[1] <= pos)
+				return true;
 		for (String phrase : phrases) {
-			int[] index = filtered.indexOf(phrase, Math.max(0, pos - 3), false, true);
-			if (index != null && index[0] == pos) {
+			int[] index = filtered.indexOf(Math.max(0, pos - 6), phrase, false, true, origin);
+			if (index != null) {
+				allowedSections.add(index);
 				return true;
 			}
-			index = filtered.indexOf(phrase, Math.max(0, pos - 3), false, false);
-			if (index != null && index[0] == pos) {
+			index = filtered.indexOf(Math.max(0, pos - 6), phrase, false, false, origin);
+			if (index != null) {
+				allowedSections.add(index);
 				return true;
 			}
 		}
 		return false;
+	}
+
+	@SuppressWarnings("unchecked")
+	private static void retriveWords(String input, StringContainerWithPositions filtered, String word,
+			List<Pair> allowedPhrases, boolean exact, Map<Integer, Integer> positionAndLength,
+			List<int[]> allowedSections) {
+		int[] pos = filtered.indexOf(word, exact, true);
+		loop: while (pos != null) {
+			if (positionAndLength.containsKey(pos[0]))
+				continue;
+			for (Pair phrase : allowedPhrases)
+				if (phrase.getKey().equals(word) && matchesAllowedPhrase(filtered, pos[0],
+						(List<String>) phrase.getValue(), exact, allowedSections, input)) {
+					pos = filtered.indexOf(word, pos[0] + 1, exact, false);
+					continue loop;
+				} else
+					positionAndLength.put(pos[0], pos[1]);
+
+		}
+		pos = filtered.indexOf(word, exact, false);
+		loop: while (pos != null) {
+			if (positionAndLength.containsKey(pos[0]))
+				continue;
+			for (Pair phrase : allowedPhrases)
+				if (phrase.getKey().equals(word) && matchesAllowedPhrase(filtered, pos[0],
+						(List<String>) phrase.getValue(), exact, allowedSections, input)) {
+					pos = filtered.indexOf(word, pos[0] + 1, exact, false);
+					continue loop;
+				} else
+					positionAndLength.put(pos[0], pos[1]);
+
+		}
 	}
 
 	// find vulgarism and replace it
@@ -850,14 +849,13 @@ public class ChatHandlers {
 			filtered.append(simplifyCharacter(Character.toLowerCase(origin)), i);
 		}
 
+		List<int[]> allowedSections = new ArrayList<>();
 		Map<Integer, Integer> positionAndLength = new HashMap<>();
-		for (String word : words) {
-			retriveWords(filtered, word, allowedPhrases, true, positionAndLength);
-		}
+		for (String word : words)
+			retriveWords(input, filtered, word, allowedPhrases, true, positionAndLength, allowedSections);
 
-		for (String word : exactWords) {
-			retriveWords(filtered, word, allowedPhrases, false, positionAndLength);
-		}
+		for (String word : exactWords)
+			retriveWords(input, filtered, word, allowedPhrases, false, positionAndLength, allowedSections);
 		if (positionAndLength.isEmpty())
 			return input;
 		StringContainer container = new StringContainer(input);
