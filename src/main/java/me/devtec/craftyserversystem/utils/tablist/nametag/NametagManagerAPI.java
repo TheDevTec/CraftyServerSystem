@@ -103,7 +103,8 @@ public class NametagManagerAPI {
 			for (NametagPlayer player : players)
 				if (player.getUUID().equals(uuid))
 					return player;
-			NametagPlayer as = new NametagPlayer(online.getName(), online.getUniqueId(), teamManager.getTeam(online.getUniqueId())).initNametag(online);
+			NametagPlayer as = new NametagPlayer(online.getName(), online.getUniqueId(),
+					teamManager.getTeam(online.getUniqueId())).initNametag(online);
 			if (online.getVehicle() != null) {
 				List<NametagPlayer> players = new ArrayList<>();
 				players.add(as);
@@ -137,7 +138,8 @@ public class NametagManagerAPI {
 
 	public void load() {
 		isLoaded = true;
-		switch (me.devtec.craftyserversystem.api.API.get().getConfigManager().getTab().getString("sorting.by").toUpperCase()) {
+		switch (me.devtec.craftyserversystem.api.API.get().getConfigManager().getTab().getString("sorting.by")
+				.toUpperCase()) {
 		case "GROUP_WEIGHT":
 			if (Bukkit.getPluginManager().isPluginEnabled("LuckPerms")) {
 				teamManager = new LuckPermsTeamManager();
@@ -153,8 +155,8 @@ public class NametagManagerAPI {
 			break;
 		}
 		teamManager.reload();
-		Class<?> entityTypes, outVelocity, outMount, outMetadata, outDestroy, clientBundle, outTeleport, inVehicleMove, outSpawnEntity, clientPlayerInfoUpdate, clientPlayerInfoRemove, entityPose,
-				outBed, outAnimation;
+		Class<?> entityTypes, outVelocity, outMount, outMetadata, outDestroy, clientBundle, outTeleport, inVehicleMove,
+				outSpawnEntity, clientPlayerInfoUpdate, clientPlayerInfoRemove, entityPose, outBed, outAnimation;
 		// mount
 		Field idField;
 		Field mobsField;
@@ -206,31 +208,38 @@ public class NametagManagerAPI {
 			metaEntityId = Ref.field(outMetadata, int.class);
 			velocityEntityId = Ref.field(outVelocity, int.class);
 			metaData = Ref.field(outMetadata, List.class);
-			playerInfoUuidField = Ref.field(Ref.nms("network.protocol.game", "ClientboundPlayerInfoUpdatePacket$Entry"), UUID.class);
+			playerInfoUuidField = Ref.field(Ref.nms("network.protocol.game", "ClientboundPlayerInfoUpdatePacket$Entry"),
+					UUID.class);
 			valueField = Ref.field(Ref.nms("network.syncher", "SynchedEntityData$DataValue"), "value");
 			animationEntityId = null;
 			animationId = null;
 		} else {
 			entityTypes = Ref.nms("world.entity", "EntityTypes");
 			outVelocity = Ref.nms("network.protocol.game", "PacketPlayOutEntityVelocity");
-			outMount = Ref.nms("network.protocol.game", "PacketPlayOutMount") == null ? Ref.nms("network.protocol.game", "PacketPlayOutAttachEntity")
+			outMount = Ref.nms("network.protocol.game", "PacketPlayOutMount") == null
+					? Ref.nms("network.protocol.game", "PacketPlayOutAttachEntity")
 					: Ref.nms("network.protocol.game", "PacketPlayOutMount");
 			outMetadata = Ref.nms("network.protocol.game", "PacketPlayOutEntityMetadata");
 			outDestroy = Ref.nms("network.protocol.game", "PacketPlayOutEntityDestroy");
 			clientBundle = Ref.nms("network.protocol.game", "ClientboundBundlePacket");
 			outTeleport = Ref.nms("network.protocol.game", "PacketPlayOutEntityTeleport");
 			inVehicleMove = Ref.nms("network.protocol.game", "PacketPlayInVehicleMove");
-			outSpawnEntity = Ref.nms("network.protocol.game", "PacketPlayOutNamedEntitySpawn") == null ? Ref.nms("network.protocol.game", "PacketPlayOutSpawnEntity")
+			outSpawnEntity = Ref.nms("network.protocol.game", "PacketPlayOutNamedEntitySpawn") == null
+					? Ref.nms("network.protocol.game", "PacketPlayOutSpawnEntity")
 					: Ref.nms("network.protocol.game", "PacketPlayOutNamedEntitySpawn");
-			clientPlayerInfoUpdate = Ref.isNewerThan(19) || Ref.serverVersionInt() == 19 && Ref.serverVersionRelease() >= 2 ? Ref.nms("network.protocol.game", "ClientboundPlayerInfoUpdatePacket")
-					: Ref.nms("network.protocol.game", "PacketPlayOutPlayerInfo");
+			clientPlayerInfoUpdate = Ref.isNewerThan(19)
+					|| Ref.serverVersionInt() == 19 && Ref.serverVersionRelease() >= 2
+							? Ref.nms("network.protocol.game", "ClientboundPlayerInfoUpdatePacket")
+							: Ref.nms("network.protocol.game", "PacketPlayOutPlayerInfo");
 			clientPlayerInfoRemove = Ref.nms("network.protocol.game", "ClientboundPlayerInfoRemovePacket");
 			entityPose = Ref.nms("world.entity", "EntityPose");
 			outBed = Ref.nms("", "PacketPlayOutBed");
-			outAnimation = Ref.nms("network.protocol.game", "ClientboundAnimatePacket") == null ? Ref.nms("network.protocol.game", "PacketPlayOutAnimation")
+			outAnimation = Ref.nms("network.protocol.game", "ClientboundAnimatePacket") == null
+					? Ref.nms("network.protocol.game", "PacketPlayOutAnimation")
 					: Ref.nms("network.protocol.game", "ClientboundAnimatePacket");
 			idField = Ref.isOlderThan(12) ? Ref.field(outMount, "c") : Ref.field(outMount, int.class);
-			mobsField = Ref.field(outMount, int[].class) == null ? Ref.field(outMount, "b") : Ref.field(outMount, int[].class);
+			mobsField = Ref.field(outMount, int[].class) == null ? Ref.field(outMount, "b")
+					: Ref.field(outMount, int[].class);
 			isLeashed = Ref.field(outMount, "a");
 			integersField = Ref.field(outDestroy, "a");
 			entityIdField = Ref.field(outTeleport, int.class);
@@ -246,16 +255,42 @@ public class NametagManagerAPI {
 			metaData = Ref.field(outMetadata, List.class);
 			playerInfoUuidField = Ref.isNewerThan(19) || Ref.serverVersionInt() == 19 && Ref.serverVersionRelease() >= 2
 					? Ref.field(Ref.nms("network.protocol.game", "ClientboundPlayerInfoUpdatePacket$b"), UUID.class)
-					: Ref.field(Ref.nms("network.protocol.game", "PacketPlayOutPlayerInfo$PlayerInfoData"), Ref.getClass("com.mojang.authlib.GameProfile"));
-			valueField = Ref.isNewerThan(19) || Ref.serverVersionInt() == 19 && Ref.serverVersionRelease() >= 2 ? Ref.field(Ref.nms("network.syncher", "DataWatcher$b"), "c")
-					: Ref.field(Ref.isOlderThan(12) ? Ref.nms("network.syncher", "DataWatcher$WatchableObject") : Ref.nms("network.syncher", "DataWatcher$Item"), Ref.isOlderThan(12) ? "c" : "b");
+					: Ref.field(Ref.nms("network.protocol.game", "PacketPlayOutPlayerInfo$PlayerInfoData"),
+							Ref.getClass("com.mojang.authlib.GameProfile"));
+			valueField = Ref.isNewerThan(19)
+					|| Ref.serverVersionInt() == 19 && Ref.serverVersionRelease() >= 2
+							? Ref.field(Ref.nms("network.syncher", "DataWatcher$b"), "c")
+							: Ref.field(
+									Ref.isOlderThan(12) ? Ref.nms("network.syncher", "DataWatcher$WatchableObject")
+											: Ref.nms("network.syncher", "DataWatcher$Item"),
+									Ref.isOlderThan(12) ? "c" : "b");
 			animationId = Ref.field(outAnimation, "b");
 			animationEntityId = Ref.field(outAnimation, "a");
 		}
-
+		Class<?> vec3D = Ref.nms("world.phys", "Vec3") == null ? Ref.nms("world.phys", "Vec3D")
+				: Ref.nms("world.phys", "Vec3");
 		Field bedId = Ref.field(outBed, int.class);
 		Field[] xyz = new Field[3];
-		if (Ref.isOlderThan(12)) {
+		Field moveRot = Ref.field(outTeleport, Ref.nms("world.entity", "PositionMoveRotation"));
+		Field positionVec = Ref.field(Ref.nms("world.entity", "PositionMoveRotation"), vec3D);
+		Field positionVecVehicle = Ref.field(inVehicleMove, vec3D);
+		if (positionVec != null) {
+			if (BukkitLoader.NO_OBFUSCATED_NMS_MODE) {
+				xyz[0] = Ref.field(vec3D, "x");
+				xyz[1] = Ref.field(vec3D, "y");
+				xyz[2] = Ref.field(vec3D, "z");
+			} else
+				for (Field field : Ref.getDeclaredFields(vec3D))
+					if (field.getType() == double.class)
+						if (xyz[0] == null)
+							xyz[0] = field;
+						else if (xyz[1] == null)
+							xyz[1] = field;
+						else if (xyz[2] == null) {
+							xyz[2] = field;
+							break;
+						}
+		} else if (Ref.isOlderThan(12)) {
 			boolean firstInt = true;
 			for (Field field : Ref.getDeclaredFields(outTeleport))
 				if (field.getType() == int.class) {
@@ -272,31 +307,51 @@ public class NametagManagerAPI {
 						break;
 					}
 				}
-		}
-		for (Field field : Ref.getDeclaredFields(outTeleport))
-			if (field.getType() == double.class)
-				if (xyz[0] == null)
-					xyz[0] = field;
-				else if (xyz[1] == null)
-					xyz[1] = field;
-				else if (xyz[2] == null) {
-					xyz[2] = field;
-					break;
-				}
-		Field[] mxyz = new Field[3];
-		if (inVehicleMove != null)
-			for (Field field : Ref.getDeclaredFields(inVehicleMove))
+		} else
+			for (Field field : Ref.getDeclaredFields(outTeleport))
 				if (field.getType() == double.class)
-					if (mxyz[0] == null)
-						mxyz[0] = field;
-					else if (mxyz[1] == null)
-						mxyz[1] = field;
-					else if (mxyz[2] == null) {
-						mxyz[2] = field;
+					if (xyz[0] == null)
+						xyz[0] = field;
+					else if (xyz[1] == null)
+						xyz[1] = field;
+					else if (xyz[2] == null) {
+						xyz[2] = field;
 						break;
 					}
-		Class<?> actionPacketClass = Ref.nms("network.protocol.game", BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "ServerboundPlayerCommandPacket" : "PacketPlayInEntityAction");
-		Class<?> movementPacketClass = Ref.nms("network.protocol.game", BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "ServerboundMovePlayerPacket" : "PacketPlayInFlying");
+		Field[] mxyz = new Field[3];
+		if (inVehicleMove != null) {
+			if (positionVecVehicle == null)
+				for (Field field : Ref.getDeclaredFields(inVehicleMove))
+					if (field.getType() == double.class)
+						if (mxyz[0] == null)
+							mxyz[0] = field;
+						else if (mxyz[1] == null)
+							mxyz[1] = field;
+						else if (mxyz[2] == null) {
+							mxyz[2] = field;
+							break;
+						}
+			if (positionVecVehicle != null)
+				if (BukkitLoader.NO_OBFUSCATED_NMS_MODE) {
+					mxyz[0] = Ref.field(vec3D, "x");
+					mxyz[1] = Ref.field(vec3D, "y");
+					mxyz[2] = Ref.field(vec3D, "z");
+				} else
+					for (Field field : Ref.getDeclaredFields(vec3D))
+						if (field.getType() == double.class)
+							if (mxyz[0] == null)
+								mxyz[0] = field;
+							else if (mxyz[1] == null)
+								mxyz[1] = field;
+							else if (mxyz[2] == null) {
+								mxyz[2] = field;
+								break;
+							}
+		}
+		Class<?> actionPacketClass = Ref.nms("network.protocol.game",
+				BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "ServerboundPlayerCommandPacket" : "PacketPlayInEntityAction");
+		Class<?> movementPacketClass = Ref.nms("network.protocol.game",
+				BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "ServerboundMovePlayerPacket" : "PacketPlayInFlying");
 		Field changedPosition;
 		Field actionField;
 		if (BukkitLoader.NO_OBFUSCATED_NMS_MODE || Ref.isOlderThan(17)) {
@@ -335,7 +390,8 @@ public class NametagManagerAPI {
 					return;
 				}
 				// 1.19.4+
-				if ((Ref.isNewerThan(19) || Ref.serverVersionInt() == 19 && Ref.serverVersionRelease() == 3) && packet.getClass().isAssignableFrom(clientBundle)) {
+				if ((Ref.isNewerThan(19) || Ref.serverVersionInt() == 19 && Ref.serverVersionRelease() == 3)
+						&& packet.getClass().isAssignableFrom(clientBundle)) {
 					for (Object inBundle : (Iterable<?>) Ref.get(packet, iterableField))
 						processPacket(name, inBundle);
 					return;
@@ -344,11 +400,13 @@ public class NametagManagerAPI {
 			}
 
 			private Object findEntityType() {
-				Class<?> nmsHuman = Ref.nms("world.entity.player", BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "Player" : "EntityHuman");
+				Class<?> nmsHuman = Ref.nms("world.entity.player",
+						BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "Player" : "EntityHuman");
 				for (Field field : Ref.getAllFields(entityTypes))
 					try {
 						if (field.getType().equals(entityTypes) && field.getGenericType() instanceof ParameterizedType
-								&& ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0].equals(nmsHuman))
+								&& ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0]
+										.equals(nmsHuman))
 							return Ref.get(null, field);
 					} catch (Exception ignored) {
 
@@ -399,7 +457,13 @@ public class NametagManagerAPI {
 							; // Await world change
 						spawned = lookupByUuidOrCreate(player, uuid);
 					}
-					spawned.getNametag().shouldTeleport((double) Ref.get(packet, movexField), (double) Ref.get(packet, moveyField), (double) Ref.get(packet, movezField));
+					if (positionVecVehicle != null) {
+						Object pos = Ref.get(packet, positionVecVehicle);
+						spawned.getNametag().shouldTeleport((double) Ref.get(pos, movexField),
+								(double) Ref.get(pos, moveyField), (double) Ref.get(pos, movezField));
+					} else
+						spawned.getNametag().shouldTeleport((double) Ref.get(packet, movexField),
+								(double) Ref.get(packet, moveyField), (double) Ref.get(packet, movezField));
 				}
 			}
 
@@ -424,12 +488,11 @@ public class NametagManagerAPI {
 								public void run() {
 									Player joinedPlayer = null;
 									long start = System.currentTimeMillis();
-									while ((joinedPlayer = Bukkit.getPlayer(uuid)) == null || joinedPlayer.getWorld() == null)
+									while ((joinedPlayer = Bukkit.getPlayer(uuid)) == null
+											|| joinedPlayer.getWorld() == null)
 										if (System.currentTimeMillis() - start >= 20)
 											return;
-									// Await connection
-									NametagPlayer spawned;
-									spawned = lookupByUuidOrCreate(joinedPlayer, uuid);
+									NametagPlayer spawned = lookupByUuidOrCreate(joinedPlayer, uuid);
 									spawned.addTabSorting(receiverPlayer);
 								}
 							}.runTask();
@@ -451,15 +514,18 @@ public class NametagManagerAPI {
 						}
 						return;
 					}
-				} else if (packet.getClass().isAssignableFrom(clientPlayerInfoUpdate)) { // These two packets are combined into one in the earlier versions
+				} else if (packet.getClass().isAssignableFrom(clientPlayerInfoUpdate)) { // These two packets are
+																							// combined into one in the
+																							// earlier versions
 					UUID offlineUuid = API.offlineCache().lookupId(name);
 					Player offlinePlayer;
-					if (Ref.get(packet, clientPlayerInfoLegacyAction).toString().equals("REMOVE_PLAYER")) { // Remove
+					if ("REMOVE_PLAYER".equals(Ref.get(packet, clientPlayerInfoLegacyAction).toString())) { // Remove
 						if ((offlinePlayer = Bukkit.getPlayer(offlineUuid)) == null)
 							return;
 						NametagPlayer receiverPlayer = lookupByUuidOrCreate(offlinePlayer, offlineUuid);
 						for (Object entity : (List<?>) Ref.get(packet, listUuidsFieldUpdate)) {
-							UUID uuid = BukkitLoader.getNmsProvider().fromGameProfile(Ref.get(entity, playerInfoUuidField)).getUUID();
+							UUID uuid = BukkitLoader.getNmsProvider()
+									.fromGameProfile(Ref.get(entity, playerInfoUuidField)).getUUID();
 							if (uuid.equals(offlineUuid))
 								continue;
 							NametagPlayer spawned = lookupByUuid(uuid);
@@ -472,7 +538,8 @@ public class NametagManagerAPI {
 
 						NametagPlayer receiverPlayer = lookupByUuidOrCreate(offlinePlayer, offlineUuid);
 						for (Object entity : (List<?>) Ref.get(packet, listBField)) {
-							UUID uuid = BukkitLoader.getNmsProvider().fromGameProfile(Ref.get(entity, playerInfoUuidField)).getUUID();
+							UUID uuid = BukkitLoader.getNmsProvider()
+									.fromGameProfile(Ref.get(entity, playerInfoUuidField)).getUUID();
 							if (uuid.equals(offlineUuid))
 								continue;
 							new Tasker() {
@@ -481,11 +548,11 @@ public class NametagManagerAPI {
 								public void run() {
 									Player joinedPlayer = null;
 									long start = System.currentTimeMillis();
-									while ((joinedPlayer = Bukkit.getPlayer(uuid)) == null || joinedPlayer.getWorld() == null)
+									while ((joinedPlayer = Bukkit.getPlayer(uuid)) == null
+											|| joinedPlayer.getWorld() == null)
 										if (System.currentTimeMillis() - start >= 20)
 											return;
-									NametagPlayer spawned;
-									spawned = lookupByUuidOrCreate(joinedPlayer, uuid);
+									NametagPlayer spawned = lookupByUuidOrCreate(joinedPlayer, uuid);
 									spawned.addTabSorting(receiverPlayer);
 								}
 							}.runTask();
@@ -511,7 +578,8 @@ public class NametagManagerAPI {
 							public void run() {
 								Player joinedPlayer = null;
 								long start = System.currentTimeMillis();
-								while ((joinedPlayer = Bukkit.getPlayer(uuid)) == null || joinedPlayer.getWorld() == null)
+								while ((joinedPlayer = Bukkit.getPlayer(uuid)) == null
+										|| joinedPlayer.getWorld() == null)
 									if (System.currentTimeMillis() - start >= 20)
 										return;
 
@@ -584,7 +652,8 @@ public class NametagManagerAPI {
 					}
 					return;
 				}
-				if (packet.getClass().isAssignableFrom(outDestroy)) { // Used only when player switch world/gamemode or dies
+				if (packet.getClass().isAssignableFrom(outDestroy)) { // Used only when player switch world/gamemode or
+																		// dies
 					NametagPlayer receiver = lookupByName(name);
 					if (receiver == null)
 						return;
@@ -638,25 +707,29 @@ public class NametagManagerAPI {
 						int[] mobs = (int[]) Ref.get(packet, mobsField);
 						List<NametagPlayer> ridingBefore = watchingEntityMove.get(id);
 						if (ridingBefore == null) { // mount
-							List<NametagPlayer> players = mobs.length == 0 ? Collections.emptyList() : Collections.synchronizedList(new ArrayList<>());
+							List<NametagPlayer> players = mobs.length == 0 ? Collections.emptyList()
+									: Collections.synchronizedList(new ArrayList<>());
 							for (int i : mobs) {
 								NametagPlayer riding = lookupById(i);
 								if (riding != null) {
 									players.add(riding);
 									// Mount
-									riding.getNametag().setPosWithoutUpdate(riding.getPlayer().getVehicle().getLocation());
+									riding.getNametag()
+											.setPosWithoutUpdate(riding.getPlayer().getVehicle().getLocation());
 									riding.getNametag().updateHeight(false, false, true, false);
 								}
 							}
 							watchingEntityMove.put(id, players);
 						} else {// mount & dismount
-							List<NametagPlayer> players = mobs.length == 0 ? Collections.emptyList() : new ArrayList<>();
+							List<NametagPlayer> players = mobs.length == 0 ? Collections.emptyList()
+									: new ArrayList<>();
 							for (int i : mobs) {
 								NametagPlayer riding = lookupById(i);
 								if (riding != null) {
 									players.add(riding);
 									// Mount
-									riding.getNametag().setPosWithoutUpdate(riding.getPlayer().getVehicle().getLocation());
+									riding.getNametag()
+											.setPosWithoutUpdate(riding.getPlayer().getVehicle().getLocation());
 									riding.getNametag().updateHeight(false, false, true, false);
 								}
 							}
@@ -678,9 +751,15 @@ public class NametagManagerAPI {
 					NametagPlayer player = lookupById((int) Ref.get(packet, entityIdField));
 					if (player != null)
 						if (Ref.isOlderThan(12))
-							player.getNametag().shouldTeleport((int) Ref.get(packet, xField) / 32.0, (int) Ref.get(packet, yField) / 32.0, (int) Ref.get(packet, zField) / 32.0);
-						else
-							player.getNametag().shouldTeleport((double) Ref.get(packet, xField), (double) Ref.get(packet, yField), (double) Ref.get(packet, zField));
+							player.getNametag().shouldTeleport((int) Ref.get(packet, xField) / 32.0,
+									(int) Ref.get(packet, yField) / 32.0, (int) Ref.get(packet, zField) / 32.0);
+						else if (moveRot != null) {
+							Object pos = Ref.get(Ref.get(packet, moveRot), positionVec);
+							player.getNametag().shouldTeleport((double) Ref.get(pos, xField),
+									(double) Ref.get(pos, yField), (double) Ref.get(pos, zField));
+						} else
+							player.getNametag().shouldTeleport((double) Ref.get(packet, xField),
+									(double) Ref.get(packet, yField), (double) Ref.get(packet, zField));
 				}
 			}
 		};
@@ -709,7 +788,8 @@ public class NametagManagerAPI {
 	}
 
 	private boolean canSeeSpectatorLogin(NametagPlayer player, NametagPlayer other) {
-		return other.getPlayer().getGameMode() != GameMode.SPECTATOR || player.getPlayer().getGameMode() == GameMode.SPECTATOR;
+		return other.getPlayer().getGameMode() != GameMode.SPECTATOR
+				|| player.getPlayer().getGameMode() == GameMode.SPECTATOR;
 	}
 
 	public void unload() {
