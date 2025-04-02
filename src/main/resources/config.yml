@@ -7,6 +7,18 @@ chatIgnore:
   # Also messages in which someone ping you.
   only-pings-in-chat: true
 
+staff-chat:
+  # Works only for players via /staffchat
+  can-be-toggled: true
+  # You can use here Vault's groups (or LuckPerms groups)
+  # vaultGroup: FORMAT_HERE
+  # Placeholders: {sender}, {message}
+  formats:
+    console: "&0[&cSC&0] &cCONSOLE&7: &f{message}"
+    default: "&0[&cSC&0] &6{sender}&7: &f{message}"
+    admin: "&0[&cSC&0] &cAdmin &6{sender}&7: &f{message}"
+    
+
 afk:
   # Time to to trigger auto-afk
   # Set to 0 to disable auto-afk function
@@ -52,6 +64,10 @@ sql:
 vanish:
   # This option will be used only if "sql" option is enabled
   store-in-sql: true
+  # If admin toggle vanish & is already connected, fake join & leave messages will be broadcasted to players, which can't see this admin.
+  # Works only if CSS's join & quit events are enabled (join.yml & quit.yml)
+  # Commands are not send.
+  broadcast-join-and-leave: true
 
 fly:
   anti-fall-damage-listener: true

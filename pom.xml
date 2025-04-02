@@ -5,7 +5,7 @@
 
   <groupId>me.devtec</groupId>
   <artifactId>CraftyServerSystem</artifactId>
-  <version>1.0.9.8</version>
+  <version>1.0.9.9</version>
   <packaging>jar</packaging>
 
   <name>CraftyServerSystem</name>

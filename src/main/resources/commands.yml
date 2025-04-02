@@ -1,3 +1,12 @@
+#
+# You can simply disable registering of command via setting value of enabled to false
+# If "enabled" section is missing, default value is true
+# css:
+#   enabled: false
+#   usage:
+# .........
+#e
+
 css:
   usage:
     cmd:
@@ -15,10 +24,13 @@ afk:
     cmd: "css.cmd.afk"
     other: "css.cmd.afk.other"
 
+staffchat:
+  usage: "/sc [message]"
+  cmd: [sc,ac,helpop,staffchat]
+  perms:
+    cmd: "css.cmd.staffchat"
+
 fly:
-  # You can simply disable registering of command via setting value of enabled to false
-  # If "enabled" section is missing, default value is true
-  # enabled: false
   usage:
     other: "/fly [player] {true/false}"
   cmd: [fly]

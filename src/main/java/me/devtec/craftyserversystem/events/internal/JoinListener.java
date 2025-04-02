@@ -35,11 +35,14 @@ public class JoinListener implements CssListener {
 		String time = e.getPlayer().hasPlayedBefore() ? "normal" : "first";
 		e.setJoinMessage(null); // Remove message
 
-		PlaceholdersExecutor placeholders = PlaceholdersExecutor.i().add("player", e.getPlayer().getName()).papi(e.getPlayer().getUniqueId());
+		PlaceholdersExecutor placeholders = PlaceholdersExecutor.i().add("player", e.getPlayer().getName())
+				.papi(e.getPlayer().getUniqueId());
 		// Send json message
 		Collection<? extends Player> onlinePlayers = BukkitLoader.getOnlinePlayers();
-		API.get().getMsgManager().sendMessageFromFile(getConfig(), "join." + time + ".text", placeholders, onlinePlayers);
-		API.get().getMsgManager().sendMessageFromFile(getConfig(), "join." + time + ".broadcast", placeholders, onlinePlayers);
+		API.get().getMsgManager().sendMessageFromFile(getConfig(), "join." + time + ".text", placeholders,
+				onlinePlayers);
+		API.get().getMsgManager().sendMessageFromFile(getConfig(), "join." + time + ".broadcast", placeholders,
+				onlinePlayers);
 		for (String cmd : placeholders.apply(getConfig().getStringList("join." + time + ".commands")))
 			Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd);
 	}

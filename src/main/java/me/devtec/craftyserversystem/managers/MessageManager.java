@@ -302,7 +302,7 @@ public class MessageManager {
 									continue;
 								}
 								container.append(' ');
-								if (split.equals("OF") || split.equals("THE"))
+								if ("OF".equals(split) || "THE".equals(split))
 									container.append(split.toLowerCase());
 								else
 									container.append(split.charAt(0)).append(split.substring(1).toLowerCase());
@@ -542,7 +542,7 @@ public class MessageManager {
 		List<CommandSender> receivers = new ArrayList<>();
 		receivers.add(Bukkit.getConsoleSender());
 		for (Player player : BukkitLoader.getOnlinePlayers())
-			if (player.hasPermission(permission))
+			if (permission == null || player.hasPermission(permission))
 				receivers.add(player);
 		actions.add(new Action(transFile, pathToTranslation, ex, receivers.toArray(new CommandSender[0])));
 	}
