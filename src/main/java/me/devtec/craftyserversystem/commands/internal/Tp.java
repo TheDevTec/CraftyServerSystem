@@ -103,7 +103,7 @@ public class Tp extends CssCommand {
 			String y = args[2];
 			String z = args[3];
 			boolean individual = x.indexOf('~') != -1 || y.indexOf('~') != -1 || z.indexOf('~') != -1;
-			boolean useMath = x.indexOf('+') != -1 || x.indexOf('-') != -1 || y.indexOf('+') != -1
+			boolean useMath = individual || x.indexOf('+') != -1 || x.indexOf('-') != -1 || y.indexOf('+') != -1
 					|| y.indexOf('-') != -1 || z.indexOf('+') != -1 || z.indexOf('-') != -1;
 			teleport(sender,
 					sender instanceof ConsoleCommandSender ? null
@@ -118,7 +118,7 @@ public class Tp extends CssCommand {
 			String yaw = args[4];
 			boolean individual = x.indexOf('~') != -1 || y.indexOf('~') != -1 || z.indexOf('~') != -1
 					|| yaw.indexOf('~') != -1;
-			boolean useMath = x.indexOf('+') != -1 || x.indexOf('-') != -1 || y.indexOf('+') != -1
+			boolean useMath = individual || x.indexOf('+') != -1 || x.indexOf('-') != -1 || y.indexOf('+') != -1
 					|| y.indexOf('-') != -1 || z.indexOf('+') != -1 || z.indexOf('-') != -1 || yaw.indexOf('+') != -1
 					|| yaw.indexOf('-') != -1;
 			teleport(sender,
@@ -135,7 +135,7 @@ public class Tp extends CssCommand {
 			String pitch = args[5];
 			boolean individual = x.indexOf('~') != -1 || y.indexOf('~') != -1 || z.indexOf('~') != -1
 					|| yaw.indexOf('~') != -1 || pitch.indexOf('~') != -1;
-			boolean useMath = x.indexOf('+') != -1 || x.indexOf('-') != -1 || y.indexOf('+') != -1
+			boolean useMath = individual || x.indexOf('+') != -1 || x.indexOf('-') != -1 || y.indexOf('+') != -1
 					|| y.indexOf('-') != -1 || z.indexOf('+') != -1 || z.indexOf('-') != -1 || yaw.indexOf('+') != -1
 					|| yaw.indexOf('-') != -1 || pitch.indexOf('+') != -1 || pitch.indexOf('-') != -1;
 			teleport(sender,
@@ -168,7 +168,7 @@ public class Tp extends CssCommand {
 			String y = args[1];
 			String z = args[2];
 			boolean individual = x.indexOf('~') != -1 || y.indexOf('~') != -1 || z.indexOf('~') != -1;
-			boolean useMath = x.indexOf('+') != -1 || x.indexOf('-') != -1 || y.indexOf('+') != -1
+			boolean useMath = individual || x.indexOf('+') != -1 || x.indexOf('-') != -1 || y.indexOf('+') != -1
 					|| y.indexOf('-') != -1 || z.indexOf('+') != -1 || z.indexOf('-') != -1;
 			teleport(sender,
 					sender instanceof ConsoleCommandSender ? null
@@ -186,7 +186,7 @@ public class Tp extends CssCommand {
 			String yaw = args[3];
 			boolean individual = x.indexOf('~') != -1 || y.indexOf('~') != -1 || z.indexOf('~') != -1
 					|| yaw.indexOf('~') != -1;
-			boolean useMath = x.indexOf('+') != -1 || x.indexOf('-') != -1 || y.indexOf('+') != -1
+			boolean useMath = individual || x.indexOf('+') != -1 || x.indexOf('-') != -1 || y.indexOf('+') != -1
 					|| y.indexOf('-') != -1 || z.indexOf('+') != -1 || z.indexOf('-') != -1 || yaw.indexOf('+') != -1
 					|| yaw.indexOf('-') != -1;
 			teleport(sender,
@@ -206,7 +206,7 @@ public class Tp extends CssCommand {
 			String pitch = args[4];
 			boolean individual = x.indexOf('~') != -1 || y.indexOf('~') != -1 || z.indexOf('~') != -1
 					|| yaw.indexOf('~') != -1 || pitch.indexOf('~') != -1;
-			boolean useMath = x.indexOf('+') != -1 || x.indexOf('-') != -1 || y.indexOf('+') != -1
+			boolean useMath = individual || x.indexOf('+') != -1 || x.indexOf('-') != -1 || y.indexOf('+') != -1
 					|| y.indexOf('-') != -1 || z.indexOf('+') != -1 || z.indexOf('-') != -1 || yaw.indexOf('+') != -1
 					|| yaw.indexOf('-') != -1 || pitch.indexOf('+') != -1 || pitch.indexOf('-') != -1;
 			teleport(sender,

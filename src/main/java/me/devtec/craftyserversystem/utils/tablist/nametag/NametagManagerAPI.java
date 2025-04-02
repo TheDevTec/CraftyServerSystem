@@ -355,15 +355,9 @@ public class NametagManagerAPI {
 		Field changedPosition;
 		Field actionField;
 		if (BukkitLoader.NO_OBFUSCATED_NMS_MODE || Ref.isOlderThan(17)) {
-			Ref.field(movementPacketClass, "x");
-			Ref.field(movementPacketClass, "y");
-			Ref.field(movementPacketClass, "z");
 			changedPosition = Ref.field(movementPacketClass, "hasPos");
 			actionField = Ref.field(actionPacketClass, Ref.isOlderThan(17) ? "animation" : "action");
 		} else {
-			Ref.field(movementPacketClass, "a");
-			Ref.field(movementPacketClass, "b");
-			Ref.field(movementPacketClass, "c");
 			changedPosition = Ref.field(movementPacketClass, "g");
 			actionField = Ref.field(actionPacketClass, "b");
 		}
