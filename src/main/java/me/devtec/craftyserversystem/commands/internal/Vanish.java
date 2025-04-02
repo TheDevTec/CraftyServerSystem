@@ -25,6 +25,7 @@ import me.devtec.shared.commands.structures.CommandStructure;
 import me.devtec.shared.database.DatabaseHandler.InsertQuery;
 import me.devtec.shared.database.DatabaseHandler.RemoveQuery;
 import me.devtec.shared.database.DatabaseHandler.SelectQuery;
+import me.devtec.shared.dataholder.Config;
 import me.devtec.shared.events.EventManager;
 import me.devtec.theapi.bukkit.BukkitLoader;
 
@@ -32,14 +33,26 @@ public class Vanish extends CssCommand {
 
 	private Listener listener;
 	private boolean storeVanishInDb;
+	private boolean fakeJoin;
+	private boolean fakeLeave;
+	private boolean isSpigotPurgingFiles;
 
 	@Override
 	public void register() {
 		if (isRegistered())
 			return;
 
-		storeVanishInDb = me.devtec.craftyserversystem.api.API.get().getConfigManager().getMain().getBoolean("vanish.store-in-sql")
-				&& me.devtec.craftyserversystem.api.API.get().getSqlConnection() != null;
+		storeVanishInDb = me.devtec.craftyserversystem.api.API.get().getConfigManager().getMain().getBoolean(
+				"vanish.store-in-sql") && me.devtec.craftyserversystem.api.API.get().getSqlConnection() != null;
+
+		fakeJoin = me.devtec.craftyserversystem.api.API.get().getConfigManager().getMain()
+				.getBoolean("vanish.broadcast-join-and-leave")
+				&& me.devtec.craftyserversystem.api.API.get().getConfigManager().getJoin().getBoolean("enabled");
+		fakeLeave = me.devtec.craftyserversystem.api.API.get().getConfigManager().getMain()
+				.getBoolean("vanish.broadcast-join-and-leave")
+				&& me.devtec.craftyserversystem.api.API.get().getConfigManager().getQuit().getBoolean("enabled");
+		if (fakeJoin || fakeLeave)
+			isSpigotPurgingFiles = new Config("spigot.yml").getBoolean("players.disable-saving");
 
 		listener = new Listener() {
 
@@ -61,7 +74,8 @@ public class Vanish extends CssCommand {
 								player.hidePlayer(e.getPlayer());
 					} else if (storeVanishInDb)
 						try {
-							me.devtec.craftyserversystem.api.API.get().getSqlConnection().remove(RemoveQuery.table("css_vanish").where("id", e.getPlayer().getUniqueId().toString()));
+							me.devtec.craftyserversystem.api.API.get().getSqlConnection().remove(RemoveQuery
+									.table("css_vanish").where("id", e.getPlayer().getUniqueId().toString()));
 						} catch (SQLException e1) {
 							e1.printStackTrace();
 						}
@@ -70,7 +84,8 @@ public class Vanish extends CssCommand {
 				}
 				// Hide vanished players before this player
 				for (Player player : BukkitLoader.getOnlinePlayers())
-					if (!player.equals(e.getPlayer()) && getVanish(player) && !e.getPlayer().hasPermission(getPerm("see")))
+					if (!player.equals(e.getPlayer()) && getVanish(player)
+							&& !e.getPlayer().hasPermission(getPerm("see")))
 						e.getPlayer().hidePlayer(player);
 			}
 
@@ -83,7 +98,8 @@ public class Vanish extends CssCommand {
 			private boolean hasVanishEnabled(UUID uuid) {
 				if (storeVanishInDb)
 					try {
-						return me.devtec.craftyserversystem.api.API.get().getSqlConnection().exists(SelectQuery.table("css_vanish").where("id", uuid.toString()));
+						return me.devtec.craftyserversystem.api.API.get().getSqlConnection()
+								.exists(SelectQuery.table("css_vanish").where("id", uuid.toString()));
 					} catch (SQLException e) {
 						e.printStackTrace();
 					}
@@ -93,13 +109,14 @@ public class Vanish extends CssCommand {
 		};
 		Bukkit.getPluginManager().registerEvents(listener, Loader.getPlugin());
 
-		CommandStructure<CommandSender> cmd = CommandStructure.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
-			if (!(sender instanceof Player)) {
-				msgUsage(sender, "cmd");
-				return;
-			}
-			setVanish(sender, (Player) sender, !getVanish((Player) sender), true);
-		}).permission(getPerm("cmd"));
+		CommandStructure<CommandSender> cmd = CommandStructure
+				.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
+					if (!(sender instanceof Player)) {
+						msgUsage(sender, "cmd");
+						return;
+					}
+					setVanish(sender, (Player) sender, !getVanish((Player) sender), true);
+				}).permission(getPerm("cmd"));
 		// silent
 		cmd.argument("-s", (sender, structure, args) -> {
 			if (!(sender instanceof Player)) {
@@ -158,13 +175,15 @@ public class Vanish extends CssCommand {
 		if (storeVanishInDb) {
 			if (event.getStatus())
 				try {
-					me.devtec.craftyserversystem.api.API.get().getSqlConnection().insert(InsertQuery.table("css_vanish", target.getUniqueId().toString()));
+					me.devtec.craftyserversystem.api.API.get().getSqlConnection()
+							.insert(InsertQuery.table("css_vanish", target.getUniqueId().toString()));
 				} catch (SQLException e1) {
 					e1.printStackTrace();
 				}
 			else
 				try {
-					me.devtec.craftyserversystem.api.API.get().getSqlConnection().remove(RemoveQuery.table("css_vanish").where("id", target.getUniqueId().toString()));
+					me.devtec.craftyserversystem.api.API.get().getSqlConnection()
+							.remove(RemoveQuery.table("css_vanish").where("id", target.getUniqueId().toString()));
 				} catch (SQLException e1) {
 					e1.printStackTrace();
 				}
@@ -175,19 +194,43 @@ public class Vanish extends CssCommand {
 
 		if (event.getStatus()) {
 			for (Player player : BukkitLoader.getOnlinePlayers())
-				if (!player.equals(target) && !player.hasPermission(getPerm("see")))
+				if (!player.equals(target) && !player.hasPermission(getPerm("see"))) {
 					player.hidePlayer(target);
+					if (fakeLeave) {
+						PlaceholdersExecutor placeholders = PlaceholdersExecutor.i().add("player", target.getName())
+								.papi(target.getUniqueId());
+						// Send json message
+						Config config = me.devtec.craftyserversystem.api.API.get().getConfigManager().getQuit();
+						me.devtec.craftyserversystem.api.API.get().getMsgManager().sendMessageFromFile(config,
+								"quit.text", placeholders, player);
+						me.devtec.craftyserversystem.api.API.get().getMsgManager().sendMessageFromFile(config,
+								"quit.broadcast", placeholders, player);
+					}
+				}
 		} else
 			for (Player player : BukkitLoader.getOnlinePlayers())
-				if (!player.equals(target) && !player.canSee(target))
+				if (!player.equals(target) && !player.canSee(target)) {
 					player.showPlayer(target);
+					if (fakeJoin) {
+						PlaceholdersExecutor placeholders = PlaceholdersExecutor.i().add("player", target.getName())
+								.papi(target.getUniqueId());
+						String time = !isSpigotPurgingFiles ? "normal" : "first";
+						// Send json message
+						Config config = me.devtec.craftyserversystem.api.API.get().getConfigManager().getJoin();
+						me.devtec.craftyserversystem.api.API.get().getMsgManager().sendMessageFromFile(config,
+								"join." + time + ".text", placeholders, player);
+						me.devtec.craftyserversystem.api.API.get().getMsgManager().sendMessageFromFile(config,
+								"join." + time + ".broadcast", placeholders, player);
+					}
+				}
 
 		if (sendMessages) {
 			String statusPath = event.getStatus() ? "enabled" : "disabled";
 			if (sender.equals(target))
 				msg(sender, "self." + statusPath);
 			else {
-				PlaceholdersExecutor ex = PlaceholdersExecutor.i().add("sender", sender.getName()).add("target", target.getName());
+				PlaceholdersExecutor ex = PlaceholdersExecutor.i().add("sender", sender.getName()).add("target",
+						target.getName());
 				msg(sender, "other." + statusPath + ".sender", ex);
 				msg(target, "other." + statusPath + ".target", ex);
 			}
