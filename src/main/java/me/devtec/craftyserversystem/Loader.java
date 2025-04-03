@@ -145,6 +145,7 @@ public class Loader extends JavaPlugin {
 			Bukkit.getPluginManager().disablePlugin(plugin);
 			return;
 		}
+		API.get().getAnimationManager().load();
 		API.get().registerPlaceholders();
 		if (Bukkit.getPluginManager().isPluginEnabled("LuckPerms"))
 			API.get().setPermissionHook(new LuckPermsPermissionHook());
@@ -165,6 +166,7 @@ public class Loader extends JavaPlugin {
 			return;
 		API.get().getCommandManager().unregister();
 		API.get().getListenerManager().unregister();
+		API.get().getAnimationManager().unload();
 		API.get().shutdown();
 	}
 

@@ -29,6 +29,7 @@ public class ConfigurationManager {
 	private Config customGuis;
 	private Config serverMotd;
 	private Config consoleFilter;
+	private Config animations;
 	private String prefix = "";
 	private Position spawn;
 	private long teleportRequestTime;
@@ -51,6 +52,7 @@ public class ConfigurationManager {
 		placeholders = new Config(FILES_PATH + "placeholders.yml");
 		serverMotd = new Config(FILES_PATH + "events/server-motd.yml");
 		consoleFilter = new Config(FILES_PATH + "events/console-filter.yml");
+		animations = new Config(FILES_PATH + "animations.yml");
 	}
 
 	public ConfigurationManager initFromJar() {
@@ -77,6 +79,8 @@ public class ConfigurationManager {
 		if (!serverMotd.exists("motds"))
 			merge(serverMotd, "server-motd.yml");
 		merge(consoleFilter, "console-filter.yml");
+		if (animations.getKeys().isEmpty())
+			merge(animations, "animations.yml");
 		prefix = getMain().getString("prefix", "");
 		teleportRequestTime = TimeUtils.timeFromString(getMain().getString("teleport-request-time"));
 		return this;
@@ -194,6 +198,10 @@ public class ConfigurationManager {
 		return consoleFilter;
 	}
 
+	public Config getAnimations() {
+		return animations;
+	}
+
 	public void reloadAll() {
 		getMain().reload();
 		getTranslations().reload();
@@ -212,6 +220,7 @@ public class ConfigurationManager {
 		getCustomGuis().reload();
 		getServerMotd().reload();
 		getConsoleFilter().reload();
+		getAnimations().reload();
 		prefix = getMain().getString("prefix", "");
 		teleportRequestTime = TimeUtils.timeFromString(getMain().getString("teleport-request-time"));
 	}

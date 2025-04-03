@@ -39,6 +39,8 @@ group:
     color: "YELLOW"
     style: "SOLID"
 
+# {player}, {money}, {health}, {food}, {world}, {x}, {y}, {z} and PlaceholderAPI placeholders
+# plus {animation:ANIMATION_NAME}
 text: "Online players {online}/{max_players}"
 # You can use here placeholders & math to calculate progress!
 # Progress can be between 0.0 and 100.0

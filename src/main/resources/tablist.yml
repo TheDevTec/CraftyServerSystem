@@ -1,6 +1,6 @@
 enabled: true
 
-# Displays scoreboard under specified condition (1. priority)
+# Shows tablist under specified condition (1. priority)
 conditions:
   vanish:
     # %placeholder%==VALUE
@@ -78,10 +78,14 @@ yellowNumber:
   # NONE, INTEGER or HEARTS
   displayAs: INTEGER
 
+# {player}, {money}, {health}, {food}, {world}, {x}, {y}, {z} and PlaceholderAPI placeholders
+# plus {animation:ANIMATION_NAME}
 header:
 - "  &f&lServer name"
 - "&7Total Online &e{online} &7players:"
 
+# {player}, {money}, {health}, {food}, {world}, {x}, {y}, {z} and PlaceholderAPI placeholders
+# plus {animation:ANIMATION_NAME}
 footer:
 - "&7Money: &e€{balance}"
 

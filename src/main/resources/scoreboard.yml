@@ -10,6 +10,7 @@ conditions:
     condition: "%css_vanish%==true"
     title: "&6S&fcoreboard"
     # {player}, {money}, {health}, {food}, {world}, {x}, {y}, {z} and PlaceholderAPI placeholders
+    # plus {animation:ANIMATION_NAME}
     # maximum 16 lines
     lines:
     - ""
@@ -36,6 +37,7 @@ world:
       test:
         title: "&6S&fcoreboard"
         # {player}, {money}, {health}, {food}, {world}, {x}, {y}, {z} and PlaceholderAPI placeholders
+        # plus {animation:ANIMATION_NAME}
         # maximum 16 lines
         lines:
         - ""
@@ -51,6 +53,7 @@ world:
       default:
         title: "&6S&fcoreboard"
         # {player}, {money}, {health}, {food}, {world}, {x}, {y}, {z} and PlaceholderAPI placeholders
+        # plus {animation:ANIMATION_NAME}
         # maximum 16 lines
         lines:
         - ""
@@ -69,6 +72,7 @@ player:
   test:
     title: "&6S&fcoreboard"
     # {player}, {money}, {health}, {food}, {world}, {x}, {y}, {z} and PlaceholderAPI placeholders
+    # plus {animation:ANIMATION_NAME}
     # maximum 16 lines
     lines:
     - ""
@@ -87,6 +91,7 @@ group:
   default:
     title: "&6S&fcoreboard"
     # {player}, {money}, {health}, {food}, {world}, {x}, {y}, {z} and PlaceholderAPI placeholders
+    # plus {animation:ANIMATION_NAME}
     # maximum 16 lines
     lines:
     - ""
@@ -102,6 +107,7 @@ group:
 # This settings can by overriden by per-group-settings
 title: "&6S&fcoreboard"
 # {player}, {money}, {health}, {food}, {world}, {x}, {y}, {z} and PlaceholderAPI placeholders
+# plus {animation:ANIMATION_NAME}
 # maximum 16 lines
 # 5. priority
 lines:

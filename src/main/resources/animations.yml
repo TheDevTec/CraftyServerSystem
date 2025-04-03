@@ -1,0 +1,33 @@
+welcome:
+  # Speed in ticks (20 = 1s)
+  # 1 is minimum
+  speed: 5
+  lines:
+  - "W_"
+  - "We_"
+  - "Wel_"
+  - "Welc_"
+  - "Welco_"
+  - "Welcom_"
+  - "Welcome_"
+  - "Welcome h_"
+  - "Welcome he_"
+  - "Welcome her_"
+  - "Welcome here_"
+  - "&aWelcome here &e{player}!"
+  - "&aWelcome here &e{player}!"
+  - "&aWelcome here &e{player}!"
+  - "&aWelcome here &e{player}!"
+  - "&aWelcome here &e{player}!"
+  - "&aWelcome here &e{player}!"
+  - "Welcome here_"
+  - "Welcome her_"
+  - "Welcome he_"
+  - "Welcome h_"
+  - "Welcome_"
+  - "Welcom_"
+  - "Welco_"
+  - "Welc_"
+  - "Wel_"
+  - "We_"
+  

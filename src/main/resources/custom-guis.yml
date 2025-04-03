@@ -1,5 +1,6 @@
 # Id of gui
 # Gui can be open via command /cssgui [gui-id] {player}
+# You can also use animations in the GUIs! {animation:ANIMATION-NAME}
 gui0:
   title: "&cThis is example"
   # Max 6 lines

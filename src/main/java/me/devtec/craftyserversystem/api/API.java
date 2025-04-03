@@ -22,6 +22,7 @@ import me.devtec.craftyserversystem.economy.EmptyEconomyHook;
 import me.devtec.craftyserversystem.economy.VaultEconomyHook;
 import me.devtec.craftyserversystem.events.internal.BossBarListener;
 import me.devtec.craftyserversystem.events.internal.ScoreboardListener;
+import me.devtec.craftyserversystem.managers.AnimationManager;
 import me.devtec.craftyserversystem.managers.CommandManager;
 import me.devtec.craftyserversystem.managers.ConfigurationManager;
 import me.devtec.craftyserversystem.managers.CooldownManager;
@@ -53,6 +54,7 @@ public class API {
 	private CooldownManager cdManager;
 	private MessageManager msgManager;
 	private ListenerManager listenerManager;
+	private AnimationManager anmManager;
 	private CommandsAPI commandsApi;
 
 	private PermissionHook permissionHook = new EmptyPermissionHook();
@@ -141,6 +143,15 @@ public class API {
 	}
 
 	/**
+	 * Creates animations from String list
+	 *
+	 * @return AnimationManager
+	 */
+	public AnimationManager getAnimationManager() {
+		return anmManager;
+	}
+
+	/**
 	 * Economy hook via Vault Economy provider (Essentials, CMIEconomy, etc.) <br>
 	 * Or return our empty instance {@link EmptyPermissionHook}
 	 *
@@ -207,6 +218,7 @@ public class API {
 		cmdManager = new CommandManager(cfgManager);
 		cdManager = new CooldownManager();
 		msgManager = new MessageManager();
+		anmManager = new AnimationManager();
 		listenerManager = new ListenerManager();
 		commandsApi = new CommandsAPI();
 
@@ -221,9 +233,9 @@ public class API {
 			}
 			if (Bukkit.getPluginManager().getPlugin("Vault") == null) {
 				this.economy = new CssEconomy(economy.getDouble("settings.startup-money"),
-						economy.getString("settings.minimum-money").equals("UNLIMITED") ? Double.NEGATIVE_INFINITY
+						"UNLIMITED".equals(economy.getString("settings.minimum-money")) ? Double.NEGATIVE_INFINITY
 								: economy.getDouble("settings.minimum-money"),
-						economy.getString("settings.maximum-money").equals("UNLIMITED") ? Double.POSITIVE_INFINITY
+						"UNLIMITED".equals(economy.getString("settings.maximum-money")) ? Double.POSITIVE_INFINITY
 								: economy.getDouble("settings.maximum-money"),
 						map != null, map);
 				setEconomyHook(new CssEconomyHook(this.economy));
@@ -232,9 +244,9 @@ public class API {
 						Ref.getClass("me.devtec.craftyserversystem.economy.CssEconomyVaultImplementation"),
 						double.class, double.class, double.class, boolean.class, Map.class);
 				this.economy = (CssEconomy) Ref.newInstance(cons, economy.getDouble("settings.startup-money"),
-						economy.getString("settings.minimum-money").equals("UNLIMITED") ? Double.NEGATIVE_INFINITY
+						"UNLIMITED".equals(economy.getString("settings.minimum-money")) ? Double.NEGATIVE_INFINITY
 								: economy.getDouble("settings.minimum-money"),
-						economy.getString("settings.maximum-money").equals("UNLIMITED") ? Double.POSITIVE_INFINITY
+						"UNLIMITED".equals(economy.getString("settings.maximum-money")) ? Double.POSITIVE_INFINITY
 								: economy.getDouble("settings.maximum-money"),
 						map != null, map);
 				setEconomyHook(new CssEconomyHook(this.economy));
@@ -254,41 +266,47 @@ public class API {
 					text = text.substring(4);
 				if (text.startsWith("user_"))
 					return me.devtec.shared.API.getUser(player).get(text.substring(5)) + "";
-				if (text.equals("balance")) {
-					Player online = Bukkit.getPlayer(player);
-					return "" + API.get().getEconomyHook()
-							.getBalance(online == null ? me.devtec.shared.API.offlineCache().lookupNameById(player)
-									: online.getName(), online == null ? null : online.getWorld().getName());
-				}
-				if (text.equals("formatted_balance")) {
-					Player online = Bukkit.getPlayer(player);
-					return API.get().getEconomyHook()
-							.format(API.get().getEconomyHook()
-									.getBalance(
-											online == null ? me.devtec.shared.API.offlineCache().lookupNameById(player)
-													: online.getName(),
-											online == null ? null : online.getWorld().getName()));
-				}
-				if (text.equals("vanish")) {
-					Player online = Bukkit.getPlayer(player);
-					return online != null ? "" + Vanish.getVanish(online) : null;
-				}
-				if (text.equals("ping")) {
-					Player online = Bukkit.getPlayer(player);
-					return online != null ? "" + BukkitLoader.getNmsProvider().getPing(online) : null;
-				}
-				if (text.equals("scoreboard")) {
-					UserScoreboardData online = ScoreboardListener.data.get(player);
-					return online != null ? "" + online.isHidden() : null;
-				}
-				if (text.equals("bossbar")) {
-					UserBossBarData online = BossBarListener.data.get(player);
-					return online != null ? "" + online.isHidden() : null;
-				}
-				if (text.equals("afk"))
-					return me.devtec.shared.API.getUser(player).getBoolean("afk") + "";
-				if (text.equals("chatignore"))
-					return me.devtec.shared.API.getUser(player).getBoolean("css.chatignore") + "";
+				if (text != null)
+					switch (text) {
+					case "balance": {
+						Player online = Bukkit.getPlayer(player);
+						return ""
+								+ API.get().getEconomyHook().getBalance(
+										online == null ? me.devtec.shared.API.offlineCache().lookupNameById(player)
+												: online.getName(),
+										online == null ? null : online.getWorld().getName());
+					}
+					case "formatted_balance": {
+						Player online = Bukkit.getPlayer(player);
+						return API.get().getEconomyHook()
+								.format(API.get().getEconomyHook().getBalance(
+										online == null ? me.devtec.shared.API.offlineCache().lookupNameById(player)
+												: online.getName(),
+										online == null ? null : online.getWorld().getName()));
+					}
+					case "vanish": {
+						Player online = Bukkit.getPlayer(player);
+						return online != null ? "" + Vanish.getVanish(online) : null;
+					}
+					case "ping": {
+						Player online = Bukkit.getPlayer(player);
+						return online != null ? "" + BukkitLoader.getNmsProvider().getPing(online) : null;
+					}
+					case "scoreboard": {
+						UserScoreboardData online = ScoreboardListener.data.get(player);
+						return online != null ? "" + online.isHidden() : null;
+					}
+					case "bossbar": {
+						UserBossBarData online = BossBarListener.data.get(player);
+						return online != null ? "" + online.isHidden() : null;
+					}
+					case "afk":
+						return me.devtec.shared.API.getUser(player).getBoolean("afk") + "";
+					case "chatignore":
+						return me.devtec.shared.API.getUser(player).getBoolean("css.chatignore") + "";
+					default:
+						break;
+					}
 				return null;
 			}
 		}.register();
@@ -301,7 +319,7 @@ public class API {
 		metrics.shutdown();
 		getListenerManager().unregister();
 		if (Bukkit.getPluginManager().getPlugin("Vault") != null)
-			if (getEconomyHook().getClass().getSimpleName().equals("CssEconomyVaultImplementation"))
+			if ("CssEconomyVaultImplementation".equals(getEconomyHook().getClass().getSimpleName()))
 				VaultEconomyHook.unregisterOurEconomy();
 		setEconomyHook(new EmptyEconomyHook());
 	}
@@ -318,12 +336,14 @@ public class API {
 			}
 		getCommandManager().unregister();
 		getListenerManager().unregister();
+		getAnimationManager().unload();
 		if (Bukkit.getPluginManager().getPlugin("Vault") != null)
-			if (getEconomyHook().getClass().getSimpleName().equals("CssEconomyVaultImplementation"))
+			if ("CssEconomyVaultImplementation".equals(getEconomyHook().getClass().getSimpleName()))
 				VaultEconomyHook.unregisterOurEconomy();
 		setEconomyHook(new EmptyEconomyHook());
 		// Load
 		getConfigManager().reloadAll();
+		getAnimationManager().load();
 		// Login to the database
 		Config config = getConfigManager().getMain();
 		if (config.getBoolean("sql.enabled")) {
@@ -354,9 +374,9 @@ public class API {
 			}
 			if (Bukkit.getPluginManager().getPlugin("Vault") == null) {
 				this.economy = new CssEconomy(economy.getDouble("settings.startup-money"),
-						economy.getString("settings.minimum-money").equals("UNLIMITED") ? Double.NEGATIVE_INFINITY
+						"UNLIMITED".equals(economy.getString("settings.minimum-money")) ? Double.NEGATIVE_INFINITY
 								: economy.getDouble("settings.minimum-money"),
-						economy.getString("settings.maximum-money").equals("UNLIMITED") ? Double.POSITIVE_INFINITY
+						"UNLIMITED".equals(economy.getString("settings.maximum-money")) ? Double.POSITIVE_INFINITY
 								: economy.getDouble("settings.maximum-money"),
 						map != null, map);
 				setEconomyHook(new CssEconomyHook(this.economy));
@@ -365,9 +385,9 @@ public class API {
 						Ref.getClass("me.devtec.craftyserversystem.economy.CssEconomyVaultImplementation"),
 						double.class, double.class, double.class, boolean.class, Map.class);
 				this.economy = (CssEconomy) Ref.newInstance(cons, economy.getDouble("settings.startup-money"),
-						economy.getString("settings.minimum-money").equals("UNLIMITED") ? Double.NEGATIVE_INFINITY
+						"UNLIMITED".equals(economy.getString("settings.minimum-money")) ? Double.NEGATIVE_INFINITY
 								: economy.getDouble("settings.minimum-money"),
-						economy.getString("settings.maximum-money").equals("UNLIMITED") ? Double.POSITIVE_INFINITY
+						"UNLIMITED".equals(economy.getString("settings.maximum-money")) ? Double.POSITIVE_INFINITY
 								: economy.getDouble("settings.maximum-money"),
 						map != null, map);
 				setEconomyHook(new CssEconomyHook(this.economy));

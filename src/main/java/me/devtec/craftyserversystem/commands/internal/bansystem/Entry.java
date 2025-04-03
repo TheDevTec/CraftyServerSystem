@@ -18,7 +18,8 @@ public class Entry {
 	private final long startDate;
 	private boolean cancelled;
 
-	public Entry(int id, BanType type, String user, String reason, String admin, long duration, long startDate, boolean cancelled) {
+	public Entry(int id, BanType type, String user, String reason, String admin, long duration, long startDate,
+			boolean cancelled) {
 		this.id = id;
 		this.type = type;
 		this.user = user;
@@ -26,7 +27,7 @@ public class Entry {
 		this.admin = admin;
 		this.duration = duration;
 		this.startDate = startDate;
-		setCancelled(cancelled);
+		this.cancelled = cancelled;
 	}
 
 	public Entry(int id, BanType type, String user, String reason, String admin, long duration) {
@@ -76,8 +77,10 @@ public class Entry {
 	}
 
 	public static Entry fromQuery(Result result) {
-		return new Entry(ParseUtils.getInt(result.getValue()[0]), BanType.valueOf(result.getValue()[1].toUpperCase()), result.getValue()[2], result.getValue()[3], result.getValue()[4],
-				ParseUtils.getLong(result.getValue()[5]), ParseUtils.getLong(result.getValue()[6]), ParseUtils.getInt(result.getValue()[7]) == 1);
+		return new Entry(ParseUtils.getInt(result.getValue()[0]), BanType.valueOf(result.getValue()[1].toUpperCase()),
+				result.getValue()[2], result.getValue()[3], result.getValue()[4],
+				ParseUtils.getLong(result.getValue()[5]), ParseUtils.getLong(result.getValue()[6]),
+				ParseUtils.getInt(result.getValue()[7]) == 1);
 	}
 
 	@Override
