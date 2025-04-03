@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 import me.devtec.craftyserversystem.commands.CssCommand;
 import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
@@ -23,13 +24,14 @@ public class Anvil extends CssCommand {
 		if (isRegistered())
 			return;
 
-		CommandStructure<CommandSender> cmd = CommandStructure.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
-			if (!(sender instanceof Player)) {
-				msgUsage(sender, "cmd");
-				return;
-			}
-			openInv(sender, (Player) sender, true);
-		}).permission(getPerm("cmd"));
+		CommandStructure<CommandSender> cmd = CommandStructure
+				.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
+					if (!(sender instanceof Player)) {
+						msgUsage(sender, "cmd");
+						return;
+					}
+					openInv(sender, (Player) sender, true);
+				}).permission(getPerm("cmd"));
 		// silent
 		cmd.argument("-s", (sender, structure, args) -> {
 			if (!(sender instanceof Player)) {
@@ -56,12 +58,27 @@ public class Anvil extends CssCommand {
 	}
 
 	private void openInv(CommandSender sender, Player target, boolean sendMessages) {
-		new AnvilGUI("Anvil", target).setInsertable(true);
+		new AnvilGUI("Anvil", target) {
+			@Override
+			public void onPreClose(Player player) {
+				ItemStack item = getItem(0);
+				if (item != null)
+					target.getInventory().addItem(item);
+				item = getItem(1);
+				if (item != null)
+					target.getInventory().addItem(item);
+				item = player.getItemOnCursor();
+				player.setItemOnCursor(null);
+				if (item != null)
+					target.getInventory().addItem(item);
+			}
+		}.setInsertable(true);
 		if (sendMessages)
 			if (sender.equals(target))
 				msg(sender, "self");
 			else {
-				PlaceholdersExecutor ex = PlaceholdersExecutor.i().add("sender", sender.getName()).add("target", target.getName());
+				PlaceholdersExecutor ex = PlaceholdersExecutor.i().add("sender", sender.getName()).add("target",
+						target.getName());
 				msg(sender, "other.sender", ex);
 				msg(target, "other.target", ex);
 			}
