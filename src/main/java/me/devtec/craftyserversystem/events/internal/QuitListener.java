@@ -1,6 +1,7 @@
 package me.devtec.craftyserversystem.events.internal;
 
-import java.util.Collection;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -37,9 +38,11 @@ public class QuitListener implements CssListener {
 		PlaceholdersExecutor placeholders = PlaceholdersExecutor.i().add("player", e.getPlayer().getName())
 				.papi(e.getPlayer().getUniqueId());
 		// Send json message
-		Collection<? extends Player> onlinePlayers = BukkitLoader.getOnlinePlayers();
-		API.get().getMsgManager().sendMessageFromFile(getConfig(), "quit.text", placeholders, onlinePlayers);
-		API.get().getMsgManager().sendMessageFromFile(getConfig(), "quit.broadcast", placeholders, onlinePlayers);
+		List<Player> players = new ArrayList<>();
+		for (Player online : BukkitLoader.getOnlinePlayers())
+			if (online.equals(e.getPlayer()) || online.canSee(e.getPlayer()))
+				players.add(online);
+		API.get().getMsgManager().sendMessageFromFile(getConfig(), "quit.text", placeholders, players);
 		for (String cmd : placeholders.apply(getConfig().getStringList("quit.commands")))
 			Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd);
 	}

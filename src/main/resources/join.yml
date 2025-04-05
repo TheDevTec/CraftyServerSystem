@@ -3,11 +3,15 @@ enabled: true
 force-spawn-location: false
 join:
   first:
+    # This is broadcast to everyone
     text: "{prefix} Welcome player {player} on the server!"
-    broadcast: []
+    # These messages will be sent only to joined player
+    messages: []
     commands:
     - "kit first-join {player}"
   normal:
+    # This is broadcast to everyone
     text: "{prefix} Player {player} joined the server"
-    broadcast: []
+    # These messages will be sent only to joined player
+    messages: []
     commands: []
