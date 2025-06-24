@@ -326,6 +326,9 @@ public class API {
 
 	public void reload() {
 		// Unload
+		getCommandManager().unregister();
+		getListenerManager().unregister();
+		getAnimationManager().unload();
 		if (BanAPI.isInit())
 			getCommandsAPI().getBanAPI().shutdown();
 		if (getSqlConnection() != null)
@@ -334,9 +337,6 @@ public class API {
 				sqlDatabase = null;
 			} catch (SQLException e) {
 			}
-		getCommandManager().unregister();
-		getListenerManager().unregister();
-		getAnimationManager().unload();
 		if (Bukkit.getPluginManager().getPlugin("Vault") != null)
 			if ("CssEconomyVaultImplementation".equals(getEconomyHook().getClass().getSimpleName()))
 				VaultEconomyHook.unregisterOurEconomy();

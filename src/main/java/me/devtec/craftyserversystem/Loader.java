@@ -147,14 +147,14 @@ public class Loader extends JavaPlugin {
 		}
 		API.get().getAnimationManager().load();
 		API.get().registerPlaceholders();
-		if (Bukkit.getPluginManager().isPluginEnabled("LuckPerms"))
-			API.get().setPermissionHook(new LuckPermsPermissionHook());
-		if (Bukkit.getPluginManager().isPluginEnabled("Vault")) {
+		if (Bukkit.getPluginManager().getPlugin("Vault") != null) {
 			if (API.get().getPermissionHook().getClass() == EmptyPermissionHook.class)
 				API.get().setPermissionHook(new VaultPermissionHook());
 			if (!(API.get().getEconomyHook() instanceof CssEconomyHook))
 				API.get().setEconomyHook(new VaultEconomyHook());
 		}
+		if (Bukkit.getPluginManager().getPlugin("LuckPerms") != null)
+			API.get().setPermissionHook(new LuckPermsPermissionHook());
 		API.get().getCommandManager().register();
 		API.get().getConfigManager().loadSpawn();
 		API.get().getListenerManager().register();

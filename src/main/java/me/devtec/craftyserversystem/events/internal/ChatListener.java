@@ -177,7 +177,6 @@ public class ChatListener implements CssListener {
 		if (e.isCancelled())
 			return;
 		List<String> playerNames = playerNames(e.getPlayer());
-
 		String modifiedMessage = antiFloodEnabled
 				&& (bypassAntiFlood ? !e.getPlayer().hasPermission("css.chat.bypass.antiflood") : true)
 						? ChatHandlers.antiFlood(e.getMessage(), ChatHandlers.match(e.getMessage(), playerNames),
@@ -254,15 +253,15 @@ public class ChatListener implements CssListener {
 		PlaceholdersExecutor placeholders = PlaceholdersExecutor.i().add("player", e.getPlayer().getName())
 				.add("player_name", e.getPlayer().getName()).papi(e.getPlayer().getUniqueId());
 
-		String userGroup = API.get().getPermissionHook().getGroup(e.getPlayer());
+		String userGroup = API.get().getPermissionHook().getGroup(e.getPlayer().getName());
 		if (!getConfig().exists("formats." + userGroup))
 			userGroup = "default";
 
 		placeholders.add("player", placeholders.apply(getConfig().getString("formats." + userGroup + ".name",
 				getConfig().getString("formats.default.name"))));
 		placeholders.add("message", modifiedMessage);
-		placeholders.add("message", placeholders.apply(getConfig().getString("formats." + userGroup + ".message",
-				getConfig().getString("formats.default.message"))));
+		placeholders.add("message", modifiedMessage = placeholders.apply(getConfig()
+				.getString("formats." + userGroup + ".message", getConfig().getString("formats.default.message"))));
 
 		Player player = e.getPlayer();
 

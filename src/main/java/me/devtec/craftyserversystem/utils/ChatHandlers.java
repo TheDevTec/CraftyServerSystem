@@ -797,28 +797,32 @@ public class ChatHandlers {
 			List<int[]> allowedSections) {
 		int[] pos = filtered.indexOf(word, exact, true);
 		loop: while (pos != null) {
-			if (positionAndLength.containsKey(pos[0]))
+			if (positionAndLength.containsKey(pos[0])) {
+				pos = filtered.indexOf(word, pos[0] + 1, exact, true);
 				continue;
+			}
 			for (Pair phrase : allowedPhrases)
 				if (phrase.getKey().equals(word) && matchesAllowedPhrase(filtered, pos[0],
 						(List<String>) phrase.getValue(), exact, allowedSections, input)) {
-					pos = filtered.indexOf(word, pos[0] + 1, exact, false);
+					pos = filtered.indexOf(word, pos[0] + 1, exact, true);
 					continue loop;
 				} else
-					positionAndLength.put(pos[0], pos[1]);
+					positionAndLength.put(pos[0], pos[1] + 1);
 
 		}
 		pos = filtered.indexOf(word, exact, false);
 		loop: while (pos != null) {
-			if (positionAndLength.containsKey(pos[0]))
+			if (positionAndLength.containsKey(pos[0])) {
+				pos = filtered.indexOf(word, pos[0] + 1, exact, false);
 				continue;
+			}
 			for (Pair phrase : allowedPhrases)
 				if (phrase.getKey().equals(word) && matchesAllowedPhrase(filtered, pos[0],
 						(List<String>) phrase.getValue(), exact, allowedSections, input)) {
 					pos = filtered.indexOf(word, pos[0] + 1, exact, false);
 					continue loop;
 				} else
-					positionAndLength.put(pos[0], pos[1]);
+					positionAndLength.put(pos[0], pos[1] + 1);
 
 		}
 	}

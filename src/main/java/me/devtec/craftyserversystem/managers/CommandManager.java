@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
@@ -24,6 +25,7 @@ public class CommandManager {
 	}
 
 	public void register() {
+		CompletableFuture<Boolean> await = new CompletableFuture<>();
 		try {
 			Map<String, CssCommand> lookup = lookupForCssCommands();
 			Config commandsFile = cfgManager.getCommands();
@@ -36,9 +38,14 @@ public class CommandManager {
 						cmd.register();
 						registered.put(cmd.section(), cmd);
 					}
+				await.complete(true);
 			});
 		} catch (Exception e) {
 			e.printStackTrace();
+		}
+		try {
+			await.get();
+		} catch (Exception e) {
 		}
 	}
 
@@ -49,11 +56,14 @@ public class CommandManager {
 	 */
 	public Map<String, CssCommand> lookupForCssCommands() throws Exception {
 		Map<String, CssCommand> lookup = new HashMap<>();
-		try (JarFile file = new JarFile(new File(Loader.getPlugin().getClass().getProtectionDomain().getCodeSource().getLocation().toURI()))) {
+		try (JarFile file = new JarFile(
+				new File(Loader.getPlugin().getClass().getProtectionDomain().getCodeSource().getLocation().toURI()))) {
 			Enumeration<JarEntry> entries = file.entries();
 			while (entries.hasMoreElements()) {
 				JarEntry entry = entries.nextElement();
-				if (entry.getName().endsWith(".class") && entry.getName().startsWith("me/devtec/craftyserversystem/commands/internal/") && entry.getName().indexOf('$') == -1) {
+				if (entry.getName().endsWith(".class")
+						&& entry.getName().startsWith("me/devtec/craftyserversystem/commands/internal/")
+						&& entry.getName().indexOf('$') == -1) {
 					String className = entry.getName().substring(0, entry.getName().length() - 6).replace('/', '.');
 					Class<?> clazz = Class.forName(className);
 					if (clazz.getAnnotation(IgnoredClass.class) != null)
@@ -67,11 +77,17 @@ public class CommandManager {
 	}
 
 	public void unregister() {
+		CompletableFuture<Boolean> await = new CompletableFuture<>();
 		BukkitLoader.getNmsProvider().postToMainThread(() -> {
 			for (CssCommand register : registered.values())
 				register.unregister();
 			registered.clear();
+			await.complete(true);
 		});
+		try {
+			await.get();
+		} catch (Exception e) {
+		}
 	}
 
 	public Map<String, CssCommand> getRegistered() {

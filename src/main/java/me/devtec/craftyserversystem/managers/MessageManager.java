@@ -526,10 +526,7 @@ public class MessageManager {
 			Collection<? extends CommandSender> receivers, Player player) {
 		CompletableFuture<String> future = new CompletableFuture<>();
 		actions.add(0,
-				new Action(transFile, pathToTranslation, ex, receivers.toArray(new CommandSender[0]), future, player)); // Inserts
-																														// on
-																														// first
-																														// priority
+				new Action(transFile, pathToTranslation, ex, receivers.toArray(new CommandSender[0]), future, player));
 		try {
 			return future.get(); // Freeze current thread and await result from another thread
 		} catch (Exception e) {
