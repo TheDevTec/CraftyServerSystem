@@ -726,10 +726,10 @@ public class ChatHandlers {
 				continue;
 			}
 			char origin = input.charAt(i);
-			if (origin == '_' || origin == '*' || origin == '.' || origin == ',' || origin == '\'' || origin == '"'
-					|| origin == ')' || origin == '(' || origin == ']' || origin == '[' || origin == '<'
-					|| origin == '>' || origin == '-' || origin == '+' || origin == '/' || origin == '\\'
-					|| origin == '&' || origin == '§' || origin == ';')
+			if (origin == '_' || origin == '.' || origin == ',' || origin == '\'' || origin == '"' || origin == ')'
+					|| origin == '(' || origin == ']' || origin == '[' || origin == '<' || origin == '>'
+					|| origin == '-' || origin == '+' || origin == '/' || origin == '\\' || origin == '&'
+					|| origin == '§' || origin == ';')
 				continue;
 			filtered.append(simplifyCharacter(Character.toLowerCase(origin)), i);
 		}
@@ -845,10 +845,10 @@ public class ChatHandlers {
 				continue;
 			}
 			char origin = input.charAt(i);
-			if (origin == '_' || origin == '*' || origin == '.' || origin == ',' || origin == '\'' || origin == '"'
-					|| origin == ')' || origin == '(' || origin == ']' || origin == '[' || origin == '<'
-					|| origin == '>' || origin == '-' || origin == '+' || origin == '/' || origin == '\\'
-					|| origin == '&' || origin == '§' || origin == ';')
+			if (origin == '_' || origin == '.' || origin == ',' || origin == '\'' || origin == '"' || origin == ')'
+					|| origin == '(' || origin == ']' || origin == '[' || origin == '<' || origin == '>'
+					|| origin == '-' || origin == '+' || origin == '/' || origin == '\\' || origin == '&'
+					|| origin == '§' || origin == ';')
 				continue;
 			filtered.append(simplifyCharacter(Character.toLowerCase(origin)), i);
 		}

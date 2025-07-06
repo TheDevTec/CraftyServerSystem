@@ -67,6 +67,7 @@ public class StringContainerWithPositions {
 
 	protected int[] indexOf(final int start, final String lookingFor, boolean ignoreSpaces,
 			boolean removeSequentialDuplicates, String original) {
+		byte countStars = 0;
 		if (original == null) {
 			int min = Math.min(start, count);
 			int size = lookingFor.length();
@@ -79,14 +80,18 @@ public class StringContainerWithPositions {
 				char c = value[i];
 				if (ignoreSpaces && Character.isWhitespace(c))
 					continue;
-				if (c == firstChar) {
+				if (c == firstChar || c == '*') {
+					if (c == '*')
+						countStars = 1;
+					else
+						countStars = 0;
 					++i;
 					int foundPos = 1;
 					for (int d = i; d < count; ++d) {
 						char e = value[d];
 						if (ignoreSpaces && Character.isWhitespace(e))
 							continue;
-						if (e == lookingFor.charAt(foundPos)) {
+						if (e == '*' && ++countStars <= 2 || e == lookingFor.charAt(foundPos)) {
 							if (++foundPos == size)
 								return new int[] { i - 1, d };
 						} else if (removeSequentialDuplicates && e == prev && !Character.isWhitespace(e))
@@ -110,14 +115,18 @@ public class StringContainerWithPositions {
 				char c = original.charAt(realPos[i]);
 				if (ignoreSpaces && Character.isWhitespace(c))
 					continue;
-				if (c == firstChar) {
+				if (c == firstChar || c == '*') {
+					if (c == '*')
+						countStars = 1;
+					else
+						countStars = 0;
 					++i;
 					int foundPos = 1;
 					for (int d = i; d < count; ++d) {
 						char e = original.charAt(realPos[d]);
 						if (ignoreSpaces && Character.isWhitespace(e))
 							continue;
-						if (e == lookingFor.charAt(foundPos)) {
+						if (e == '*' && ++countStars <= 2 || e == lookingFor.charAt(foundPos)) {
 							if (++foundPos == size)
 								return new int[] { i - 1, d };
 						} else if (removeSequentialDuplicates && e == prev && !Character.isWhitespace(e))
