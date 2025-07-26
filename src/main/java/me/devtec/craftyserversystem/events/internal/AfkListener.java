@@ -140,7 +140,7 @@ public class AfkListener implements CssListener {
 
 				@Override
 				public void playIn(String player, PacketContainer container, ChannelContainer channel) {
-					if (movementPacketClass.isAssignableFrom(container.getPacket().getClass())) {
+					if (movementPacketClass.isAssignableFrom(container.getPacket().getClass()) || movementPacketClass.equals(container.getPacket().getClass())) {
 						Object pos = container.getPacket();
 						int x = MathUtils.floor((double) Ref.get(pos, xField));
 						int y = MathUtils.floor((double) Ref.get(pos, yField));

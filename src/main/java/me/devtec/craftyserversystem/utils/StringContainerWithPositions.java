@@ -81,13 +81,13 @@ public class StringContainerWithPositions {
 				if (ignoreSpaces && Character.isWhitespace(c))
 					continue;
 				if (c == firstChar || c == '*') {
+					prev = c;
 					if (c == '*')
 						countStars = 1;
 					else
 						countStars = 0;
-					++i;
 					int foundPos = 1;
-					for (int d = i; d < count; ++d) {
+					for (int d = ++i; d < count; ++d) {
 						char e = value[d];
 						if (ignoreSpaces && Character.isWhitespace(e))
 							continue;
@@ -116,13 +116,13 @@ public class StringContainerWithPositions {
 				if (ignoreSpaces && Character.isWhitespace(c))
 					continue;
 				if (c == firstChar || c == '*') {
+					prev = c;
 					if (c == '*')
 						countStars = 1;
 					else
 						countStars = 0;
-					++i;
 					int foundPos = 1;
-					for (int d = i; d < count; ++d) {
+					for (int d = ++i; d < count; ++d) {
 						char e = original.charAt(realPos[d]);
 						if (ignoreSpaces && Character.isWhitespace(e))
 							continue;
@@ -140,7 +140,6 @@ public class StringContainerWithPositions {
 			}
 		}
 		return null;
-
 	}
 
 	public void increaseCount(final int newCount) {

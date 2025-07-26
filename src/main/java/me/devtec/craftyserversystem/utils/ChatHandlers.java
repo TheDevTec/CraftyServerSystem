@@ -1023,6 +1023,7 @@ public class ChatHandlers {
 			break;
 		case 'ž':
 		case 'ź':
+		case 'ż':
 			c = 'z';
 			break;
 		case 'ý':
@@ -1032,10 +1033,12 @@ public class ChatHandlers {
 			break;
 		case 'á':
 		case 'ä':
+		case 'ą':
 			c = 'a';
 			break;
 		case '0':
 		case 'ö':
+		case 'ó':
 			c = 'o';
 			break;
 		}
