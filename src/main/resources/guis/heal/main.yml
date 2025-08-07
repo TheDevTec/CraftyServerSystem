@@ -1,0 +1,69 @@
+title: "&fHealing"
+# Max 6 lines, each 9 chars
+# space = empty slot
+loop:
+  # types: PLAYER, WORLD, BIOME, MATERIAL
+  value: PLAYER
+  item:
+    B:
+      action: PREVIOUS_PAGE
+      available:
+        type: LIME_STAINED_GLASS_PANE
+        displayName: "&aNext page"
+      unavailable:
+        type: BLACK_STAINED_GLASS_PANE
+        displayName: "&c"
+    N:
+      action: NEXT_PAGE
+      available:
+        type: YELLOW_STAINED_GLASS_PANE
+        displayName: "&ePrevious page"
+      unavailable:
+        type: BLACK_STAINED_GLASS_PANE
+        displayName: "&c"
+    result:
+      conditions:
+        0:
+          check:
+          - CHECK_PLACEHOLDER:{target_health}<20
+          type: PLAYER_HEAD
+          head:
+            type: PLAYER
+            owner: {target}
+          displayName: "&d{target}"
+          lore:
+          - ""
+          - "&7Click to heal player"
+          - ""
+          click:
+            commands:
+            - "heal {target}"
+            actions:
+            - "UPDATE_ITEM:#"
+      # pokud item neprojde žádnou condition, tak se nic nepřidá, protože zde není žádný item vytvořený
+      # type: {type}
+      # displayName: &e{displayName}
+      # lore: "Stojí jen {cost}$"
+      # click: ...
+lines:
+- "xxxxxxxxx"
+- "#########"
+- "#########"
+- "#########"
+- "xBxxcxxNx"
+items:
+  x:
+    type: BLACK_STAINED_GLASS_PANE
+    displayName: "&c"
+  c:
+    type: RED_STAINED_GLASS_PANE
+    displayName: "&cClose"
+    lore:
+    - ""
+    - "&7Click to close menu!"
+    - ""
+    click:
+      commands: []
+      messages: []
+      actions:
+      - "CLOSE_MENU"

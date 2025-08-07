@@ -1,0 +1,75 @@
+title: "&uShop"
+# Max 6 lines, each 9 chars
+# space = empty slot
+lines:
+- "xxxxxxxxx"
+- "         "
+- "  d i g  "
+- "         "
+- "xxxxcxxxx"
+items:
+  x:
+    type: BLACK_STAINED_GLASS_PANE
+    displayName: "&c"
+  c:
+    type: RED_STAINED_GLASS_PANE
+    displayName: "&cClose"
+    lore:
+    - ""
+    - "&7Click to close menu!"
+    - ""
+    click:
+      commands: []
+      messages: []
+      actions:
+      - "CLOSE_MENU"
+  d:
+    type: DIRT
+    displayName: "&dDirt"
+    lore:
+    - ""
+    - "&7Cost: &e3.125$"
+    - ""
+    click:
+      commands: []
+      messages: []
+      actions:
+      - "SET_CACHE:type:dirt"
+      - "SET_CACHE:price:3.125"
+      - "SET_CACHE:name:Dirt"
+      - "SET_CACHE:amount:1"
+      - "OPEN_MENU:shop/buy_menu"
+  i:
+    type: IRON_INGOT
+    displayName: "&dIron Ingot"
+    lore:
+    - ""
+    - "&7Amount: &e4x"
+    - "&7Cost: &e22.5$"
+    - ""
+    click:
+      commands: []
+      messages: []
+      actions:
+      - "SET_CACHE:type:iron_ingot"
+      - "SET_CACHE:price:22.5"
+      - "SET_CACHE:name:Iron Ingot"
+      - "SET_CACHE:amount:1"
+      - "OPEN_MENU:shop/buy_menu"
+  g:
+    type: GOLD_INGOT
+    displayName: "&dGold Ingot"
+    lore:
+    - ""
+    - "&7Cost: &e55$"
+    - ""
+    click:
+      commands: []
+      messages: []
+      actions:
+      - "SET_CACHE:type:gold_ingot"
+      - "SET_CACHE:price:55"
+      - "SET_CACHE:name:Gold Ingot"
+      - "SET_CACHE:amount:1"
+      - "OPEN_MENU:shop/buy_menu"
+

@@ -1,0 +1,109 @@
+title: "&fPurchase transaction &7- &f[name]"
+# Max 6 lines, each 9 chars
+# space = empty slot
+lines:
+- "xxxxxxxxx"
+- "x  0 5  x"
+- "  1 Y 4  "
+- "x  2 3  x"
+- "xxxxcxxxx"
+items:
+  x:
+    type: BLACK_STAINED_GLASS_PANE
+    displayName: "&c"
+  c:
+    type: RED_STAINED_GLASS_PANE
+    displayName: "&cBack"
+    lore:
+    - ""
+    - "&7Cancel transation and return back"
+    - ""
+    click:
+      commands: []
+      messages: []
+      actions:
+      - "CLEAR_CACHE"
+      - "OPEN_MENU:shop/main"
+  0:
+    type: RED_WOOL
+    displayName: "&c-32"
+    click:
+      commands: []
+      messages: []
+      actions:
+      - "MINUS_CACHE:amount:32"
+      - "UPDATE_ITEM:Y"
+  1:
+    type: RED_CARPET
+    displayName: "&c-16"
+    click:
+      commands: []
+      messages: []
+      actions:
+      - "MINUS_CACHE:amount:16"
+      - "UPDATE_ITEM:Y"
+  2:
+    type: RED_DYE
+    displayName: "&c-1"
+    click:
+      commands: []
+      messages: []
+      actions:
+      - "MINUS_CACHE:amount:1"
+      - "UPDATE_ITEM:Y"
+  3:
+    type: LIME_DYE
+    displayName: "&a+1"
+    click:
+      commands: []
+      messages: []
+      actions:
+      - "PLUS_CACHE:amount:1"
+      - "UPDATE_ITEM:Y"
+  4:
+    type: LIME_CARPET
+    displayName: "&a+16"
+    click:
+      commands: []
+      messages: []
+      actions:
+      - "PLUS_CACHE:amount:16"
+      - "UPDATE_ITEM:Y"
+  5:
+    type: LIME_WOOL
+    displayName: "&a+32"
+    click:
+      commands: []
+      messages: []
+      actions:
+      - "PLUS_CACHE:amount:32"
+      - "UPDATE_ITEM:Y"
+  Y:
+    type: EMERALD
+    displayName: "&aConfirm payment"
+    lore:
+    - ""
+    - "&7Amount: max(1, [amount])"
+    - "&7Cost: calc(max(1,[amount])*[price])"
+    - ""
+    click:
+      commands: []
+      messages: []
+      actions:
+      - "CHECK_BALANCE:calc(max(1,[amount])*[price])?success{cost:calc(max(1,[amount])*[price])}:fail"
+
+customActions:
+  success:
+    economy:
+      deposit: ""
+      withdraw: "{cost}"
+    commands:
+    - "give {player} [type] [amount]"
+    messages:
+    - "&aYou bought [amount]x [name] for {cost}$!"
+    actions: []
+  fail:
+    commands: []
+    messages:
+    - "&cSorry, you don't have enough money!"
+    actions: []

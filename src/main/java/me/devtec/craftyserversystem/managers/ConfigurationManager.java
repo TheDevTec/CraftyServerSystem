@@ -1,5 +1,7 @@
 package me.devtec.craftyserversystem.managers;
 
+import java.io.File;
+
 import org.bukkit.Bukkit;
 
 import me.devtec.craftyserversystem.Loader;
@@ -26,7 +28,6 @@ public class ConfigurationManager {
 	private Config kits;
 	private Config economy;
 	private Config placeholders;
-	private Config customGuis;
 	private Config serverMotd;
 	private Config consoleFilter;
 	private Config animations;
@@ -48,7 +49,6 @@ public class ConfigurationManager {
 		bossbar = new Config(FILES_PATH + "events/bossbar.yml");
 		kits = new Config(FILES_PATH + "kits.yml");
 		economy = new Config(FILES_PATH + "economy.yml");
-		customGuis = new Config(FILES_PATH + "custom-guis.yml");
 		placeholders = new Config(FILES_PATH + "placeholders.yml");
 		serverMotd = new Config(FILES_PATH + "events/server-motd.yml");
 		consoleFilter = new Config(FILES_PATH + "events/console-filter.yml");
@@ -74,8 +74,11 @@ public class ConfigurationManager {
 		merge(kits, "kits.yml");
 		merge(economy, "economy.yml");
 		merge(placeholders, "placeholders.yml");
-		if (customGuis.getKeys().isEmpty())
-			merge(customGuis, "custom-guis.yml");
+		if(!new File(FILES_PATH+"guis").exists()) {
+			Config.loadFromPlugin(Loader.getPlugin().getClass(), "guis/heal/main.yml", FILES_PATH + "storage/guis/heal/main.yml").save("yaml");
+			Config.loadFromPlugin(Loader.getPlugin().getClass(), "guis/shop/buy_menu.yml", FILES_PATH + "storage/guis/shop/buy_menu.yml").save("yaml");
+			Config.loadFromPlugin(Loader.getPlugin().getClass(), "guis/shop/main.yml", FILES_PATH + "storage/guis/shop/main.yml").save("yaml");
+		}
 		if (!serverMotd.exists("motds"))
 			merge(serverMotd, "server-motd.yml");
 		merge(consoleFilter, "console-filter.yml");
@@ -190,10 +193,6 @@ public class ConfigurationManager {
 		return chat;
 	}
 
-	public Config getCustomGuis() {
-		return customGuis;
-	}
-
 	public Config getConsoleFilter() {
 		return consoleFilter;
 	}
@@ -217,7 +216,6 @@ public class ConfigurationManager {
 		getKits().reload();
 		getEconomy().reload();
 		getPlaceholders().reload();
-		getCustomGuis().reload();
 		getServerMotd().reload();
 		getConsoleFilter().reload();
 		getAnimations().reload();
