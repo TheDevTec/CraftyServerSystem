@@ -36,6 +36,10 @@ public class PlaceholdersExecutor {
 		return addSpec('{' + sequence + '}', replacement);
 	}
 
+	public void remove(String sequence) {
+		placeholders.remove('{' + sequence + '}');
+	}
+
 	public PlaceholdersExecutor add(String sequence, Number replacement) {
 		return addSpec('{' + sequence + '}', StringUtils.formatDouble(FormatType.NORMAL, replacement.doubleValue()));
 	}
@@ -58,30 +62,30 @@ public class PlaceholdersExecutor {
 		if (placeholders.isEmpty() || text.indexOf('{') == -1)
 			return ColorUtils.colorize(PlaceholderAPI.apply(text, target)); // Doesn't contains any (our) placeholders
 
-		StringContainer container = new StringContainer(text); // Much faster than using String#replace method
+		StringContainer container = new StringContainer(PlaceholderAPI.apply(text, target)); // Much faster than using String#replace method
 		for (Entry<String, String> entry : placeholders.entrySet())
 			container.replace(entry.getKey(), entry.getValue());
-		return ColorUtils.colorize(PlaceholderAPI.apply(container.toString(), target));
+		return ColorUtils.colorize(container, null).toString();
 	}
 
 	public String applyWithoutColors(String text) {
 		if (placeholders.isEmpty() || text.indexOf('{') == -1)
 			return PlaceholderAPI.apply(text, target); // Doesn't contains any (our) placeholders
 
-		StringContainer container = new StringContainer(text); // Much faster than using String#replace method
+		StringContainer container = new StringContainer(PlaceholderAPI.apply(text, target)); // Much faster than using String#replace method
 		for (Entry<String, String> entry : placeholders.entrySet())
 			container.replace(entry.getKey(), entry.getValue());
-		return PlaceholderAPI.apply(container.toString(), target);
+		return ColorUtils.colorize(container, null).toString();
 	}
 
 	public String applyAfterColorize(String text) {
 		if (placeholders.isEmpty() || text.indexOf('{') == -1)
 			return PlaceholderAPI.apply(ColorUtils.colorize(text), target); // Doesn't contains any (our) placeholders
 
-		StringContainer container = new StringContainer(ColorUtils.colorize(text, new ArrayList<>(placeholders.keySet()))); // Much faster than using String#replace method
+		StringContainer container = new StringContainer(PlaceholderAPI.apply(ColorUtils.colorize(text, new ArrayList<>(placeholders.keySet())), target)); // Much faster than using String#replace method
 		for (Entry<String, String> entry : placeholders.entrySet())
 			container.replace(entry.getKey(), entry.getValue());
-		return PlaceholderAPI.apply(container.toString(), target);
+		return container.toString();
 	}
 
 	public List<String> apply(List<String> lore) {
@@ -98,10 +102,10 @@ public class PlaceholdersExecutor {
 		if (object instanceof Map) {
 			Map<String, Object> map = new HashMap<>(((Map<String, Object>) object).size());
 			for (Entry<String, Object> entry : ((Map<String, Object>) object).entrySet())
-				if (entry.getKey().equals("color"))
+				if ("color".equals(entry.getKey()))
 					map.put(entry.getKey(), entry.getValue());
 				else
-					map.put(entry.getKey(), apply(entry.getValue(), entry.getKey().equals("hoverEvent")));
+					map.put(entry.getKey(), apply(entry.getValue(), "hoverEvent".equals(entry.getKey())));
 			return map;
 		}
 		if (object instanceof Collection) {
@@ -118,11 +122,11 @@ public class PlaceholdersExecutor {
 		if (object instanceof Map) {
 			Map<String, Object> map = new HashMap<>(((Map<String, Object>) object).size());
 			for (Entry<String, Object> entry : ((Map<String, Object>) object).entrySet())
-				if (entry.getKey().equals("color"))
+				if ("color".equals(entry.getKey()))
 					map.put(entry.getKey(), entry.getValue());
 				else
 					map.put(entry.getKey(),
-							apply(entry.getValue(), shouldConvertToComponent ? entry.getKey().equals("value") || entry.getKey().equals("content") || entry.getKey().equals("contents") : false));
+							apply(entry.getValue(), shouldConvertToComponent ? "value".equals(entry.getKey()) || "content".equals(entry.getKey()) || "contents".equals(entry.getKey()) : false));
 			return map;
 		}
 		if (object instanceof Collection) {

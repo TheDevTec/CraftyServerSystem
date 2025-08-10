@@ -179,9 +179,9 @@ public class ChatListener implements CssListener {
 		List<String> playerNames = playerNames(e.getPlayer());
 		String modifiedMessage = antiFloodEnabled
 				&& (bypassAntiFlood ? !e.getPlayer().hasPermission("css.chat.bypass.antiflood") : true)
-						? ChatHandlers.antiFlood(e.getMessage(), ChatHandlers.match(e.getMessage(), playerNames),
-								floodMaxNumbers, floodMaxChars, floodMaxCapsChars, floodMaxSameWords,
-								floodMinWordsBetweenSameToIgnore)
+				? ChatHandlers.antiFlood(e.getMessage(), ChatHandlers.match(e.getMessage(), playerNames),
+						floodMaxNumbers, floodMaxChars, floodMaxCapsChars, floodMaxSameWords,
+						floodMinWordsBetweenSameToIgnore)
 						: e.getMessage();
 
 		if (antiAdEnabled && (bypassAntiAd ? !e.getPlayer().hasPermission("css.chat.bypass.antiad") : true)
@@ -202,7 +202,7 @@ public class ChatListener implements CssListener {
 				&& modifiedMessage.indexOf("[item]") != -1
 				&& ChatHandlers.antiAd(itemInHand.hasItemMeta() && itemInHand.getItemMeta().hasDisplayName()
 						? itemInHand.getItemMeta().getDisplayName()
-						: null, antiAdWhitelist)) {
+								: null, antiAdWhitelist)) {
 			e.setCancelled(true);
 			API.get().getMsgManager().sendMessageFromFile(getConfig(), "translations.antiAd",
 					PlaceholdersExecutor.i().add("player", e.getPlayer().getName()), e.getPlayer());
@@ -259,7 +259,8 @@ public class ChatListener implements CssListener {
 
 		placeholders.add("player", placeholders.apply(getConfig().getString("formats." + userGroup + ".name",
 				getConfig().getString("formats.default.name"))));
-		placeholders.add("message", modifiedMessage);
+		placeholders.add("message",modifiedMessage);
+
 		placeholders.add("message", modifiedMessage = placeholders.apply(getConfig()
 				.getString("formats." + userGroup + ".message", getConfig().getString("formats.default.message"))));
 
@@ -299,7 +300,7 @@ public class ChatListener implements CssListener {
 				}
 			} else if ("DISTANCE".equals(type) && (!player.getWorld().equals(target.getWorld())
 					|| target.getLocation().distance(player.getLocation()) > distance)) { // If they are not in same
-																							// world
+				// world
 				// or distance is too high
 				targets.remove();
 				continue;
@@ -340,7 +341,7 @@ public class ChatListener implements CssListener {
 				.sendMessageFromFileWithResult(getConfig(),
 						getConfig().existsKey("formats." + userGroup + ".chat") ? "formats." + userGroup + ".chat"
 								: "formats.default.chat",
-						placeholders, e.getRecipients(), e.getPlayer())
+								placeholders, e.getRecipients(), e.getPlayer())
 				.replace("%", "%%"));
 		e.getRecipients().clear(); // We have our own json format (see above)
 	}
@@ -422,7 +423,7 @@ public class ChatListener implements CssListener {
 			final List<String> protectedStrings) {
 		if (container.isEmpty()
 				|| !sender.hasPermission("css.chat.colors") && !sender.hasPermission("css.chat.gradient")
-						&& !sender.hasPermission("css.chat.hex") && !sender.hasPermission("css.chat.rainbow"))
+				&& !sender.hasPermission("css.chat.hex") && !sender.hasPermission("css.chat.rainbow"))
 			return container;
 		if (sender.hasPermission("css.chat.colors"))
 			for (int i = 0; i < container.length(); ++i) {

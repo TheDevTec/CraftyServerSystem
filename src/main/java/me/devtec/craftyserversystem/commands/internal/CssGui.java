@@ -26,7 +26,7 @@ public class CssGui extends CssCommand {
 		for(String id : guisByCss)
 			GuiCreator.guis.remove(id);
 		guisByCss.clear();
-		loadGuis(new File("plugins/CraftyServerSystem/guis"), "");
+		loadGuis(new File("plugins/CraftyServerSystem/storage/guis"), "");
 	}
 
 	@Override
@@ -34,7 +34,7 @@ public class CssGui extends CssCommand {
 		if (isRegistered())
 			return;
 
-		loadGuis(new File("plugins/CraftyServerSystem/guis"), "");
+		loadGuis(new File("plugins/CraftyServerSystem/storage/guis"), "");
 
 		CommandStructure<CommandSender> cmd = CommandStructure.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
 			msgUsage(sender, "cmd");
@@ -77,18 +77,19 @@ public class CssGui extends CssCommand {
 	}
 
 	public void loadGuis(File folder, String prefix) {
-		for (File file : folder.listFiles())
-			if (file.isDirectory())
-				loadGuis(file, prefix.isEmpty() ? file.getName() : prefix + "/" + file.getName());
-			else if (file.getName().endsWith(".yml")) {
-				Config config = new Config(file);
-				String fileName = file.getName().substring(0, file.getName().length() - 4);
-				String name = prefix.isEmpty() ? fileName : prefix + "/" + fileName;
-				guisByCss.add(name);
-				if("anvil".equalsIgnoreCase(config.getString("type", "NORMAL"))) new AnvilGuiCreator(name,config);
-				else if(config.exists("loop")) new LoopGuiCreator(name,config);
-				else new ClassicGuiCreator(name,config);
-			}
+		if(folder.exists())
+			for (File file : folder.listFiles())
+				if (file.isDirectory())
+					loadGuis(file, prefix.isEmpty() ? file.getName() : prefix + "/" + file.getName());
+				else if (file.getName().endsWith(".yml")) {
+					Config config = new Config(file);
+					String fileName = file.getName().substring(0, file.getName().length() - 4);
+					String name = prefix.isEmpty() ? fileName : prefix + "/" + fileName;
+					guisByCss.add(name);
+					GuiCreator c= "anvil".equalsIgnoreCase(config.getString("type", "NORMAL"))? new AnvilGuiCreator(name,config) :
+						config.exists("loop") ? new LoopGuiCreator(name,config) : new ClassicGuiCreator(name,config);
+					c.register();
+				}
 	}
 
 	public void openMenu(CommandSender sender, Player target, String id, boolean sendMessage) {

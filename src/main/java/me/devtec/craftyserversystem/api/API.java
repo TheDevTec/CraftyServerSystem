@@ -33,6 +33,7 @@ import me.devtec.craftyserversystem.permission.PermissionHook;
 import me.devtec.craftyserversystem.utils.bossbar.UserBossBarData;
 import me.devtec.craftyserversystem.utils.scoreboard.UserScoreboardData;
 import me.devtec.shared.Ref;
+import me.devtec.shared.Ref.ServerType;
 import me.devtec.shared.annotations.Nullable;
 import me.devtec.shared.database.DatabaseAPI;
 import me.devtec.shared.database.DatabaseAPI.DatabaseType;
@@ -235,9 +236,9 @@ public class API {
 				this.economy = new CssEconomy(economy.getDouble("settings.startup-money"),
 						"UNLIMITED".equals(economy.getString("settings.minimum-money")) ? Double.NEGATIVE_INFINITY
 								: economy.getDouble("settings.minimum-money"),
-						"UNLIMITED".equals(economy.getString("settings.maximum-money")) ? Double.POSITIVE_INFINITY
-								: economy.getDouble("settings.maximum-money"),
-						map != null, map);
+								"UNLIMITED".equals(economy.getString("settings.maximum-money")) ? Double.POSITIVE_INFINITY
+										: economy.getDouble("settings.maximum-money"),
+										map != null, map);
 				setEconomyHook(new CssEconomyHook(this.economy));
 			} else {
 				Constructor<?> cons = Ref.constructor(
@@ -246,9 +247,9 @@ public class API {
 				this.economy = (CssEconomy) Ref.newInstance(cons, economy.getDouble("settings.startup-money"),
 						"UNLIMITED".equals(economy.getString("settings.minimum-money")) ? Double.NEGATIVE_INFINITY
 								: economy.getDouble("settings.minimum-money"),
-						"UNLIMITED".equals(economy.getString("settings.maximum-money")) ? Double.POSITIVE_INFINITY
-								: economy.getDouble("settings.maximum-money"),
-						map != null, map);
+								"UNLIMITED".equals(economy.getString("settings.maximum-money")) ? Double.POSITIVE_INFINITY
+										: economy.getDouble("settings.maximum-money"),
+										map != null, map);
 				setEconomyHook(new CssEconomyHook(this.economy));
 				VaultEconomyHook.registerOurEconomy();
 			}
@@ -271,9 +272,9 @@ public class API {
 					case "balance": {
 						Player online = Bukkit.getPlayer(player);
 						return ""
-								+ API.get().getEconomyHook().getBalance(
-										online == null ? me.devtec.shared.API.offlineCache().lookupNameById(player)
-												: online.getName(),
+						+ API.get().getEconomyHook().getBalance(
+								online == null ? me.devtec.shared.API.offlineCache().lookupNameById(player)
+										: online.getName(),
 										online == null ? null : online.getWorld().getName());
 					}
 					case "formatted_balance": {
@@ -282,7 +283,7 @@ public class API {
 								.format(API.get().getEconomyHook().getBalance(
 										online == null ? me.devtec.shared.API.offlineCache().lookupNameById(player)
 												: online.getName(),
-										online == null ? null : online.getWorld().getName()));
+												online == null ? null : online.getWorld().getName()));
 					}
 					case "vanish": {
 						Player online = Bukkit.getPlayer(player);
@@ -326,7 +327,8 @@ public class API {
 
 	public void reload() {
 		// Unload
-		getCommandManager().unregister();
+		if(Ref.serverType()!=ServerType.PAPER)
+			getCommandManager().unregister();
 		getListenerManager().unregister();
 		getAnimationManager().unload();
 		if (BanAPI.isInit())
@@ -341,6 +343,8 @@ public class API {
 			if ("CssEconomyVaultImplementation".equals(getEconomyHook().getClass().getSimpleName()))
 				VaultEconomyHook.unregisterOurEconomy();
 		setEconomyHook(new EmptyEconomyHook());
+		CssCommand gui = getCommandManager().getRegistered().get("cssgui");
+		if(gui!=null)gui.reload();
 		// Load
 		getConfigManager().reloadAll();
 		getAnimationManager().load();
@@ -376,9 +380,9 @@ public class API {
 				this.economy = new CssEconomy(economy.getDouble("settings.startup-money"),
 						"UNLIMITED".equals(economy.getString("settings.minimum-money")) ? Double.NEGATIVE_INFINITY
 								: economy.getDouble("settings.minimum-money"),
-						"UNLIMITED".equals(economy.getString("settings.maximum-money")) ? Double.POSITIVE_INFINITY
-								: economy.getDouble("settings.maximum-money"),
-						map != null, map);
+								"UNLIMITED".equals(economy.getString("settings.maximum-money")) ? Double.POSITIVE_INFINITY
+										: economy.getDouble("settings.maximum-money"),
+										map != null, map);
 				setEconomyHook(new CssEconomyHook(this.economy));
 			} else {
 				Constructor<?> cons = Ref.constructor(
@@ -387,16 +391,17 @@ public class API {
 				this.economy = (CssEconomy) Ref.newInstance(cons, economy.getDouble("settings.startup-money"),
 						"UNLIMITED".equals(economy.getString("settings.minimum-money")) ? Double.NEGATIVE_INFINITY
 								: economy.getDouble("settings.minimum-money"),
-						"UNLIMITED".equals(economy.getString("settings.maximum-money")) ? Double.POSITIVE_INFINITY
-								: economy.getDouble("settings.maximum-money"),
-						map != null, map);
+								"UNLIMITED".equals(economy.getString("settings.maximum-money")) ? Double.POSITIVE_INFINITY
+										: economy.getDouble("settings.maximum-money"),
+										map != null, map);
 				setEconomyHook(new CssEconomyHook(this.economy));
 				VaultEconomyHook.registerOurEconomy();
 			}
 		}
 		getCommandsAPI().getBanAPI().init();
 
-		getCommandManager().register();
+		if(Ref.serverType()!=ServerType.PAPER)
+			getCommandManager().register();
 		getListenerManager().register();
 	}
 }

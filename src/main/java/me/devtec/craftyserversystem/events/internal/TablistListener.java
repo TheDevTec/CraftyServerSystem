@@ -115,12 +115,12 @@ public class TablistListener implements CssListener {
 			else
 				taskId = new Tasker() {
 
-					@Override
-					public void run() {
-						for (UserTablistData userData : data.values())
-							data.put(userData.getPlayer().getUniqueId(), generateData(userData.getPlayer()));
-					}
-				}.runRepeating(100, 100);
+				@Override
+				public void run() {
+					for (UserTablistData userData : data.values())
+						data.put(userData.getPlayer().getUniqueId(), generateData(userData.getPlayer()));
+				}
+			}.runRepeating(100, 100);
 			refleshTaskId = new Tasker() {
 
 				@Override
@@ -214,7 +214,7 @@ public class TablistListener implements CssListener {
 			@Override
 			public void run() {
 				BukkitLoader.getNmsProvider()
-						.postToMainThread(() -> NametagManagerAPI.get().getPlayer(player).afterJoin());
+				.postToMainThread(() -> NametagManagerAPI.get().getPlayer(player).afterJoin());
 				if (disabledInWorlds.contains(player.getWorld().getName()))
 					return;
 				data.put(player.getUniqueId(),

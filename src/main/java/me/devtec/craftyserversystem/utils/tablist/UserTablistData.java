@@ -53,8 +53,8 @@ public class UserTablistData extends TablistData {
 			String replaced = PlaceholderAPI.apply(API.get().getConfigManager().getPlaceholders().getString(placeholder + ".placeholder"), player.getUniqueId());
 			placeholders.add(placeholder,
 					API.get().getConfigManager().getPlaceholders()
-							.getString(placeholder + ".replace." + replaced, API.get().getConfigManager().getPlaceholders().getString(placeholder + ".replace._DEFAULT", ""))
-							.replace("{placeholder}", replaced));
+					.getString(placeholder + ".replace." + replaced, API.get().getConfigManager().getPlaceholders().getString(placeholder + ".replace._DEFAULT", ""))
+					.replace("{placeholder}", replaced));
 		}
 
 		StringContainer headerContainer = new StringContainer(64);
@@ -143,11 +143,11 @@ public class UserTablistData extends TablistData {
 		else
 			new Tasker() {
 
-				@Override
-				public void run() {
-					NametagManagerAPI.get().getPlayers().remove(nametag);
-				}
-			}.runLater(5);
+			@Override
+			public void run() {
+				NametagManagerAPI.get().getPlayers().remove(nametag);
+			}
+		}.runLater(5);
 	}
 
 	public Player getPlayer() {

@@ -75,6 +75,7 @@ public class ConfigurationManager {
 		merge(economy, "economy.yml");
 		merge(placeholders, "placeholders.yml");
 		if(!new File(FILES_PATH+"guis").exists()) {
+			Config.loadFromPlugin(Loader.getPlugin().getClass(), "guis/example.yml", FILES_PATH + "storage/guis/example.yml").save("yaml");
 			Config.loadFromPlugin(Loader.getPlugin().getClass(), "guis/heal/main.yml", FILES_PATH + "storage/guis/heal/main.yml").save("yaml");
 			Config.loadFromPlugin(Loader.getPlugin().getClass(), "guis/shop/buy_menu.yml", FILES_PATH + "storage/guis/shop/buy_menu.yml").save("yaml");
 			Config.loadFromPlugin(Loader.getPlugin().getClass(), "guis/shop/main.yml", FILES_PATH + "storage/guis/shop/main.yml").save("yaml");

@@ -1,0 +1,127 @@
+title: "&uExample"
+# Max 6 lines, each 9 chars
+# space = empty slot
+lines:
+- "xxxxhxxxx"
+- "         "
+- "  d i g  "
+- "    s    "
+- "xxxxcxxxx"
+scheduler:
+  0:
+    # time in ticks!! 20 = 1s
+    time: 5
+    items: [h,s]
+    actions: []
+items:
+  x:
+    type: BLACK_STAINED_GLASS_PANE
+    displayName: "&c"
+  h:
+    type: CLOCK
+    displayName: "&eClock"
+    lore:
+    - ""
+    - "&7Time: %server_time_HH:mm:ss%"
+    - ""
+  s:
+    conditions:
+    - "CHECK_PLACEHOLDER:%player_health%>=20"
+    - "CHECK_PERMISSION:guiexpansion.test"
+    - "CHECK_BALANCE:250"
+    has:
+       type: BARRIER
+       displayName: "&cSecret"
+       lore:
+       - ""
+       - "&7Time: %server_time_HH:mm:ss%"
+       - ""
+    # If you don't add not section, then no item will be displayed
+    # not:
+    #    type: BARRIER
+    #    displayName: &cSecret
+    #    lore:
+    #    - &7Time: %server_time_HH:mm:ss%
+  c:
+    type: RED_STAINED_GLASS_PANE
+    displayName: "&cClose"
+    lore:
+    - ""
+    - "&7Click to close menu!"
+    - ""
+    click:
+      # You can retrieve values from cache here via [pathInCache]! Also use calc function as you wish
+      commands: []
+      messages: []
+      # Available actions:
+      # - OPEN_MENU:id
+      # - CLOSE_MENU
+      # - CHECK_BALANCE:requiredMoney?ifPlayerHasMoney_ActionName:PlayerDoesNotHaveMoney_ActionName
+      # you can use in the "requiredMoney" field calculation! also values from cache via calc([pathInCache]..)
+      # for ex.: CHECK_BALANCE:calc([amount]*[cost])?sucess:fail
+      # you can also add own placeholders into actions via json like: {placeholderName:value}
+      # in the json you can also use math calc.
+      # for ex.: CHECK_BALANCE:500?success{name:Dirt,value:25}:fail
+      # - CHECK_PLACEHOLDER:%placeholderapi_placeholder_here%==RESULT?itsTrue:itsFalse
+      # You can use here ==, >=, >, <, <=, != checks
+      # - CHECK_PERMISSION:permissionName?itsTrue:itsFalse
+      # - SET_CACHE:path:value
+      # - REMOVE_CACHE:path
+      # - PLUS_CACHE:path:number
+      # - MINUS_CACHE:path:number
+      # - CLEAR_CACHE
+      actions:
+      - "CLOSE_MENU"
+  d:
+    type: DIRT
+    displayName: "&dDirt"
+    lore:
+    - ""
+    - "&7Amount: &e8x"
+    - "&7Cost: &e25$"
+    - ""
+    click:
+      commands: []
+      messages: []
+      actions:
+      - "CHECK_BALANCE:25?success{name:Dirt,value:25,amount:8,type:dirt}:fail"
+  i:
+    type: IRON_INGOT
+    displayName: "&dIron Ingot"
+    lore:
+    - ""
+    - "&7Amount: &e4x"
+    - "&7Cost: &e90$"
+    - ""
+    click:
+      commands: []
+      messages: []
+      actions:
+      - "CHECK_BALANCE:90?success{name:Iron Ingot,value:90,amount:4,type:iron_ingot}:fail"
+  g:
+    type: GOLD_INGOT
+    displayName: "&dGold Ingot"
+    lore:
+    - ""
+    - "&7Amount: &e2x"
+    - "&7Cost: &e110$"
+    - ""
+    click:
+      commands: []
+      messages: []
+      actions:
+      - "CHECK_BALANCE:110?success{name:Dirt,value:110,amount:2,type:gold_ingot}:fail"
+
+customActions:
+  success:
+    economy:
+      withdraw: "{value}"
+    commands:
+    - "give {player} {type} {amount}"
+    messages:
+    - "&aYou bought {amount}x {name} for {value}$!"
+  fail:
+    commands: []
+    messages:
+    - "&cSorry, you don't have enough money!"
+
