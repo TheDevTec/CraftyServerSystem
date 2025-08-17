@@ -44,6 +44,10 @@ import me.devtec.shared.database.SqlFieldType;
 import me.devtec.shared.dataholder.Config;
 import me.devtec.shared.mcmetrics.Metrics;
 import me.devtec.shared.placeholders.PlaceholderExpansion;
+import me.devtec.shared.sorting.SortingAPI.ComparableObject;
+import me.devtec.shared.utility.ParseUtils;
+import me.devtec.shared.utility.StringUtils;
+import me.devtec.shared.utility.StringUtils.FormatType;
 import me.devtec.theapi.bukkit.BukkitLoader;
 
 public class API {
@@ -257,7 +261,109 @@ public class API {
 	}
 
 	public void registerPlaceholders() {
-		placeholder = new PlaceholderExpansion("css") {
+		if (API.get().getConfigManager().getEconomy().getBoolean("settings.balance-top.enable-global-placeholder")) {
+			Loader.getPlugin().getLogger().info("Registering Placeholder for BalanceTop (%css_baltop_{name/balance}_{position}%)");
+			EconomyHook hook = API.get().getEconomyHook();
+			placeholder = new PlaceholderExpansion("css") {
+
+				@Override
+				public String apply(String text, UUID player) {
+					if (text.startsWith("css_"))
+						text = text.substring(4);
+					if (text.startsWith("baltop_name_")) {
+						int pos = Math.max(0, ParseUtils.getInt(text, 12, text.length())-1);
+						String worldGroup = "default";
+						if (hook instanceof CssEconomyHook) {
+							CssEconomyHook css = (CssEconomyHook) hook;
+							if (css.economy.isEnabledPerWorldEconomy())
+								if (player != null && Bukkit.getPlayer(player) != null)
+									worldGroup = css.economy.getWorldGroup(Bukkit.getPlayer(player).getWorld().getName());
+						}
+						ComparableObject<String, Double>[] comp = BalanceTop.balanceTop.get(worldGroup);
+						return comp != null && comp.length > pos ? comp[pos].getKey() : "-";
+					}
+					if (text.startsWith("baltop_balance_")) {
+						int pos = Math.max(0, ParseUtils.getInt(text, 15, text.length())-1);
+						String worldGroup = "default";
+						if (hook instanceof CssEconomyHook) {
+							CssEconomyHook css = (CssEconomyHook) hook;
+							if (css.economy.isEnabledPerWorldEconomy())
+								if (player != null && Bukkit.getPlayer(player) != null)
+									worldGroup = css.economy.getWorldGroup(Bukkit.getPlayer(player).getWorld().getName());
+						}
+						ComparableObject<String, Double>[] comp = BalanceTop.balanceTop.get(worldGroup);
+						return comp != null && comp.length > pos ? hook.format(comp[pos].getValue()) : "-";
+					}
+					if ("baltop_rank".equalsIgnoreCase(text) && player!=null) {
+						String name = me.devtec.shared.API.offlineCache().lookupNameById(player);
+						String worldGroup = "default";
+						if (hook instanceof CssEconomyHook) {
+							CssEconomyHook css = (CssEconomyHook) hook;
+							if (css.economy.isEnabledPerWorldEconomy())
+								if (player != null && Bukkit.getPlayer(player) != null)
+									worldGroup = css.economy.getWorldGroup(Bukkit.getPlayer(player).getWorld().getName());
+						}
+						ComparableObject<String, Double>[] comp = BalanceTop.balanceTop.get(worldGroup);
+						if(comp!=null) {
+							int pos = 1;
+							for(ComparableObject<String, Double> line : comp)
+								if(line.getKey().equalsIgnoreCase(name))
+									break;
+								else ++pos;
+							return StringUtils.formatDouble(FormatType.NORMAL, pos);
+						}
+						return null;
+					}
+					if (player == null)
+						return null;
+					if (text.startsWith("user_"))
+						return me.devtec.shared.API.getUser(player).get(text.substring(5)) + "";
+					if (text != null)
+						switch (text) {
+						case "balance": {
+							Player online = Bukkit.getPlayer(player);
+							return ""
+							+ API.get().getEconomyHook().getBalance(
+									online == null ? me.devtec.shared.API.offlineCache().lookupNameById(player)
+											: online.getName(),
+											online == null ? null : online.getWorld().getName());
+						}
+						case "formatted_balance": {
+							Player online = Bukkit.getPlayer(player);
+							return API.get().getEconomyHook()
+									.format(API.get().getEconomyHook().getBalance(
+											online == null ? me.devtec.shared.API.offlineCache().lookupNameById(player)
+													: online.getName(),
+													online == null ? null : online.getWorld().getName()));
+						}
+						case "vanish": {
+							Player online = Bukkit.getPlayer(player);
+							return online != null ? "" + Vanish.getVanish(online) : null;
+						}
+						case "ping": {
+							Player online = Bukkit.getPlayer(player);
+							return online != null ? "" + BukkitLoader.getNmsProvider().getPing(online) : null;
+						}
+						case "scoreboard": {
+							UserScoreboardData online = ScoreboardListener.data.get(player);
+							return online != null ? "" + online.isHidden() : null;
+						}
+						case "bossbar": {
+							UserBossBarData online = BossBarListener.data.get(player);
+							return online != null ? "" + online.isHidden() : null;
+						}
+						case "afk":
+							return me.devtec.shared.API.getUser(player).getBoolean("afk") + "";
+						case "chatignore":
+							return me.devtec.shared.API.getUser(player).getBoolean("css.chatignore") + "";
+						default:
+							break;
+						}
+					return null;
+				}
+			}.register();
+		} else
+			placeholder = new PlaceholderExpansion("css") {
 
 			@Override
 			public String apply(String text, UUID player) {

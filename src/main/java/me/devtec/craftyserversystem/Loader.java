@@ -60,7 +60,7 @@ public class Loader extends JavaPlugin {
 				try {
 					downloadFileFromUrl(new URL("https://api.spiget.org/v2/resources/72679/download"), file);
 					if (isOlderThan(Bukkit.getPluginManager().getPlugin("TheAPI").getDescription().getVersion(),
-							"13.6.4")) {
+							"13.6.5")) {
 						plugin.getLogger()
 						.severe("Downloaded required & newest update of TheAPI plugin, please restart server.");
 						Bukkit.getPluginManager().disablePlugin(plugin);

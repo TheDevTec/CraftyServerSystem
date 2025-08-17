@@ -66,6 +66,7 @@ settings:
     # Set to true to enable %css_baltop_name_{POSITION}% & %css_baltop_balance_{POSITION}% placeholder in the PlaceholderAPI
     # This will start updating balance top every 1 hour
     enable-global-placeholder: false
+    update-every: 15min
     entries-per-page: 10 # 10 players per page
     minimum-money: 100.0 # startup-money balance
 

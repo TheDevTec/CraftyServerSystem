@@ -5,9 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.UUID;
 
-import org.bukkit.Bukkit;
 import org.bukkit.command.BlockCommandSender;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -19,20 +17,19 @@ import me.devtec.craftyserversystem.economy.EconomyHook;
 import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
 import me.devtec.shared.commands.selectors.Selector;
 import me.devtec.shared.commands.structures.CommandStructure;
-import me.devtec.shared.placeholders.PlaceholderExpansion;
 import me.devtec.shared.scheduler.Scheduler;
 import me.devtec.shared.scheduler.Tasker;
 import me.devtec.shared.sorting.SortingAPI;
 import me.devtec.shared.sorting.SortingAPI.ComparableObject;
 import me.devtec.shared.utility.OfflineCache.Query;
 import me.devtec.shared.utility.ParseUtils;
+import me.devtec.shared.utility.TimeUtils;
 
 public class BalanceTop extends CssCommand {
 
-	static Map<String, ComparableObject<String, Double>[]> balanceTop = new HashMap<>();
+	public static Map<String, ComparableObject<String, Double>[]> balanceTop = new HashMap<>();
 
 	public int task;
-	public PlaceholderExpansion placeholder;
 	private double minimumBalanceToShow;
 
 	@Override
@@ -42,47 +39,13 @@ public class BalanceTop extends CssCommand {
 
 		minimumBalanceToShow = API.get().getConfigManager().getEconomy().getDouble("settings.balance-top.minimum-money");
 		int entriesPerPage = API.get().getConfigManager().getEconomy().getInt("settings.balance-top.entries-per-page");
-		if (API.get().getConfigManager().getEconomy().getBoolean("settings.balance-top.enable-global-placeholder")) {
-			EconomyHook hook = API.get().getEconomyHook();
-			placeholder = new PlaceholderExpansion("css_baltop") {
-
-				@Override
-				public String apply(String placeholder, UUID uuid) {
-					if (placeholder.startsWith("css_baltop_name_")) {
-						int pos = ParseUtils.getInt(placeholder, 11, placeholder.length());
-						String worldGroup = "default";
-						if (hook instanceof CssEconomyHook) {
-							CssEconomyHook css = (CssEconomyHook) hook;
-							if (css.economy.isEnabledPerWorldEconomy())
-								if (uuid != null && Bukkit.getPlayer(uuid) != null)
-									worldGroup = css.economy.getWorldGroup(Bukkit.getPlayer(uuid).getWorld().getName());
-						}
-						ComparableObject<String, Double>[] comp = balanceTop.get(worldGroup);
-						return comp.length > pos ? comp[pos].getKey() : "-";
-					}
-					if (placeholder.startsWith("css_baltop_balance_")) {
-						int pos = ParseUtils.getInt(placeholder, 11, placeholder.length());
-						String worldGroup = "default";
-						if (hook instanceof CssEconomyHook) {
-							CssEconomyHook css = (CssEconomyHook) hook;
-							if (css.economy.isEnabledPerWorldEconomy())
-								if (uuid != null && Bukkit.getPlayer(uuid) != null)
-									worldGroup = css.economy.getWorldGroup(Bukkit.getPlayer(uuid).getWorld().getName());
-						}
-						ComparableObject<String, Double>[] comp = balanceTop.get(worldGroup);
-						return comp.length > pos ? hook.format(comp[pos].getValue()) : "-";
-					}
-					return null;
-				}
-			}.register();
-		}
 		task = new Tasker() {
 
 			@Override
 			public void run() {
 				calculate(minimumBalanceToShow);
 			}
-		}.runRepeating((long) (Math.random() * 10 * 8), 20 * 60 * 60);
+		}.runRepeating((long) (Math.random() * 10 * 8), 20 * Math.max(1, TimeUtils.timeFromString(API.get().getConfigManager().getEconomy().getString("settings.balance-top.update-every"))));
 
 		CommandStructure<CommandSender> cmd = CommandStructure.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
 			listBalanceTop(sender, balanceTop.get(getWorldGroup(sender)), 1, entriesPerPage);
@@ -139,9 +102,6 @@ public class BalanceTop extends CssCommand {
 		if (task != 0)
 			Scheduler.cancelTask(task);
 		task = 0;
-		if (placeholder != null)
-			placeholder.unregister();
-		placeholder = null;
 	}
 
 	public void calculate() {
