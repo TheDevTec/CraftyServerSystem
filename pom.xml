@@ -71,7 +71,7 @@
 	<dependency>
 	  <groupId>com.github.TheDevTec.TheAPI</groupId>
 	  <artifactId>TheAPI</artifactId>
-	  <version>13.6.5</version>
+	  <version>13.6.8</version>
       <scope>provided</scope>
 	</dependency>
     <dependency>

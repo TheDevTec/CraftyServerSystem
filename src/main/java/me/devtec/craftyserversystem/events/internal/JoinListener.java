@@ -8,6 +8,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.spigotmc.event.player.PlayerSpawnLocationEvent;
 
 import me.devtec.craftyserversystem.api.API;
 import me.devtec.craftyserversystem.events.CssListener;
@@ -30,6 +31,12 @@ public class JoinListener implements CssListener {
 	@Override
 	public void reload() {
 
+	}
+
+	@EventHandler(priority = EventPriority.MONITOR)
+	public void onJoin(PlayerSpawnLocationEvent e) {
+		if(getConfig().getBoolean("force-spawn-location"))
+			e.setSpawnLocation(API.get().getConfigManager().getSpawn().toLocation());
 	}
 
 	@EventHandler(priority = EventPriority.MONITOR)
