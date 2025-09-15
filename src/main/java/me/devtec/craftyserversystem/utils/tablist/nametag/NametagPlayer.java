@@ -17,6 +17,8 @@ import me.devtec.shared.components.Component;
 import me.devtec.shared.dataholder.cache.ConcurrentSet;
 import me.devtec.theapi.bukkit.BukkitLoader;
 import me.devtec.theapi.bukkit.nms.utils.TeamUtils;
+import me.devtec.theapi.bukkit.nms.utils.TeamUtils.CollisionRule;
+import me.devtec.theapi.bukkit.nms.utils.TeamUtils.Visibility;
 
 public class NametagPlayer {
 	private static final Function<Player, String> DEFAULT_NAMETAG = Player::getName;
@@ -65,7 +67,7 @@ public class NametagPlayer {
 
 	public NametagPlayer afterJoin() {
 		BukkitLoader.getPacketHandler().send(getPlayer(),
-				NametagManagerAPI.modifyTeamPacket(TeamUtils.createTeamPacket(0, TeamUtils.white, Component.EMPTY_COMPONENT, Component.EMPTY_COMPONENT, name, teamName)));
+				TeamUtils.createTeamPacket(0, TeamUtils.white, Component.EMPTY_COMPONENT, Component.EMPTY_COMPONENT, name, teamName, Visibility.NEVER, CollisionRule.ALWAYS));
 		for (Object packet : packets)
 			BukkitLoader.getPacketHandler().send(getPlayer(), packet);
 		packets.clear();
@@ -91,18 +93,18 @@ public class NametagPlayer {
 
 		if (NametagManagerAPI.get().getPlayerCountInTeam(teamName) > 1)
 			for (NametagPlayer target : withProfile)
-				target.sendTeamPacket(NametagManagerAPI.modifyTeamPacket(TeamUtils.createTeamPacket(4, TeamUtils.white, Component.EMPTY_COMPONENT, Component.EMPTY_COMPONENT, name, teamName)));
+				target.sendTeamPacket(TeamUtils.createTeamPacket(4, TeamUtils.white, Component.EMPTY_COMPONENT, Component.EMPTY_COMPONENT, name, teamName, Visibility.NEVER, CollisionRule.ALWAYS));
 		else
 			for (NametagPlayer target : withProfile)
-				target.sendTeamPacket(NametagManagerAPI.modifyTeamPacket(TeamUtils.createTeamPacket(1, TeamUtils.white, Component.EMPTY_COMPONENT, Component.EMPTY_COMPONENT, name, teamName)));
+				target.sendTeamPacket(TeamUtils.createTeamPacket(1, TeamUtils.white, Component.EMPTY_COMPONENT, Component.EMPTY_COMPONENT, name, teamName, Visibility.NEVER, CollisionRule.ALWAYS));
 		for (NametagPlayer target : withProfile)
-			target.sendTeamPacket(NametagManagerAPI.modifyTeamPacket(TeamUtils.createTeamPacket(0, TeamUtils.white, Component.EMPTY_COMPONENT, Component.EMPTY_COMPONENT, name, newTeamName)));
+			target.sendTeamPacket(TeamUtils.createTeamPacket(0, TeamUtils.white, Component.EMPTY_COMPONENT, Component.EMPTY_COMPONENT, name, newTeamName, Visibility.NEVER, CollisionRule.ALWAYS));
 
 		if (NametagManagerAPI.get().getPlayerCountInTeam(teamName) > 1)
-			sendTeamPacket(NametagManagerAPI.modifyTeamPacket(TeamUtils.createTeamPacket(4, TeamUtils.white, Component.EMPTY_COMPONENT, Component.EMPTY_COMPONENT, name, teamName)));
+			sendTeamPacket(TeamUtils.createTeamPacket(4, TeamUtils.white, Component.EMPTY_COMPONENT, Component.EMPTY_COMPONENT, name, teamName, Visibility.NEVER, CollisionRule.ALWAYS));
 		else
-			sendTeamPacket(NametagManagerAPI.modifyTeamPacket(TeamUtils.createTeamPacket(1, TeamUtils.white, Component.EMPTY_COMPONENT, Component.EMPTY_COMPONENT, name, teamName)));
-		sendTeamPacket(NametagManagerAPI.modifyTeamPacket(TeamUtils.createTeamPacket(0, TeamUtils.white, Component.EMPTY_COMPONENT, Component.EMPTY_COMPONENT, name, newTeamName)));
+			sendTeamPacket(TeamUtils.createTeamPacket(1, TeamUtils.white, Component.EMPTY_COMPONENT, Component.EMPTY_COMPONENT, name, teamName, Visibility.NEVER, CollisionRule.ALWAYS));
+		sendTeamPacket(TeamUtils.createTeamPacket(0, TeamUtils.white, Component.EMPTY_COMPONENT, Component.EMPTY_COMPONENT, name, newTeamName, Visibility.NEVER, CollisionRule.ALWAYS));
 		teamName = newTeamName;
 	}
 
@@ -123,17 +125,17 @@ public class NametagPlayer {
 	public void addTabSorting(@Nonnull NametagPlayer player) {
 		if (withProfile.add(player))
 			if (NametagManagerAPI.get().getPlayerCountInTeam(teamName) > 1)
-				player.sendTeamPacket(NametagManagerAPI.modifyTeamPacket(TeamUtils.createTeamPacket(3, TeamUtils.white, Component.EMPTY_COMPONENT, Component.EMPTY_COMPONENT, name, teamName)));
+				player.sendTeamPacket(TeamUtils.createTeamPacket(3, TeamUtils.white, Component.EMPTY_COMPONENT, Component.EMPTY_COMPONENT, name, teamName, Visibility.NEVER, CollisionRule.ALWAYS));
 			else
-				player.sendTeamPacket(NametagManagerAPI.modifyTeamPacket(TeamUtils.createTeamPacket(0, TeamUtils.white, Component.EMPTY_COMPONENT, Component.EMPTY_COMPONENT, name, teamName)));
+				player.sendTeamPacket(TeamUtils.createTeamPacket(0, TeamUtils.white, Component.EMPTY_COMPONENT, Component.EMPTY_COMPONENT, name, teamName, Visibility.NEVER, CollisionRule.ALWAYS));
 	}
 
 	public void removeTabSorting(@Nonnull NametagPlayer player) {
 		if (withProfile.remove(player))
 			if (NametagManagerAPI.get().getPlayerCountInTeam(teamName) > 1)
-				player.sendTeamPacket(NametagManagerAPI.modifyTeamPacket(TeamUtils.createTeamPacket(4, TeamUtils.white, Component.EMPTY_COMPONENT, Component.EMPTY_COMPONENT, name, teamName)));
+				player.sendTeamPacket(TeamUtils.createTeamPacket(4, TeamUtils.white, Component.EMPTY_COMPONENT, Component.EMPTY_COMPONENT, name, teamName, Visibility.NEVER, CollisionRule.ALWAYS));
 			else
-				player.sendTeamPacket(NametagManagerAPI.modifyTeamPacket(TeamUtils.createTeamPacket(1, TeamUtils.white, Component.EMPTY_COMPONENT, Component.EMPTY_COMPONENT, name, teamName)));
+				player.sendTeamPacket(TeamUtils.createTeamPacket(1, TeamUtils.white, Component.EMPTY_COMPONENT, Component.EMPTY_COMPONENT, name, teamName, Visibility.NEVER, CollisionRule.ALWAYS));
 	}
 
 	@Nonnull
