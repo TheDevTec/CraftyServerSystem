@@ -255,14 +255,14 @@ public class ChatListener implements CssListener {
 
 		String userGroup = API.get().getPermissionHook().getGroup(e.getPlayer().getName());
 		if (!getConfig().exists("formats." + userGroup))
-			userGroup = "default";
+			userGroup = "__OTHER__";
 
 		placeholders.add("player", placeholders.apply(getConfig().getString("formats." + userGroup + ".name",
-				getConfig().getString("formats.default.name"))));
+				getConfig().getString("formats.__OTHER__.name"))));
 		placeholders.add("message",modifiedMessage);
 
 		placeholders.add("message", modifiedMessage = placeholders.apply(getConfig()
-				.getString("formats." + userGroup + ".message", getConfig().getString("formats.default.message"))));
+				.getString("formats." + userGroup + ".message", getConfig().getString("formats.__OTHER__.message"))));
 
 		Player player = e.getPlayer();
 

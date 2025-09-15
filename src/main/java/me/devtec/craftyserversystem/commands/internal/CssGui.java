@@ -2,8 +2,11 @@ package me.devtec.craftyserversystem.commands.internal;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
+import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -89,18 +92,42 @@ public class CssGui extends CssCommand {
 					GuiCreator c= "anvil".equalsIgnoreCase(config.getString("type", "NORMAL"))? new AnvilGuiCreator(name,config) :
 						config.exists("loop") ? new LoopGuiCreator(name,config) : new ClassicGuiCreator(name,config);
 					c.register();
+					if(config.existsKey("command.args")) {
+						List<String> cmds = config.get("command.args") instanceof Collection ? config.getStringList("command.args") : new ArrayList<>(Arrays.asList(config.getString("command.args")));
+						CommandStructure.create(CommandSender.class, (sender, perm, tab) -> sender.hasPermission(perm), (s, str, args) -> {
+							if(s instanceof Player)
+								openMenu(s, (Player)s, c, true);
+							else
+								msgUsage(s, "cmd");
+						}).permission(config.getString("command.perm")).argument("-s", (s, str, args) -> {
+							if(s instanceof Player)
+								openMenu(s, (Player)s, c, false);
+							else
+								msgUsage(s, "cmd");
+						}).parent().selector(Selector.PLAYER, (s, str, args) -> {
+							Player player = Bukkit.getPlayer(args[0]);
+							openMenu(s, player, c, true);
+						}).permission(getPerm("other")).argument("-s", (s, str, args) -> {
+							Player player = Bukkit.getPlayer(args[0]);
+							openMenu(s, player, c, false);
+						}).build().register(cmds.remove(0), cmds.toArray(new String[0]));
+					}
 				}
 	}
 
 	public void openMenu(CommandSender sender, Player target, String id, boolean sendMessage) {
-		GuiCreator.guis.get(id).open(target);
+		openMenu(sender, target, GuiCreator.guis.get(id), sendMessage);
+	}
+
+	public void openMenu(CommandSender sender, Player target, GuiCreator id, boolean sendMessage) {
+		id.open(target);
 		if (sendMessage)
 			if (!sender.equals(target)) {
-				PlaceholdersExecutor placeholders = PlaceholdersExecutor.i().add("sender", sender.getName()).add("target", target.getName()).add("id", id);
+				PlaceholdersExecutor placeholders = PlaceholdersExecutor.i().add("sender", sender.getName()).add("target", target.getName()).add("id", id.getId());
 				msg(target, "other.target", placeholders);
 				msg(sender, "other.sender", placeholders);
 			} else
-				msg(target, "self", PlaceholdersExecutor.i().add("target", target.getName()).add("id", id));
+				msg(target, "self", PlaceholdersExecutor.i().add("target", target.getName()).add("id", id.getId()));
 	}
 
 }
