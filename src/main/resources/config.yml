@@ -7,6 +7,11 @@ chatIgnore:
   # Also messages in which someone ping you.
   only-pings-in-chat: true
 
+teleport:
+  # Enables possiblity to teleport self/another player to specified world without coords (x, y, z)
+  # It will use world spawn location
+  world-without-coords: true
+
 staff-chat:
   # Works only for players via /staffchat
   can-be-toggled: true
