@@ -131,7 +131,7 @@ public class Back extends CssCommand {
 			return;
 		}
 		Position previous = getPositionOf(target.getUniqueId(), location);
-		if (previous == null) {
+		if (previous == null || previous.getWorld()==null) {
 			if (sendMessage)
 				if (!sender.equals(target)) {
 					PlaceholdersExecutor placeholders = PlaceholdersExecutor.i().add("sender", sender.getName()).add("target", target.getName()).add("destination", location.displayName());
@@ -164,7 +164,7 @@ public class Back extends CssCommand {
 		API.getUser(uniqueId).set("back-destination", location.name());
 	}
 
-	public static enum TeleportDestination {
+	public enum TeleportDestination {
 		LATEST, TELEPORT, DEATH;
 
 		public String displayName() {
