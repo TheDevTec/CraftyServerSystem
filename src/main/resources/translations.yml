@@ -12,6 +12,20 @@ css:
   - "{prefix} Discord: &ehttps://discord.gg/APwYKQRxby"
   - ""
 
+repair:
+  self:
+    empty-hand: "{prefix} Sorry, but I can't fix something you don't have."
+    # {item}
+    cannot-be-fixed: "{prefix} Hey? Do you really think that the thing is broken? Try new glasses!"
+    fixed: "{prefix} Voilà, an item in your hand has been miraculously repaired."
+  # {sender}, {target}, {item}
+  other:
+    empty-hand: "{prefix} Oops, &e{target} &7has no item in hand."
+    cannot-be-fixed: "{prefix} Sorry, but &e{target} &7has an item in their hand that cannot be repaired."
+    fixed:
+      sender: "{prefix} Poof! The item in &e{target}'s hand has been fixed."
+      target: "{prefix} Voilà, an item in your hand has been miraculously repaired."
+
 fly:
   self:
     true: "{prefix} Are you a god? Or why did you just &estart flying&7?"
