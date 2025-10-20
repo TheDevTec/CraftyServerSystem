@@ -21,6 +21,7 @@ import me.devtec.craftyserversystem.economy.EconomyHook;
 import me.devtec.craftyserversystem.economy.EmptyEconomyHook;
 import me.devtec.craftyserversystem.economy.VaultEconomyHook;
 import me.devtec.craftyserversystem.events.internal.BossBarListener;
+import me.devtec.craftyserversystem.events.internal.ProxyBridgeListener;
 import me.devtec.craftyserversystem.events.internal.ScoreboardListener;
 import me.devtec.craftyserversystem.managers.AnimationManager;
 import me.devtec.craftyserversystem.managers.CommandManager;
@@ -197,6 +198,8 @@ public class API {
 	public void start() {
 		if (metrics != null)
 			return;
+		Loader.getPlugin().getLogger().info("Registering 'craftyserversystem:bridge' PluginMessage listener");
+		Bukkit.getMessenger().registerIncomingPluginChannel(Loader.getPlugin(), "craftyserversystem:bridge", new ProxyBridgeListener());
 		BukkitLoader.getApiRelease();
 		metrics = new Metrics(Loader.getPlugin().getDescription().getVersion(), 20204);
 		cfgManager = new ConfigurationManager().initFromJar();
