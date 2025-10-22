@@ -1,5 +1,4 @@
 jdk:
   - openjdk17
 install:
-  - chmod +x ./gradlew
-  - ./gradlew build -Pgroup=com.github.TheDevTec publishToMavenLocal
+  - ./mvnw install -DskipTests -Pgroup=com.github.TheDevTec
