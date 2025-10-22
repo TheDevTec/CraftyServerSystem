@@ -6,10 +6,12 @@ import org.bukkit.Bukkit;
 
 import me.devtec.craftyserversystem.annotations.IgnoredClass;
 import me.devtec.craftyserversystem.api.API;
+import me.devtec.craftyserversystem.api.events.AfkToggleEvent;
 import me.devtec.craftyserversystem.events.internal.AfkListener;
 import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
 import me.devtec.shared.annotations.Nonnull;
 import me.devtec.shared.dataholder.Config;
+import me.devtec.shared.events.EventManager;
 import me.devtec.theapi.bukkit.BukkitLoader;
 
 @IgnoredClass
@@ -34,10 +36,11 @@ public class AfkManager {
 	}
 
 	public void startAfk(UUID uuid, boolean runActions) {
-		if (AfkListener.autoAfk != null)
-			AfkListener.autoAfk.put(uuid, 0L);
 		Config user = me.devtec.shared.API.getUser(uuid);
 		if (!user.getBoolean("afk")) {
+			AfkToggleEvent event = new AfkToggleEvent(uuid, true);
+			EventManager.call(event);
+			if(event.isCancelled())return;
 			user.set("afk", true);
 			if (runActions) {
 				PlaceholdersExecutor placeholders = PlaceholdersExecutor.i().add("player", me.devtec.shared.API.offlineCache().lookupNameById(uuid)).papi(uuid);
@@ -49,13 +52,16 @@ public class AfkManager {
 				});
 			}
 		}
+		if (AfkListener.autoAfk != null)
+			AfkListener.autoAfk.put(uuid, System.currentTimeMillis() / 1000);
 	}
 
 	public void stopAfk(UUID uuid, boolean runActions) {
-		if (AfkListener.autoAfk != null)
-			AfkListener.autoAfk.put(uuid, System.currentTimeMillis() / 1000);
 		Config user = me.devtec.shared.API.getUser(uuid);
 		if (user.getBoolean("afk")) {
+			AfkToggleEvent event = new AfkToggleEvent(uuid, false);
+			EventManager.call(event);
+			if(event.isCancelled())return;
 			user.set("afk", false);
 			if (runActions) {
 				PlaceholdersExecutor placeholders = PlaceholdersExecutor.i().add("player", me.devtec.shared.API.offlineCache().lookupNameById(uuid)).papi(uuid);
@@ -67,5 +73,7 @@ public class AfkManager {
 				});
 			}
 		}
+		if (AfkListener.autoAfk != null)
+			AfkListener.autoAfk.put(uuid, System.currentTimeMillis() / 1000);
 	}
 }
