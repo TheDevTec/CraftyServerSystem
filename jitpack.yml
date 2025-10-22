@@ -1,4 +1,4 @@
 jdk:
   - openjdk17
 install:
-  - ./mvnw install -DskipTests -Pgroup=com.github.TheDevTec
+  - mvn install -DskipTests -Pgroup=com.github.TheDevTec
