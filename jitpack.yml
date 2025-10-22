@@ -1,4 +1,6 @@
 jdk:
   - openjdk17
+before_install:
+  - sdk install maven 3.6.3
 install:
-  - mvn install -DskipTests -Pgroup=com.github.TheDevTec
+  - mvn install -DskipTests
