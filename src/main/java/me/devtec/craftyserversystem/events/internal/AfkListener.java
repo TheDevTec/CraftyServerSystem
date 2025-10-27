@@ -19,12 +19,14 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 import me.devtec.craftyserversystem.api.API;
+import me.devtec.craftyserversystem.api.events.AfkToggleEvent;
 import me.devtec.craftyserversystem.commands.internal.afk.AfkManager;
 import me.devtec.craftyserversystem.events.CssListener;
 import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
 import me.devtec.shared.Pair;
 import me.devtec.shared.Ref;
 import me.devtec.shared.dataholder.Config;
+import me.devtec.shared.events.EventManager;
 import me.devtec.shared.scheduler.Scheduler;
 import me.devtec.shared.scheduler.Tasker;
 import me.devtec.shared.utility.MathUtils;
@@ -81,6 +83,9 @@ public class AfkListener implements CssListener {
 						if (entry.getValue() + afkTime - System.currentTimeMillis() / 1000 <= 0) {
 							Config user = me.devtec.shared.API.getUser(entry.getKey());
 							if (!user.getBoolean("afk")) {
+								AfkToggleEvent event = new AfkToggleEvent(entry.getKey(), true);
+								EventManager.call(event);
+								if(event.isCancelled())return;
 								user.set("afk", true);
 								PlaceholdersExecutor placeholders = PlaceholdersExecutor.i().add("player", me.devtec.shared.API.offlineCache().lookupNameById(entry.getKey())).papi(entry.getKey());
 								// Send json message
