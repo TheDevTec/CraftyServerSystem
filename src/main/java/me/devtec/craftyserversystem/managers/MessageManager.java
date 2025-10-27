@@ -288,10 +288,10 @@ public class MessageManager {
 					comp.setText(prefix);
 					prevPos = find[0] + find[1];
 					ItemStack itemInHand = owner.getItemInHand();
-					if (itemInHand.getType() != Material.AIR && find[1] == 6) {
+					if (itemInHand.getType() != Material.AIR && (find[1] == 6||find[1]==3)) {
 						String itemName = itemInHand.hasItemMeta() && itemInHand.getItemMeta().hasDisplayName()
 								? itemInHand.getItemMeta().getDisplayName()
-								: null;
+										: null;
 						if (itemName == null) {
 							StringContainer container = new StringContainer(itemInHand.getType().name().length());
 							boolean first = true;
@@ -329,7 +329,7 @@ public class MessageManager {
 						item.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/css-openinv " + id));
 						item.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ITEM,
 								new ComponentItem(itemInHand.getType().name().toLowerCase(), itemInHand.getAmount())
-										.setNbt(getNbtOf(itemInHand))));
+								.setNbt(getNbtOf(itemInHand))));
 						if (item.getExtra() != null)
 							for (Component extra : item.getExtra()) {
 								extra.setClickEvent(item.getClickEvent());
@@ -358,7 +358,7 @@ public class MessageManager {
 											ComponentAPI.fromString(
 													ColorUtils.colorize(
 															config.getString("placeholders.inventory.hoverEvent")
-																	.replace("{player}", owner.getName())),
+															.replace("{player}", owner.getName())),
 													true, false)));
 						if (item.getExtra() != null)
 							for (Component extra : item.getExtra()) {
@@ -383,7 +383,7 @@ public class MessageManager {
 											ComponentAPI.fromString(
 													ColorUtils.colorize(
 															config.getString("placeholders.enderchest.hoverEvent")
-																	.replace("{player}", owner.getName())),
+															.replace("{player}", owner.getName())),
 													true, false)));
 						item.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/css-openinv " + id));
 						if (item.getExtra() != null)
@@ -407,17 +407,21 @@ public class MessageManager {
 		private int[] find(int startAt, String value) {
 			for (int i = startAt; i < value.length(); ++i) {
 				char c = value.charAt(i);
-				if (c == '[') {
+				char endChar = c=='['?']':'%';
+				if (c == '[' || c=='%') {
 					if (value.length() > i + 5)
 						if (value.charAt(i + 1) == 'i' && value.charAt(i + 2) == 't' && value.charAt(i + 3) == 'e'
-								&& value.charAt(i + 4) == 'm' && value.charAt(i + 5) == ']')
+						&& value.charAt(i + 4) == 'm' && value.charAt(i + 5) == endChar)
 							return new int[] { i, 6 };
+					if (value.length() > i + 2)
+						if (value.charAt(i + 1) == 'i' && value.charAt(i + 2) == endChar)
+							return new int[] { i, 3 };
 					if (value.length() > i + 4)
 						if (value.charAt(i + 1) == 'i' && value.charAt(i + 2) == 'n' && value.charAt(i + 3) == 'v'
-								&& value.charAt(i + 4) == ']')
+						&& value.charAt(i + 4) == endChar)
 							return new int[] { i, 5 };
 					if (value.length() > i + 3)
-						if (value.charAt(i + 1) == 'e' && value.charAt(i + 2) == 'c' && value.charAt(i + 3) == ']')
+						if (value.charAt(i + 1) == 'e' && value.charAt(i + 2) == 'c' && value.charAt(i + 3) == endChar)
 							return new int[] { i, 4 };
 				}
 			}
