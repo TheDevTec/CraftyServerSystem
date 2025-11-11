@@ -233,6 +233,7 @@ public class AfkListener implements CssListener {
 
 	@EventHandler
 	public void onQuit(PlayerQuitEvent e) {
+		AfkManager.getProvider().stopAfk(e.getPlayer().getUniqueId(), false);
 		if (autoAfk != null)
 			autoAfk.remove(e.getPlayer().getUniqueId());
 		if (positions != null)
