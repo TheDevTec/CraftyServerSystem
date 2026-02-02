@@ -6,8 +6,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.bukkit.entity.Player;
-
+import me.devtec.craftyserversystem.utils.tablist.nametag.classic.ClassicTabPlayer;
 import me.devtec.shared.Ref;
 import me.devtec.theapi.bukkit.BukkitLoader;
 
@@ -29,13 +28,13 @@ public class Hologram implements HologramHolder {
 	protected Object metadataPacket;
 	protected List<Object> metadataListValue;
 
-	protected void show(Player to) {
-		BukkitLoader.getPacketHandler().send(to, spawnPacket);
-		BukkitLoader.getPacketHandler().send(to, metadataPacket);
+	protected void show(ClassicTabPlayer to) {
+		to.sendPacket(spawnPacket);
+		to.sendPacket(metadataPacket);
 	}
 
-	protected void hide(Player to) {
-		BukkitLoader.getPacketHandler().send(to, despawnPacket);
+	protected void hide(ClassicTabPlayer to) {
+		to.sendPacket(despawnPacket);
 	}
 
 	private static final Object findDataWatcherObject(Class<?> inside, Class<?> holder) {
@@ -53,5 +52,10 @@ public class Hologram implements HologramHolder {
 
 			}
 		return null;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		return obj instanceof Hologram ? ((Hologram)obj).uuid.equals(uuid) : false;
 	}
 }

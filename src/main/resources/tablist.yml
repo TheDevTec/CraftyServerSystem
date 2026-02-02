@@ -15,7 +15,6 @@ conditions:
       prefix: "{afk} &cInvalid &f"
       suffix: "{vanish}"
     tag:
-      format: "{prefix}{player}{suffix}"
       prefix: "&cInvalid &f"
       suffix: "{vanish}" 
 
@@ -67,7 +66,6 @@ group:
       prefix: "{afk} &7Player &f"
       suffix: "{vanish}"
     tag:
-      format: "{prefix}{player}{suffix}"
       prefix: "&7Player &f"
       suffix: "{vanish}"
 
@@ -96,9 +94,11 @@ tab:
   prefix: "{afk} &cInvalid &f"
   suffix: "{vanish}"
 tag:
-  format: "{prefix}{player}{suffix}"
   prefix: "&cInvalid &f"
   suffix: "{vanish}"
+  # Support for multiple lines in the nametag!
+  lines:
+  - "{prefix}{player}{suffix}"
 
 sorting:
   # PLAYER_NAME(Vanilla), GROUP(Vault), GROUP_WEIGHT(LuckPerms)

@@ -103,12 +103,12 @@ public class BossBarListener implements CssListener {
 			else
 				taskId = new Tasker() {
 
-					@Override
-					public void run() {
-						for (UserBossBarData userData : data.values())
-							data.put(userData.getPlayer().getUniqueId(), generateData(userData.getPlayer()));
-					}
-				}.runRepeating(100, 100);
+				@Override
+				public void run() {
+					for (UserBossBarData userData : data.values())
+						data.put(userData.getPlayer().getUniqueId(), generateData(userData.getPlayer()));
+				}
+			}.runRepeating(100, 100);
 			refleshTaskId = new Tasker() {
 
 				@Override
@@ -196,7 +196,6 @@ public class BossBarListener implements CssListener {
 	@EventHandler
 	public void onJoin(PlayerJoinEvent e) {
 		Player player = e.getPlayer();
-		BukkitLoader.getNmsProvider().postToMainThread(() -> NametagManagerAPI.get().getPlayer(player).afterJoin());
 		if (disabledInWorlds.contains(player.getWorld().getName()))
 			return;
 		data.put(player.getUniqueId(), generateData(player).process(InternalPlaceholders.generatePlaceholders(player)));

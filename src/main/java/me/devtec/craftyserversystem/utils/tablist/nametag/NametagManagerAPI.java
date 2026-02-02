@@ -4,17 +4,18 @@ import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
-import me.devtec.craftyserversystem.utils.tablist.nametag.hologram.NametagHologram;
+import me.devtec.craftyserversystem.utils.tablist.nametag.classic.ClassicTabPlayer;
+import me.devtec.craftyserversystem.utils.tablist.nametag.hologram.ArmorStandHologram;
 import me.devtec.craftyserversystem.utils.tablist.nametag.support.DefaultTeamManager;
 import me.devtec.craftyserversystem.utils.tablist.nametag.support.LuckPermsTeamManager;
 import me.devtec.craftyserversystem.utils.tablist.nametag.support.TeamManager;
@@ -22,8 +23,6 @@ import me.devtec.craftyserversystem.utils.tablist.nametag.support.VaultTeamManag
 import me.devtec.shared.API;
 import me.devtec.shared.Ref;
 import me.devtec.shared.annotations.Nonnull;
-import me.devtec.shared.dataholder.cache.ConcurrentSet;
-import me.devtec.shared.scheduler.Tasker;
 import me.devtec.theapi.bukkit.BukkitLoader;
 import me.devtec.theapi.bukkit.packetlistener.ChannelContainer;
 import me.devtec.theapi.bukkit.packetlistener.PacketContainer;
@@ -41,9 +40,8 @@ public class NametagManagerAPI {
 
 	private boolean isLoaded;
 	private PacketListener listener;
-	private volatile Set<NametagPlayer> players = new ConcurrentSet<>();
 
-	protected volatile Map<Integer, List<NametagPlayer>> watchingEntityMove = new ConcurrentHashMap<>();
+	public volatile Map<Integer, List<ClassicTabPlayer>> watchingEntityMove = new ConcurrentHashMap<>();
 	private TeamManager teamManager = new DefaultTeamManager();
 
 	private NametagManagerAPI() {
@@ -59,59 +57,6 @@ public class NametagManagerAPI {
 
 	public boolean isPlayer(String name) {
 		return Bukkit.getPlayerExact(name) != null;
-	}
-
-	public Set<NametagPlayer> getPlayers() {
-		return players;
-	}
-
-	public NametagPlayer getPlayer(Player player) {
-		return lookupByUuidOrCreate(player, player.getUniqueId());
-	}
-
-	public NametagPlayer lookupById(int id) {
-		synchronized (players) {
-			for (NametagPlayer player : players)
-				if (player.getPlayer().getEntityId() == id)
-					return player;
-		}
-		return null;
-	}
-
-	public NametagPlayer lookupByName(String name) {
-		synchronized (players) {
-			for (NametagPlayer player : players)
-				if (player.getName().equals(name))
-					return player;
-		}
-		return null;
-	}
-
-	public NametagPlayer lookupByUuid(UUID uuid) {
-		synchronized (players) {
-			for (NametagPlayer player : players)
-				if (player.getUUID().equals(uuid))
-					return player;
-		}
-		return null;
-	}
-
-	public NametagPlayer lookupByUuidOrCreate(Player online, UUID uuid) {
-		synchronized (players) {
-			for (NametagPlayer player : players)
-				if (player.getUUID().equals(uuid))
-					return player;
-			NametagPlayer as = new NametagPlayer(online.getName(), online.getUniqueId(),
-					teamManager.getTeam(online.getUniqueId())).initNametag(online);
-			if (online.getVehicle() != null) {
-				List<NametagPlayer> players = new ArrayList<>();
-				players.add(as);
-				watchingEntityMove.put(online.getVehicle().getEntityId(), players);
-			}
-			players.add(as);
-			return as;
-
-		}
 	}
 
 	@Nonnull
@@ -339,7 +284,10 @@ public class NametagManagerAPI {
 				BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "ServerboundPlayerCommandPacket" : "PacketPlayInEntityAction");
 		Class<?> movementPacketClass = Ref.nms("network.protocol.game",
 				BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "ServerboundMovePlayerPacket" : "PacketPlayInFlying");
+		Class<?> inputPacket = Ref.nms("network.protocol.game", "ServerboundPlayerInputPacket");
 		Field changedPosition;
+		Field input = Ref.field(inputPacket, "input");
+		Field shift = Ref.field(Ref.nms("world.entity.player", "Input"), "shift");
 		Field actionField;
 		if (BukkitLoader.NO_OBFUSCATED_NMS_MODE || Ref.isOlderThan(17)) {
 			changedPosition = Ref.field(movementPacketClass, "hasPos");
@@ -361,12 +309,14 @@ public class NametagManagerAPI {
 			public void playOut(String name, PacketContainer packetContainer, ChannelContainer channel) {
 				Object packet = packetContainer.getPacket();
 				if (packet.getClass().isAssignableFrom(outVelocity)) {
-					NametagPlayer player = lookupById((int) Ref.get(packet, velocityEntityId));
+					ClassicTabPlayer player = TabAPI.getHolder((int) Ref.get(packet, velocityEntityId));
 					if (player != null) {
-						NametagPlayer receiver = lookupByName(name);
+						ClassicTabPlayer receiver = TabAPI.await(name);
 						if (receiver == null)
 							return;
-						player.getNametag().shouldTeleport(player.getPlayer().getLocation());
+						Location location = player.getPlayer().getLocation();
+						for(ArmorStandHologram line : player.getAdditionalLines())
+							line.shouldTeleport(location);
 					}
 					return;
 				}
@@ -400,51 +350,73 @@ public class NametagManagerAPI {
 				Object packet = packetContainer.getPacket();
 				if (movementPacketClass.isAssignableFrom(packet.getClass())) {
 					if ((boolean) Ref.get(packet, changedPosition)) {
-						NametagPlayer player = lookupByName(name);
+						ClassicTabPlayer player = TabAPI.await(name);
 						if (player != null) {
-							NametagHologram hologram = player.getNametag();
-							hologram.shouldTeleport(player.getPlayer().getLocation());
+							Location location = player.getPlayer().getLocation();
+							for(ArmorStandHologram line : player.getAdditionalLines())
+								line.shouldTeleport(location);
 						}
 					}
 					return;
 				}
+				if (inputPacket!=null  && inputPacket.isAssignableFrom(packet.getClass())) {
+					ClassicTabPlayer player = TabAPI.await(name);
+					if (player != null) {
+						Location loc = player.getPlayer().getLocation();
+						for(ArmorStandHologram line : player.getAdditionalLines()) {
+							line.setPosWithoutUpdate(loc);
+							line.updateHeight((boolean)Ref.get(Ref.get(packet, input), shift), false, false, false);
+						}
+					}
+
+					return;
+				}
 				if (packet.getClass().equals(actionPacketClass)) {
-					NametagPlayer player = lookupByName(name);
+					ClassicTabPlayer player = TabAPI.await(name);
 					if (player != null)
 						switch (Ref.get(packet, actionField).toString()) {
 						case "PRESS_SHIFT_KEY":
 						case "1":
-							player.getNametag().setPosWithoutUpdate(player.getPlayer().getLocation());
-							player.getNametag().updateHeight(true, false, false, false);
+							Location loc = player.getPlayer().getLocation();
+							for(ArmorStandHologram line : player.getAdditionalLines()) {
+								line.setPosWithoutUpdate(loc);
+								line.updateHeight(true, false, false, false);
+							}
 							break;
 						case "2":
 						case "RELEASE_SHIFT_KEY":
-							player.getNametag().setPosWithoutUpdate(player.getPlayer().getLocation());
-							player.getNametag().updateHeight(false, false, false, false);
+							loc = player.getPlayer().getLocation();
+							for(ArmorStandHologram line : player.getAdditionalLines()) {
+								line.setPosWithoutUpdate(loc);
+								line.updateHeight(false, false, false, false);
+							}
 							break;
 						case "START_FALL_FLYING":
-							player.getNametag().setPosWithoutUpdate(player.getPlayer().getLocation());
-							player.getNametag().updateHeight(false, false, false, false);
+							loc = player.getPlayer().getLocation();
+							for(ArmorStandHologram line : player.getAdditionalLines()) {
+								line.setPosWithoutUpdate(loc);
+								line.updateHeight(false, false, false, false);
+							}
 							break;
 						}
 					return;
 				}
 				if (inVehicleMove != null && packet.getClass().isAssignableFrom(inVehicleMove)) {
-					NametagPlayer spawned = lookupByName(name);
-					if (spawned == null) {
-						UUID uuid = API.offlineCache().lookupId(name);
-						Player player;
-						while ((player = Bukkit.getPlayer(uuid)) == null)
-							; // Await world change
-						spawned = lookupByUuidOrCreate(player, uuid);
-					}
+					ClassicTabPlayer spawned = TabAPI.await(name);
 					if (positionVecVehicle != null) {
 						Object pos = Ref.get(packet, positionVecVehicle);
-						spawned.getNametag().shouldTeleport((double) Ref.get(pos, movexField),
-								(double) Ref.get(pos, moveyField), (double) Ref.get(pos, movezField));
-					} else
-						spawned.getNametag().shouldTeleport((double) Ref.get(packet, movexField),
-								(double) Ref.get(packet, moveyField), (double) Ref.get(packet, movezField));
+						double x=(double) Ref.get(pos, movexField);
+						double y=(double) Ref.get(pos, moveyField);
+						double z=(double) Ref.get(pos, movezField);
+						for(ArmorStandHologram line : spawned.getAdditionalLines())
+							line.shouldTeleport(x,y,z);
+					} else {
+						double x=(double) Ref.get(packet, movexField);
+						double y=(double) Ref.get(packet, moveyField);
+						double z=(double) Ref.get(packet, movezField);
+						for(ArmorStandHologram line : spawned.getAdditionalLines())
+							line.shouldTeleport(x,y,z);
+					}
 				}
 			}
 
@@ -452,46 +424,43 @@ public class NametagManagerAPI {
 			private void processPacket(String name, Object packet) {
 				if (Ref.isNewerThan(19) || Ref.serverVersionInt() == 19 && Ref.serverVersionRelease() >= 2) {
 					if (packet.getClass().isAssignableFrom(clientPlayerInfoUpdate)) {
-						UUID offlineUuid = API.offlineCache().lookupId(name);
-						Player offlinePlayer;
-						while ((offlinePlayer = Bukkit.getPlayer(offlineUuid)) == null)
-							; // Await world change
-
-						NametagPlayer receiverPlayer = lookupByUuidOrCreate(offlinePlayer, offlineUuid);
+						boolean shouldContinue = false;
+						for(Object obj : (EnumSet<?>)Ref.get(packet, "actions"))
+							if("ADD_PLAYER".equals(obj.toString())) {
+								shouldContinue=true;
+								break;
+							}
+						if(!shouldContinue)return;
+						ClassicTabPlayer receiverPlayer = TabAPI.await(name);
 						for (Object entity : (List<?>) Ref.get(packet, listBField)) {
 							UUID uuid = (UUID) Ref.get(entity, playerInfoUuidField);
-							if (uuid.equals(offlineUuid))
+							if (uuid.equals(receiverPlayer.getPlayer().getUniqueId()))
 								continue;
-
-							new Tasker() {
-
-								@Override
-								public void run() {
-									Player joinedPlayer = null;
-									long start = System.currentTimeMillis();
-									while ((joinedPlayer = Bukkit.getPlayer(uuid)) == null
-											|| joinedPlayer.getWorld() == null)
-										if (System.currentTimeMillis() - start >= 20)
-											return;
-									NametagPlayer spawned = lookupByUuidOrCreate(joinedPlayer, uuid);
-									spawned.addTabSorting(receiverPlayer);
-								}
-							}.runTask();
+							ClassicTabPlayer spawned = TabAPI.await(uuid);
+							Player joinedPlayer = spawned.getPlayer();
+							long start = System.currentTimeMillis();
+							while (!joinedPlayer.isOnline()
+									|| joinedPlayer.getWorld() == null)
+								if (System.currentTimeMillis() - start >= 5)
+									return;
+							if(spawned.getPrimaryTeam() == null || receiverPlayer.getTeams().contains(spawned.getPrimaryTeam()))return;
+							receiverPlayer.getPlayer().sendMessage("Displaying team "+spawned.getPrimaryTeam()+" of player "+spawned.getPlayer().getName());
+							receiverPlayer.createTeam(spawned.getPrimaryTeam());
 						}
 						return;
 					}
 					if (packet.getClass().isAssignableFrom(clientPlayerInfoRemove)) {
 						UUID offlineUuid = API.offlineCache().lookupId(name);
-						Player offlinePlayer;
-						if ((offlinePlayer = Bukkit.getPlayer(offlineUuid)) == null)
-							return;
-						NametagPlayer receiverPlayer = lookupByUuidOrCreate(offlinePlayer, offlineUuid);
+						ClassicTabPlayer receiverPlayer = TabAPI.await(offlineUuid);
+						if(receiverPlayer==null)return;
 						for (UUID entity : (List<UUID>) Ref.get(packet, listUuidsField)) {
 							if (entity.equals(offlineUuid))
 								continue;
-							NametagPlayer spawned = lookupByUuid(entity);
-							if (spawned != null)
-								spawned.removeTabSorting(receiverPlayer);
+							ClassicTabPlayer removed = TabAPI.data.get(entity);
+							if (removed != null && removed.getPrimaryTeam()!=null) {
+								receiverPlayer.getPlayer().sendMessage("Removing team "+removed.getPrimaryTeam()+" of player "+removed.getPlayer().getName());
+								receiverPlayer.removeTeam(removed.getPrimaryTeam().getTeam());
+							}
 						}
 						return;
 					}
@@ -499,44 +468,33 @@ public class NametagManagerAPI {
 					// combined into one in the
 					// earlier versions
 					UUID offlineUuid = API.offlineCache().lookupId(name);
-					Player offlinePlayer;
 					if ("REMOVE_PLAYER".equals(Ref.get(packet, clientPlayerInfoLegacyAction).toString())) { // Remove
-						if ((offlinePlayer = Bukkit.getPlayer(offlineUuid)) == null)
+						ClassicTabPlayer receiverPlayer = TabAPI.getHolder(offlineUuid);
+						if (receiverPlayer==null)
 							return;
-						NametagPlayer receiverPlayer = lookupByUuidOrCreate(offlinePlayer, offlineUuid);
 						for (Object entity : (List<?>) Ref.get(packet, listUuidsFieldUpdate)) {
 							UUID uuid = BukkitLoader.getNmsProvider()
 									.fromGameProfile(Ref.get(entity, playerInfoUuidField)).getUUID();
 							if (uuid.equals(offlineUuid))
 								continue;
-							NametagPlayer spawned = lookupByUuid(uuid);
-							if (spawned != null)
-								spawned.removeTabSorting(receiverPlayer);
+							ClassicTabPlayer removed = TabAPI.data.get(uuid);
+							if (removed != null && removed.getPrimaryTeam()!=null)
+								receiverPlayer.removeTeam(removed.getPrimaryTeam().getTeam());
 						}
 					} else { // Add or update
-						while ((offlinePlayer = Bukkit.getPlayer(offlineUuid)) == null)
-							; // Await world change
-
-						NametagPlayer receiverPlayer = lookupByUuidOrCreate(offlinePlayer, offlineUuid);
+						ClassicTabPlayer receiverPlayer = TabAPI.await(offlineUuid);
 						for (Object entity : (List<?>) Ref.get(packet, listBField)) {
-							UUID uuid = BukkitLoader.getNmsProvider()
-									.fromGameProfile(Ref.get(entity, playerInfoUuidField)).getUUID();
+							UUID uuid = BukkitLoader.getNmsProvider().fromGameProfile(Ref.get(entity, playerInfoUuidField)).getUUID();
 							if (uuid.equals(offlineUuid))
 								continue;
-							new Tasker() {
-
-								@Override
-								public void run() {
-									Player joinedPlayer = null;
-									long start = System.currentTimeMillis();
-									while ((joinedPlayer = Bukkit.getPlayer(uuid)) == null
-											|| joinedPlayer.getWorld() == null)
-										if (System.currentTimeMillis() - start >= 20)
-											return;
-									NametagPlayer spawned = lookupByUuidOrCreate(joinedPlayer, uuid);
-									spawned.addTabSorting(receiverPlayer);
-								}
-							}.runTask();
+							ClassicTabPlayer spawned = TabAPI.await(uuid);
+							Player joinedPlayer = spawned.getPlayer();
+							long start = System.currentTimeMillis();
+							while (!joinedPlayer.isOnline()
+									|| joinedPlayer.getWorld() == null)
+								if (System.currentTimeMillis() - start >= 5)
+									return;
+							receiverPlayer.createTeam(spawned.getPrimaryTeam());
 						}
 					}
 					return;
@@ -547,32 +505,19 @@ public class NametagManagerAPI {
 						UUID offlineUuid = API.offlineCache().lookupId(name);
 						if (uuid.equals(offlineUuid))
 							return;
-						Player offlinePlayer;
-						while ((offlinePlayer = Bukkit.getPlayer(offlineUuid)) == null)
-							; // Await world change
-						Player offlinePlayerFinal = offlinePlayer;
-						NametagPlayer receiverPlayer = lookupByUuidOrCreate(offlinePlayerFinal, offlineUuid);
-
-						new Tasker() {
-
-							@Override
-							public void run() {
-								Player joinedPlayer = null;
-								long start = System.currentTimeMillis();
-								while ((joinedPlayer = Bukkit.getPlayer(uuid)) == null
-										|| joinedPlayer.getWorld() == null)
-									if (System.currentTimeMillis() - start >= 20)
-										return;
-
-								NametagPlayer spawned = lookupByUuidOrCreate(joinedPlayer, uuid);
-								spawned.showNametag(receiverPlayer);
-							}
-						}.runTask();
+						ClassicTabPlayer receiverPlayer = TabAPI.await(offlineUuid);
+						ClassicTabPlayer spawned = TabAPI.getHolder(uuid);
+						Player joinedPlayer = spawned.getPlayer();
+						long start = System.currentTimeMillis();
+						while (joinedPlayer.getWorld() == null || !joinedPlayer.isOnline())
+							if (System.currentTimeMillis() - start >= 5)
+								return;
+						spawned.showLines(receiverPlayer);
 					}
 					return;
 				}
 				if (packet.getClass().isAssignableFrom(outMetadata)) {
-					NametagPlayer player = lookupById((int) Ref.get(packet, metaEntityId));
+					ClassicTabPlayer player = TabAPI.getHolder((int) Ref.get(packet, metaEntityId));
 					if (player != null)
 						for (Object item : (List<?>) Ref.get(packet, metaData)) {
 							Object pose = Ref.get(item, valueField);
@@ -582,16 +527,25 @@ public class NametagManagerAPI {
 								if (pose instanceof Byte)
 									switch ((byte) pose) {
 									case (byte) 0x02:
-										player.getNametag().setPosWithoutUpdate(player.getPlayer().getLocation());
-									player.getNametag().updateHeight(true, false, false, false);
+										Location loc = player.getPlayer().getLocation();
+									for(ArmorStandHologram line : player.getAdditionalLines()) {
+										line.setPosWithoutUpdate(loc);
+										line.updateHeight(true, false, false, false);
+									}
 									break;
 									case (byte) 0x80:
-										player.getNametag().setPosWithoutUpdate(player.getPlayer().getLocation());
-									player.getNametag().updateHeight(false, true, false, false);
+										loc = player.getPlayer().getLocation();
+									for(ArmorStandHologram line : player.getAdditionalLines()) {
+										line.setPosWithoutUpdate(loc);
+										line.updateHeight(false, true, false, false);
+									}
 									break;
 									default:
-										player.getNametag().setPosWithoutUpdate(player.getPlayer().getLocation());
-										player.getNametag().updateHeight(false, false, false, false);
+										loc = player.getPlayer().getLocation();
+										for(ArmorStandHologram line : player.getAdditionalLines()) {
+											line.setPosWithoutUpdate(loc);
+											line.updateHeight(false, false, false, false);
+										}
 										break;
 									}
 								return;
@@ -604,52 +558,61 @@ public class NametagManagerAPI {
 									break;
 								case "SLEEPING":
 								case "SWIMMING":
-									player.getNametag().setPosWithoutUpdate(player.getPlayer().getLocation());
-									player.getNametag().updateHeight(false, true, false, false);
+									Location loc = player.getPlayer().getLocation();
+									for(ArmorStandHologram line : player.getAdditionalLines()) {
+										line.setPosWithoutUpdate(loc);
+										line.updateHeight(false, true, false, false);
+									}
 									break;
 								default:
-									player.getNametag().setPosWithoutUpdate(player.getPlayer().getLocation());
-									player.getNametag().updateHeight(false, false, false, false);
+									loc = player.getPlayer().getLocation();
+									for(ArmorStandHologram line : player.getAdditionalLines()) {
+										line.setPosWithoutUpdate(loc);
+										line.updateHeight(false, false, false, false);
+									}
 									break;
 								}
 						}
 					return;
 				}
 				if (outBed != null && packet.getClass().isAssignableFrom(outBed)) {
-					NametagPlayer player = lookupById((int) Ref.get(packet, bedId));
+					ClassicTabPlayer player = TabAPI.getHolder((int) Ref.get(packet, bedId));
 					if (player != null) {
-						player.getNametag().setPosWithoutUpdate(player.getPlayer().getLocation());
-						player.getNametag().updateHeight(false, true, false, false);
+						Location loc = player.getPlayer().getLocation();
+						for(ArmorStandHologram line : player.getAdditionalLines()) {
+							line.setPosWithoutUpdate(loc);
+							line.updateHeight(false, true, false, false);
+						}
 					}
 					return;
 				}
 				if (outBed != null && packet.getClass().isAssignableFrom(outAnimation)) {
 					if ((int) Ref.get(packet, animationId) == 2) {
-						NametagPlayer player = lookupById((int) Ref.get(packet, animationEntityId));
+						ClassicTabPlayer player = TabAPI.getHolder((int) Ref.get(packet, animationEntityId));
 						if (player != null) {
-							player.getNametag().setPosWithoutUpdate(player.getPlayer().getLocation());
-							player.getNametag().updateHeight(false, false, false, false);
+							Location loc = player.getPlayer().getLocation();
+							for(ArmorStandHologram line : player.getAdditionalLines()) {
+								line.setPosWithoutUpdate(loc);
+								line.updateHeight(false, false, false, false);
+							}
 						}
 					}
 					return;
 				}
-				if (packet.getClass().isAssignableFrom(outDestroy)) { // Used only when player switch world/gamemode or
-					// dies
-					NametagPlayer receiver = lookupByName(name);
-					if (receiver == null)
-						return;
+				if (packet.getClass().isAssignableFrom(outDestroy)) { // Used only when player switch world/gamemode or dies
+					ClassicTabPlayer receiver = TabAPI.await(name);
 					Object obj = Ref.get(packet, integersField);
 					if (obj instanceof List)
 						for (int i : (List<Integer>) obj) { // IntList
-							NametagPlayer despawning = lookupById(i);
+							ClassicTabPlayer despawning = TabAPI.getHolder(i);
 							if (despawning != null)
-								despawning.hideNametag(receiver);
+								despawning.hideLines(receiver);
 						}
 					else
 						for (int i : (int[]) obj) { // int[]
-							NametagPlayer despawning = lookupById(i);
+							ClassicTabPlayer despawning = TabAPI.getHolder(i);
 							if (despawning != null)
-								despawning.hideNametag(receiver);
+								despawning.hideLines(receiver);
 						}
 					return;
 				}
@@ -662,22 +625,26 @@ public class NametagManagerAPI {
 
 						int attachedMob = (int) Ref.get(packet, mobsField);
 						if (attachedMob == -1) { // Dismount
-							List<NametagPlayer> ridingBefore = watchingEntityMove.get(id);
+							List<ClassicTabPlayer> ridingBefore = watchingEntityMove.get(id);
 							synchronized (ridingBefore) {
-								for (NametagPlayer player : ridingBefore)
+								for (ClassicTabPlayer player : ridingBefore)
 									// Dismount
-									player.getNametag().updateHeight(false, false, false, false);
+									for(ArmorStandHologram line : player.getAdditionalLines())
+										line.updateHeight(false, false, false, false);
 								watchingEntityMove.remove(id);
 								return;
 							}
 						} else {
-							List<NametagPlayer> players = Collections.synchronizedList(new ArrayList<>());
-							NametagPlayer riding = lookupById(attachedMob);
+							List<ClassicTabPlayer> players = Collections.synchronizedList(new ArrayList<>());
+							ClassicTabPlayer riding = TabAPI.getHolder(attachedMob);
 							if (riding != null && riding.getPlayer().getVehicle() != null) {
 								players.add(riding);
 								// Mount
-								riding.getNametag().setPosWithoutUpdate(riding.getPlayer().getVehicle().getLocation());
-								riding.getNametag().updateHeight(false, false, true, false);
+								Location loc = riding.getPlayer().getVehicle().getLocation();
+								for(ArmorStandHologram line : riding.getAdditionalLines()) {
+									line.setPosWithoutUpdate(loc);
+									line.updateHeight(false, false, true, false);
+								}
 							}
 							if (players.isEmpty())
 								watchingEntityMove.remove(id);
@@ -686,32 +653,36 @@ public class NametagManagerAPI {
 						}
 					} else {
 						int[] mobs = (int[]) Ref.get(packet, mobsField);
-						List<NametagPlayer> ridingBefore = watchingEntityMove.get(id);
+						List<ClassicTabPlayer> ridingBefore = watchingEntityMove.get(id);
 						if (ridingBefore == null) { // mount
-							List<NametagPlayer> players = mobs.length == 0 ? Collections.emptyList()
+							List<ClassicTabPlayer> players = mobs.length == 0 ? Collections.emptyList()
 									: Collections.synchronizedList(new ArrayList<>());
 							for (int i : mobs) {
-								NametagPlayer riding = lookupById(i);
+								ClassicTabPlayer riding = TabAPI.getHolder(i);
 								if (riding != null) {
 									players.add(riding);
 									// Mount
-									riding.getNametag()
-									.setPosWithoutUpdate(riding.getPlayer().getVehicle().getLocation());
-									riding.getNametag().updateHeight(false, false, true, false);
+									Location loc = riding.getPlayer().getVehicle().getLocation();
+									for(ArmorStandHologram line : riding.getAdditionalLines()) {
+										line.setPosWithoutUpdate(loc);
+										line.updateHeight(false, false, true, false);
+									}
 								}
 							}
 							watchingEntityMove.put(id, players);
 						} else {// mount & dismount
-							List<NametagPlayer> players = mobs.length == 0 ? Collections.emptyList()
+							List<ClassicTabPlayer> players = mobs.length == 0 ? Collections.emptyList()
 									: new ArrayList<>();
 							for (int i : mobs) {
-								NametagPlayer riding = lookupById(i);
+								ClassicTabPlayer riding = TabAPI.getHolder(i);
 								if (riding != null) {
 									players.add(riding);
 									// Mount
-									riding.getNametag()
-									.setPosWithoutUpdate(riding.getPlayer().getVehicle().getLocation());
-									riding.getNametag().updateHeight(false, false, true, false);
+									Location loc = riding.getPlayer().getVehicle().getLocation();
+									for(ArmorStandHologram line : riding.getAdditionalLines()) {
+										line.setPosWithoutUpdate(loc);
+										line.updateHeight(false, false, true, false);
+									}
 								}
 							}
 							if (players.isEmpty())
@@ -719,9 +690,12 @@ public class NametagManagerAPI {
 							else {
 								watchingEntityMove.put(id, players);
 								ridingBefore.removeAll(players);
-								for (NametagPlayer dismounted : ridingBefore) {
-									dismounted.getNametag().setPosWithoutUpdate(dismounted.getPlayer().getLocation());
-									dismounted.getNametag().updateHeight(false, false, false, false);
+								for (ClassicTabPlayer dismounted : ridingBefore) {
+									Location loc = dismounted.getPlayer().getLocation();
+									for(ArmorStandHologram line : dismounted.getAdditionalLines()) {
+										line.setPosWithoutUpdate(loc);
+										line.updateHeight(false, false, false, false);
+									}
 								}
 							}
 						}
@@ -729,81 +703,58 @@ public class NametagManagerAPI {
 					return;
 				}
 				if (packet.getClass().isAssignableFrom(outTeleport)) {
-					NametagPlayer player = lookupById((int) Ref.get(packet, entityIdField));
+					ClassicTabPlayer player = TabAPI.getHolder((int) Ref.get(packet, entityIdField));
 					if (player != null)
-						if (Ref.isOlderThan(12))
-							player.getNametag().shouldTeleport((int) Ref.get(packet, xField) / 32.0,
-									(int) Ref.get(packet, yField) / 32.0, (int) Ref.get(packet, zField) / 32.0);
+						if (Ref.isOlderThan(12)) {
+							double x= (int) Ref.get(packet, xField) / 32.0;
+							double y= (int) Ref.get(packet, yField) / 32.0;
+							double z= (int) Ref.get(packet, zField) / 32.0;
+							for(ArmorStandHologram line : player.getAdditionalLines())
+								line.shouldTeleport(x,y,z);
+						}
 						else if (moveRot != null) {
 							Object pos = Ref.get(Ref.get(packet, moveRot), positionVec);
-							player.getNametag().shouldTeleport((double) Ref.get(pos, xField),
-									(double) Ref.get(pos, yField), (double) Ref.get(pos, zField));
-						} else
-							player.getNametag().shouldTeleport((double) Ref.get(packet, xField),
-									(double) Ref.get(packet, yField), (double) Ref.get(packet, zField));
+							double x= (double) Ref.get(pos, xField);
+							double y= (double) Ref.get(pos, yField);
+							double z= (double) Ref.get(pos, zField);
+							for(ArmorStandHologram line : player.getAdditionalLines())
+								line.shouldTeleport(x,y,z);
+						} else {
+							double x= (double) Ref.get(packet, xField);
+							double y= (double) Ref.get(packet, yField);
+							double z= (double) Ref.get(packet, zField);
+							for(ArmorStandHologram line : player.getAdditionalLines())
+								line.shouldTeleport(x,y,z);
+						}
 				}
 			}
 		};
 		listener.register();
 		for (Player online : BukkitLoader.getOnlinePlayers())
-			lookupByUuidOrCreate(online, online.getUniqueId()).afterJoin();
+			TabAPI.getHolder(online).afterConnection();
 
 		// Init online players
-		for (NametagPlayer player : players)
-			for (NametagPlayer other : players) {
+		for (ClassicTabPlayer player : TabAPI.data.values())
+			for (ClassicTabPlayer other : TabAPI.data.values()) {
 				if (player.equals(other))
 					continue;
 				// Tablist sorting
 				if (player.getPlayer().canSee(other.getPlayer()))
-					player.addTabSorting(other);
+					player.showLines(other);
 				if (other.getPlayer().canSee(player.getPlayer()))
-					other.addTabSorting(player);
-				// Nametag
-				if (player.getPlayer().getWorld().equals(other.getPlayer().getWorld())) {
-					if (other.getPlayer().canSee(player.getPlayer()) && canSeeSpectatorLogin(other, player))
-						player.getNametag().show(other);
-					if (player.getPlayer().canSee(other.getPlayer()) && canSeeSpectatorLogin(player, other))
-						other.getNametag().show(player);
-				}
+					other.showLines(player);
 			}
-	}
-
-	private boolean canSeeSpectatorLogin(NametagPlayer player, NametagPlayer other) {
-		return other.getPlayer().getGameMode() != GameMode.SPECTATOR
-				|| player.getPlayer().getGameMode() == GameMode.SPECTATOR;
 	}
 
 	public void unload() {
 		isLoaded = false;
 		teamManager.disable();
 		listener.unregister();
-		for (NametagPlayer hologram : players)
-			hologram.onQuit();
-		players.clear();
+		TabAPI.unload();
 	}
 
 	public boolean isLoaded() {
 		return isLoaded;
-	}
-
-	public int getPlayerCountInTeam(String teamName) {
-		int amount = 0;
-		synchronized (players) {
-			for (NametagPlayer player : players)
-				if (player.getTeamName().equals(teamName))
-					++amount;
-		}
-		return amount;
-	}
-
-	public List<String> getPlayersInTeam(String teamName) {
-		List<String> result = new ArrayList<>();
-		synchronized (players) {
-			for (NametagPlayer player : players)
-				if (player.getTeamName().equals(teamName))
-					result.add(player.getName());
-		}
-		return result;
 	}
 
 }

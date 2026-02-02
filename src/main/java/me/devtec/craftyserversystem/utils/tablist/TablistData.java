@@ -11,12 +11,12 @@ public class TablistData {
 	private String tabPrefix;
 	private String tabSuffix;
 	// Nametag
-	private String tagNameFormat;
 	private String tagPrefix;
 	private String tagSuffix;
 	// Yellow number
 	private String yellowNumberPlaceholder;
 	private YellowNumberDisplayMode displayYellowNumberMode;
+	private List<String> nametagLines;
 
 	@Override
 	public boolean equals(Object object) {
@@ -107,18 +107,9 @@ public class TablistData {
 		return this;
 	}
 
-	public String getTagNameFormat() {
-		return tagNameFormat;
-	}
-
-	public TablistData setTagNameFormat(String tagNameFormat) {
-		this.tagNameFormat = tagNameFormat;
-		return this;
-	}
-
 	public boolean isComplete() {
 		return header != null && footer != null && tabNameFormat != null && tabPrefix != null && tabSuffix != null && yellowNumberPlaceholder != null && displayYellowNumberMode != null
-				&& tagNameFormat != null && tagPrefix != null && tagSuffix != null;
+				&& tagPrefix != null && tagSuffix != null;
 	}
 
 	public TablistData fillMissing(TablistData additional) {
@@ -132,8 +123,6 @@ public class TablistData {
 			tabPrefix = additional.tabPrefix;
 		if (tabSuffix == null)
 			tabSuffix = additional.tabSuffix;
-		if (tagNameFormat == null)
-			tagNameFormat = additional.tagNameFormat;
 		if (tagPrefix == null)
 			tagPrefix = additional.tagPrefix;
 		if (tagSuffix == null)
@@ -142,6 +131,16 @@ public class TablistData {
 			yellowNumberPlaceholder = additional.yellowNumberPlaceholder;
 		if (displayYellowNumberMode == null)
 			displayYellowNumberMode = additional.displayYellowNumberMode;
+		if(nametagLines==null)
+			nametagLines=additional.nametagLines;
 		return this;
+	}
+
+	public List<String> getNametagLines() {
+		return nametagLines;
+	}
+
+	public void setNametagLines(List<String> nametagLines) {
+		this.nametagLines = nametagLines;
 	}
 }

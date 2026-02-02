@@ -1,16 +1,20 @@
 package me.devtec.craftyserversystem.utils.tablist.nametag.support;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.bukkit.entity.Player;
+import org.joml.Math;
 
 import me.devtec.craftyserversystem.Loader;
-import me.devtec.craftyserversystem.utils.tablist.nametag.NametagManagerAPI;
-import me.devtec.craftyserversystem.utils.tablist.nametag.NametagPlayer;
+import me.devtec.craftyserversystem.utils.tablist.nametag.TabAPI;
+import me.devtec.craftyserversystem.utils.tablist.nametag.TabAPI.SimpleTeam;
+import me.devtec.craftyserversystem.utils.tablist.nametag.classic.ClassicTabPlayer;
 import me.devtec.shared.Pair;
 import me.devtec.shared.scheduler.Scheduler;
 import me.devtec.shared.scheduler.Tasker;
@@ -38,16 +42,38 @@ public class LuckPermsTeamManager implements TeamManager {
 			public void run() {
 				Pair pair = updates.poll();
 				while (pair != null) {
-					NametagPlayer player = (NametagPlayer) pair.getKey();
-					player.getNametag().setText(player.getNametagGenerator().apply(player.getPlayer()));
-					player.setTeamName(getTeam((String) pair.getValue()));
+					ClassicTabPlayer player = (ClassicTabPlayer) pair.getKey();
+					String team = makeItOriginal(player.getId(),getTeam((String) pair.getValue()));
+					List<SimpleTeam> teams = new ArrayList<>();
+					for(SimpleTeam t : player.getTeams()) {
+						if(t.getTeam().equals(team))
+							//TODO update team
+							break;
+						if(t.getTeam().startsWith("css_"))
+							if(t.getPlayers().size()==1)
+								teams.add(t);
+							else
+								teams.add(t.leavePlayer(player.getPlayer().getName()));
+					}
+					for(SimpleTeam t : teams) {
+						if(t.getPlayers().size()==1) {
+							//remove
+							for(ClassicTabPlayer holder : TabAPI.getPlayers())
+								holder.removeTeam(t.getTeam());
+							continue;
+						}
+
+						for(ClassicTabPlayer holder : TabAPI.getPlayers())
+							holder.leaveTeam(t);
+					}
+					//TODO update lines
 					pair = updates.poll();
 				}
 
 			}
 		}.runRepeating(20, 20);
 		lpEventUsers = LuckPermsProvider.get().getEventBus().subscribe(Loader.getPlugin(), UserDataRecalculateEvent.class, e -> {
-			NametagPlayer player = NametagManagerAPI.get().lookupByUuid(e.getUser().getUniqueId());
+			ClassicTabPlayer player = TabAPI.getHolder(e.getUser().getUniqueId());
 			if (player == null)
 				return; // Probably not loaded for uknown reasons..
 			updates.add(Pair.of(player, e.getUser().getPrimaryGroup()));
@@ -58,7 +84,7 @@ public class LuckPermsTeamManager implements TeamManager {
 				String group;
 				if (!(group = LuckPermsProvider.get().getUserManager().getUser(online.getUniqueId()).getPrimaryGroup()).equals(e.getGroup().getName()))
 					continue;
-				NametagPlayer player = NametagManagerAPI.get().lookupByUuid(online.getUniqueId());
+				ClassicTabPlayer player = TabAPI.getHolder(online.getUniqueId());
 				if (player == null)
 					continue; // Probably not loaded for uknown reasons..
 
@@ -82,6 +108,11 @@ public class LuckPermsTeamManager implements TeamManager {
 	@Override
 	public String getTeam(String vaultGroup) {
 		return groupAndTeamName.getOrDefault(vaultGroup, "z");
+	}
+
+	private String makeItOriginal(int id, String team) {
+		String prefix = "css_"+id;
+		return prefix+team.substring(0, Math.min(16-prefix.length(),team.length()));
 	}
 
 	@Override

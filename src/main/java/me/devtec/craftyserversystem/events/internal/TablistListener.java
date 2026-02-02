@@ -24,6 +24,7 @@ import me.devtec.craftyserversystem.utils.tablist.TablistData;
 import me.devtec.craftyserversystem.utils.tablist.UserTablistData;
 import me.devtec.craftyserversystem.utils.tablist.YellowNumberDisplayMode;
 import me.devtec.craftyserversystem.utils.tablist.nametag.NametagManagerAPI;
+import me.devtec.craftyserversystem.utils.tablist.nametag.TabAPI;
 import me.devtec.shared.dataholder.Config;
 import me.devtec.shared.scheduler.Scheduler;
 import me.devtec.shared.scheduler.Tasker;
@@ -69,6 +70,7 @@ public class TablistListener implements CssListener {
 		if (NametagManagerAPI.get().isLoaded())
 			NametagManagerAPI.get().unload();
 		if (isEnabled()) {
+			TabAPI.register();
 			NametagManagerAPI.get().load();
 			disabledInWorlds = getConfig().getStringList("disabled-in-worlds");
 			for (String world : getConfig().getKeys("world")) {
@@ -156,7 +158,8 @@ public class TablistListener implements CssListener {
 		data.setTabNameFormat(getConfig().getString(path + "tab.format"));
 		data.setTabPrefix(getConfig().getString(path + "tab.prefix"));
 		data.setTabSuffix(getConfig().getString(path + "tab.suffix"));
-		data.setTagNameFormat(getConfig().getString(path + "tag.format"));
+		if(!getConfig().getStringList(path + "tag.lines").isEmpty())
+			data.setNametagLines(getConfig().getStringList(path + "tag.lines"));
 		data.setTagPrefix(getConfig().getString(path + "tag.prefix"));
 		data.setTagSuffix(getConfig().getString(path + "tag.suffix"));
 		data.setYellowNumberText(getConfig().getString(path + "yellowNumber.value"));
@@ -209,18 +212,11 @@ public class TablistListener implements CssListener {
 	@EventHandler
 	public void onJoin(PlayerJoinEvent e) {
 		Player player = e.getPlayer();
-		new Tasker() {
-
-			@Override
-			public void run() {
-				BukkitLoader.getNmsProvider()
-				.postToMainThread(() -> NametagManagerAPI.get().getPlayer(player).afterJoin());
-				if (disabledInWorlds.contains(player.getWorld().getName()))
-					return;
-				data.put(player.getUniqueId(),
-						generateData(player).process(InternalPlaceholders.generatePlaceholders(player)));
-			}
-		}.runLater(20);
+		TabAPI.getHolder(player).afterConnection();
+		if (disabledInWorlds.contains(player.getWorld().getName()))
+			return;
+		data.put(player.getUniqueId(),
+				generateData(player).process(InternalPlaceholders.generatePlaceholders(player)));
 	}
 
 	@EventHandler

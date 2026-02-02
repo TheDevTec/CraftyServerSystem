@@ -130,11 +130,11 @@ public class Vanish extends CssCommand {
 			Player player = Bukkit.getPlayer(args[0]);
 			setVanish(sender, player, !getVanish(player), true);
 		}).permission(getPerm("other"))
-				// silent
-				.argument("-s", (sender, structure, args) -> {
-					Player player = Bukkit.getPlayer(args[0]);
-					setVanish(sender, player, !getVanish(player), false);
-				});
+		// silent
+		.argument("-s", (sender, structure, args) -> {
+			Player player = Bukkit.getPlayer(args[0]);
+			setVanish(sender, player, !getVanish(player), false);
+		});
 
 		// register
 		List<String> cmds = getCommands();
@@ -176,14 +176,14 @@ public class Vanish extends CssCommand {
 			if (event.getStatus())
 				try {
 					me.devtec.craftyserversystem.api.API.get().getSqlConnection()
-							.insert(InsertQuery.table("css_vanish", target.getUniqueId().toString()));
+					.insert(InsertQuery.table("css_vanish", target.getUniqueId().toString()));
 				} catch (SQLException e1) {
 					e1.printStackTrace();
 				}
 			else
 				try {
 					me.devtec.craftyserversystem.api.API.get().getSqlConnection()
-							.remove(RemoveQuery.table("css_vanish").where("id", target.getUniqueId().toString()));
+					.remove(RemoveQuery.table("css_vanish").where("id", target.getUniqueId().toString()));
 				} catch (SQLException e1) {
 					e1.printStackTrace();
 				}
@@ -203,8 +203,6 @@ public class Vanish extends CssCommand {
 						Config config = me.devtec.craftyserversystem.api.API.get().getConfigManager().getQuit();
 						me.devtec.craftyserversystem.api.API.get().getMsgManager().sendMessageFromFile(config,
 								"quit.text", placeholders, player);
-						me.devtec.craftyserversystem.api.API.get().getMsgManager().sendMessageFromFile(config,
-								"quit.broadcast", placeholders, player);
 					}
 				}
 		} else
@@ -219,8 +217,6 @@ public class Vanish extends CssCommand {
 						Config config = me.devtec.craftyserversystem.api.API.get().getConfigManager().getJoin();
 						me.devtec.craftyserversystem.api.API.get().getMsgManager().sendMessageFromFile(config,
 								"join." + time + ".text", placeholders, player);
-						me.devtec.craftyserversystem.api.API.get().getMsgManager().sendMessageFromFile(config,
-								"join." + time + ".broadcast", placeholders, player);
 					}
 				}
 
