@@ -7,7 +7,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
@@ -68,7 +67,6 @@ public class ClassicTabPlayer {
 	private SimpleTeam primaryTeam;
 
 	public ClassicTabPlayer(Player player) {
-		Bukkit.broadcastMessage("creating data for "+player.getName());
 		this.player=player;
 	}
 
