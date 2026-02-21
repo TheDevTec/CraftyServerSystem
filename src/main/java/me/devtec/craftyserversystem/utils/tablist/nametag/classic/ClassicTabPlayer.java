@@ -18,8 +18,6 @@ import me.devtec.craftyserversystem.utils.tablist.nametag.TabAPI;
 import me.devtec.craftyserversystem.utils.tablist.nametag.TabAPI.SimpleTeam;
 import me.devtec.craftyserversystem.utils.tablist.nametag.hologram.ArmorStandHologram;
 import me.devtec.shared.components.Component;
-import me.devtec.shared.components.ComponentEntity;
-import me.devtec.shared.components.ComponentItem;
 import me.devtec.shared.dataholder.cache.ConcurrentSet;
 import me.devtec.theapi.bukkit.BukkitLoader;
 import me.devtec.theapi.bukkit.nms.utils.TeamUtils;
@@ -183,7 +181,7 @@ public class ClassicTabPlayer {
 
 	public void setPrefix(Display display, Component value) {
 		if(display==Display.NAMETAG){
-			if(!areSame(tagPrefix,value)) {
+			if(!Objects.equals(tagPrefix,value)) {
 				tagPrefix=value;
 				if(getPrimaryTeam()==null)
 					changePrimaryTeam(new SimpleTeam(getPlayer().getName(), getPrefix(Display.NAMETAG), getSuffix(Display.NAMETAG), null, ChatColor.WHITE, 0, CollisionRule.ALWAYS, Visibility.ALWAYS).joinPlayer(getPlayer().getName()));
@@ -198,7 +196,7 @@ public class ClassicTabPlayer {
 			}
 			return;
 		}
-		if(!areSame(tabPrefix,value)) {
+		if(!Objects.equals(tabPrefix,value)) {
 			tabPrefix=value;
 			player.setPlayerListName(getTablistFormat().replace("{prefix}", value==null?"":value.toString()).replace("{player}", getPlayer().getName()).replace("{suffix}", tabSuffix==null?"":tabSuffix.toString()));
 		}
@@ -206,7 +204,7 @@ public class ClassicTabPlayer {
 
 	public void setSuffix(Display display, Component value) {
 		if(display==Display.NAMETAG){
-			if(!areSame(tagPrefix,value)) {
+			if(!Objects.equals(tagPrefix,value)) {
 				tagSuffix=value;
 				if(getPrimaryTeam()==null)
 					changePrimaryTeam(new SimpleTeam(getPlayer().getName(), getPrefix(Display.NAMETAG), getSuffix(Display.NAMETAG), null, ChatColor.WHITE, 0, CollisionRule.ALWAYS, Visibility.ALWAYS).joinPlayer(getPlayer().getName()));
@@ -221,67 +219,22 @@ public class ClassicTabPlayer {
 			}
 			return;
 		}
-		if(!areSame(tabSuffix,value)) {
+		if(!Objects.equals(tabSuffix,value)) {
 			tabSuffix=value;
 			player.setPlayerListName(getTablistFormat().replace("{prefix}", tabPrefix==null?"":tabPrefix.toString()).replace("{player}", getPlayer().getName()).replace("{suffix}", value==null?"":value.toString()));
 		}
 	}
 
-	private boolean areSame(Component a, Component b) {
-		if(a==null == (b!=null) || a!=null && b !=null && !a.getClass().equals(b.getClass()))return false;
-		if(a==null && b == null)return true;
-		if(a instanceof ComponentItem) {
-			ComponentItem item = (ComponentItem)a;
-			ComponentItem secondItem = (ComponentItem)b;
-			if(!Objects.equals(item.getId(), secondItem.getId()) || item.getCount()!=secondItem.getCount() || !Objects.equals(item.getNbt(), secondItem.getNbt()))return false;
-			return true;
-		}
-		if(a instanceof ComponentEntity) {
-			ComponentEntity item = (ComponentEntity)a;
-			ComponentEntity secondItem = (ComponentEntity)b;
-			if(!Objects.equals(item.getId(), secondItem.getId()) || !Objects.equals(item.getType(), secondItem.getType()) || !areSame(item.getName(), secondItem.getName()))return false;
-			return true;
-		}
-		if(a.getText()==null ? b.getText()==null : a.getText().equals(b.getText())) {
-			if(a.getExtra()==null && b.getExtra()==null || a.getExtra()!=null && b.getExtra()!=null && a.getExtra().size()==b.getExtra().size() || a.getExtra()==null && b.getExtra()!=null && b.getExtra().isEmpty()
-					|| b.getExtra()==null && a.getExtra()!=null && a.getExtra().isEmpty()) {
-				int pos = 0;
-				if(a.getExtra()!=null)
-					for(Component extra : a.getExtra())
-						if(!areSame(extra,b.getExtra().get(pos++)))
-							return false;
-			}
-			if(!Objects.equals(a.getColor(), b.getColor()) || !Objects.equals(a.getFont(), b.getFont()) || !Objects.equals(a.getInsertion(), b.getInsertion()) ||
-					a.isBold()!=b.isBold() || a.isItalic()!=b.isItalic()
-					|| a.isObfuscated()!=b.isObfuscated()
-					|| a.isStrikethrough()!=b.isStrikethrough()
-					|| a.isUnderlined()!=b.isUnderlined())
-				return false;
-			if(a.getClickEvent()!=null && b.getClickEvent()!=null) {
-				if(a.getClickEvent().getAction()!=b.getClickEvent().getAction() || !Objects.equals(a.getClickEvent().getValue(), b.getClickEvent().getValue()))
-					return false;
-			}else if(a.getClickEvent() == null ? b.getClickEvent() != null : b.getClickEvent() == null)
-				return false;
-			if(a.getHoverEvent()!=null && b.getHoverEvent()!=null) {
-				if(a.getHoverEvent().getAction()!=b.getHoverEvent().getAction() || !areSame(a.getHoverEvent().getValue(), b.getHoverEvent().getValue()))
-					return false;
-			}else if(a.getHoverEvent() == null ? b.getHoverEvent() != null : b.getHoverEvent() == null)
-				return false;
-			return true;
-		}
-		return false;
-	}
-
 
 	public void setHeader(Component value) {
-		if(value==null && (this.header==null || this.header.isEmpty()) || !value.isEmpty() && header!=null && areSame(value, header))return;
+		if(value==null && (this.header==null || this.header.isEmpty()) || !value.isEmpty() && header!=null && Objects.equals(value, header))return;
 		this.header=value;
 		sendPacket(BukkitLoader.getNmsProvider().packetPlayerListHeaderFooter(header, footer));
 	}
 
 
 	public void setFooter(Component value) {
-		if(value==null && (this.footer==null || this.footer.isEmpty()) || !value.isEmpty() && footer!=null && areSame(value, footer))return;
+		if(value==null && (this.footer==null || this.footer.isEmpty()) || !value.isEmpty() && footer!=null && Objects.equals(value, footer))return;
 		this.footer=value;
 		sendPacket(BukkitLoader.getNmsProvider().packetPlayerListHeaderFooter(header, footer));
 	}

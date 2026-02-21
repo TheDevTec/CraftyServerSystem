@@ -69,10 +69,10 @@ public class UserTablistData extends TablistData {
 		nametag.setHeader(Component.fromString(header.toString(), true, false));
 		nametag.setFooter(Component.fromString(footer.toString(), true, false));
 		nametag.setTablistFormat(getTabNameFormat());
-		nametag.setPrefix(Display.TABLIST, Component.fromString(getTabPrefix(), true, false));
-		nametag.setSuffix(Display.TABLIST, Component.fromString(getTabSuffix(), true, false));
-		nametag.setPrefix(Display.NAMETAG, Component.fromString(getTagPrefix(), true, false));
-		nametag.setSuffix(Display.NAMETAG, Component.fromString(getTagSuffix(), true, false));
+		nametag.setPrefix(Display.TABLIST, Component.fromString(placeholders.apply(getTabPrefix()), true, false));
+		nametag.setSuffix(Display.TABLIST, Component.fromString(placeholders.apply(getTabSuffix()), true, false));
+		nametag.setPrefix(Display.NAMETAG, Component.fromString(placeholders.apply(getTagPrefix()), true, false));
+		nametag.setSuffix(Display.NAMETAG, Component.fromString(placeholders.apply(getTagSuffix()), true, false));
 		int index = 0;
 		boolean addingMode = false;
 		boolean hidePlayerNickname = false;

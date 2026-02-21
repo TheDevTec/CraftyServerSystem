@@ -652,7 +652,12 @@ public class NametagManagerAPI {
 								watchingEntityMove.put(id, players);
 						}
 					} else {
-						int[] mobs = (int[]) Ref.get(packet, mobsField);
+						Object obj = Ref.get(packet, mobsField);
+						int[] mobs;
+						if(obj instanceof int[])
+							mobs=(int[])obj;
+						else
+							mobs=new int[] {(int)obj};
 						List<ClassicTabPlayer> ridingBefore = watchingEntityMove.get(id);
 						if (ridingBefore == null) { // mount
 							List<ClassicTabPlayer> players = mobs.length == 0 ? Collections.emptyList()
