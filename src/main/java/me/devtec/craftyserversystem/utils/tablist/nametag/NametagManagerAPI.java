@@ -444,7 +444,6 @@ public class NametagManagerAPI {
 								if (System.currentTimeMillis() - start >= 5)
 									return;
 							if(spawned.getPrimaryTeam() == null || receiverPlayer.getTeams().contains(spawned.getPrimaryTeam()))return;
-							receiverPlayer.getPlayer().sendMessage("Displaying team "+spawned.getPrimaryTeam()+" of player "+spawned.getPlayer().getName());
 							receiverPlayer.createTeam(spawned.getPrimaryTeam());
 						}
 						return;
@@ -457,10 +456,8 @@ public class NametagManagerAPI {
 							if (entity.equals(offlineUuid))
 								continue;
 							ClassicTabPlayer removed = TabAPI.data.get(entity);
-							if (removed != null && removed.getPrimaryTeam()!=null) {
-								receiverPlayer.getPlayer().sendMessage("Removing team "+removed.getPrimaryTeam()+" of player "+removed.getPlayer().getName());
+							if (removed != null && removed.getPrimaryTeam()!=null)
 								receiverPlayer.removeTeam(removed.getPrimaryTeam().getTeam());
-							}
 						}
 						return;
 					}
