@@ -333,12 +333,12 @@ public class NametagManagerAPI {
 			private Object findEntityType() {
 				Class<?> nmsHuman = Ref.nms("world.entity.player",
 						BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "Player" : "EntityHuman");
-				for (Field field : Ref.getAllFields(entityTypes))
+				for (Field field : Ref.getAllFields(Ref.isNewerThan(25)?Ref.nms("world.entity", "EntityTypes"):entityTypes))
 					try {
 						if (field.getType().equals(entityTypes) && field.getGenericType() instanceof ParameterizedType
 								&& ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0]
 										.equals(nmsHuman))
-							return Ref.get(null, field);
+							return Ref.getStatic(field);
 					} catch (Exception ignored) {
 
 					}
@@ -363,9 +363,10 @@ public class NametagManagerAPI {
 					ClassicTabPlayer player = TabAPI.await(name);
 					if (player != null) {
 						Location loc = player.getPlayer().getLocation();
+						boolean shifting = (boolean)Ref.get(Ref.get(packet, input), shift);
 						for(ArmorStandHologram line : player.getAdditionalLines()) {
 							line.setPosWithoutUpdate(loc);
-							line.updateHeight((boolean)Ref.get(Ref.get(packet, input), shift), false, false, false);
+							line.updateHeight(shifting, false, false, false);
 						}
 					}
 

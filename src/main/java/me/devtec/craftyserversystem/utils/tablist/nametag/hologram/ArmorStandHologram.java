@@ -46,7 +46,7 @@ public class ArmorStandHologram extends Hologram {
 	private static Object findEntityType() {
 		Class<?> entityTypes = Ref.nms("world.entity", BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "EntityType" : "EntityTypes");
 		Class<?> nmsHuman = Ref.nms("world.entity.decoration", BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "ArmorStand" : "EntityArmorStand");
-		for (Field field : Ref.getAllFields(entityTypes))
+		for (Field field : Ref.getAllFields(Ref.nms("world.entity", BukkitLoader.NO_OBFUSCATED_NMS_MODE && !Ref.isNewerThan(25) ? "EntityType" : "EntityTypes")))
 			try {
 				if (field.getType().equals(entityTypes) && field.getGenericType() instanceof ParameterizedType
 						&& ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0].equals(nmsHuman))
@@ -393,7 +393,7 @@ public class ArmorStandHologram extends Hologram {
 		} else if (sleeping) {
 			height -= 1.44;
 			sneak(false);
-		} else if(this.sneaking!=sneaking) {
+		} else {
 			if (sneaking)
 				height -= 0.44;
 			sneak(sneaking);
