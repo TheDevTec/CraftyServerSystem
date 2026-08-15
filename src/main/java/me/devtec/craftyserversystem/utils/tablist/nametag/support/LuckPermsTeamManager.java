@@ -73,7 +73,7 @@ public class LuckPermsTeamManager implements TeamManager {
 			}
 		}.runRepeating(20, 20);
 		lpEventUsers = LuckPermsProvider.get().getEventBus().subscribe(Loader.getPlugin(), UserDataRecalculateEvent.class, e -> {
-			ClassicTabPlayer player = TabAPI.getHolder(e.getUser().getUniqueId());
+			ClassicTabPlayer player = TabAPI.getNullableHolder(e.getUser().getUniqueId());
 			if (player == null)
 				return; // Probably not loaded for uknown reasons..
 			updates.add(Pair.of(player, e.getUser().getPrimaryGroup()));
@@ -84,7 +84,7 @@ public class LuckPermsTeamManager implements TeamManager {
 				String group;
 				if (!(group = LuckPermsProvider.get().getUserManager().getUser(online.getUniqueId()).getPrimaryGroup()).equals(e.getGroup().getName()))
 					continue;
-				ClassicTabPlayer player = TabAPI.getHolder(online.getUniqueId());
+				ClassicTabPlayer player = TabAPI.getNullableHolder(online.getUniqueId());
 				if (player == null)
 					continue; // Probably not loaded for uknown reasons..
 

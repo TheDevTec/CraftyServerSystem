@@ -134,9 +134,8 @@ public class God extends CssCommand {
 
 	public void setGod(Player target, boolean godStatus, boolean sendMessage, CommandSender sender) {
 		if (godStatus) {
-			if (Ref.isOlderThan(12))
-				me.devtec.shared.API.getUser(target.getUniqueId()).set("css.god", true);
-			else
+			me.devtec.shared.API.getUser(target.getUniqueId()).set("css.god", true);
+			if (!Ref.isOlderThan(12))
 				target.setInvulnerable(true);
 			if (sendMessage)
 				if (!sender.equals(target)) {
@@ -146,9 +145,8 @@ public class God extends CssCommand {
 				} else
 					msg(target, "self.true", PlaceholdersExecutor.i().add("target", target.getName()));
 		} else {
-			if (Ref.isOlderThan(12))
-				me.devtec.shared.API.getUser(target.getUniqueId()).set("css.god", false);
-			else
+			me.devtec.shared.API.getUser(target.getUniqueId()).set("css.god", false);
+			if (!Ref.isOlderThan(12))
 				target.setInvulnerable(false);
 			if (sendMessage)
 				if (!sender.equals(target)) {
@@ -163,7 +161,7 @@ public class God extends CssCommand {
 	public boolean isAllowed(Player target) {
 		if (Ref.isOlderThan(12))
 			return me.devtec.shared.API.getUser(target.getUniqueId()).getBoolean("css.god");
-		return target.isInvulnerable();
+		return target.isInvulnerable() || me.devtec.shared.API.getUser(target.getUniqueId()).getBoolean("css.god");
 	}
 
 	@Override

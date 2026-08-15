@@ -475,7 +475,7 @@ pay:
 balance:
   cmd: [balance,bal]
   usage:
-    cmd: "/balance {balance}"
+    cmd: "/balance {player}"
   perms:
     cmd: "css.cmd.balance"
     other: "css.cmd.balance.other"
@@ -496,8 +496,10 @@ economy:
     remove: "/economy remove {player} {balance}"
     set: "/economy set {player} {balance}"
   perms:
-    cmd: "css.cmd.balance"
-    other: "css.cmd.balance.other"
+    cmd: "css.cmd.economy"
+    add: "css.cmd.economy.add"
+    remove: "css.cmd.economy.remove"
+    set: "css.cmd.economy.set"
    
 home:
   cmd: [home]

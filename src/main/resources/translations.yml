@@ -645,6 +645,7 @@ bansystem:
     perm: "&8[&c&lMUTE&8] &e{admin} &7perm muted &e{user} &7for &f{reason}"
     # {expireAfter}, {expireDate}
     temp: "&8[&c&lMUTE&8] &e{admin} &7muted &e{user} &7for &e{expireAfter} &7for &f{reason}"
+    chat: "&8[&c&lMUTE&8] &e{user} &7tried to say &f{message}"
   warned: "&8[&c&lWARN&8] &e{admin} &7warned &e{user} &7for &f{reason}"
   kicked: "&8[&c&lKICK&8] &e{admin} &7kicked &e{user} &7for &f{reason}"
 

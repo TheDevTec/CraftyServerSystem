@@ -79,7 +79,7 @@ public class ArmorStandHologram extends Hologram {
 		prevWorld = world;
 		Entity vehicle = owner.getPlayer().getVehicle();
 		updateHeight(owner.getPlayer().isSneaking(), owner.getPlayer().isSleeping(), vehicle != null, true);
-		id = HologramHolder.increaseAndGetId();
+		id = HologramHolder.increaseAndGetId(world);
 		if (vehicle != null) {
 			double additionalY = vehicle.getLocation().getY();
 			EntityType type = vehicle.getType();

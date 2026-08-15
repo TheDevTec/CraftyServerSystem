@@ -119,13 +119,13 @@ public class ClassicTabPlayer {
 
 	@Override
 	public boolean equals(Object obj) {
-		return obj instanceof ClassicTabPlayer && ((ClassicTabPlayer)obj).getPlayer().equals(getPlayer());
+		return obj instanceof ClassicTabPlayer && ((ClassicTabPlayer)obj).id==id;
 	}
 
 
 	@Override
 	public int hashCode() {
-		return player.hashCode();
+		return id;
 	}
 
 
@@ -154,12 +154,12 @@ public class ClassicTabPlayer {
 	public void onDisconnect() {
 		player.setPlayerListName(null);
 		sendPacket(emptyTablistHeaderFooterPacket);
+		if (getPlayer().getVehicle() != null)
+			NametagManagerAPI.get().watchingEntityMove.remove(getPlayer().getVehicle().getEntityId());
 		for(ArmorStandHologram hologram : getAdditionalLines())
 			hologram.hideAll();
 		additionalLines.clear();
 		whoSeeAdditionalLines.clear();
-		if (getPlayer().getVehicle() != null)
-			NametagManagerAPI.get().watchingEntityMove.remove(getPlayer().getVehicle().getEntityId());
 	}
 
 
@@ -225,14 +225,14 @@ public class ClassicTabPlayer {
 
 
 	public void setHeader(Component value) {
-		if(value==null && (this.header==null || this.header.isEmpty()) || !value.isEmpty() && header!=null && Objects.equals(value, header))return;
+		if(value==null && (this.header==null || this.header.isEmpty()) || value!=null && !value.isEmpty() && header!=null && Objects.equals(value, header))return;
 		this.header=value;
 		sendPacket(BukkitLoader.getNmsProvider().packetPlayerListHeaderFooter(header, footer));
 	}
 
 
 	public void setFooter(Component value) {
-		if(value==null && (this.footer==null || this.footer.isEmpty()) || !value.isEmpty() && footer!=null && Objects.equals(value, footer))return;
+		if(value==null && (this.footer==null || this.footer.isEmpty()) || value!=null && !value.isEmpty() && footer!=null && Objects.equals(value, footer))return;
 		this.footer=value;
 		sendPacket(BukkitLoader.getNmsProvider().packetPlayerListHeaderFooter(header, footer));
 	}

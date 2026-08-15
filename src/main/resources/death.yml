@@ -12,3 +12,14 @@ death:
   keep-exp: false
   broadcast: []
   commands: []
+
+# priorities:
+# - home (with name "home" or first found)
+# - bed
+# - spawn (spawn set via /setspawn)
+# - world (world's spawn location) - fallback if everything fails
+respawn-priority:
+- home
+- bed
+- spawn
+- world

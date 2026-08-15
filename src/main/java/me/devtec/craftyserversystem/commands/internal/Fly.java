@@ -12,10 +12,12 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.event.player.PlayerTeleportEvent;
+import org.bukkit.event.player.PlayerRespawnEvent;
 
 import me.devtec.craftyserversystem.Loader;
 import me.devtec.craftyserversystem.api.API;
@@ -23,7 +25,6 @@ import me.devtec.craftyserversystem.commands.CssCommand;
 import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
 import me.devtec.shared.commands.selectors.Selector;
 import me.devtec.shared.commands.structures.CommandStructure;
-import me.devtec.shared.dataholder.cache.TempList;
 
 public class Fly extends CssCommand {
 
@@ -40,6 +41,12 @@ public class Fly extends CssCommand {
 			listener = new Listener() {
 
 				@EventHandler
+				public void join(PlayerJoinEvent e) {
+					if(isAllowed(e.getPlayer()))
+						setFly(e.getPlayer(), true, false, e.getPlayer());
+				}
+				
+				@EventHandler
 				public void playerFall(EntityDamageEvent e) {
 					if (e.getCause() == DamageCause.FALL && e.getEntityType() == EntityType.PLAYER)
 						if (fallDamageCancel.remove(e.getEntity().getUniqueId()))
@@ -47,38 +54,40 @@ public class Fly extends CssCommand {
 				}
 
 				@EventHandler
+				public void death(PlayerDeathEvent e) {
+					fallDamageCancel.remove(e.getEntity().getUniqueId());
+				}
+
+				@EventHandler
 				public void quit(PlayerQuitEvent e) {
 					fallDamageCancel.remove(e.getPlayer().getUniqueId());
 				}
 
-				private List<UUID> tempList = new TempList<>(20 * 5);
-
 				@EventHandler
-				public void onPreWorldChange(PlayerTeleportEvent e) {
-					if (!e.getFrom().getWorld().equals(e.getTo().getWorld()) && isAllowed(e.getPlayer()))
-						tempList.add(e.getPlayer().getUniqueId());
+				public void onWorldChange(PlayerChangedWorldEvent e) {
+					if (isAllowed(e.getPlayer()))
+						setFly(e.getPlayer(), true, false, e.getPlayer());
 				}
 
 				@EventHandler
-				public void onWorldChange(PlayerChangedWorldEvent e) {
-					if (tempList.remove(e.getPlayer().getUniqueId()))
-						setFly(e.getPlayer(), true, false, e.getPlayer());
+				public void respawn(PlayerRespawnEvent e) {
+					if (isAllowed(e.getPlayer()))
+						setFly(e.getPlayer(), false, false, e.getPlayer());
 				}
 			};
 		} else
 			listener = new Listener() {
-				private List<UUID> tempList = new TempList<>(20 * 5);
-
-				@EventHandler
-				public void onPreWorldChange(PlayerTeleportEvent e) {
-					if (!e.getFrom().getWorld().equals(e.getTo().getWorld()) && isAllowed(e.getPlayer()))
-						tempList.add(e.getPlayer().getUniqueId());
-				}
 
 				@EventHandler
 				public void onWorldChange(PlayerChangedWorldEvent e) {
-					if (tempList.remove(e.getPlayer().getUniqueId()))
+					if (isAllowed(e.getPlayer()))
 						setFly(e.getPlayer(), true, false, e.getPlayer());
+				}
+
+				@EventHandler
+				public void respawn(PlayerRespawnEvent e) {
+					if (isAllowed(e.getPlayer()))
+						setFly(e.getPlayer(), false, false, e.getPlayer());
 				}
 			};
 		Bukkit.getPluginManager().registerEvents(listener, Loader.getPlugin());
@@ -116,6 +125,7 @@ public class Fly extends CssCommand {
 	}
 
 	public void setFly(Player target, boolean flyStatus, boolean sendMessage, CommandSender sender) {
+		me.devtec.shared.API.getUser(target.getUniqueId()).set("css.fly", flyStatus);
 		if (flyStatus) {
 			target.setAllowFlight(true);
 			if (target.getLocation().add(0, -0.5, 0).getBlock().isEmpty())
@@ -143,7 +153,7 @@ public class Fly extends CssCommand {
 	}
 
 	public boolean isAllowed(Player sender) {
-		return sender.getAllowFlight();
+		return sender.getAllowFlight() || me.devtec.shared.API.getUser(sender.getUniqueId()).getBoolean("css.fly");
 	}
 
 	@Override

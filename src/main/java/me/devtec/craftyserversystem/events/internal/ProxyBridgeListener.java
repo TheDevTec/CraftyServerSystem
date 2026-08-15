@@ -31,7 +31,7 @@ public class ProxyBridgeListener implements PluginMessageListener {
 
 	@Override
 	public void onPluginMessageReceived(String channel, Player player, byte[] message) {
-		if(!CHANNEL.equalsIgnoreCase(channel))return;
+		if(!CHANNEL.equalsIgnoreCase(channel) || message==null)return;
 		ByteArrayDataInput input = ByteStreams.newDataInput(message);
 		String action = input.readUTF();
 		switch(action) {

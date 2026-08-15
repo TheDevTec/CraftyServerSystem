@@ -55,14 +55,16 @@ public class UserTablistData extends TablistData {
 		ClassicTabPlayer nametag = TabAPI.getHolder(player);
 
 		StringContainer header = new StringContainer(64);
+		int linePos = 0;
 		for (String text : getHeader()) {
-			if (!header.isEmpty())
+			if (linePos++ != 0)
 				header.append('\n');
 			header.append(placeholders.apply(text));
 		}
+		linePos=0;
 		StringContainer footer = new StringContainer(64);
 		for (String text : getFooter()) {
-			if (!footer.isEmpty())
+			if (linePos++ != 0)
 				footer.append('\n');
 			footer.append(placeholders.apply(text));
 		}
@@ -174,12 +176,12 @@ public class UserTablistData extends TablistData {
 	}
 
 	public void removeTablist() {
-		ClassicTabPlayer nametag = TabAPI.removeHolder(player.getUniqueId());
-		if(nametag!=null)
-			nametag.onDisconnect(); // With cooldown 5 ticks?
 		BukkitLoader.getPacketHandler().send(yellowNumber.keySet(), BukkitLoader.getNmsProvider().packetScoreboardScore(Action.REMOVE, "yn_ping_css", player.getName(), 0));
 		yellowNumber.clear();
 		BukkitLoader.getPacketHandler().send(player, createObjectivePacket(1, "yn_ping_css", "", previous == YellowNumberDisplayMode.INTEGER));
+		ClassicTabPlayer nametag = TabAPI.removeHolder(player.getUniqueId());
+		if(nametag!=null)
+			nametag.onDisconnect(); // With cooldown 5 ticks?
 	}
 
 	public Player getPlayer() {

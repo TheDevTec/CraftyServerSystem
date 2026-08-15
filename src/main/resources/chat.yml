@@ -20,19 +20,397 @@ placeholders:
 
 antiSwear:
   enabled: true
-  words: ["cigan","cikan","negr","nigga","sex", "gai", "gei", "gay", "gey", "gej", "gaj", "kkt", "kokot", "kreten", "devko", "devki", "devka", "curak", "curac", "kund", "mrd", "penis", "vagin", "kurv", "kurw", "idiot", "pica", "pico", "pici", "pice", "picu", "fuck", "suck", "dick", "fck", "cock", "bitch", "sperm", "masturb", "dement","demence","penys","srack","vagyn","kripl","krypl","debil","debyl","picka","picko","picky","picki"]
+  # Global words are checked in every language. Prefix a word with * to match inside a word.
+  words:
+  - "cigan"
+  - "cikan"
+  - "negr"
+  - "nigga"
+  - "sex"
+  - "gai"
+  - "gei"
+  - "gay"
+  - "gey"
+  - "gej"
+  - "gaj"
+  - "kkt"
+  - "kokot"
+  - "kreten"
+  - "devko"
+  - "devki"
+  - "devka"
+  - "curak"
+  - "curac"
+  - "kund"
+  - "mrd"
+  - "penis"
+  - "vagin"
+  - "kurv"
+  - "kurw"
+  - "idiot"
+  - "pico"
+  - "pici"
+  - "pice"
+  - "picu"
+  - "fuck"
+  - "suck"
+  - "dick"
+  - "fck"
+  - "cock"
+  - "bitch"
+  - "sperm"
+  - "masturb"
+  - "dement"
+  - "demence"
+  - "penys"
+  - "srack"
+  - "vagyn"
+  - "kripl"
+  - "krypl"
+  - "debil"
+  - "debyl"
+  - "picka"
+  - "picko"
+  - "picky"
+  - "picki"
+  - "*anal"
+  - "kokutc"
+  - "kokute"
+  - "jebat"
+  - "jebka"
+  - "jebane"
+  - "jebani"
+  - "ducking"
+  - "ciot"
+  - "cvel"
+  - "cip"
+  - "ciul"
+  - "jebsie"
+  - "jeba"
+  - "dopierd"
+  - "downie"
+  - "dzif"
+  - "dziwk"
+  - "fiucie"
+  - "fiut"
+  - "huj"
+  - "hoj"
+  - "jebcie"
+  - "jebi"
+  - "jebliwy"
+  - "jebna"
+  - "korwa"
+  - "korewko"
+  - "kurestwo"
+  - "kurew"
+  - "kurva"
+  - "kutas"
+  - "korew"
+  - "jebc"
+  - "morde"
+  - "mordę"
+  - "pierd"
+  - "obsrywa"
+  - "pieprz"
+  - "pedal"
+  - "picza"
+  - "piczka"
+  - "piczo"
+  - "pizd"
+  - "pojeb"
+  - "ruchac"
+  - "qrwa"
+  - "zjeb"
+  - "rucha"
+  - "spierdal"
+  - "spierdol"
+  - "suki"
+  - "szmat"
+  - "piździa"
+  - "sranym"
+  - "srac"
+  - "srywa"
+  - "zjeby"
+  - "*arsch"
+  - "*bastard"
+  - "*hurensohn"
+  - "*misgeburt"
+  - "*wichser"
+  - "*idiot"
+  - "*blodman"
+  - "*dummkopf"
+  - "*drecksack"
+  - "*penner"
+  - "*opfer"
+  - "*hitler"
+  - "*nazi"
+  - "*gaskammer"
+  - "*stasi"
+  - "*vollpfosten"
+  - "*schlampe"
+  - "*depp"
+  - "*holzkopf"
+  - "*blodekuh"
+  - "*nervensage"
+  - "*schweinehund"
+  - "*fickdich"
+  - "*leckmich"
+  - "*schwachkopf"
+  - "*falscheschlange"
+  - "*scheise"
+  - "*verdammt"
+  - "duschlampe"
+  - "*nigger"
+  - "*neger"
+  - "prick"
+  - "dumbass"
+  - "asshole"
+  - "arse"
+  - "pussy"
+  - "slut"
+  - "nigger"
+  - "nigra"
+  - "*гей"
+  - "*педерас"
+  - "мекакитка"
+  - "*китка"
+  - "*курва"
+  - "*еба"
+  - "*ебем"
+  - "*ебеm"
+  - "*кур"
+  - "*хуй"
+  - "*путка"
+  - "*пичка"
+  - "*халка"
+  - "*идиот"
+  - "*нещастник"
+  - "*смотаняк"
+  - "*боклук"
+  - "*парцал"
+  - "*gei"
+  - "*pederas"
+  - "*mekakitka"
+  - "*debamaikati"
+  - "*daeba"
+  - "*kur"
+  - "*huq"
+  - "*putk"
+  - "*pichk"
+  - "*halka"
+  - "*neshtastnik"
+  - "*smotanqk"
+  - "*bokluk"
+  - "*softwrist"
+  # Format: languages|collision-languages|word.
+  # These rules run language detection only when a matching candidate is found.
+  # Example: "cs,sk|ro|pica" blocks Czech/Slovak profanity
+  # but ignores the harmless Romanian word "pica". The lightweight detector returns
+  # UNKNOWN for unclear messages, which are reviewed instead of blocked.
+  language-rules:
+  - "cs,sk|ro|pica"
   block-event: false
-  # if block-event is set to false, replacement is used.
+  # If block-event is false, direct vulgarisms are replaced. History-only hits are blocked.
   replacement: "****"
   # css.chat.bypass.antiswear
   bypass-enabled: false
-  # Format: swearWord:allowedPhrase
-  allowed-phrases: ["negr:negramot","cock:čočka","cock:čočky","pice:slepice","picka:slepickám","picka:slepičkám","picka:slepickam","picka:slepička","picky:slepičky","kund:sekund","kkt:ak kter","kkt:ak ktor","debyl:kde byl","debil:kde bil","pice:opice","mrd:smrdi","mrd:smrde","picky:pick y","picko:pick o","picka:pick a"] 
+  automod-debug:
+    # Logs every matched rule for moderation tuning. Disable after reviewing the defaults.
+    enabled: true
+    # Also prints the same details to the server console.
+    console: true
+    # Online players with this permission receive the debug message.
+    permission: "css.chat.automod.debug"
+  history:
+    enabled: true
+    # How long previous messages stay available for combined anti-swear checks.
+    cache: 20s
+    # Number of previous messages by the same player used with the current message.
+    maximum-messages: 4
+  # Phrases blocked only in context. One normal spelling is enough: diacritics,
+  # spaces, dots, hyphens and basic leetspeak are normalized automatically.
+  contextual-phrases:
+  - "to duck you"
+  - "duck you"
+  - "ducking man"
+  - "ducking clown"
+  - "ducking dog"
+  - "you ducking"
+  - "ty jsi kokos"
+  - "ty si kokos"
+  - "ty ses kokos"
+  - "ty jses kokos"
+  - "ty jsi uplnej kokos"
+  - "ty si uplnej kokos"
+  - "ty ses uplnej kokos"
+  - "ty jses uplnej kokos"
+  - "ty jsi uplny kokos"
+  - "ty si uplny kokos"
+  - "ty ses uplny kokos"
+  - "ty jses uplny kokos"
+  # Format: swearWord:allowedPhrase. One normal spelling is enough: diacritics,
+  # punctuation, spaces and basic leetspeak are normalized before comparison.
+  allowed-phrases:
+  - "picy:spicy"
+  - "pice:spiced"
+  - "picki:epicky"
+  - "picka:epicka"
+  - "picka:opicka"
+  - "picka:opička"
+  - "picki:epicki"
+  - "picki:epický"
+  - "picki:epickí"
+  - "pici:epic it"
+  - "pici:epici"
+  - "pici:epicy"
+  - "pico:epico"
+  - "pico:epic o"
+  - "kkt:de kkt"
+  - "pico:epicos"
+  - "pica:picas"
+  - "pico:epicov"
+  - "picko:epicko"
+  - "negr:negramot"
+  - "cock:čočka"
+  - "cock:čočky"
+  - "pice:slepice"
+  - "picka:slepickám"
+  - "picka:slepičkám"
+  - "picka:slepickam"
+  - "picka:slepička"
+  - "picki:slepičky"
+  - "picki:slepicky"
+  - "picky:slepičky"
+  - "picky:slepicky"
+  - "picki:typicky"
+  - "picka:typicka"
+  - "gai:gain"
+  - "picki:tipicky"
+  - "pici:opici"
+  - "picka:tipicka"
+  - "picki:typický"
+  - "picka:typická"
+  - "picki:tipický"
+  - "picka:tipická"
+  - "kund:sekund"
+  - "kkt:ak kter"
+  - "kkt:ak ktor"
+  - "debyl:kde byl"
+  - "debil:kde bil"
+  - "debil:kde byl"
+  - "pice:opice"
+  - "mrd:smrdi"
+  - "mrd:smrde"
+  - "dick:vždick"
+  - "dick:vždyck"
+  - "dick:vzdick"
+  - "dick:vzdyck"
+  - "dick:opravdick"
+  - "dick:opravdičk"
+  - "pica:picasso"
+  - "dick:pohodick"
+  - "dick:pohodičk"
+  - "mrd:nesmrdi"
+  - "mrd:nesmrdí"
+  - "picki:pick i"
+  - "picki:pick y"
+  - "picky:pick y"
+  - "picko:pick o"
+  - "picka:pick a"
+  - "negr:ne grar"
+  - "negr:ne, grat"
+  - "kkt:kk tak"
+  - "gei:ge in"
+  - "gei:ge yo"
+  - "kkt:kto"
+  - "kkt:kk ty"
+  - "kkt:kk ti"
+  - "kkt:kk to"
+  - "kkt:kk tu"
+  - "kkt:kk ta"
+  - "kkt:kk te"
+  - "dick:srandick"
+  - "dick:srandičk"
+  - "dick:parádičk"
+  - "dick:paradičk"
+  - "dick:paradick"
+  - "dick:parádick"
+  - "gej:ge je"
+  - "gei:age, i"
+  - "picko:spickov"
+  - "picko:špickov"
+  - "picko:špičkov"
+  - "picko:spičkov"
+  - "debil:dě byl"
+  - "debil:de byl"
+  - "kkt:kk t"
+  - "anal:kanal"
+  - "anal:kanál"
+  - "gej:forge"
+  - "downie:cudownie"
+  - "ciot:ciotka"
+  - "ciot:ciotki"
+  - "ciot:cioteczki"
+  - "hoj:ahoj"
+  - "cip:cipsy"
+  - "srac:sraczka"
+  - "cip:cy pcha"
+  - "cip:ci pod"
+  - "morde:mor derca"
+  - "morde:morderca"
+  - "morde:mordeczk"
+  - "morde:mor deczk"
+  - "huj:chu juz"
+  - "cip:ci pom"
+  - "cip:ci pr"
+  - "cip:cy pie"
+  - "cip:ci py"
+  - "cip:ci po"
+  - "cip:cy pł"
+  - "cip:cy, pł"
+  - "cip:ać i"
+  - "cip:ac i"
+  - "cip:ci pl"
+  - "cip:dowcipn"
+  - "jebi:zajebiscie"
+  - "jebi:zajebiście"
+  - "srac:s raczje"
+  - "pierd:upierdliw"
+  - "pierd:pierdoł"
+  - "pierd:pierdół"
+  - "rucha:uruchamiam"
+  - "jebi:je by"
+  - "duschlampe:duschlampe"
+  - "scheise:scheiß e"
+  - "arse:tear"
+  - "arse:arsen"
+  - "arse:year"
+  - "arse:pharse"
+  - "arse:ar se"
+  - "arse:parse"
+  - "cock:cockroach"
+  - "кур:куре"
+  - "кур:курс"
+  - "еба:се ебав"
+  - "кур:нкурс"
+  - "гей:дгейм"
+  - "гей:гейминг"
+  - "гей:геймър"
+  - "гей:гейм"
+  - "гей:апогей"
+  - "гей:геймъри"
+  - "гей:геймърка"
+  - "гей:геймърче"
+  - "еба:Дееба"
+  - "gei:ge i"
+  - "гей:гейм д"
+  - "еба:ебата"
+  - "e6a:амеба"
 
 chat-placeholders:
   shrug:
     text: ":shrug:"
-    replacement: "¯\_(ツ)_/¯"
+    replacement: '¯\_(ツ)_/¯'
 
 antiSpam:
   enabled: true
@@ -40,6 +418,18 @@ antiSpam:
   maximum-messages: 3
   # Maximum is 1.0
   minimal-similarity: 0.41
+  random-letters:
+    enabled: true
+    # Minimum amount of letters in the message before this check can block it.
+    minimum-length: 18
+    # Only words at least this long are scored as random.
+    minimum-word-length: 6
+    # How many suspicious words must be found before blocking by ratio.
+    minimum-suspicious-words: 2
+    # 0.6 means 60% of checked long words must look random.
+    minimum-suspicious-ratio: 0.6
+    # Repeated 2-4 letter patterns this many times block immediately.
+    repeated-sequence-threshold: 4
   cooldown-per-message:
     enabled: false
     time: 5s
@@ -47,7 +437,7 @@ antiSpam:
     bypass-enabled: false
   # css.chat.bypass.antispam
   bypass-enabled: false
-  
+
 antiFlood:
   enabled: true
   maximum-chars: 2
@@ -57,14 +447,14 @@ antiFlood:
   maximum-numbers: 12
   # css.chat.bypass.antiflood
   bypass-enabled: false
-  
+
 antiAd:
   enabled: true
   whitelist:
   - "example.com"
   # css.chat.bypass.antiad
   bypass-enabled: false
-  
+
 options:
   # types: GLOBAL, PER_WORLD, DISTANCE
   type: GLOBAL
@@ -80,7 +470,7 @@ options:
     group2:
     - "world_the_end"
     # etc.
-    
+
 notification:
   color: "§e@" # RGB (#RRGGBB) or default vanilla color (§<colorChar>)
   sound:

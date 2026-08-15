@@ -35,7 +35,7 @@ public class JoinListener implements CssListener {
 
 	@EventHandler(priority = EventPriority.MONITOR)
 	public void onJoin(PlayerSpawnLocationEvent e) {
-		if(getConfig().getBoolean("force-spawn-location") || !e.getPlayer().hasPlayedBefore())
+		if(getConfig().getBoolean("force-spawn-location") || me.devtec.shared.API.offlineCache().lookupQuery(e.getPlayer().getUniqueId())==null)
 			e.setSpawnLocation(API.get().getConfigManager().getSpawn().toLocation());
 	}
 

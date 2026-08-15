@@ -25,7 +25,6 @@ import me.devtec.craftyserversystem.api.API;
 import me.devtec.craftyserversystem.events.CssListener;
 import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
 import me.devtec.craftyserversystem.utils.ChatHandlers;
-import me.devtec.shared.Pair;
 import me.devtec.shared.annotations.Nonnull;
 import me.devtec.shared.annotations.Nullable;
 import me.devtec.shared.dataholder.Config;
@@ -46,6 +45,12 @@ public class ChatListener implements CssListener {
 	private int maxMessages;
 	private double minSimilarity;
 	private boolean bypassAntiSpam;
+	private boolean randomLettersAntiSpamEnabled;
+	private int randomLettersMinimumLength;
+	private int randomLettersMinimumWordLength;
+	private int randomLettersMinimumSuspiciousWords;
+	private double randomLettersMinimumSuspiciousRatio;
+	private int randomLettersRepeatedSequenceThreshold;
 
 	// AntiSpam - Cooldown
 	@Nonnull
@@ -68,11 +73,19 @@ public class ChatListener implements CssListener {
 	private String replacement;
 	private boolean addColors;
 	@Nonnull
-	private List<String> words;
-	@Nonnull
-	private List<String> exactWords;
+	private List<ChatHandlers.BadWordRule> profanityRules;
 	private boolean bypassAntiSwear;
-	private List<Pair> allowedPhrases;
+	private boolean antiSwearBlockEvent;
+	private boolean antiSwearHistoryEnabled;
+	private int antiSwearHistoryMessages;
+	@Nonnull
+	private TempMap<UUID, List<String>> antiSwearHistory;
+	private List<ChatHandlers.AllowedPhraseRule> allowedPhrases;
+	private List<String> contextualPhrases;
+	private boolean autoModDebugEnabled;
+	private boolean autoModDebugConsole;
+	@Nonnull
+	private String autoModDebugPermission;
 
 	// AntiAd pattern
 	private boolean antiAdEnabled;
@@ -122,6 +135,25 @@ public class ChatListener implements CssListener {
 		maxMessages = getConfig().getInt("antiSpam.maximum-messages") + 1;
 		minSimilarity = getConfig().getDouble("antiSpam.minimal-similarity");
 		bypassAntiSpam = getConfig().getBoolean("antiSpam.bypass-enabled");
+		randomLettersAntiSpamEnabled = getConfig().getBoolean("antiSpam.random-letters.enabled");
+		randomLettersMinimumLength = getConfig().getInt("antiSpam.random-letters.minimum-length");
+		if (randomLettersMinimumLength <= 0)
+			randomLettersMinimumLength = 18;
+		randomLettersMinimumWordLength = getConfig().getInt("antiSpam.random-letters.minimum-word-length");
+		if (randomLettersMinimumWordLength <= 0)
+			randomLettersMinimumWordLength = 6;
+		randomLettersMinimumSuspiciousWords = getConfig()
+				.getInt("antiSpam.random-letters.minimum-suspicious-words");
+		if (randomLettersMinimumSuspiciousWords <= 0)
+			randomLettersMinimumSuspiciousWords = 2;
+		randomLettersMinimumSuspiciousRatio = getConfig()
+				.getDouble("antiSpam.random-letters.minimum-suspicious-ratio");
+		if (randomLettersMinimumSuspiciousRatio <= 0)
+			randomLettersMinimumSuspiciousRatio = 0.6;
+		randomLettersRepeatedSequenceThreshold = getConfig()
+				.getInt("antiSpam.random-letters.repeated-sequence-threshold");
+		if (randomLettersRepeatedSequenceThreshold <= 0)
+			randomLettersRepeatedSequenceThreshold = 4;
 		antiFloodEnabled = getConfig().getBoolean("antiFlood.enabled");
 		floodMaxChars = getConfig().getInt("antiFlood.maximum-chars");
 		floodMaxCapsChars = getConfig().getInt("antiFlood.maximum-caps-chars");
@@ -132,32 +164,49 @@ public class ChatListener implements CssListener {
 		antiSwearEnabled = getConfig().getBoolean("antiSwear.enabled");
 		replacement = getConfig().getString("antiSwear.replacement");
 		addColors = replacement.indexOf('§') != -1;
-		words = new ArrayList<>();
-		exactWords = new ArrayList<>();
-		for (String word : getConfig().getStringList("antiSwear.words"))
-			if (word.startsWith("*"))
-				exactWords.add(word.substring(1));
-			else
-				words.add(word);
+		profanityRules = new ArrayList<>();
+		loadProfanityRules("antiSwear.words");
+		loadProfanityRules("antiSwear.language-rules");
 		allowedPhrases = new ArrayList<>();
-		phraseLoop: for (String phrase : getConfig().getStringList("antiSwear.allowed-phrases")) {
+		for (String phrase : getConfig().getStringList("antiSwear.allowed-phrases")) {
 			if (phrase.indexOf(":") == -1) {
 				Loader.getPlugin().getLogger().warning("Failed loading allowed phrase '" + phrase
 						+ "' - Incorrect format! Format must be: 'swearWord:allowedPhrase'");
 				continue;
 			}
-			String[] split = phrase.split(":");
-			for (Pair pair : allowedPhrases)
-				if (pair.getKey().equals(split[0])) {
-					((List<String>) pair.getValue()).add(split[1].trim());
-					continue phraseLoop;
-				}
-			List<String> list;
-			Pair pair = Pair.of(split[0], list = new ArrayList<>());
-			list.add(split[1].trim());
-			allowedPhrases.add(pair);
+			String[] split = phrase.split(":", 2);
+			ChatHandlers.AllowedPhraseRule allowed = new ChatHandlers.AllowedPhraseRule(split[0], split[1].trim());
+			if (!allowed.isValid()) {
+				Loader.getPlugin().getLogger().warning("Failed loading allowed phrase '" + phrase
+						+ "' - Invalid normalized value");
+				continue;
+			}
+			allowedPhrases.add(allowed);
+		}
+		contextualPhrases = new ArrayList<>();
+		for (String phrase : getConfig().getStringList("antiSwear.contextual-phrases")) {
+			String normalizedPhrase = ChatHandlers.normalizeAntiSwearPhrase(phrase);
+			if (!normalizedPhrase.isEmpty())
+				contextualPhrases.add(normalizedPhrase);
 		}
 		bypassAntiSwear = getConfig().getBoolean("antiSwear.bypass-enabled");
+		antiSwearBlockEvent = getConfig().getBoolean("antiSwear.block-event");
+		antiSwearHistoryEnabled = getConfig().getBoolean("antiSwear.history.enabled");
+		autoModDebugEnabled = getConfig().getBoolean("antiSwear.automod-debug.enabled");
+		autoModDebugConsole = getConfig().getBoolean("antiSwear.automod-debug.console");
+		autoModDebugPermission = getConfig().getString("antiSwear.automod-debug.permission",
+				"css.chat.automod.debug");
+		antiSwearHistoryMessages = getConfig().getInt("antiSwear.history.maximum-messages");
+		if (antiSwearHistoryMessages <= 0)
+			antiSwearHistoryMessages = 4;
+		long antiSwearHistoryCache = TimeUtils.timeFromString(
+				getConfig().getString("antiSwear.history.cache", "20s")) * 20;
+		if (antiSwearHistory == null)
+			antiSwearHistory = new TempMap<>(antiSwearHistoryCache);
+		else {
+			antiSwearHistory.clear();
+			antiSwearHistory.setCacheTime(antiSwearHistoryCache);
+		}
 		antiAdEnabled = getConfig().getBoolean("antiAd.enabled");
 		bypassAntiAd = getConfig().getBoolean("antiAd.bypass-enabled");
 		antiAdWhitelist = getConfig().getStringList("antiAd.whitelist");
@@ -170,6 +219,14 @@ public class ChatListener implements CssListener {
 			chatPlaceholders.put(getConfig().getString("chat-placeholders." + key + ".text"),
 					getConfig().getString("chat-placeholders." + key + ".replacement"));
 		entrySetOfChatPlaceholders = chatPlaceholders.entrySet();
+	}
+
+	private void loadProfanityRules(String path) {
+		for (String value : getConfig().getStringList(path)) {
+			ChatHandlers.BadWordRule rule = ChatHandlers.parseProfanityRule(value);
+			if (rule != null && !rule.getWord().isEmpty())
+				profanityRules.add(rule);
+		}
 	}
 
 	@EventHandler(priority = EventPriority.HIGHEST)
@@ -229,33 +286,60 @@ public class ChatListener implements CssListener {
 				}
 				cdMsgs.add(e.getPlayer().getUniqueId());
 			}
-			if (ChatHandlers.processAntiSpam(e.getPlayer().getUniqueId(), modifiedMessage, prevMsgs, maxMessages,
-					minSimilarity)) {
+			if (randomLettersAntiSpamEnabled && ChatHandlers.randomLettersSpam(modifiedMessage,
+					randomLettersMinimumLength, randomLettersMinimumWordLength, randomLettersMinimumSuspiciousWords,
+					randomLettersMinimumSuspiciousRatio, randomLettersRepeatedSequenceThreshold) || ChatHandlers.processAntiSpam(e.getPlayer().getUniqueId(), modifiedMessage, prevMsgs, maxMessages,
+							minSimilarity)) {
 				e.setCancelled(true);
 				API.get().getMsgManager().sendMessageFromFile(getConfig(), "translations.antiSpam",
 						PlaceholdersExecutor.i().add("player", e.getPlayer().getName()), e.getPlayer());
 				return;
 			}
 		}
-		if (antiSwearEnabled && (bypassAntiSwear ? !e.getPlayer().hasPermission("css.chat.bypass.antiswear") : true))
-			if (getConfig().getBoolean("antiSwear.block-event")) {
-				if (ChatHandlers.antiSwear(modifiedMessage, words, exactWords, allowedPhrases,
-						ChatHandlers.match(modifiedMessage, playerNames))) {
-					e.setCancelled(true);
-					API.get().getMsgManager().sendMessageFromFile(getConfig(), "translations.antiSwear",
-							PlaceholdersExecutor.i().add("player", e.getPlayer().getName()), e.getPlayer());
-					return;
-				}
-			} else
-				modifiedMessage = ChatHandlers.antiSwearReplace(modifiedMessage, words, exactWords, allowedPhrases,
-						ChatHandlers.match(modifiedMessage, playerNames), replacement, addColors);
+		if (antiSwearEnabled && (bypassAntiSwear ? !e.getPlayer().hasPermission("css.chat.bypass.antiswear") : true)) {
+			int[][] ignoredSections = ChatHandlers.match(modifiedMessage, playerNames);
+			ChatHandlers.ProfanityResult currentResult = ChatHandlers.checkProfanity(modifiedMessage, profanityRules,
+					allowedPhrases, ignoredSections);
+			boolean currentMessageContainsSwear = currentResult.hasMatch();
+			String currentContextMatch = ChatHandlers.findContextualProfanity(modifiedMessage, contextualPhrases);
+			boolean currentContextContainsSwear = currentContextMatch != null;
+			boolean historyContainsSwear = false;
+			ChatHandlers.ProfanityResult historyResult = null;
+			String historyContextMatch = null;
+			if (!currentMessageContainsSwear && !currentContextContainsSwear && antiSwearHistoryEnabled) {
+				String historyMessage = buildAntiSwearHistoryMessage(e.getPlayer().getUniqueId(), modifiedMessage);
+				historyResult = ChatHandlers.checkProfanity(historyMessage, profanityRules, allowedPhrases,
+						ChatHandlers.match(historyMessage, playerNames));
+				historyContextMatch = ChatHandlers.findContextualProfanity(historyMessage, contextualPhrases);
+				historyContainsSwear = historyResult.hasMatch() || historyContextMatch != null;
+			}
+			debugAutoMod(e.getPlayer(), "message", currentResult, currentContextMatch);
+			if (historyContainsSwear)
+				debugAutoMod(e.getPlayer(), "history", historyResult, historyContextMatch);
+			if (antiSwearBlockEvent && currentMessageContainsSwear || currentContextContainsSwear
+					|| historyContainsSwear) {
+				e.setCancelled(true);
+				clearAntiSwearHistory(e.getPlayer().getUniqueId());
+				API.get().getMsgManager().sendMessageFromFile(getConfig(), "translations.antiSwear",
+						PlaceholdersExecutor.i().add("player", e.getPlayer().getName()), e.getPlayer());
+				return;
+			}
+			if (currentMessageContainsSwear) {
+				clearAntiSwearHistory(e.getPlayer().getUniqueId());
+				modifiedMessage = currentResult.replace(modifiedMessage, replacement, addColors);
+			} else if (antiSwearHistoryEnabled)
+				addAntiSwearHistory(e.getPlayer().getUniqueId(), modifiedMessage);
+		}
 
 		PlaceholdersExecutor placeholders = PlaceholdersExecutor.i().add("player", e.getPlayer().getName())
 				.add("player_name", e.getPlayer().getName()).papi(e.getPlayer().getUniqueId());
 
 		String userGroup = API.get().getPermissionHook().getGroup(e.getPlayer().getName());
-		if (!getConfig().exists("formats." + userGroup))
+		if (!getConfig().exists("formats." + userGroup)) {
 			userGroup = "__OTHER__";
+			if (!getConfig().exists("formats." + userGroup))
+				userGroup = "default";
+		}
 
 		placeholders.add("player", placeholders.apply(getConfig().getString("formats." + userGroup + ".name",
 				getConfig().getString("formats.__OTHER__.name"))));
@@ -331,7 +415,7 @@ public class ChatListener implements CssListener {
 				if (target.equals(e.getPlayer()))
 					continue;
 				if (me.devtec.shared.API.getUser(target.getUniqueId()).getBoolean("css.chatignore")) {
-					if (chatIgnoreOnlyPings && pinged.contains(target))
+					if (pinged!=null && chatIgnoreOnlyPings && pinged.contains(target))
 						continue;
 					receivers.remove();
 				}
@@ -344,6 +428,67 @@ public class ChatListener implements CssListener {
 								placeholders, e.getRecipients(), e.getPlayer())
 				.replace("%", "%%"));
 		e.getRecipients().clear(); // We have our own json format (see above)
+	}
+
+	private String buildAntiSwearHistoryMessage(UUID uniqueId, String message) {
+		List<String> history = antiSwearHistory.get(uniqueId);
+		if (history == null || history.isEmpty())
+			return message;
+		StringBuilder builder = new StringBuilder(message.length() + history.size() * 16);
+		for (String previousMessage : history) {
+			if (builder.length() != 0)
+				builder.append(' ');
+			builder.append(previousMessage);
+		}
+		if (builder.length() != 0)
+			builder.append(' ');
+		builder.append(message);
+		return builder.toString();
+	}
+
+	private void addAntiSwearHistory(UUID uniqueId, String message) {
+		if (message == null || message.trim().isEmpty())
+			return;
+		List<String> history = antiSwearHistory.get(uniqueId);
+		if (history == null)
+			history = new ArrayList<>(antiSwearHistoryMessages);
+		history.add(message);
+		while (history.size() > antiSwearHistoryMessages)
+			history.remove(0);
+		antiSwearHistory.put(uniqueId, history);
+	}
+
+	private void clearAntiSwearHistory(UUID uniqueId) {
+		if (antiSwearHistory != null)
+			antiSwearHistory.remove(uniqueId);
+	}
+
+	private void debugAutoMod(Player player, String source, ChatHandlers.ProfanityResult result,
+			String contextualPhrase) {
+		if (!autoModDebugEnabled)
+			return;
+		if (result != null)
+			for (ChatHandlers.ProfanityMatch match : result.getMatches())
+				if (match.getDecision() == ChatHandlers.ProfanityDecision.MATCH)
+					sendAutoModDebug("player=" + player.getName() + " source=" + source + " original="
+							+ cleanAutoModDebug(match.getOriginal()) + " rule=" + match.getRule().getWord() + " type="
+							+ match.getType() + " language=" + (match.getLanguage() == null ? "unknown" : match.getLanguage()));
+		if (contextualPhrase != null)
+			sendAutoModDebug("player=" + player.getName() + " source=" + source + " contextual="
+					+ cleanAutoModDebug(contextualPhrase));
+	}
+
+	private void sendAutoModDebug(String details) {
+		String message = "[AutoMod] " + details;
+		if (autoModDebugConsole)
+			Bukkit.getConsoleSender().sendMessage(message);
+		for (Player target : Bukkit.getOnlinePlayers())
+			if (target.hasPermission(autoModDebugPermission))
+				target.sendMessage(message);
+	}
+
+	private String cleanAutoModDebug(String value) {
+		return value == null ? "" : value.replace('\r', ' ').replace('\n', ' ');
 	}
 
 	public String notificationReplace(Player pinger, List<Player> pinged, StringContainer container,

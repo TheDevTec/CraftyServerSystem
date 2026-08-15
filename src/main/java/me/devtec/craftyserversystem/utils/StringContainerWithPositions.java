@@ -67,77 +67,70 @@ public class StringContainerWithPositions {
 
 	protected int[] indexOf(final int start, final String lookingFor, boolean ignoreSpaces,
 			boolean removeSequentialDuplicates, String original) {
-		byte countStars = 0;
-		if (original == null) {
-			int min = Math.min(start, count);
-			int size = lookingFor.length();
-			if (min + size > count)
-				return null;
+		int min = Math.min(start, count);
+		int size = lookingFor.length();
+		if (min + size > count)
+			return null;
 
-			char firstChar = lookingFor.charAt(0);
-			char prev = 0;
-			for (int i = min; i < count; ++i) {
-				char c = value[i];
-				if (ignoreSpaces && Character.isWhitespace(c))
-					continue;
-				if (c == firstChar || c == '*') {
-					prev = c;
-					if (c == '*')
-						countStars = 1;
-					else
-						countStars = 0;
-					int foundPos = 1;
-					for (int d = ++i; d < count; ++d) {
-						char e = value[d];
-						if (ignoreSpaces && Character.isWhitespace(e))
-							continue;
-						if (e == '*' && ++countStars <= 2 || e == lookingFor.charAt(foundPos)) {
-							if (++foundPos == size)
-								return new int[] { i - 1, d };
-						} else if (removeSequentialDuplicates && e == prev && !Character.isWhitespace(e))
-							continue;
-						else
-							break;
-						prev = e;
-					}
-				}
+		char firstChar = lookingFor.charAt(0);
+		char prev = 0;
+		for (int i = min; i < count; ++i) {
+			char c = original == null ? value[i] : original.charAt(realPos[i]);
+			if (ignoreSpaces && Character.isWhitespace(c))
+				continue;
+			// $/@ act as their letter counterpart ('s'/'a') when they appear at the
+			// start of a swear ("$hit" → "shit"); '*' is a general wildcard start.
+			boolean startsWildcard = c == '*'
+					|| c == '$' && firstChar == 's'
+					|| c == '@' && firstChar == 'a';
+			if (c == firstChar || startsWildcard) {
 				prev = c;
-			}
-		} else {
-			int min = Math.min(start, count);
-			int size = lookingFor.length();
-			if (min + size > count)
-				return null;
-
-			char firstChar = lookingFor.charAt(0);
-			char prev = 0;
-			for (int i = min; i < count; ++i) {
-				char c = original.charAt(realPos[i]);
-				if (ignoreSpaces && Character.isWhitespace(c))
-					continue;
-				if (c == firstChar || c == '*') {
-					prev = c;
-					if (c == '*')
-						countStars = 1;
-					else
-						countStars = 0;
-					int foundPos = 1;
-					for (int d = ++i; d < count; ++d) {
-						char e = original.charAt(realPos[d]);
-						if (ignoreSpaces && Character.isWhitespace(e))
-							continue;
-						if (e == '*' && ++countStars <= 2 || e == lookingFor.charAt(foundPos)) {
-							if (++foundPos == size)
-								return new int[] { i - 1, d };
-						} else if (removeSequentialDuplicates && e == prev && !Character.isWhitespace(e))
-							continue;
-						else
-							break;
+				byte countStars = (byte) (c == '*' ? 1 : 0);
+				boolean hasObfuscation = startsWildcard;
+				int extrasUsed = 0;
+				int foundPos = 1;
+				for (int d = ++i; d < count; ++d) {
+					char e = original == null ? value[d] : original.charAt(realPos[d]);
+					if (ignoreSpaces && Character.isWhitespace(e))
+						continue;
+					if (foundPos == size)
+						return new int[] { i - 1, d - 1 };
+					char expected = lookingFor.charAt(foundPos);
+					// $ / @ inside a match: match their letter if that fits the pattern,
+					// otherwise they're silent — swallowed like whitespace with
+					// ignoreSpaces. This is what catches "K$o$k$o$t" against "kokot".
+					if (e == '$' || e == '@') {
+						hasObfuscation = true;
+						char asLetter = e == '$' ? 's' : 'a';
+						if (asLetter == expected && ++foundPos == size)
+							return new int[] { i - 1, d };
 						prev = e;
+						continue;
 					}
+					if (e == '*' && ++countStars <= 2) {
+						hasObfuscation = true;
+						if (++foundPos == size)
+							return new int[] { i - 1, d };
+					} else if (e == expected) {
+						if (++foundPos == size)
+							return new int[] { i - 1, d };
+					} else if (removeSequentialDuplicates && e == prev && !Character.isWhitespace(e)) {
+						continue;
+					} else if (hasObfuscation && extrasUsed < 1 && Character.isLetter(e)) {
+						// Once we're already inside an obfuscated match, tolerate one
+						// spurious letter ("K$o$k$xo$t" against "kokot"). Gating on
+						// prior obfuscation stops random typos from being treated
+						// as swears.
+						++extrasUsed;
+						prev = e;
+						continue;
+					} else {
+						break;
+					}
+					prev = e;
 				}
-				prev = c;
 			}
+			prev = c;
 		}
 		return null;
 	}

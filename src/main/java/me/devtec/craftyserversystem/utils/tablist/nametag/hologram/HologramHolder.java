@@ -2,10 +2,13 @@ package me.devtec.craftyserversystem.utils.tablist.nametag.hologram;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import org.bukkit.World;
 
 import me.devtec.shared.Ref;
 import me.devtec.shared.utility.MathUtils;
@@ -16,6 +19,7 @@ public interface HologramHolder {
 	AtomicInteger integer = (AtomicInteger) Ref
 			.getStatic(Ref.field(Ref.nms("world.entity", "Entity"), AtomicInteger.class));
 	Field entityCount = Ref.field(Ref.nms("world.entity", "Entity"), "entityCount");
+	Method levelEntityCount = Ref.method(Ref.nms("world.level", "Level"), "getNextEntityId");
 
 	Class<?> metadataClass = Ref.nms("network.protocol.game",
 			BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "ClientboundSetEntityDataPacket" : "PacketPlayOutEntityMetadata");
@@ -43,7 +47,7 @@ public interface HologramHolder {
 		try {
 			return Ref.isNewerThan(19) || Ref.serverVersionInt() == 19 && Ref.serverVersionRelease() >= 2
 					? Ref.newInstance(metadataConstructor, id, list)
-					: initMetadataPacket(Ref.newUnsafeInstance(metadataClass), id, list);
+							: initMetadataPacket(Ref.newUnsafeInstance(metadataClass), id, list);
 		} catch (Exception e) {
 			return null;
 		}
@@ -79,9 +83,11 @@ public interface HologramHolder {
 		}
 	}
 
-	static int increaseAndGetId() {
+	static int increaseAndGetId(World world) {
 		if (integer != null)
 			return integer.incrementAndGet();
+		if(levelEntityCount!=null)
+			return (int)Ref.invoke(BukkitLoader.getNmsProvider().getWorld(world), levelEntityCount);
 		int count = (int) Ref.getStatic(entityCount);
 		Ref.setStatic(entityCount, count + 1);
 		return count;

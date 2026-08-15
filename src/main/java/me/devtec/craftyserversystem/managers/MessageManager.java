@@ -405,26 +405,27 @@ public class MessageManager {
 		}
 
 		private int[] find(int startAt, String value) {
-			for (int i = startAt; i < value.length(); ++i) {
-				char c = value.charAt(i);
-				char endChar = c=='['?']':'%';
-				if (c == '[' || c=='%') {
-					if (value.length() > i + 5)
-						if (value.charAt(i + 1) == 'i' && value.charAt(i + 2) == 't' && value.charAt(i + 3) == 'e'
-						&& value.charAt(i + 4) == 'm' && value.charAt(i + 5) == endChar)
-							return new int[] { i, 6 };
-					if (value.length() > i + 2)
-						if (value.charAt(i + 1) == 'i' && value.charAt(i + 2) == endChar)
-							return new int[] { i, 3 };
-					if (value.length() > i + 4)
-						if (value.charAt(i + 1) == 'i' && value.charAt(i + 2) == 'n' && value.charAt(i + 3) == 'v'
-						&& value.charAt(i + 4) == endChar)
-							return new int[] { i, 5 };
-					if (value.length() > i + 3)
-						if (value.charAt(i + 1) == 'e' && value.charAt(i + 2) == 'c' && value.charAt(i + 3) == endChar)
-							return new int[] { i, 4 };
+			if(value!=null)
+				for (int i = startAt; i < value.length(); ++i) {
+					char c = value.charAt(i);
+					char endChar = c=='['?']':'%';
+					if (c == '[' || c=='%') {
+						if (value.length() > i + 5)
+							if (value.charAt(i + 1) == 'i' && value.charAt(i + 2) == 't' && value.charAt(i + 3) == 'e'
+							&& value.charAt(i + 4) == 'm' && value.charAt(i + 5) == endChar)
+								return new int[] { i, 6 };
+						if (value.length() > i + 2)
+							if (value.charAt(i + 1) == 'i' && value.charAt(i + 2) == endChar)
+								return new int[] { i, 3 };
+						if (value.length() > i + 4)
+							if (value.charAt(i + 1) == 'i' && value.charAt(i + 2) == 'n' && value.charAt(i + 3) == 'v'
+							&& value.charAt(i + 4) == endChar)
+								return new int[] { i, 5 };
+						if (value.length() > i + 3)
+							if (value.charAt(i + 1) == 'e' && value.charAt(i + 2) == 'c' && value.charAt(i + 3) == endChar)
+								return new int[] { i, 4 };
+					}
 				}
-			}
 			return null;
 		}
 	}

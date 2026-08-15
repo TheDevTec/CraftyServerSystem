@@ -97,21 +97,21 @@ public class TabAPI {
 		Method getName = Ref.method(teamPacket, "getName");
 		Method getParameters = Ref.method(teamPacket, "getParameters");
 		Method getPlayers = Ref.method(teamPacket, "getPlayers");
-		Method getCollisionRule = Ref.method(Ref.nms("network.protocol.game", "ClientboundSetPlayerTeamPacket$Parameters"), "getCollisionRule");
-		Method getNametagVisibility = Ref.method(Ref.nms("network.protocol.game", "ClientboundSetPlayerTeamPacket$Parameters"), "getNametagVisibility");
-		Method getPlayerPrefix = Ref.method(Ref.nms("network.protocol.game", "ClientboundSetPlayerTeamPacket$Parameters"), "getPlayerPrefix");
-		Method getPlayerSuffix = Ref.method(Ref.nms("network.protocol.game", "ClientboundSetPlayerTeamPacket$Parameters"), "getPlayerSuffix");
-		Method getDisplayName = Ref.method(Ref.nms("network.protocol.game", "ClientboundSetPlayerTeamPacket$Parameters"), "getDisplayName");
-		Method getOptions = Ref.method(Ref.nms("network.protocol.game", "ClientboundSetPlayerTeamPacket$Parameters"), "getOptions");
-		Method getColor = Ref.method(Ref.nms("network.protocol.game", "ClientboundSetPlayerTeamPacket$Parameters"), "getColor");
+		Method getCollisionRule = Ref.method(Ref.nms("network.protocol.game", "ClientboundSetPlayerTeamPacket$Parameters"), Ref.isNewerThan(25)?"collisionRule":"getCollisionRule");
+		Method getNametagVisibility = Ref.method(Ref.nms("network.protocol.game", "ClientboundSetPlayerTeamPacket$Parameters"), Ref.isNewerThan(25)?"nameTagVisibility":"getNametagVisibility");
+		Method getPlayerPrefix = Ref.method(Ref.nms("network.protocol.game", "ClientboundSetPlayerTeamPacket$Parameters"), Ref.isNewerThan(25)?"playerPrefix":"getPlayerPrefix");
+		Method getPlayerSuffix = Ref.method(Ref.nms("network.protocol.game", "ClientboundSetPlayerTeamPacket$Parameters"), Ref.isNewerThan(25)?"playerSuffix":"getPlayerSuffix");
+		Method getDisplayName = Ref.method(Ref.nms("network.protocol.game", "ClientboundSetPlayerTeamPacket$Parameters"), Ref.isNewerThan(25)?"displayName":"getDisplayName");
+		Method getOptions = Ref.method(Ref.nms("network.protocol.game", "ClientboundSetPlayerTeamPacket$Parameters"), Ref.isNewerThan(25)?"options":"getOptions");
+		Method getColor = Ref.method(Ref.nms("network.protocol.game", "ClientboundSetPlayerTeamPacket$Parameters"), Ref.isNewerThan(25)?"color":"getColor");
+
 		new PacketListener() {
 
+			@SuppressWarnings({ "unchecked", "rawtypes" })
 			@Override
 			public void playOut(String name, PacketContainer packetContainer, ChannelContainer channel) {
 				Object packet = packetContainer.getPacket();
 				if (packet.getClass().equals(teamPacket)) {
-
-					@SuppressWarnings("unchecked")
 					Collection<String> players = (Collection<String>)Ref.invoke(packet, getPlayers);
 					String teamName = (String)Ref.invoke(packet, getName);
 					Optional<?> optional = (Optional<?>)Ref.invoke(packet, getParameters);
@@ -125,7 +125,7 @@ public class TabAPI {
 								parameters==null?null:BukkitLoader.getNmsProvider().fromIChatBaseComponent(Ref.invoke(parameters, getPlayerPrefix)),
 										parameters==null?null:BukkitLoader.getNmsProvider().fromIChatBaseComponent(Ref.invoke(parameters, getPlayerSuffix)),
 												parameters==null?null:BukkitLoader.getNmsProvider().fromIChatBaseComponent(Ref.invoke(parameters, getDisplayName)),
-														parameters==null?ChatColor.WHITE:ChatColor.valueOf(((Enum<?>)Ref.invoke(parameters, getColor)).name()), (int)Ref.invoke(parameters, getOptions),
+														parameters==null?ChatColor.WHITE:ChatColor.valueOf(((Enum<?>)(Ref.invoke(parameters, getColor) instanceof Optional ? ((Optional)Ref.invoke(parameters, getColor)).orElse(TeamUtils.white) : Ref.invoke(parameters, getColor))).name()), ((Number)Ref.invoke(parameters, getOptions)).intValue(),
 																parameters==null?CollisionRule.ALWAYS:CollisionRule.valueOf(Ref.invoke(parameters, getCollisionRule).toString().toUpperCase()),
 																		parameters==null?Visibility.ALWAYS:Visibility.valueOf(Ref.invoke(parameters, getNametagVisibility).toString().toUpperCase())));
 						team.getPlayers().addAll(players);
@@ -142,7 +142,7 @@ public class TabAPI {
 									parameters==null?null:BukkitLoader.getNmsProvider().fromIChatBaseComponent(Ref.invoke(parameters, getPlayerPrefix)),
 											parameters==null?null:BukkitLoader.getNmsProvider().fromIChatBaseComponent(Ref.invoke(parameters, getPlayerSuffix)),
 													parameters==null?null:BukkitLoader.getNmsProvider().fromIChatBaseComponent(Ref.invoke(parameters, getDisplayName)),
-															parameters==null?ChatColor.WHITE:ChatColor.valueOf(((Enum<?>)Ref.invoke(parameters, getColor)).name()), (int)Ref.invoke(parameters, getOptions),
+															parameters==null?ChatColor.WHITE:ChatColor.valueOf(((Enum<?>)(Ref.invoke(parameters, getColor) instanceof Optional ? ((Optional)Ref.invoke(parameters, getColor)).orElse(TeamUtils.white) : Ref.invoke(parameters, getColor))).name()), ((Number)Ref.invoke(parameters, getOptions)).intValue(),
 																	parameters==null?CollisionRule.ALWAYS:CollisionRule.valueOf(Ref.invoke(parameters, getCollisionRule).toString().toUpperCase()),
 																			parameters==null?Visibility.ALWAYS:Visibility.valueOf(Ref.invoke(parameters, getNametagVisibility).toString().toUpperCase())));
 						else if(parameters!=null){
@@ -172,7 +172,7 @@ public class TabAPI {
 							team.setPrefix(BukkitLoader.getNmsProvider().fromIChatBaseComponent(Ref.invoke(parameters, getPlayerPrefix)));
 							team.setSuffix(BukkitLoader.getNmsProvider().fromIChatBaseComponent(Ref.invoke(parameters, getPlayerSuffix)));
 							team.setDisplayName(BukkitLoader.getNmsProvider().fromIChatBaseComponent(Ref.invoke(parameters, getDisplayName)));
-							team.setColor(ChatColor.valueOf(((Enum<?>)Ref.invoke(parameters, getColor)).name()));
+							team.setColor(ChatColor.valueOf(((Enum<?>)(Ref.invoke(parameters, getColor) instanceof Optional ? ((Optional)Ref.invoke(parameters, getColor)).orElse(TeamUtils.white) : Ref.invoke(parameters, getColor))).name()));
 							team.setCollisionRule(CollisionRule.valueOf(Ref.invoke(parameters, getCollisionRule).toString().toUpperCase()));
 							team.setNametagVisibility(Visibility.valueOf(Ref.invoke(parameters, getNametagVisibility).toString().toUpperCase()));
 						}
@@ -213,6 +213,11 @@ public class TabAPI {
 	}
 
 	@Nullable
+	public static ClassicTabPlayer getNullableHolder(UUID player) {
+		return data.get(player);
+	}
+
+	@Nullable
 	public static ClassicTabPlayer getHolder(String playerName) {
 		return getHolder(API.offlineCache().lookupId(playerName));
 	}
@@ -247,7 +252,8 @@ public class TabAPI {
 		if(holder!=null)
 			for (ClassicTabPlayer active : TabAPI.getPlayers()) {
 				active.getWhoSeeAdditionalLines().remove(holder);
-				active.removeTeam(holder.getPrimaryTeam().getTeam());
+				if(holder.getPrimaryTeam()!=null)
+					active.removeTeam(holder.getPrimaryTeam().getTeam());
 			}
 		return holder;
 	}
