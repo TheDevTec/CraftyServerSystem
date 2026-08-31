@@ -21,6 +21,8 @@ import me.devtec.shared.scheduler.Tasker;
 import me.devtec.shared.sorting.SortingAPI;
 import me.devtec.shared.sorting.SortingAPI.ComparableObject;
 import me.devtec.theapi.bukkit.BukkitLoader;
+import me.devtec.theapi.bukkit.nms.utils.TeamUtils.CollisionRule;
+import me.devtec.theapi.bukkit.nms.utils.TeamUtils.Visibility;
 import net.luckperms.api.LuckPermsProvider;
 import net.luckperms.api.event.EventSubscription;
 import net.luckperms.api.event.group.GroupDataRecalculateEvent;
@@ -43,12 +45,16 @@ public class LuckPermsTeamManager implements TeamManager {
 				Pair pair = updates.poll();
 				while (pair != null) {
 					ClassicTabPlayer player = (ClassicTabPlayer) pair.getKey();
-					String team = makeItOriginal(player.getId(),getTeam((String) pair.getValue()));
+					String newTeam = getTeam((String) pair.getValue());
+					if(player.getPrimaryTeam()==null)
+						player.changePrimaryTeam(new SimpleTeam(newTeam, null, null, null, null, 0, CollisionRule.ALWAYS, player.getAdditionalLines().isEmpty() ? Visibility.ALWAYS : Visibility.NEVER));
+					else
+						if(newTeam!=player.getPrimaryTeam().getTeam())
+							player.changePrimaryTeam(player.getPrimaryTeam().asName(newTeam));
 					List<SimpleTeam> teams = new ArrayList<>();
 					for(SimpleTeam t : player.getTeams()) {
-						if(t.getTeam().equals(team))
-							//TODO update team
-							break;
+						if(t.getTeam().equals(newTeam))
+							continue;
 						if(t.getTeam().startsWith("css_"))
 							if(t.getPlayers().size()==1)
 								teams.add(t);
@@ -66,7 +72,6 @@ public class LuckPermsTeamManager implements TeamManager {
 						for(ClassicTabPlayer holder : TabAPI.getPlayers())
 							holder.leaveTeam(t);
 					}
-					//TODO update lines
 					pair = updates.poll();
 				}
 
@@ -102,7 +107,7 @@ public class LuckPermsTeamManager implements TeamManager {
 
 	@Override
 	public String getTeam(UUID playerUuid) {
-		return getTeam(LuckPermsProvider.get().getUserManager().getUser(playerUuid).getPrimaryGroup());
+		return makeItOriginal(TabAPI.getHolder(playerUuid).getId(), getTeam(LuckPermsProvider.get().getUserManager().getUser(playerUuid).getPrimaryGroup()));
 	}
 
 	@Override

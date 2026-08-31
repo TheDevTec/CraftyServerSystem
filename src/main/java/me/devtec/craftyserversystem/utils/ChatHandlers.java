@@ -1,23 +1,9 @@
 package me.devtec.craftyserversystem.utils;
 
 import java.text.Normalizer;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
-import me.devtec.shared.Pair;
 import me.devtec.shared.dataholder.StringContainer;
-import me.devtec.shared.sorting.SortingAPI;
-import me.devtec.shared.sorting.SortingAPI.ComparableObject;
 
 public class ChatHandlers {
 
@@ -855,7 +841,7 @@ public class ChatHandlers {
 			for (String word : checkedWords)
 				if (looksRandomLetterWord(word, Math.max(3, repeatedSequenceThreshold - 1)))
 					++suspiciousWords;
-			if ((checkedWords.size() == 1 && suspiciousWords == 1) || (checkedWords.size() == 2 && suspiciousWords == 1))
+			if (checkedWords.size() == 1 && suspiciousWords == 1 || checkedWords.size() == 2 && suspiciousWords == 1)
 				return true;
 			return false;
 		}
@@ -919,7 +905,7 @@ public class ChatHandlers {
 				++suspiciousBigrams;
 		}
 
-		if (maxConsonantsInRow >= 5 || maxVowelsInRow >= 4 || (word.length() >= 8 && suspiciousBigrams >= 2))
+		if (maxConsonantsInRow >= 5 || maxVowelsInRow >= 4 || word.length() >= 8 && suspiciousBigrams >= 2)
 			return true;
 		return word.length() >= 12 && suspiciousBigrams >= 1 && maxConsonantsInRow >= 4;
 	}
@@ -1002,13 +988,20 @@ public class ChatHandlers {
 	public static final class BadWordRule {
 		private final String word;
 		private final boolean matchInsideWord;
+		private final boolean replaceWholeWord;
 		private final Set<String> languages;
 		private final Set<String> collisionLanguages;
 
 		public BadWordRule(String word, boolean matchInsideWord, Set<String> languages,
 				Set<String> collisionLanguages) {
+			this(word, matchInsideWord, false, languages, collisionLanguages);
+		}
+
+		private BadWordRule(String word, boolean matchInsideWord, boolean replaceWholeWord, Set<String> languages,
+				Set<String> collisionLanguages) {
 			this.word = normalizeRuleWord(word);
 			this.matchInsideWord = matchInsideWord;
+			this.replaceWholeWord = replaceWholeWord;
 			this.languages = normalizeLanguageSet(languages);
 			this.collisionLanguages = normalizeLanguageSet(collisionLanguages);
 		}
@@ -1019,6 +1012,10 @@ public class ChatHandlers {
 
 		public boolean isMatchInsideWord() {
 			return matchInsideWord;
+		}
+
+		public boolean isReplaceWholeWord() {
+			return replaceWholeWord;
 		}
 
 		public Set<String> getLanguages() {
@@ -1105,6 +1102,28 @@ public class ChatHandlers {
 		}
 	}
 
+	public static final class LanguageProfile {
+		private final byte[] scores = new byte[LANGUAGE_CODES.length];
+
+		public void learn(String input) {
+			int mask = detectLanguageMask(input);
+			if (mask == 0)
+				return;
+			int increment = Integer.bitCount(mask) == 1 ? 2 : 1;
+			for (int i = 0; i < scores.length; ++i)
+				if ((mask & 1 << i) != 0)
+					scores[i] = (byte) Math.min(32, scores[i] + increment);
+		}
+
+		public Set<String> getLanguages() {
+			Set<String> languages = new LinkedHashSet<>();
+			for (int i = 0; i < scores.length; ++i)
+				if (scores[i] >= 3)
+					languages.add(LANGUAGE_CODES[i]);
+			return languages;
+		}
+	}
+
 	private static final class NormalizedText {
 		private final String text;
 		private final int[] starts;
@@ -1137,18 +1156,26 @@ public class ChatHandlers {
 			return null;
 		String[] parts = value.split("\\|", 3);
 		if (parts.length != 3) {
-			boolean anywhere = value.startsWith("*");
-			return new BadWordRule(anywhere ? value.substring(1) : value, anywhere, Collections.<String>emptySet(),
+			boolean stem = value.startsWith("+");
+			boolean anywhere = stem || value.startsWith("*");
+			return new BadWordRule(anywhere ? value.substring(1) : value, anywhere, stem,
+					Collections.<String>emptySet(),
 					Collections.<String>emptySet());
 		}
 		String word = parts[2].trim();
-		boolean anywhere = word.startsWith("*");
-		return new BadWordRule(anywhere ? word.substring(1) : word, anywhere, parseLanguages(parts[0]),
+		boolean stem = word.startsWith("+");
+		boolean anywhere = stem || word.startsWith("*");
+		return new BadWordRule(anywhere ? word.substring(1) : word, anywhere, stem, parseLanguages(parts[0]),
 				parseLanguages(parts[1]));
 	}
 
 	public static ProfanityResult checkProfanity(String input, List<BadWordRule> rules,
 			List<AllowedPhraseRule> allowedPhrases, int[][] ignoredSections) {
+		return checkProfanity(input, rules, allowedPhrases, ignoredSections, Collections.<String>emptySet());
+	}
+
+	public static ProfanityResult checkProfanity(String input, List<BadWordRule> rules,
+			List<AllowedPhraseRule> allowedPhrases, int[][] ignoredSections, Set<String> profileLanguages) {
 		if (input == null || input.isEmpty() || rules == null || rules.isEmpty())
 			return new ProfanityResult(Collections.<ProfanityMatch>emptyList());
 
@@ -1168,19 +1195,36 @@ public class ChatHandlers {
 		String detectedLanguage = null;
 		List<ProfanityMatch> matches = new ArrayList<>();
 		for (Candidate candidate : candidates.values()) {
-			if (candidate.type == ProfanityMatchType.OBFUSCATED && !isObfuscatedJoin(input, candidate))
-				continue;
-			if (isAllowedPhrase(input, candidate, allowedPhrases))
+			if ((candidate.type == ProfanityMatchType.OBFUSCATED && !isObfuscatedJoin(input, candidate)) || isAllowedPhrase(input, candidate, allowedPhrases))
 				continue;
 			ProfanityDecision decision = ProfanityDecision.MATCH;
 			if (!candidate.rule.languages.isEmpty() || !candidate.rule.collisionLanguages.isEmpty()) {
-				if (detectedLanguage == null)
+				String ruleLanguage = detectRuleDiacritics(input, candidate.rule);
+				if (ruleLanguage != null)
+					detectedLanguage = ruleLanguage;
+				else if (detectedLanguage == null)
 					detectedLanguage = detectChatLanguage(input);
+				if (detectedLanguage == null && profileLanguages != null && !profileLanguages.isEmpty()) {
+					String profileMatch = null;
+					boolean profileCollision = false;
+					for (String language : profileLanguages) {
+						if (candidate.rule.collisionLanguages.contains(language))
+							profileCollision = true;
+						if (candidate.rule.languages.contains(language))
+							profileMatch = language;
+					}
+					if (profileMatch != null && !profileCollision)
+						detectedLanguage = profileMatch + " (profile)";
+					else if (profileCollision && profileMatch == null) {
+						detectedLanguage = "profile-collision";
+						decision = ProfanityDecision.IGNORE;
+					}
+				}
 				if (detectedLanguage == null)
 					decision = ProfanityDecision.REVIEW;
-				else if (!candidate.rule.languages.isEmpty() && !candidate.rule.languages.contains(detectedLanguage))
-					decision = ProfanityDecision.IGNORE;
-				else if (candidate.rule.collisionLanguages.contains(detectedLanguage))
+				else if (decision != ProfanityDecision.IGNORE && ruleLanguage == null && !detectedLanguage.endsWith(" (profile)")
+						&& ((!candidate.rule.languages.isEmpty() && !containsDetectedLanguage(candidate.rule.languages, detectedLanguage))
+								|| containsDetectedLanguage(candidate.rule.collisionLanguages, detectedLanguage)))
 					decision = ProfanityDecision.IGNORE;
 			}
 			ProfanityMatchType type = candidate.type;
@@ -1188,8 +1232,70 @@ public class ChatHandlers {
 			if (type == ProfanityMatchType.NORMALIZED && original.equalsIgnoreCase(candidate.rule.word))
 				type = ProfanityMatchType.EXACT;
 			matches.add(new ProfanityMatch(candidate.rule, candidate.start, candidate.end, original, type, decision,
-					detectedLanguage));
+					detectedLanguage == null && candidate.rule.languages.isEmpty() && candidate.rule.collisionLanguages.isEmpty() ? "global" : detectedLanguage));
 		}
+		return new ProfanityResult(matches);
+	}
+
+	private static String detectRuleDiacritics(String input, BadWordRule rule) {
+		if ((!rule.languages.contains("cs") && !rule.languages.contains("sk")) || input == null)
+			return null;
+		for (int i = 0; i < input.length(); ++i)
+			switch (Character.toLowerCase(input.charAt(i))) {
+			case '\u010d': case '\u010f': case '\u011b': case '\u0148': case '\u0159': case '\u0161': case '\u0165': case '\u016f': case '\u017e':
+				return "cs/sk";
+			case '\u013e': case '\u013a': case '\u0155': case '\u00e4': case '\u00f4':
+				return "sk";
+			default:
+				break;
+			}
+		return null;
+	}
+
+	private static boolean containsDetectedLanguage(Set<String> languages, String detectedLanguage) {
+		if (detectedLanguage == null)
+			return false;
+		String normalized = detectedLanguage.replace(" (profile)", "");
+		for (String language : normalized.split("/"))
+			if (languages.contains(language))
+				return true;
+		return false;
+	}
+
+	// Checks a word completed by the current message.
+	public static ProfanityResult checkSplitProfanity(List<String> history, String current, List<BadWordRule> rules,
+			List<AllowedPhraseRule> allowedPhrases) {
+		return checkSplitProfanity(history, current, rules, allowedPhrases, Collections.<String>emptySet());
+	}
+
+	public static ProfanityResult checkSplitProfanity(List<String> history, String current, List<BadWordRule> rules,
+			List<AllowedPhraseRule> allowedPhrases, Set<String> profileLanguages) {
+		if (history == null || history.isEmpty() || current == null || current.isEmpty() || rules == null || rules.isEmpty())
+			return new ProfanityResult(Collections.<ProfanityMatch>emptyList());
+
+		int limit = 2;
+		for (BadWordRule rule : rules)
+			if (rule != null)
+				limit = Math.max(limit, rule.word.length() + 2);
+		StringBuilder previous = new StringBuilder();
+		for (String message : history)
+			if (message != null)
+				previous.append(message);
+		if (previous.length() > limit)
+			previous.delete(0, previous.length() - limit);
+
+		int boundary = previous.length();
+		if (boundary == 0)
+			return new ProfanityResult(Collections.<ProfanityMatch>emptyList());
+		ProfanityResult combined = checkProfanity(previous.append(current).toString(), rules, allowedPhrases, null, profileLanguages);
+		List<ProfanityMatch> matches = new ArrayList<>();
+		for (ProfanityMatch match : combined.getMatches())
+			if (match.getStart() < boundary && match.getEnd() > boundary) {
+				int end = Math.min(current.length(), match.getEnd() - boundary);
+				if (end > 0)
+					matches.add(new ProfanityMatch(match.getRule(), 0, end, current.substring(0, end), match.getType(),
+							match.getDecision(), match.getLanguage()));
+			}
 		return new ProfanityResult(matches);
 	}
 
@@ -1225,21 +1331,64 @@ public class ChatHandlers {
 			Map<String, Candidate> candidates) {
 		int at = normalized.text.indexOf(rule.word);
 		while (at != -1) {
-			int end = at + rule.word.length();
-			if (rule.matchInsideWord || hasWordStart(normalized.text, at)) {
-				int originalStart = normalized.starts[at];
-				int originalEnd = normalized.ends[end - 1];
-				String key = originalStart + ":" + originalEnd + ":" + rule.word;
-				Candidate existing = candidates.get(key);
-				if (existing == null || existing.type == ProfanityMatchType.OBFUSCATED && type != ProfanityMatchType.OBFUSCATED)
-					candidates.put(key, new Candidate(rule, originalStart, originalEnd, type));
-			}
+			addCandidate(normalized, rule, type, candidates, at, rule.word.length());
 			at = normalized.text.indexOf(rule.word, at + 1);
 		}
+		findMissingVowelCandidates(normalized, rule, type, candidates);
+	}
+
+	private static void findMissingVowelCandidates(NormalizedText normalized, BadWordRule rule, ProfanityMatchType type,
+			Map<String, Candidate> candidates) {
+		if (rule.word.length() < 5)
+			return;
+		Set<String> variants = new HashSet<>();
+		for (int i = 1; i < rule.word.length() - 1; ++i)
+			if (isVowel(rule.word.charAt(i)))
+				variants.add(rule.word.substring(0, i) + rule.word.substring(i + 1));
+		for (String variant : variants) {
+			int at = normalized.text.indexOf(variant);
+			while (at != -1) {
+				addCandidate(normalized, rule, type, candidates, at, variant.length());
+				at = normalized.text.indexOf(variant, at + 1);
+			}
+		}
+	}
+
+	private static boolean isVowel(char character) {
+		return character == 'a' || character == 'e' || character == 'i' || character == 'o' || character == 'u' || character == 'y';
+	}
+
+	private static void addCandidate(NormalizedText normalized, BadWordRule rule, ProfanityMatchType type,
+			Map<String, Candidate> candidates, int at, int length) {
+		int end = at + length;
+		if (!rule.matchInsideWord && !hasWordStart(normalized.text, at))
+			return;
+		int originalStart = normalized.starts[at];
+		int originalEnd = normalized.ends[end - 1];
+		if (rule.replaceWholeWord) {
+			originalStart = findOriginalWordStart(normalized, at);
+			originalEnd = findOriginalWordEnd(normalized, end);
+		}
+		String key = originalStart + ":" + originalEnd + ":" + rule.word;
+		Candidate existing = candidates.get(key);
+		if (existing == null || existing.type == ProfanityMatchType.OBFUSCATED && type != ProfanityMatchType.OBFUSCATED)
+			candidates.put(key, new Candidate(rule, originalStart, originalEnd, type));
 	}
 
 	private static boolean hasWordStart(String text, int at) {
 		return at == 0 || text.charAt(at - 1) == ' ';
+	}
+
+	private static int findOriginalWordStart(NormalizedText normalized, int at) {
+		while (at > 0 && normalized.ends[at - 1] == normalized.starts[at])
+			--at;
+		return normalized.starts[at];
+	}
+
+	private static int findOriginalWordEnd(NormalizedText normalized, int end) {
+		while (end < normalized.text.length() && normalized.starts[end] == normalized.ends[end - 1])
+			++end;
+		return normalized.ends[end - 1];
 	}
 
 	private static boolean isObfuscatedJoin(String input, Candidate candidate) {
@@ -1274,7 +1423,10 @@ public class ChatHandlers {
 			int at = normalized.text.indexOf(expected);
 			while (at != -1) {
 				int end = at + expected.length();
-				if (isOriginalWordBounded(input, normalized.starts[at], normalized.ends[end - 1]))
+				int phraseStart = normalized.starts[at];
+				int phraseEnd = normalized.ends[end - 1];
+				if (isOriginalWordBounded(input, phraseStart, phraseEnd)
+						&& candidate.start >= phraseStart && candidate.end <= phraseEnd)
 					return true;
 				at = normalized.text.indexOf(expected, at + 1);
 			}
@@ -1341,38 +1493,122 @@ public class ChatHandlers {
 		}
 	}
 
-	private static String detectChatLanguage(String input) {
-		String normalized = Normalizer.normalize(input.toLowerCase(Locale.ROOT), Normalizer.Form.NFKC);
-		if (normalized.length() < 6)
-			return null;
-		int romanian = scoreLanguage(normalized, "ă", "â", "î", "ș", "ț", "cam", "greu", "este", "sunt", "pentru", "care", "acest");
-		int czech = scoreLanguage(normalized, "ě", "ř", "ů", "č", "š", "ž", "jsem", "jsi", "kde", "jak", "proto", "tenhle", "něco");
-		int slovak = scoreLanguage(normalized, "ľ", "ĺ", "ŕ", "ä", "ô", "ď", "ť", "ako", "som", "nie", "ktor", "toto");
-		int polish = scoreLanguage(normalized, "ą", "ę", "ł", "ś", "ź", "ż", "cz", "sz", "jest", "nie", "który");
-		int russian = scoreLanguage(normalized, "ы", "э", "ё", "привет", "это", "что", "для", "пожал");
-		int bulgarian = scoreLanguage(normalized, "ъ", "щ", "й", "съм", "това", "българ", "няма");
-		int best = Math.max(romanian, Math.max(czech, Math.max(slovak, Math.max(polish, Math.max(russian, bulgarian)))));
-		if (best < 1)
-			return null;
-		if (best == romanian)
-			return "ro";
-		if (best == czech)
-			return "cs";
-		if (best == slovak)
-			return "sk";
-		if (best == polish)
-			return "pl";
-		if (best == russian)
-			return "ru";
-		return "bg";
+	private static final String[] LANGUAGE_CODES = {
+			"bg", "cs", "pl", "hr", "sk", "de", "da", "nl", "el", "en", "es", "fi", "fr", "hu", "it", "lt", "lv", "pt", "ro", "ru", "sr", "sv", "tr"
+	};
+	private static final Map<String, Integer> LANGUAGE_TOKENS = createLanguageTokens();
+
+	private static Map<String, Integer> createLanguageTokens() {
+		Map<String, Integer> tokens = new HashMap<>();
+		addLanguageTokens(tokens, "bg", "здравей", "какво", "това", "защо", "добре", "хора", "благодаря", "няма", "съм");
+		addLanguageTokens(tokens, "cs", "ahoj", "čau", "zdar", "lidi", "jsem", "jsi", "jste", "kde", "proč", "díky", "prosím", "něco", "tenhle");
+		addLanguageTokens(tokens, "pl", "cześć", "jestem", "dlaczego", "dziękuję", "ludzie", "który", "dobrze", "proszę", "nie");
+		addLanguageTokens(tokens, "hr", "bok", "ljudi", "sam", "što", "kako", "zašto", "hvala", "nije", "dobro");
+		addLanguageTokens(tokens, "sk", "ahoj", "čau", "ľudia", "som", "si", "ste", "kde", "prečo", "ďakujem", "prosím", "niečo", "tento");
+		addLanguageTokens(tokens, "de", "hallo", "was", "ist", "das", "wie", "warum", "danke", "ich", "nicht", "bitte");
+		addLanguageTokens(tokens, "da", "hej", "hvad", "det", "hvordan", "hvorfor", "tak", "ikke", "jeg", "godt");
+		addLanguageTokens(tokens, "nl", "hallo", "wat", "is", "dit", "hoe", "waarom", "bedankt", "niet", "jij");
+		addLanguageTokens(tokens, "el", "γεια", "τι", "είναι", "αυτό", "πώς", "γιατί", "ευχαριστώ", "όχι", "καλά");
+		addLanguageTokens(tokens, "en", "hello", "what", "is", "this", "how", "why", "thanks", "the", "and", "you", "your", "not", "people");
+		addLanguageTokens(tokens, "es", "hola", "qué", "esto", "cómo", "porqué", "gracias", "gente", "bien", "usted", "no");
+		addLanguageTokens(tokens, "fi", "hei", "mitä", "tämä", "miten", "miksi", "kiitos", "ihmiset", "hyvin", "en");
+		addLanguageTokens(tokens, "fr", "bonjour", "quoi", "est", "ceci", "comment", "pourquoi", "merci", "gens", "bien", "pas");
+		addLanguageTokens(tokens, "hu", "szia", "mi", "ez", "hogyan", "miért", "köszönöm", "emberek", "jól", "nem");
+		addLanguageTokens(tokens, "it", "ciao", "cosa", "questo", "come", "perché", "grazie", "gente", "bene", "non");
+		addLanguageTokens(tokens, "lt", "labas", "kas", "tai", "kaip", "kodėl", "ačiū", "žmonės", "gerai", "ne");
+		addLanguageTokens(tokens, "lv", "sveiki", "kas", "tas", "kā", "kāpēc", "paldies", "cilvēki", "labi", "nē");
+		addLanguageTokens(tokens, "pt", "olá", "que", "isto", "como", "porquê", "obrigado", "pessoas", "bem", "não");
+		addLanguageTokens(tokens, "ro", "salut", "ce", "asta", "cum", "de ce", "mulțumesc", "oameni", "bine", "nu", "este");
+		addLanguageTokens(tokens, "ru", "привет", "что", "это", "как", "почему", "спасибо", "люди", "хорошо", "нет");
+		addLanguageTokens(tokens, "sr", "здраво", "šta", "шта", "ово", "kako", "како", "zašto", "зашто", "hvala", "хвала", "ljudi", "људи", "nije", "није");
+		addLanguageTokens(tokens, "sv", "hej", "vad", "det", "hur", "varför", "tack", "människor", "bra", "inte");
+		addLanguageTokens(tokens, "tr", "merhaba", "ne", "bu", "nasıl", "neden", "teşekkürler", "insanlar", "iyi", "değil");
+		return Collections.unmodifiableMap(tokens);
 	}
 
-	private static int scoreLanguage(String input, String... markers) {
-		int score = 0;
-		for (String marker : markers)
-			if (input.contains(marker))
-				++score;
-		return score;
+	private static void addLanguageTokens(Map<String, Integer> tokens, String language, String... words) {
+		int bit = 1 << languageIndex(language);
+		for (String word : words)
+			tokens.put(word, tokens.getOrDefault(word, 0) | bit);
+	}
+
+	private static int languageIndex(String language) {
+		for (int i = 0; i < LANGUAGE_CODES.length; ++i)
+			if (LANGUAGE_CODES[i].equals(language))
+				return i;
+		return -1;
+	}
+
+	private static String detectChatLanguage(String input) {
+		int mask = detectLanguageMask(input);
+		if (mask == 0)
+			return null;
+		StringBuilder result = new StringBuilder();
+		for (int i = 0; i < LANGUAGE_CODES.length; ++i)
+			if ((mask & 1 << i) != 0) {
+				if (result.length() != 0)
+					result.append('/');
+				result.append(LANGUAGE_CODES[i]);
+			}
+		return result.toString();
+	}
+
+	private static int detectLanguageMask(String input) {
+		if (input == null || input.length() < 3)
+			return 0;
+		String normalized = Normalizer.normalize(input.toLowerCase(Locale.ROOT), Normalizer.Form.NFKC);
+		byte[] scores = new byte[LANGUAGE_CODES.length];
+		StringBuilder token = new StringBuilder(16);
+		for (int i = 0; i <= normalized.length(); ++i) {
+			char character = i == normalized.length() ? ' ' : normalized.charAt(i);
+			if (Character.isLetter(character)) {
+				if (token.length() < 32)
+					token.append(character);
+				scoreLanguageCharacter(scores, character);
+				continue;
+			}
+			if (token.length() != 0) {
+				Integer mask = LANGUAGE_TOKENS.get(token.toString());
+				if (mask != null)
+					for (int language = 0; language < scores.length; ++language)
+						if ((mask & 1 << language) != 0 && scores[language] < Byte.MAX_VALUE)
+							++scores[language];
+				token.setLength(0);
+			}
+		}
+		int best = 0;
+		for (byte score : scores)
+			best = Math.max(best, score);
+		if (best == 0)
+			return 0;
+		int result = 0;
+		for (int i = 0; i < scores.length; ++i)
+			if (scores[i] == best)
+				result |= 1 << i;
+		return result;
+	}
+
+	private static void scoreLanguageCharacter(byte[] scores, char character) {
+		String languages = null;
+		switch (character) {
+		case 'ě': case 'ř': case 'ů': languages = "cs"; break;
+		case 'ľ': case 'ĺ': case 'ŕ': case 'ô': languages = "sk"; break;
+		case 'ą': case 'ę': case 'ł': case 'ź': case 'ż': languages = "pl"; break;
+		case 'ă': case 'î': case 'ș': case 'ț': languages = "ro"; break;
+		case 'ő': case 'ű': languages = "hu"; break;
+		case 'ė': case 'ų': languages = "lt"; break;
+		case 'ā': case 'ģ': case 'ķ': case 'ļ': case 'ņ': languages = "lv"; break;
+		case 'ğ': case 'ı': languages = "tr"; break;
+		default:
+			if (character >= '\u0370' && character <= '\u03ff')
+				languages = "el";
+			break;
+		}
+		if (languages != null) {
+			int index = languageIndex(languages);
+			if (index >= 0 && scores[index] <= Byte.MAX_VALUE - 2)
+				scores[index] += 2;
+		}
 	}
 
 	private static Set<String> parseLanguages(String input) {
@@ -1394,45 +1630,6 @@ public class ChatHandlers {
 		return normalizeAntiSwearPhrase(word).replace(" ", "");
 	}
 
-	private static boolean antiSwearContextLegacy(String input, List<String> phrases) {
-		if (input == null || input.isEmpty() || phrases == null || phrases.isEmpty())
-			return false;
-		String normalized = normalizeAntiSwearPhrase(input);
-		for (String phrase : phrases)
-			if (containsNormalizedPhrase(normalized, phrase))
-				return true;
-		return false;
-	}
-
-	private static boolean containsNormalizedPhrase(String normalizedInput, String phrase) {
-		boolean isDuckLeadingPhrase = phrase.startsWith("duck");
-		int pos = normalizedInput.indexOf(phrase);
-		while (pos != -1) {
-			int end = pos + phrase.length();
-			boolean before = pos == 0 || normalizedInput.charAt(pos - 1) == ' ';
-			boolean after = end == normalizedInput.length() || normalizedInput.charAt(end) == ' ';
-			if (before && after) {
-				// "duck you" / "ducking man" caught inside a literal-duck phrase
-				// ("the duck you mentioned", "a ducking clown video") is not the swear.
-				if (isDuckLeadingPhrase) {
-					String prevToken = getPrevToken(normalizedInput, pos);
-					if (prevToken != null && isLegitDuckPrefix(prevToken)) {
-						if ("the".equals(prevToken)) {
-							String prevPrevToken = getPrevPrevToken(normalizedInput, pos);
-							if (prevPrevToken != null && isProfanityQuestionWord(prevPrevToken))
-								return true;
-						}
-						pos = normalizedInput.indexOf(phrase, pos + 1);
-						continue;
-					}
-				}
-				return true;
-			}
-			pos = normalizedInput.indexOf(phrase, pos + 1);
-		}
-		return false;
-	}
-
 	// Lookup for search words and return array of int[]
 	// arg0=positionInString, arg1=stringLength
 	public static int[][] match(String input, List<String> search) {
@@ -1451,708 +1648,6 @@ public class ChatHandlers {
 		return list.isEmpty() ? null : list.toArray(new int[0][0]);
 	}
 
-	// return true - if found any vulgarism
-	private static boolean antiSwearLegacy(String input, List<String> words, List<String> exactWords,
-			List<Pair> allowedPhrases, int[][] ignoredSections) {
-		StringContainerWithPositions filtered = filterAntiSwearInput(input, ignoredSections);
-
-		List<int[]> allowedSections = new ArrayList<>();
-		for (String word : words)
-			if (containsWord(input, filtered, word, allowedPhrases, true, allowedSections))
-				return true;
-
-		for (String word : exactWords)
-			if (containsWord(input, filtered, word, allowedPhrases, false, allowedSections))
-				return true;
-		return false;
-	}
-
-	private static boolean containsWord(String original, StringContainerWithPositions filtered, String word,
-			List<Pair> allowedPhrases, boolean exact, List<int[]> allowedSections) {
-		int[] pos = filtered.indexOf(word, exact, true);
-		loop: while (pos != null) {
-			if (isPlainSubstringInsideWord(filtered, pos, word)
-					|| matchesAllowedPhraseForWord(original, filtered, word, pos[0], exact, allowedPhrases,
-							allowedSections)) {
-				pos = filtered.indexOf(word, pos[0] + 1, exact, false);
-				continue loop;
-			}
-			return true;
-		}
-		pos = filtered.indexOf(word, exact, false);
-		loop: while (pos != null) {
-			if (isPlainSubstringInsideWord(filtered, pos, word)
-					|| matchesAllowedPhraseForWord(original, filtered, word, pos[0], exact, allowedPhrases,
-							allowedSections)) {
-				pos = filtered.indexOf(word, pos[0] + 1, exact, false);
-				continue loop;
-			}
-			return true;
-		}
-		return containsSimilarWord(original, filtered, word, exact, allowedPhrases, allowedSections);
-	}
-
-	// Short dictionary words (≤ 3 chars) sit inside plenty of innocent longer words:
-	// "cip" in "cipactli"/"recipient", "sex" in "sextant", "gay" in "Gayatri", "kkt" in
-	// random strings, etc. For those, accept a plain contiguous substring match only if
-	// the match is bounded by spaces (or string edges). If the match span is longer than
-	// the word itself, an obfuscation gap was consumed (e.g. "c i p" or "ki*kt"), and we
-	// keep flagging it. Words with the leading "*" wildcard convention are left alone —
-	// admins opted into anywhere-matching there.
-	private static boolean isPlainSubstringInsideWord(StringContainerWithPositions filtered, int[] pos, String word) {
-		if (word.length() > 3 || word.startsWith("*"))
-			return false;
-		int start = pos[0];
-		int end = pos[1];
-		if (end - start + 1 > word.length())
-			return false; // obfuscation chars were skipped during the match
-		if ((start > 0 && filtered.charAt(start - 1) != ' ') || (end + 1 < filtered.length() && filtered.charAt(end + 1) != ' '))
-			return true;
-		return false;
-	}
-
-	private static boolean containsSimilarWord(String original, StringContainerWithPositions filtered, String word,
-			boolean exact, List<Pair> allowedPhrases, List<int[]> allowedSections) {
-		String normalized = filtered.toString();
-		int length = normalized.length();
-		int start = 0;
-		while (start < length) {
-			if (normalized.charAt(start) == ' ') {
-				start++;
-				continue;
-			}
-			int end = start;
-			while (end < length && normalized.charAt(end) != ' ')
-				end++;
-			String token = normalized.substring(start, end);
-			boolean match = isSimilarWord(token, word)
-					|| isContextualDuckInsult(original, filtered, token, word, start, end);
-			if (match)
-				if (!matchesAllowedPhraseForWord(original, filtered, word, start, exact, allowedPhrases,
-						allowedSections))
-					return true;
-			start = end;
-		}
-		return false;
-	}
-
-	private static boolean isSimilarWord(String token, String word) {
-		int lenDiff = Math.abs(token.length() - word.length());
-		if (lenDiff > 1)
-			return false;
-		// Direct sound-alike obfuscation map (c↔k, v↔u, k↔g, y↔i).
-		// Catches "čokot" → normalized "cokot" → "kokot", "kreten" → "creten",
-		// "kurva" → "kvrva", "kvrva" without needing repeated chars or digits.
-		if (token.equals(word) || containsCommonSubstitution(token, word))
-			return true;
-		if (!containsObfuscationMarkers(token, word))
-			return false;
-		return levenshteinDistance(token, word, 1) <= 1;
-	}
-
-	private static boolean isContextualDuckInsult(String original, StringContainerWithPositions filtered,
-			String token, String word, int filteredStart, int filteredEnd) {
-		if ((!"fuck".equals(word) && !"ducking".equals(word)) || (!"duck".equals(token) && !"duckin".equals(token)))
-			return false;
-		String normalized = filtered.toString();
-
-		// If "duck" is clearly used as a noun ("the duck", "a duck", "my duck", "yellow duck",
-		// "see duck", "call me duck", "hey duck", ...) we leave it alone — even if an insult
-		// target follows ("the duck you mentioned" is not a swear).
-		String prevToken = getPrevToken(normalized, filteredStart);
-		if (prevToken != null && isLegitDuckPrefix(prevToken)) {
-			// Carve out "what/who/where/why/how the duck" — still profanity.
-			if ("the".equals(prevToken)) {
-				String prevPrevToken = getPrevPrevToken(normalized, filteredStart);
-				if (prevPrevToken != null && isProfanityQuestionWord(prevPrevToken))
-					return true;
-			}
-			return false;
-		}
-
-		String nextToken = getNextToken(normalized, filteredEnd);
-		if (nextToken != null) {
-			if (isInsultTargetPronoun(nextToken) || isInsultTargetNoun(nextToken))
-				return true;
-			if (isProfanityObject(nextToken))
-				return true;
-			if (isProfanityPhrasal(nextToken))
-				return true;
-		}
-		String rawNext = getRawNextToken(original, filtered, filteredEnd);
-		if (rawNext != null && (containsDigit(rawNext) || startsWithUppercase(rawNext)))
-			return true;
-		return false;
-	}
-
-	private static String getPrevToken(String normalized, int filteredStart) {
-		if (filteredStart <= 0)
-			return null;
-		int end = filteredStart;
-		while (end > 0 && normalized.charAt(end - 1) == ' ')
-			--end;
-		if (end <= 0)
-			return null;
-		int start = end;
-		while (start > 0 && normalized.charAt(start - 1) != ' ')
-			--start;
-		return normalized.substring(start, end);
-	}
-
-	private static String getPrevPrevToken(String normalized, int filteredStart) {
-		if (filteredStart <= 0)
-			return null;
-		int end = filteredStart;
-		while (end > 0 && normalized.charAt(end - 1) == ' ')
-			--end;
-		while (end > 0 && normalized.charAt(end - 1) != ' ')
-			--end;
-		while (end > 0 && normalized.charAt(end - 1) == ' ')
-			--end;
-		if (end <= 0)
-			return null;
-		int start = end;
-		while (start > 0 && normalized.charAt(start - 1) != ' ')
-			--start;
-		return normalized.substring(start, end);
-	}
-
-	private static boolean isLegitDuckPrefix(String token) {
-		switch (token) {
-		// articles & determiners (incl. question determiners "which duck...")
-		case "the":
-		case "a":
-		case "an":
-		case "what":
-		case "which":
-		case "whose":
-			// possessives
-		case "my":
-		case "your":
-		case "his":
-		case "her":
-		case "its":
-		case "our":
-		case "their":
-		case "muj":
-		case "moje":
-		case "tvuj":
-		case "tvoje":
-		case "jeho":
-		case "jeji":
-			// demonstratives
-		case "this":
-		case "that":
-		case "these":
-		case "those":
-		case "ten":
-		case "ta":
-		case "to":
-		case "tento":
-		case "tato":
-			// common descriptors for a literal duck
-		case "yellow":
-		case "rubber":
-		case "wooden":
-		case "plastic":
-		case "white":
-		case "black":
-		case "brown":
-		case "blue":
-		case "green":
-		case "baby":
-		case "little":
-		case "big":
-		case "small":
-		case "cute":
-		case "wild":
-		case "old":
-		case "new":
-		case "young":
-		case "zluty":
-		case "maly":
-		case "velky":
-		case "krasny":
-		case "novy":
-			// names & titles
-		case "donald":
-		case "daffy":
-		case "scrooge":
-		case "mr":
-		case "mrs":
-		case "miss":
-		case "dear":
-			// verbs commonly taking "duck" as direct object (or copulas around it)
-		case "see":
-		case "saw":
-		case "seen":
-		case "seeing":
-		case "watch":
-		case "watched":
-		case "watching":
-		case "feed":
-		case "fed":
-		case "feeding":
-		case "love":
-		case "loves":
-		case "loved":
-		case "loving":
-		case "like":
-		case "likes":
-		case "liked":
-		case "hate":
-		case "hates":
-		case "hated":
-		case "call":
-		case "calls":
-		case "called":
-		case "calling":
-		case "name":
-		case "names":
-		case "named":
-		case "naming":
-		case "be":
-		case "is":
-		case "are":
-		case "was":
-		case "were":
-		case "been":
-		case "have":
-		case "has":
-		case "had":
-		case "get":
-		case "gets":
-		case "got":
-		case "want":
-		case "wants":
-		case "wanted":
-		case "give":
-		case "gives":
-		case "gave":
-		case "given":
-			// greetings — addressing someone named "Duck"
-		case "hey":
-		case "hi":
-		case "hello":
-		case "ahoj":
-		case "cau":
-		case "cus":
-		case "cao":
-			// pet / animal context
-		case "pet":
-		case "dog":
-		case "cat":
-		case "bird":
-		case "animal":
-		case "toy":
-		case "zvire":
-		case "ptak":
-			// friend context
-		case "friend":
-		case "mate":
-		case "buddy":
-		case "pal":
-		case "kamos":
-		case "kamarad":
-			// prepositions ("to" is already covered above as Czech demonstrative;
-			// English infinitive "to duck you" is caught via contextual-phrases)
-		case "with":
-		case "without":
-			return true;
-		default:
-			return false;
-		}
-	}
-
-	private static boolean isProfanityObject(String token) {
-		switch (token) {
-		case "this":
-		case "that":
-		case "it":
-		case "shit":
-			return true;
-		default:
-			return false;
-		}
-	}
-
-	private static boolean isProfanityPhrasal(String token) {
-		switch (token) {
-		case "off":
-		case "up":
-			return true;
-		default:
-			return false;
-		}
-	}
-
-	private static boolean isProfanityQuestionWord(String token) {
-		switch (token) {
-		case "what":
-		case "who":
-		case "where":
-		case "when":
-		case "why":
-		case "how":
-			return true;
-		default:
-			return false;
-		}
-	}
-
-	private static String getNextToken(String normalized, int end) {
-		int length = normalized.length();
-		int index = end;
-		while (index < length && normalized.charAt(index) == ' ')
-			index++;
-		if (index >= length)
-			return null;
-		int nextEnd = index;
-		while (nextEnd < length && normalized.charAt(nextEnd) != ' ')
-			nextEnd++;
-		return normalized.substring(index, nextEnd);
-	}
-
-	private static String getRawNextToken(String original, StringContainerWithPositions filtered, int filteredEnd) {
-		if (filteredEnd <= 0)
-			return null;
-		int rawPos = filtered.posAt(filteredEnd - 1) + 1;
-		while (rawPos < original.length() && Character.isWhitespace(original.charAt(rawPos)))
-			rawPos++;
-		if (rawPos >= original.length())
-			return null;
-		int rawEnd = rawPos;
-		while (rawEnd < original.length() && !Character.isWhitespace(original.charAt(rawEnd)))
-			rawEnd++;
-		return original.substring(rawPos, rawEnd);
-	}
-
-	private static boolean isInsultTargetPronoun(String token) {
-		switch (token) {
-		case "me":
-		case "you":
-		case "us":
-		case "him":
-		case "her":
-		case "them":
-		case "they":
-		case "everyone":
-		case "anyone":
-		case "nobody":
-		case "somebody":
-		case "everybody":
-			return true;
-		default:
-			return false;
-		}
-	}
-
-	private static boolean isInsultTargetNoun(String token) {
-		switch (token) {
-		case "lady":
-		case "man":
-		case "men":
-		case "woman":
-		case "women":
-		case "boy":
-		case "girl":
-		case "kid":
-		case "kids":
-		case "dude":
-		case "guys":
-		case "people":
-		case "player":
-		case "players":
-		case "admin":
-		case "admins":
-		case "owner":
-		case "owners":
-		case "mod":
-		case "mods":
-		case "staff":
-		case "family":
-		case "child":
-		case "children":
-			return true;
-		default:
-			return false;
-		}
-	}
-
-	private static boolean containsDigit(String token) {
-		for (int i = 0; i < token.length(); ++i)
-			if (Character.isDigit(token.charAt(i)))
-				return true;
-		return false;
-	}
-
-	private static boolean startsWithUppercase(String token) {
-		return token.length() > 0 && Character.isUpperCase(token.charAt(0));
-	}
-
-	private static boolean containsObfuscationMarkers(String token, String word) {
-		if (token.length() == word.length()) {
-			int mismatches = 0;
-			boolean hasNonLetter = false;
-			for (int i = 0; i < token.length(); ++i) {
-				char tokenChar = token.charAt(i);
-				char wordChar = word.charAt(i);
-				if (tokenChar != wordChar) {
-					if (!isObfuscationChar(tokenChar, wordChar))
-						return false;
-					if (++mismatches > maxAllowedMismatches(token, word))
-						return false;
-				}
-				if (!Character.isLetter(tokenChar))
-					hasNonLetter = true;
-			}
-			if ((mismatches == 0) || (mismatches == 1 && !hasNonLetter && !hasRepeatedChar(token)))
-				return false;
-			return mismatches >= 1;
-		}
-		return token.contains(" ") || token.matches(".*[^a-z].*") || hasRepeatedChar(token);
-	}
-
-	private static int maxAllowedMismatches(String token, String word) {
-		if (token.length() <= 4)
-			return 1;
-		if (token.length() <= 7)
-			return 2;
-		return 3;
-	}
-
-	private static boolean containsCommonSubstitution(String token, String word) {
-		// Same-length only on purpose: allowing a length diff of 1 would flag the
-		// Czech informal "dik" (=díky/thanks) as similar to "dick" via the k↔c
-		// substitution. The bypasses we want ("čokot"→"cokot"/"kokot", "fvck"/"fuck",
-		// "kreten"/"creten") are all same-length swaps anyway.
-		if (token.length() != word.length())
-			return false;
-		int matches = 0;
-		for (int i = 0; i < token.length(); ++i) {
-			char tokenChar = token.charAt(i);
-			char wordChar = word.charAt(i);
-			if (tokenChar == wordChar)
-				continue;
-			if (!isCommonSubstitution(tokenChar, wordChar))
-				return false;
-			++matches;
-		}
-		return matches > 0;
-	}
-
-	private static boolean isObfuscationChar(char tokenChar, char wordChar) {
-		if (tokenChar == '*' || tokenChar == '$' || tokenChar == '@' || tokenChar == '!' || tokenChar == '1')
-			return true;
-		if (Character.isDigit(tokenChar) || !Character.isLetter(tokenChar))
-			return true;
-		switch (tokenChar) {
-		case '0':
-		case '3':
-		case '4':
-		case '5':
-		case '7':
-		case '8':
-		case '9':
-		case 'y':
-		case 'z':
-		case 'c':
-		case 'v':
-		case 'w':
-		case 'k':
-			return true;
-		default:
-			return false;
-		}
-	}
-
-	private static boolean isCommonSubstitution(char tokenChar, char wordChar) {
-		// d↔f is intentionally NOT here — it's handled in isContextualDuckInsult
-		// because "duck"/"ducks" appear in plenty of legit messages ("i love ducks",
-		// "the duck pond"); applying d↔f globally would flag them all.
-		return tokenChar == 'y' && wordChar == 'i'
-				|| tokenChar == 'i' && wordChar == 'y'
-				|| tokenChar == 'k' && wordChar == 'g'
-				|| tokenChar == 'g' && wordChar == 'k'
-				|| tokenChar == 'c' && wordChar == 'k'
-				|| tokenChar == 'k' && wordChar == 'c'
-				|| tokenChar == 'v' && wordChar == 'u'
-				|| tokenChar == 'u' && wordChar == 'v';
-	}
-
-	private static boolean hasRepeatedChar(String token) {
-		char prev = 0;
-		int repeat = 0;
-		for (int i = 0; i < token.length(); ++i) {
-			char c = token.charAt(i);
-			if (c == prev) {
-				if (++repeat >= 2)
-					return true;
-			} else {
-				prev = c;
-				repeat = 0;
-			}
-		}
-		return false;
-	}
-
-	private static int levenshteinDistance(String a, String b, int threshold) {
-		int aLength = a.length();
-		int bLength = b.length();
-		if (Math.abs(aLength - bLength) > threshold)
-			return threshold + 1;
-		if (aLength == 0)
-			return bLength;
-		if (bLength == 0)
-			return aLength;
-
-		int[] previous = new int[bLength + 1];
-		int[] current = new int[bLength + 1];
-		for (int j = 0; j <= bLength; ++j)
-			previous[j] = j;
-
-		for (int i = 1; i <= aLength; ++i) {
-			current[0] = i;
-			int min = current[0];
-			for (int j = 1; j <= bLength; ++j) {
-				int cost = a.charAt(i - 1) == b.charAt(j - 1) ? 0 : 1;
-				current[j] = Math.min(Math.min(current[j - 1] + 1, previous[j] + 1), previous[j - 1] + cost);
-				min = Math.min(min, current[j]);
-			}
-			if (min > threshold)
-				return threshold + 1;
-			int[] temp = previous;
-			previous = current;
-			current = temp;
-		}
-		return previous[bLength];
-	}
-
-	@SuppressWarnings("unchecked")
-	private static boolean matchesAllowedPhraseForWord(String original, StringContainerWithPositions filtered,
-			String word, int pos, boolean exact, List<Pair> allowedPhrases, List<int[]> allowedSections) {
-		for (Pair phrase : allowedPhrases)
-			if (phrase.getKey().equals(word) && matchesAllowedPhrase(filtered, pos, (List<String>) phrase.getValue(),
-					exact, allowedSections, original))
-				return true;
-		return false;
-	}
-
-	private static boolean matchesAllowedPhrase(StringContainerWithPositions filtered, int pos, List<String> phrases,
-			boolean exact, List<int[]> allowedSections, String origin) {
-		for (int[] i : allowedSections)
-			if (i[0] <= pos && i[1] >= pos)
-				return true;
-		for (String phrase : phrases) {
-			int[] index = filtered.indexOf(Math.max(0, pos - 6), phrase, false, true, origin);
-			if (index != null) {
-				allowedSections.add(index);
-				return true;
-			}
-			index = filtered.indexOf(Math.max(0, pos - 6), phrase, false, false, origin);
-			if (index != null) {
-				allowedSections.add(index);
-				return true;
-			}
-		}
-		return false;
-	}
-
-	private static void retriveWords(String input, StringContainerWithPositions filtered, String word,
-			List<Pair> allowedPhrases, boolean exact, Map<Integer, Integer> positionAndLength,
-			List<int[]> allowedSections) {
-		int[] pos = filtered.indexOf(word, exact, true);
-		while (pos != null) {
-			int start = filtered.posAt(pos[0]);
-			if (!positionAndLength.containsKey(start) && !isPlainSubstringInsideWord(filtered, pos, word)
-					&& !matchesAllowedPhraseForWord(input, filtered, word, pos[0], exact, allowedPhrases,
-							allowedSections))
-				positionAndLength.put(start, filtered.posAt(pos[1]) + 1);
-			pos = filtered.indexOf(word, pos[0] + 1, exact, true);
-		}
-		pos = filtered.indexOf(word, exact, false);
-		while (pos != null) {
-			int start = filtered.posAt(pos[0]);
-			if (!positionAndLength.containsKey(start) && !isPlainSubstringInsideWord(filtered, pos, word)
-					&& !matchesAllowedPhraseForWord(input, filtered, word, pos[0], exact, allowedPhrases,
-							allowedSections))
-				positionAndLength.put(start, filtered.posAt(pos[1]) + 1);
-			pos = filtered.indexOf(word, pos[0] + 1, exact, false);
-		}
-		retrieveSimilarWords(input, filtered, word, exact, allowedPhrases, positionAndLength, allowedSections);
-	}
-
-	private static void retrieveSimilarWords(String input, StringContainerWithPositions filtered, String word,
-			boolean exact, List<Pair> allowedPhrases, Map<Integer, Integer> positionAndLength,
-			List<int[]> allowedSections) {
-		String normalized = filtered.toString();
-		int length = normalized.length();
-		int start = 0;
-		while (start < length) {
-			if (normalized.charAt(start) == ' ') {
-				start++;
-				continue;
-			}
-			int end = start;
-			while (end < length && normalized.charAt(end) != ' ')
-				end++;
-			String token = normalized.substring(start, end);
-			boolean match = isSimilarWord(token, word)
-					|| isContextualDuckInsult(input, filtered, token, word, start, end);
-			if (match && !matchesAllowedPhraseForWord(input, filtered, word, start, exact, allowedPhrases,
-					allowedSections)) {
-				int origStart = filtered.posAt(start);
-				positionAndLength.putIfAbsent(origStart, filtered.posAt(end - 1) + 1);
-			}
-			start = end;
-		}
-	}
-
-	// find vulgarism and replace it
-	private static String antiSwearReplaceLegacy(String input, List<String> words, List<String> exactWords,
-			List<Pair> allowedPhrases, int[][] ignoredSections, String replacement, boolean shouldAddColors) {
-		StringContainerWithPositions filtered = filterAntiSwearInput(input, ignoredSections);
-
-		List<int[]> allowedSections = new ArrayList<>();
-		Map<Integer, Integer> positionAndLength = new HashMap<>();
-		for (String word : words)
-			retriveWords(input, filtered, word, allowedPhrases, true, positionAndLength, allowedSections);
-
-		for (String word : exactWords)
-			retriveWords(input, filtered, word, allowedPhrases, false, positionAndLength, allowedSections);
-		if (positionAndLength.isEmpty())
-			return input;
-		StringContainer container = new StringContainer(input);
-		ComparableObject<Integer, Integer>[] result = SortingAPI.sortByKeyArray(positionAndLength, true);
-		for (ComparableObject<Integer, Integer> res : result)
-			try {
-				container.replace(res.getKey(), res.getValue(), replacement + (shouldAddColors ? "§g" : ""));
-			} catch (Exception e) {
-			}
-		return container.toString();
-	}
-
-	private static StringContainerWithPositions filterAntiSwearInput(String input, int[][] ignoredSections) {
-		StringContainerWithPositions filtered = new StringContainerWithPositions(input.length());
-
-		int posOfSection = 0;
-		int[] currentSection = ignoredSections == null ? null : ignoredSections[posOfSection];
-		boolean lastSpace = false;
-		for (int i = 0; i < input.length(); i++) {
-			if (currentSection != null && currentSection[0] == i) {
-				i += currentSection[1];
-				if (ignoredSections!=null && ignoredSections.length != ++posOfSection)
-					currentSection = ignoredSections[posOfSection];
-				else
-					currentSection = null;
-				--i;
-				continue;
-			}
-			lastSpace = appendAntiSwearCharacter(filtered, input.charAt(i), i, lastSpace);
-		}
-		return filtered;
-	}
-
 	public static String normalizeAntiSwearPhrase(String input) {
 		if (input == null || input.isEmpty())
 			return "";
@@ -2161,26 +1656,6 @@ public class ChatHandlers {
 		for (int i = 0; i < input.length(); ++i)
 			lastSpace = appendAntiSwearCharacter(builder, input.charAt(i), lastSpace);
 		return builder.toString().trim();
-	}
-
-	private static boolean appendAntiSwearCharacter(StringContainerWithPositions filtered, char origin, int pos,
-			boolean lastSpace) {
-		if (Character.isWhitespace(origin)) {
-			if (!lastSpace && filtered.length() != 0)
-				filtered.append(' ', pos);
-			return true;
-		}
-		if (isIgnoredAntiSwearCharacter(origin))
-			return lastSpace;
-		String normalized = Normalizer.normalize(String.valueOf(Character.toLowerCase(origin)), Normalizer.Form.NFD);
-		for (int i = 0; i < normalized.length(); ++i) {
-			char c = normalized.charAt(i);
-			if (Character.getType(c) == Character.NON_SPACING_MARK || isIgnoredAntiSwearCharacter(c))
-				continue;
-			filtered.append(simplifyCharacter(c), pos);
-			lastSpace = false;
-		}
-		return lastSpace;
 	}
 
 	private static boolean appendAntiSwearCharacter(StringBuilder builder, char origin, boolean lastSpace) {
@@ -2208,7 +1683,8 @@ public class ChatHandlers {
 
 	// Removes from message flood and transfer uppercase characters to lowercase
 	public static String antiFlood(String input, int[][] ignoredSections, int floodMaxNumbers, int floodMaxChars,
-			int floodMaxCapsChars, int floodMaxSameWords, int floodMinWordsBetweenSameToIgnore) {
+			int floodMaxCapsChars, int floodMaxSameWords, int floodMinWordsBetweenSameToIgnore,
+			int floodMaxPatternRepeats) {
 		StringContainer filtered = new StringContainer(input.length());
 		char prev = 0;
 		int times = 0;
@@ -2255,6 +1731,7 @@ public class ChatHandlers {
 			} else
 				urlCount = 0;
 			if (origin == ' ') {
+				collapseRepeatedPattern(filtered, start, floodMaxPatternRepeats);
 				String word = filtered.substring(start).toLowerCase();
 				if (filtered.charAt(filtered.length() - 1) != ' ')
 					filtered.append(origin);
@@ -2314,6 +1791,7 @@ public class ChatHandlers {
 				times = 0;
 			prev = c;
 		}
+		collapseRepeatedPattern(filtered, start, floodMaxPatternRepeats);
 		String word = filtered.substring(start).toLowerCase();
 		for (int ic = 0; ic < floodMinWordsBetweenSameToIgnore; ++ic) {
 			String savedWord = wordsInRow.get(ic);
@@ -2327,6 +1805,28 @@ public class ChatHandlers {
 			break;
 		}
 		return filtered.toString();
+	}
+
+	// Limits repeated short patterns in one word
+	private static void collapseRepeatedPattern(StringContainer text, int start, int maximumRepeats) {
+		int length = text.length() - start;
+		if (maximumRepeats < 1 || length < 8)
+			return;
+		for (int patternLength = 2; patternLength <= 4; ++patternLength) {
+			int repeats = length / patternLength;
+			if (repeats < 4 || repeats <= maximumRepeats)
+				continue;
+			boolean repeated = true;
+			for (int index = start; index < text.length(); ++index)
+				if (!Character.isLetter(text.charAt(index)) || Character.toLowerCase(text.charAt(index)) != Character
+						.toLowerCase(text.charAt(start + (index - start) % patternLength))) {
+					repeated = false;
+					break;
+				}
+			if (repeated)
+				text.delete(start + patternLength * maximumRepeats, text.length());
+			return;
+		}
 	}
 
 	public static char simplifyCharacter(char c) {

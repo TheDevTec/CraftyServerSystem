@@ -3,6 +3,7 @@ package me.devtec.craftyserversystem.commands.internal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -94,11 +95,11 @@ public class KitEditor extends CssCommand {
 					new ItemGUI(ItemMaker.ofHead().skinValues(
 							"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZjRiZmVmMTRlODQyMGEyNTZlNDU3YTRhN2M4ODExMmUxNzk0ODVlNTIzNDU3ZTQzODUxNzdiYWQifX19")
 							.displayName("&e&l<<< &fPrevious page").lore("", "&8» &7Click to return to previous page", "").build()) {
-						@Override
-						public void onClick(Player player, HolderGUI gui, ClickType click) {
-							openEditor(player, page - 1);
-						}
-					});
+				@Override
+				public void onClick(Player player, HolderGUI gui, ClickType click) {
+					openEditor(player, page - 1);
+				}
+			});
 		gui.open(player);
 	}
 
@@ -119,14 +120,14 @@ public class KitEditor extends CssCommand {
 					config.set(kit.getName() + ".messages", kit.getMessages());
 					config.set(kit.getName() + ".commands", kit.getCommands());
 					List<String> contents = new ArrayList<>();
-					for (ItemStack stack : kit.getContents()) {
+					for (Entry<Integer, ItemStack> stack : kit.getContents().entrySet()) {
 						@SuppressWarnings("unchecked")
-						Map<String, Object> map = (Map<String, Object>) Json.writer().writeWithoutParse(stack);
+						Map<String, Object> map = (Map<String, Object>) Json.writer().writeWithoutParse(stack.getValue());
 						String type = map.remove("type").toString();
 						if (map.isEmpty())
-							contents.add(type);
+							contents.add(stack.getKey()+":"+type);
 						else
-							contents.add(type + Json.writer().simpleWrite(map));
+							contents.add(stack.getKey()+":"+type + Json.writer().simpleWrite(map));
 					}
 					config.set(kit.getName() + ".contents", contents);
 					config.save("yaml");
@@ -230,11 +231,11 @@ public class KitEditor extends CssCommand {
 					new ItemGUI(ItemMaker.ofHead().skinValues(
 							"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZjRiZmVmMTRlODQyMGEyNTZlNDU3YTRhN2M4ODExMmUxNzk0ODVlNTIzNDU3ZTQzODUxNzdiYWQifX19")
 							.displayName("&e&l<<< &fPrevious page").lore("", "&8» &7Click to return to previous page", "").build()) {
-						@Override
-						public void onClick(Player player, HolderGUI gui, ClickType click) {
-							openMessages(player, guiPage, kit, page - 1);
-						}
-					});
+				@Override
+				public void onClick(Player player, HolderGUI gui, ClickType click) {
+					openMessages(player, guiPage, kit, page - 1);
+				}
+			});
 		gui.setItem(52, new ItemGUI(ItemMaker.of(XMaterial.WRITABLE_BOOK).displayName("&aAdd message").lore("", "&8» &7Click to add new message", "").build()) {
 			@Override
 			public void onClick(Player player, HolderGUI guir, ClickType click) {
@@ -281,7 +282,7 @@ public class KitEditor extends CssCommand {
 				openEditorOf(player, guiPage, kit);
 			}
 		});
-		ItemStack[] items = kit.getContents().toArray(new ItemStack[0]);
+		ItemStack[] items = kit.getContents().values().toArray(new ItemStack[0]);
 		for (int i = page * 36 - 36; i < page * 36; ++i) {
 			if (items.length <= i || items[i] == null)
 				break;
@@ -320,11 +321,11 @@ public class KitEditor extends CssCommand {
 					new ItemGUI(ItemMaker.ofHead().skinValues(
 							"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZjRiZmVmMTRlODQyMGEyNTZlNDU3YTRhN2M4ODExMmUxNzk0ODVlNTIzNDU3ZTQzODUxNzdiYWQifX19")
 							.displayName("&e&l<<< &fPrevious page").lore("", "&8» &7Click to return to previous page", "").build()) {
-						@Override
-						public void onClick(Player player, HolderGUI gui, ClickType click) {
-							openContents(player, guiPage, kit, page - 1);
-						}
-					});
+				@Override
+				public void onClick(Player player, HolderGUI gui, ClickType click) {
+					openContents(player, guiPage, kit, page - 1);
+				}
+			});
 		gui.setItem(52, new ItemGUI(ItemMaker.of(XMaterial.EMERALD).displayName("&aAdd items").lore("", "&8» &7Click to open insert menu", "").build()) {
 			@Override
 			public void onClick(Player player, HolderGUI gui, ClickType click) {
@@ -333,8 +334,13 @@ public class KitEditor extends CssCommand {
 					public void onClose(Player player) {
 						for (int i = 0; i < 45; ++i) {
 							ItemStack item = getItem(i);
-							if (item != null && item.getType() != Material.AIR)
-								kit.getContents().add(item);
+							if (item != null && item.getType() != Material.AIR) {
+								int slot = 0;
+								while(true)
+									if(kit.getContents().get(slot)!=null)++slot;
+									else break;
+								kit.getContents().put(slot,item);
+							}
 						}
 					}
 				};
@@ -401,11 +407,11 @@ public class KitEditor extends CssCommand {
 					new ItemGUI(ItemMaker.ofHead().skinValues(
 							"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZjRiZmVmMTRlODQyMGEyNTZlNDU3YTRhN2M4ODExMmUxNzk0ODVlNTIzNDU3ZTQzODUxNzdiYWQifX19")
 							.displayName("&e&l<<< &fPrevious page").lore("", "&8» &7Click to return to previous page", "").build()) {
-						@Override
-						public void onClick(Player player, HolderGUI gui, ClickType click) {
-							openCommands(player, guiPage, kit, page - 1);
-						}
-					});
+				@Override
+				public void onClick(Player player, HolderGUI gui, ClickType click) {
+					openCommands(player, guiPage, kit, page - 1);
+				}
+			});
 		gui.setItem(52, new ItemGUI(ItemMaker.of(XMaterial.WRITABLE_BOOK).displayName("&aAdd command")
 				.lore("", "&8» &7Click to add new command", "&8» &7Type command without slash (/)", "&8» &7Use {player} as placeholder", "").build()) {
 			@Override
@@ -483,9 +489,9 @@ public class KitEditor extends CssCommand {
 								kit.getCooldown().setBypassPerm(getRenameText() == null || getRenameText().trim().isEmpty() ? null : getRenameText());
 								item.setItem(
 										ItemMaker
-												.of(XMaterial.ENDER_PEARL).displayName("&6Cooldown").lore("", "&8» &7Bypass Permission: &e" + kit.getCooldown().getBypassPerm(),
-														"&8» &7Time: &e" + kit.getCooldown().getTime(), "", "&8» &7Left click to change bypass permission", "&8» &7Right click to change time", "")
-												.build());
+										.of(XMaterial.ENDER_PEARL).displayName("&6Cooldown").lore("", "&8» &7Bypass Permission: &e" + kit.getCooldown().getBypassPerm(),
+												"&8» &7Time: &e" + kit.getCooldown().getTime(), "", "&8» &7Left click to change bypass permission", "&8» &7Right click to change time", "")
+										.build());
 								gui.setItem(22, item);
 								close(player);
 							}
@@ -507,9 +513,9 @@ public class KitEditor extends CssCommand {
 								kit.getCooldown().setTime(getRenameText() == null || getRenameText().trim().isEmpty() ? 0 : TimeUtils.timeFromString(getRenameText()));
 								item.setItem(
 										ItemMaker
-												.of(XMaterial.ENDER_PEARL).displayName("&6Cooldown").lore("", "&8» &7Bypass Permission: &e" + kit.getCooldown().getBypassPerm(),
-														"&8» &7Time: &e" + kit.getCooldown().getTime(), "", "&8» &7Left click to change bypass permission", "&8» &7Right click to change time", "")
-												.build());
+										.of(XMaterial.ENDER_PEARL).displayName("&6Cooldown").lore("", "&8» &7Bypass Permission: &e" + kit.getCooldown().getBypassPerm(),
+												"&8» &7Time: &e" + kit.getCooldown().getTime(), "", "&8» &7Left click to change bypass permission", "&8» &7Right click to change time", "")
+										.build());
 								gui.setItem(22, item);
 								close(player);
 							}
@@ -580,7 +586,7 @@ public class KitEditor extends CssCommand {
 		AnvilGUI anvil = new AnvilGUI("&fType kit name") {
 			@Override
 			public boolean onInteractItem(Player player, ItemStack newItem, ItemStack oldItem, ClickType type, int slot, boolean guiClick) {
-				if (guiClick && getRenameText() != null && !getRenameText().trim().isEmpty() && !getRenameText().replace(" ", "").equalsIgnoreCase("kitnamehere")) {
+				if (guiClick && getRenameText() != null && !getRenameText().trim().isEmpty() && !"kitnamehere".equalsIgnoreCase(getRenameText().replace(" ", ""))) {
 					KitSample kit = ((Kit) API.get().getCommandManager().getRegistered().get("kit")).getKits().get(getRenameText().replace(" ", ""));
 					if (kit == null) {
 						kit = new KitSample(getRenameText().replace(" ", ""));
@@ -596,14 +602,14 @@ public class KitEditor extends CssCommand {
 						config.set(kit.getName() + ".messages", kit.getMessages());
 						config.set(kit.getName() + ".commands", kit.getCommands());
 						List<String> contents = new ArrayList<>();
-						for (ItemStack stack : kit.getContents()) {
+						for (Entry<Integer, ItemStack> stack : kit.getContents().entrySet()) {
 							@SuppressWarnings("unchecked")
-							Map<String, Object> map = (Map<String, Object>) Json.writer().writeWithoutParse(stack);
+							Map<String, Object> map = (Map<String, Object>) Json.writer().writeWithoutParse(stack.getValue());
 							String material = map.remove("type").toString();
 							if (map.isEmpty())
-								contents.add(material);
+								contents.add(stack.getKey()+":"+material);
 							else
-								contents.add(material + Json.writer().simpleWrite(map));
+								contents.add(stack.getKey()+":"+material + Json.writer().simpleWrite(map));
 						}
 						config.set(kit.getName() + ".contents", contents);
 						config.save("yaml");

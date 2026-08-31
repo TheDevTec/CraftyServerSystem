@@ -12,8 +12,8 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -42,10 +42,13 @@ public class Fly extends CssCommand {
 
 				@EventHandler
 				public void join(PlayerJoinEvent e) {
-					if(isAllowed(e.getPlayer()))
-						setFly(e.getPlayer(), true, false, e.getPlayer());
+					if(isAllowed(e.getPlayer())){
+						e.getPlayer().setAllowFlight(true);
+						if (e.getPlayer().getLocation().add(0, -0.5, 0).getBlock().isEmpty())
+							e.getPlayer().setFlying(true);
+					}
 				}
-				
+
 				@EventHandler
 				public void playerFall(EntityDamageEvent e) {
 					if (e.getCause() == DamageCause.FALL && e.getEntityType() == EntityType.PLAYER)
@@ -65,31 +68,47 @@ public class Fly extends CssCommand {
 
 				@EventHandler
 				public void onWorldChange(PlayerChangedWorldEvent e) {
-					if (isAllowed(e.getPlayer()))
-						setFly(e.getPlayer(), true, false, e.getPlayer());
+					if (isAllowed(e.getPlayer())){
+						e.getPlayer().setAllowFlight(true);
+						if (e.getPlayer().getLocation().add(0, -0.5, 0).getBlock().isEmpty())
+							e.getPlayer().setFlying(true);
+					}
 				}
 
 				@EventHandler
 				public void respawn(PlayerRespawnEvent e) {
-					if (isAllowed(e.getPlayer()))
-						setFly(e.getPlayer(), false, false, e.getPlayer());
+					if (isAllowed(e.getPlayer())){
+						me.devtec.shared.API.getUser(e.getPlayer().getUniqueId()).set("css.fly", false);
+						if (fallDamageCancel != null && listener != null && e.getPlayer().getLocation().add(0, -0.5, 0).getBlock().isEmpty())
+							fallDamageCancel.add(e.getPlayer().getUniqueId());
+						e.getPlayer().setFlying(false);
+						e.getPlayer().setAllowFlight(false);
+					}
 				}
 			};
 		} else
 			listener = new Listener() {
 
-				@EventHandler
-				public void onWorldChange(PlayerChangedWorldEvent e) {
-					if (isAllowed(e.getPlayer()))
-						setFly(e.getPlayer(), true, false, e.getPlayer());
+			@EventHandler
+			public void onWorldChange(PlayerChangedWorldEvent e) {
+				if (isAllowed(e.getPlayer())){
+					e.getPlayer().setAllowFlight(true);
+					if (e.getPlayer().getLocation().add(0, -0.5, 0).getBlock().isEmpty())
+						e.getPlayer().setFlying(true);
 				}
+			}
 
-				@EventHandler
-				public void respawn(PlayerRespawnEvent e) {
-					if (isAllowed(e.getPlayer()))
-						setFly(e.getPlayer(), false, false, e.getPlayer());
+			@EventHandler
+			public void respawn(PlayerRespawnEvent e) {
+				if (isAllowed(e.getPlayer())){
+					me.devtec.shared.API.getUser(e.getPlayer().getUniqueId()).set("css.fly", false);
+					if (fallDamageCancel != null && listener != null && e.getPlayer().getLocation().add(0, -0.5, 0).getBlock().isEmpty())
+						fallDamageCancel.add(e.getPlayer().getUniqueId());
+					e.getPlayer().setFlying(false);
+					e.getPlayer().setAllowFlight(false);
 				}
-			};
+			}
+		};
 		Bukkit.getPluginManager().registerEvents(listener, Loader.getPlugin());
 
 		CommandStructure<CommandSender> cmd = CommandStructure.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
@@ -112,11 +131,11 @@ public class Fly extends CssCommand {
 			for (Player player : selector(sender, args[0]))
 				setFly(player, !isAllowed(player), true, sender);
 		}).permission(getPerm("other"))
-				// silent
-				.argument("-s", (sender, structure, args) -> {
-					for (Player player : selector(sender, args[0]))
-						setFly(player, !isAllowed(player), false, sender);
-				});
+		// silent
+		.argument("-s", (sender, structure, args) -> {
+			for (Player player : selector(sender, args[0]))
+				setFly(player, !isAllowed(player), false, sender);
+		});
 
 		// register
 		List<String> cmds = getCommands();

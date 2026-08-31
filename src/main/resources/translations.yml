@@ -587,6 +587,7 @@ vanish:
     
 invsee:
   open: "{prefix} Let's steal something from &e{target}&7's inventory!"
+  no-match: "{prefix} Sorry, we're not detectives, but we didn't find any matches! Try to enter full nickname!"
   self: "{prefix} Your imaginary friend - Fred - did not steal your pickaxe! You broke it by yourself, so don't try to look at your inventory by this command."
   
 scoreboardhide:

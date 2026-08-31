@@ -1,6 +1,5 @@
 package me.devtec.craftyserversystem.events.internal;
 
-import java.util.List;
 import java.util.Set;
 
 import org.bukkit.Bukkit;
@@ -41,13 +40,12 @@ public class DeathListener implements CssListener {
 		keepExp = getConfig().getBoolean("death.keep-exp");
 		priorities=new SpawnPriority[getConfig().getStringList("respawn-priority").size()];
 		int pos = 0;
-		for(String line : getConfig().getStringList("respawn-priority")){
+		for(String line : getConfig().getStringList("respawn-priority"))
 			try{
 				priorities[pos++]=SpawnPriority.valueOf(line.toUpperCase());
 			}catch(NoSuchFieldError | Exception e){
 				Loader.getPlugin().getLogger().warning("SpawnPriority named "+line+" doesn't exist! Check your death.yml file.");
 			}
-		}
 	}
 
 	@EventHandler
@@ -75,34 +73,34 @@ public class DeathListener implements CssListener {
 		Location found = null;
 		for(SpawnPriority priority : priorities){
 			if(priority!=null)
-			switch(priority){
+				switch(priority){
 				case BED:
 					found=e.getPlayer().getRespawnLocation();
-				break;
+					break;
 				case HOME:
 					Set<String> homes = HomeManager.get().getHomes(e.getPlayer().getName());
 					if(homes.isEmpty())continue;
-					if(homes.contains("home")){
-					found=HomeManager.get().getHomePosition(e.getPlayer().getName(), "home").toLocation();
-					}else
-					found=HomeManager.get().getHomePosition(e.getPlayer().getName(), homes.iterator().next()).toLocation();
-				break;
+					if(homes.contains("home"))
+						found=HomeManager.get().getHomePosition(e.getPlayer().getName(), "home").toLocation();
+					else
+						found=HomeManager.get().getHomePosition(e.getPlayer().getName(), homes.iterator().next()).toLocation();
+					break;
 				case SPAWN:
 					Position spawn = API.get().getConfigManager().getSpawn();
 					if(spawn!=null && spawn.getWorld()!=null)
-					found=spawn.toLocation();
-				break;
+						found=spawn.toLocation();
+					break;
 				case WORLD:
 					found=e.getPlayer().getWorld().getSpawnLocation();
-				break;
-			}
+					break;
+				}
 			if(found!=null)break;
-			}
+		}
 		if(found!=null)
 			e.setRespawnLocation(found);
 	}
 
-	public static enum SpawnPriority {
+	public enum SpawnPriority {
 		HOME,
 		BED,
 		SPAWN,

@@ -63,8 +63,7 @@ public class ConfigurationManager {
 		merge(join, "join.yml");
 		merge(quit, "quit.yml");
 		merge(death, "death.yml");
-		if (!chat.exists("formats.default"))
-			merge(chat, "chat.yml");
+		merge(chat, "chat.yml");
 		if (!scoreboard.exists("title"))
 			merge(scoreboard, "scoreboard.yml");
 		if (!tab.exists("header"))

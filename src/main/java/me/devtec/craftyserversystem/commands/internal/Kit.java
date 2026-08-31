@@ -23,6 +23,7 @@ import me.devtec.shared.commands.selectors.Selector;
 import me.devtec.shared.commands.structures.CommandStructure;
 import me.devtec.shared.dataholder.Config;
 import me.devtec.shared.json.Json;
+import me.devtec.shared.utility.ParseUtils;
 import me.devtec.shared.utility.StringUtils;
 import me.devtec.shared.utility.StringUtils.FormatType;
 import me.devtec.theapi.bukkit.BukkitLoader;
@@ -38,40 +39,7 @@ public class Kit extends CssCommand {
 		if (isRegistered())
 			return;
 
-		Config config = API.get().getConfigManager().getKits();
-		for (String key : config.getKeys()) {
-			KitSample sample = new KitSample(key);
-			sample.setPermission(config.getString(key + ".permission"));
-			sample.setCost(config.getDouble(key + ".settings.cost"));
-			sample.setOverrideContents(config.getBoolean(key + ".settings.override-contents-in-slots"));
-			sample.setDropItems(config.getBoolean(key + ".settings.drop-items-when-full-inv"));
-			sample.setCommands(config.getStringList(key + ".commands"));
-			for (String content : config.getStringList(key + ".contents")) {
-				int index = content.indexOf('{');
-				if (index == -1) {
-					Optional<XMaterial> material = XMaterial.matchXMaterial(content.toUpperCase());
-					if (material.isPresent())
-						sample.getContents().add(material.get().parseItem());
-					else {
-						Material bukkitType = Material.getMaterial(content);
-						if (bukkitType != null)
-							sample.getContents().add(new ItemStack(bukkitType));
-						else
-							Loader.getPlugin().getLogger().warning("An error occurred while building kit '" + key + "'. Material '" + content + "' is invalid. '");
-					}
-				} else {
-					@SuppressWarnings("unchecked")
-					Map<String, Object> json = new HashMap<>((Map<String, Object>) Json.reader().simpleRead(content.substring(index)));
-					json.put("type", content.substring(0, index));
-					ItemStack stack = ItemMaker.loadFromJson(json);
-					if (stack == null)
-						Loader.getPlugin().getLogger().warning("An error occurred while building kit '" + key + "'. Material '" + json.get("type") + "' is invalid. '");
-					else
-						sample.getContents().add(stack);
-				}
-			}
-			kits.put(key.toLowerCase(), sample);
-		}
+		reload();
 		CommandStructure<CommandSender> cmd = CommandStructure.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
 			if (!(sender instanceof Player)) {
 				msgUsage(sender, "console");
@@ -116,7 +84,7 @@ public class Kit extends CssCommand {
 		}, 1, (sender, structure, args) -> {
 			for (Player player : selector(sender, args[1]))
 				useKit(player, kits.get(args[0].toLowerCase()), perm(sender, "no-cost") ? args[2].indexOf('c') != -1 : false, perm(sender, "no-cooldown") ? args[2].indexOf('w') != -1 : false,
-						args[2].indexOf('s') == -1, sender);
+				args[2].indexOf('s') == -1, sender);
 		});
 
 		kitCmd.callableArgument((sender, structure, args) -> {
@@ -158,6 +126,60 @@ public class Kit extends CssCommand {
 		kits.clear();
 	}
 
+	@Override
+	public void reload() {
+		for (KitSample sample : kits.values())
+			API.get().getCooldownManager().unregister(sample.getCooldown().id());
+		kits.clear();
+
+		Config config = API.get().getConfigManager().getKits();
+		for (String key : config.getKeys()) {
+			KitSample sample = new KitSample(key);
+			sample.setPermission(config.getString(key + ".permission"));
+			sample.setCost(config.getDouble(key + ".settings.cost"));
+			sample.setOverrideContents(config.getBoolean(key + ".settings.override-contents-in-slots"));
+			sample.setDropItems(config.getBoolean(key + ".settings.drop-items-when-full-inv"));
+			sample.setMessages(config.getStringList(key + ".messages"));
+			sample.setCommands(config.getStringList(key + ".commands"));
+			for (String content : config.getStringList(key + ".contents")) {
+				if(content.isEmpty())continue;
+				int slot = 0;
+				if(Character.isDigit(content.charAt(0))) { //slot!
+					int index = content.indexOf(':');
+					slot = ParseUtils.getInt(content, 0, index);
+					content=content.substring(index+1);
+				} else
+					while(true)
+						if(sample.getContents().get(slot)!=null)++slot;
+						else break;
+				int index = content.indexOf('{');
+				if (index == -1) {
+					Optional<XMaterial> material = XMaterial.matchXMaterial(content.toUpperCase());
+					if (material.isPresent())
+						sample.getContents().put(slot,material.get().parseItem());
+					else {
+						Material bukkitType = Material.getMaterial(content);
+						if (bukkitType != null)
+							sample.getContents().put(slot,new ItemStack(bukkitType));
+						else
+							Loader.getPlugin().getLogger().warning("An error occurred while building kit '" + key + "'. Material '" + content + "' is invalid. '");
+					}
+				} else {
+					@SuppressWarnings("unchecked")
+					Map<String, Object> json = new HashMap<>((Map<String, Object>) Json.reader().simpleRead(content.substring(index)));
+					json.put("type", content.substring(0, index));
+					ItemStack stack = ItemMaker.loadFromJson(json);
+					if (stack == null)
+						Loader.getPlugin().getLogger().warning("An error occurred while building kit '" + key + "'. Material '" + json.get("type") + "' is invalid. '");
+					else
+						sample.getContents().put(slot,stack);
+				}
+			}
+			kits.put(key.toLowerCase(), sample);
+		}
+
+	}
+
 	public Map<String, KitSample> getKits() {
 		return kits;
 	}
@@ -195,11 +217,24 @@ public class Kit extends CssCommand {
 		}
 		API.get().getMsgManager().sendMessageFromFile(kit.getMessages(), placeholders, target);
 		BukkitLoader.getNmsProvider().postToMainThread(() -> {
-			for (ItemStack stack : kit.getContents()) {
-				if (target.getInventory().firstEmpty() == -1)
-					target.getWorld().dropItem(target.getLocation(), stack);
-				target.getInventory().addItem(stack);
-			}
+			if(kit.isOverrideContents())
+				for(int i = 0; i < 40; ++i) {
+					ItemStack stack = kit.getContents().get(i);
+					if(stack!=null)
+						target.getInventory().setItem(i, stack);
+				}
+			else
+				for(int i = 0; i < 40; ++i) {
+					ItemStack stack = kit.getContents().get(i);
+					if(stack!=null)
+						if(target.getInventory().getItem(i)==null)
+							target.getInventory().setItem(i, stack);
+						else if (target.getInventory().firstEmpty() == -1) {
+							if(kit.isDropItems())
+								target.getWorld().dropItem(target.getLocation(), stack);
+						}else
+							target.getInventory().addItem(stack);
+				}
 			for (String cmd : kit.getCommands())
 				Bukkit.dispatchCommand(Bukkit.getConsoleSender(), placeholders.applyAfterColorize(cmd));
 		});

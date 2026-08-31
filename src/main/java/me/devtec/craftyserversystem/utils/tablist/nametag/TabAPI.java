@@ -24,6 +24,7 @@ import me.devtec.shared.Ref;
 import me.devtec.shared.annotations.Nonnull;
 import me.devtec.shared.annotations.Nullable;
 import me.devtec.shared.components.Component;
+import me.devtec.shared.dataholder.cache.ConcurrentSet;
 import me.devtec.theapi.bukkit.BukkitLoader;
 import me.devtec.theapi.bukkit.nms.utils.TeamUtils;
 import me.devtec.theapi.bukkit.nms.utils.TeamUtils.CollisionRule;
@@ -46,7 +47,7 @@ public class TabAPI {
 		private int friendlyFlags;
 		private CollisionRule collisionRule;
 		private Visibility nametagVisibility;
-		private Set<String> players = new HashSet<>();
+		private Set<String> players = new ConcurrentSet<>();
 
 		public SimpleTeam(String name, Component prefix, Component suffix, Component displayName, ChatColor color, int friendlyFlags,
 				CollisionRule collisionRule, Visibility nametagVisibility) {
@@ -84,6 +85,12 @@ public class TabAPI {
 		public SimpleTeam joinPlayer(String name) {
 			players.add(name);
 			return this;
+		}
+
+		public SimpleTeam asName(String name) {
+			SimpleTeam s = new SimpleTeam(name, prefix, suffix, displayName, color, friendlyFlags, collisionRule, nametagVisibility);
+			s.players=new HashSet<>(players);
+			return s;
 		}
 
 		@Override

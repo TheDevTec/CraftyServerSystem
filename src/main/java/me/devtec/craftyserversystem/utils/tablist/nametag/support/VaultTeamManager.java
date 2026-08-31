@@ -16,6 +16,8 @@ import me.devtec.shared.scheduler.Scheduler;
 import me.devtec.shared.scheduler.Tasker;
 import me.devtec.shared.sorting.SortingAPI;
 import me.devtec.shared.sorting.SortingAPI.ComparableObject;
+import me.devtec.theapi.bukkit.nms.utils.TeamUtils.CollisionRule;
+import me.devtec.theapi.bukkit.nms.utils.TeamUtils.Visibility;
 
 public class VaultTeamManager implements TeamManager {
 	private final Map<String, String> groupAndTeamName = new HashMap<>();
@@ -28,12 +30,16 @@ public class VaultTeamManager implements TeamManager {
 			@Override
 			public void run() {
 				for (ClassicTabPlayer player : TabAPI.getPlayers()) {
-					String team = makeItOriginal(player.getId(),getTeam(API.get().getPermissionHook().getGroup(player.getPlayer())));
+					String newTeam = getTeam(player.getPlayer().getUniqueId());
+					if(player.getPrimaryTeam()==null)
+						player.changePrimaryTeam(new SimpleTeam(newTeam, null, null, null, null, 0, CollisionRule.ALWAYS, player.getAdditionalLines().isEmpty() ? Visibility.ALWAYS : Visibility.NEVER));
+					else
+						if(newTeam!=player.getPrimaryTeam().getTeam())
+							player.changePrimaryTeam(player.getPrimaryTeam().asName(newTeam));
 					List<SimpleTeam> teams = new ArrayList<>();
 					for(SimpleTeam t : player.getTeams()) {
-						if(t.getTeam().equals(team))
-							//TODO update team
-							break;
+						if(t.getTeam().equals(newTeam))
+							continue;
 						if(t.getTeam().startsWith("css_"))
 							if(t.getPlayers().size()==1)
 								teams.add(t);
@@ -51,10 +57,10 @@ public class VaultTeamManager implements TeamManager {
 						for(ClassicTabPlayer holder : TabAPI.getPlayers())
 							holder.leaveTeam(t);
 					}
-					//TODO update lines
 				}
+
 			}
-		}.runRepeating(100, 100);
+		}.runRepeating(80, 80);
 	}
 
 	@Override
@@ -64,7 +70,7 @@ public class VaultTeamManager implements TeamManager {
 
 	@Override
 	public String getTeam(UUID playerUuid) {
-		return getTeam(API.get().getPermissionHook().getGroup(me.devtec.shared.API.offlineCache().lookupNameById(playerUuid)));
+		return makeItOriginal(TabAPI.getHolder(playerUuid).getId(), getTeam(API.get().getPermissionHook().getGroup(me.devtec.shared.API.offlineCache().lookupNameById(playerUuid))));
 	}
 
 	@Override

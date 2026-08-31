@@ -378,7 +378,7 @@ public class Tp extends CssCommand {
 					}
 				});
 			else {
-				Location loc = new Location(world, finalX, finalY, finalZ, 0, 0);
+				Location loc = new Location(world, finalX, finalY, finalZ, finalYaw, finalPitch);
 				BukkitLoader.getNmsProvider().postToMainThread(() -> {
 					for (Player player : players) {
 						PlaceholdersExecutor executor = PlaceholdersExecutor.i().add("sender", sender.getName())

@@ -1,7 +1,9 @@
 package me.devtec.craftyserversystem.commands.internal.kits;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.bukkit.command.CommandSender;
 import org.bukkit.inventory.ItemStack;
@@ -17,7 +19,7 @@ import me.devtec.shared.utility.TimeUtils;
 public class KitSample {
 
 	private final String name;
-	private List<ItemStack> contents = new ArrayList<>();
+	private Map<Integer,ItemStack> contents = new HashMap<>();
 	private List<String> commands = new ArrayList<>();
 	private List<String> messages = new ArrayList<>();
 	private double cost;
@@ -78,12 +80,8 @@ public class KitSample {
 	}
 
 	@Nonnull
-	public List<ItemStack> getContents() {
+	public Map<Integer, ItemStack> getContents() {
 		return contents;
-	}
-
-	public void setContents(@Nonnull List<ItemStack> contents) {
-		this.contents = contents;
 	}
 
 	public double getCost() {

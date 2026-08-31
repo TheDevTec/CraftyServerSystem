@@ -1,7 +1,6 @@
 package me.devtec.craftyserversystem.utils.tablist.nametag.classic;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -38,7 +37,7 @@ public class ClassicTabPlayer {
 	private final int id = counter.incrementAndGet();
 
 	@Getter
-	private final Set<SimpleTeam> teams = new HashSet<>();
+	private final Set<SimpleTeam> teams = new ConcurrentSet<>();
 
 	//INTERNAL
 	private boolean ready = false;
@@ -84,11 +83,11 @@ public class ClassicTabPlayer {
 				if(player.getTeams().contains(primaryTeam)) {
 					player.removeTeam(primaryTeam.getTeam());
 					player.createTeam(newTeam);
-				} else if(player.getPlayer().canSee(getPlayer()))
+				} else if(player.getPlayer().equals(getPlayer())|| player.getPlayer().canSee(getPlayer()))
 					player.createTeam(newTeam);
 		} else
 			for(ClassicTabPlayer player : TabAPI.getPlayers())
-				if(player.getPlayer().canSee(getPlayer()))
+				if(player.getPlayer().equals(getPlayer())|| player.getPlayer().canSee(getPlayer()))
 					player.createTeam(newTeam);
 		primaryTeam = newTeam;
 	}
@@ -182,7 +181,7 @@ public class ClassicTabPlayer {
 			if(!Objects.equals(tagPrefix,value)) {
 				tagPrefix=value;
 				if(getPrimaryTeam()==null)
-					changePrimaryTeam(new SimpleTeam(getPlayer().getName(), getPrefix(Display.NAMETAG), getSuffix(Display.NAMETAG), null, ChatColor.WHITE, 0, CollisionRule.ALWAYS, Visibility.ALWAYS).joinPlayer(getPlayer().getName()));
+					changePrimaryTeam(new SimpleTeam(NametagManagerAPI.get().getTeamManager().getTeam(player.getUniqueId()), getPrefix(Display.NAMETAG), getSuffix(Display.NAMETAG), null, ChatColor.WHITE, 0, CollisionRule.ALWAYS, Visibility.ALWAYS).joinPlayer(getPlayer().getName()));
 				else{
 					SimpleTeam team = getPrimaryTeam();
 					team.setPrefix(value);
@@ -205,7 +204,7 @@ public class ClassicTabPlayer {
 			if(!Objects.equals(tagPrefix,value)) {
 				tagSuffix=value;
 				if(getPrimaryTeam()==null)
-					changePrimaryTeam(new SimpleTeam(getPlayer().getName(), getPrefix(Display.NAMETAG), getSuffix(Display.NAMETAG), null, ChatColor.WHITE, 0, CollisionRule.ALWAYS, Visibility.ALWAYS).joinPlayer(getPlayer().getName()));
+					changePrimaryTeam(new SimpleTeam(NametagManagerAPI.get().getTeamManager().getTeam(player.getUniqueId()), getPrefix(Display.NAMETAG), getSuffix(Display.NAMETAG), null, ChatColor.WHITE, 0, CollisionRule.ALWAYS, Visibility.ALWAYS).joinPlayer(getPlayer().getName()));
 				else{
 					SimpleTeam team = getPrimaryTeam();
 					team.setSuffix(value);

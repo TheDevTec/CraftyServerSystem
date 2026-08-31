@@ -21,6 +21,7 @@ placeholders:
 antiSwear:
   enabled: true
   # Global words are checked in every language. Prefix a word with * to match inside a word.
+  # Prefix a stem with + to match and replace the complete joined word, e.g. +pici catches dopiči.
   words:
   - "cigan"
   - "cikan"
@@ -49,7 +50,7 @@ antiSwear:
   - "kurw"
   - "idiot"
   - "pico"
-  - "pici"
+  - "+pici"
   - "pice"
   - "picu"
   - "fuck"
@@ -210,7 +211,7 @@ antiSwear:
   language-rules:
   - "cs,sk|ro|pica"
   block-event: false
-  # If block-event is false, direct vulgarisms are replaced. History-only hits are blocked.
+  # If block-event is false, direct and split vulgarisms are replaced.
   replacement: "****"
   # css.chat.bypass.antiswear
   bypass-enabled: false
@@ -223,10 +224,14 @@ antiSwear:
     permission: "css.chat.automod.debug"
   history:
     enabled: true
-    # How long previous messages stay available for combined anti-swear checks.
+    # Completed split words are blocked or replaced in the current message.
+    # How long previous messages stay available for anti-swear checks.
     cache: 20s
     # Number of previous messages by the same player used with the current message.
     maximum-messages: 4
+  language-profile:
+    # Temporary per-player language profile. It is never saved to disk.
+    cache: 30m
   # Phrases blocked only in context. One normal spelling is enough: diacritics,
   # spaces, dots, hyphens and basic leetspeak are normalized automatically.
   contextual-phrases:
@@ -441,6 +446,8 @@ antiSpam:
 antiFlood:
   enabled: true
   maximum-chars: 2
+  # Maximum repeats of a 2-4 letter pattern (e.g. ahahahaha -> ahah)
+  maximum-pattern-repeats: 2
   maximum-caps-chars: 3
   words-between-same-to-ignore: 6
   maximum-same-words-in-row: 2

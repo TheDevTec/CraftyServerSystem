@@ -22,7 +22,6 @@ import me.devtec.shared.components.Component;
 import me.devtec.shared.dataholder.StringContainer;
 import me.devtec.shared.placeholders.PlaceholderAPI;
 import me.devtec.shared.utility.MathUtils;
-import me.devtec.shared.utility.StringUtils;
 import me.devtec.theapi.bukkit.BukkitLoader;
 import me.devtec.theapi.bukkit.nms.NmsProvider.Action;
 import me.devtec.theapi.bukkit.nms.NmsProvider.DisplayType;
@@ -103,7 +102,7 @@ public class UserTablistData extends TablistData {
 				for(ClassicTabPlayer holder : TabAPI.getPlayers())
 					if(holder.getTeams().contains(team))
 						holder.sendPacket(packet);
-					else if(holder.getPlayer().canSee(getPlayer()))
+					else if(holder.getPlayer().equals(getPlayer()) || holder.getPlayer().canSee(getPlayer()))
 						holder.createTeam(team);
 			}
 		}
@@ -133,30 +132,6 @@ public class UserTablistData extends TablistData {
 		}
 		previous = getYellowNumberDisplayMode();
 		return this;
-	}
-
-
-	private static final String BASE62 = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-
-	public String generateSimpleHash() {
-		long timestamp = System.currentTimeMillis();
-		long random = StringUtils.random.nextLong();
-		long combined = timestamp ^ random;
-
-		// Použijeme jen část čísla, abychom dostali 11 znaků
-		return toBase62(Math.abs(combined) & 0x3FFFFFFFFFL, 11);
-	}
-
-	private String toBase62(long value, int length) {
-		char[] result = new char[length];
-
-		for (int i = length - 1; i >= 0; i--) {
-			int remainder = (int)(value % 62);
-			result[i] = BASE62.charAt(remainder);
-			value = value / 62;
-		}
-
-		return new String(result);
 	}
 
 	private Collection<Player> whoRequireUpdate(Player target, int value) {
