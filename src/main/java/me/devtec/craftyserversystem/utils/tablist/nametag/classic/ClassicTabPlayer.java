@@ -93,7 +93,8 @@ public class ClassicTabPlayer {
 	}
 
 	public void createTeam(SimpleTeam team) {
-		sendPacket(TeamUtils.createTeamPacket(TeamUtils.METHOD_ADD, team.getTeam(), team.getColor(), team.getPrefix(), team.getSuffix(), team.getDisplayName(), team.getNametagVisibility(), team.getCollisionRule(), team.getFriendlyFlags(), team.getPlayers()));
+		if(getTeams().stream().filter(t -> t.getTeam().equals(team.getTeam())).findAny().isEmpty())
+			sendPacket(TeamUtils.createTeamPacket(TeamUtils.METHOD_ADD, team.getTeam(), team.getColor(), team.getPrefix(), team.getSuffix(), team.getDisplayName(), team.getNametagVisibility(), team.getCollisionRule(), team.getFriendlyFlags(), team.getPlayers()));
 	}
 
 	public void joinTeam(SimpleTeam team) {
@@ -187,8 +188,10 @@ public class ClassicTabPlayer {
 					team.setPrefix(value);
 					Object packet = TeamUtils.createTeamPacket(TeamUtils.METHOD_CHANGE, team.getTeam(), team.getColor(), team.getPrefix(), team.getSuffix(), team.getDisplayName(), team.getNametagVisibility(), team.getCollisionRule(), team.getFriendlyFlags(), team.getPlayers());
 					for(ClassicTabPlayer holder : TabAPI.getPlayers())
-						if(holder.getTeams().contains(team))
+						if(holder.getTeams().contains(team)) {
 							holder.sendPacket(packet);
+							sendPacket(packet);
+						}
 				}
 			}
 			return;
@@ -210,8 +213,10 @@ public class ClassicTabPlayer {
 					team.setSuffix(value);
 					Object packet = TeamUtils.createTeamPacket(TeamUtils.METHOD_CHANGE, team.getTeam(), team.getColor(), team.getPrefix(), team.getSuffix(), team.getDisplayName(), team.getNametagVisibility(), team.getCollisionRule(), team.getFriendlyFlags(), team.getPlayers());
 					for(ClassicTabPlayer holder : TabAPI.getPlayers())
-						if(holder.getTeams().contains(team))
+						if(holder.getTeams().contains(team)) {
 							holder.sendPacket(packet);
+							sendPacket(packet);
+						}
 				}
 			}
 			return;
