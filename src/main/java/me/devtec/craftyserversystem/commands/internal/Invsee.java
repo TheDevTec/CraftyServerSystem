@@ -568,8 +568,8 @@ public class Invsee extends CssCommand {
 			}.runRepeating(40, 40);
 
 			@Override
-			public void onClose(Player player) {
-				if (!getPlayers().isEmpty())
+			public void onClose(Player player, CloseReason reason) {
+				if (getPlayers().size() > 1)
 					return;
 
 				guiHandler.remove(targetId);
@@ -1008,29 +1008,29 @@ public class Invsee extends CssCommand {
 	 * deserializeItem(NbtCompound item, Path temp) throws Exception { Object unsafe
 	 * = Bukkit.getUnsafe(); Method deserialize = findMethod(unsafe.getClass(),
 	 * "deserializeItem", byte[].class);
-	 * 
+	 *
 	 * if (deserialize != null) { Map copy = new
 	 * java.util.LinkedHashMap(item.values()); Method dataVersion =
 	 * findMethod(unsafe.getClass(), "getDataVersion"); if (dataVersion != null)
 	 * copy.put("DataVersion", ((Number) dataVersion.invoke(unsafe)).intValue());
-	 * 
+	 *
 	 * NbtCompound serialized = new NbtCompound("", copy); NbtWriter.write(temp,
 	 * serialized, true); return (ItemStack) deserialize.invoke(unsafe,
 	 * Files.readAllBytes(temp)); }
-	 * 
+	 *
 	 * Object compound = toNmsCompound(item); Object nmsItem =
 	 * createLegacyNmsItem(compound); return nmsItem == null ? null :
 	 * BukkitLoader.getNmsProvider().asBukkitItem(nmsItem); }
-	 * 
+	 *
 	 * private Object toNmsCompound(NbtCompound source) throws Exception { Object
 	 * compound = BukkitLoader.getNmsProvider().parseNBT("{}"); for (Entry<String,
 	 * Object> entry : source.values().entrySet()) setNmsValue(compound,
 	 * entry.getKey(), entry.getValue()); return compound; }
-	 * 
+	 *
 	 * private void setNmsValue(Object compound, String key, Object value) throws
 	 * Exception { if (value instanceof NbtValue) value = ((NbtValue)
 	 * value).value(); if (value == null) return;
-	 * 
+	 *
 	 * if (value instanceof NbtCompound) {
 	 * BukkitLoader.getNmsProvider().setNBTBase(compound, key,
 	 * toNmsCompound((NbtCompound) value)); return; } if (value instanceof NbtList)
@@ -1058,23 +1058,23 @@ public class Invsee extends CssCommand {
 	 * IOException("Unsupported NBT value: " + value.getClass().getName());
 	 * BukkitLoader.getNmsProvider().setNBTBase(compound, key,
 	 * createNmsLongArray((long[]) value)); }
-	 * 
+	 *
 	 * private Object createNmsLongArray(long[] values) { StringBuilder snbt = new
 	 * StringBuilder("{value:[L;"); for (int i = 0; i < values.length; ++i) { if (i
 	 * != 0) snbt.append(','); snbt.append(values[i]).append('L'); } return
 	 * BukkitLoader.getNmsProvider().getNBTBase(BukkitLoader.getNmsProvider().
 	 * parseNBT(snbt.append("]}").toString()), "value"); }
-	 * 
+	 *
 	 * private Object toNmsList(NbtList source) throws Exception { Object holder =
 	 * BukkitLoader.getNmsProvider().parseNBT("{value:[]}"); Object list =
 	 * BukkitLoader.getNmsProvider().getNBTBase(holder, "value"); for (Object value
 	 * : source.values()) appendNmsListValue(list, createNmsTag(value)); return
 	 * list; }
-	 * 
+	 *
 	 * private Object createNmsTag(Object value) throws Exception { Object holder =
 	 * BukkitLoader.getNmsProvider().parseNBT("{}"); setNmsValue(holder, "value",
 	 * value); return BukkitLoader.getNmsProvider().getNBTBase(holder, "value"); }
-	 * 
+	 *
 	 * private void appendNmsListValue(Object list, Object value) throws Exception {
 	 * for (Method method : list.getClass().getDeclaredMethods()) { if
 	 * (Modifier.isStatic(method.getModifiers()) || !"add".equals(method.getName()))
@@ -1086,11 +1086,11 @@ public class Invsee extends CssCommand {
 	 * method.setAccessible(true); method.invoke(list, listSize(list), value);
 	 * return; } } throw new IOException("Unable to append NBT list value on " +
 	 * Bukkit.getBukkitVersion()); }
-	 * 
+	 *
 	 * private int listSize(Object list) { try { Method size =
 	 * list.getClass().getMethod("size"); return ((Number)
 	 * size.invoke(list)).intValue(); } catch (Exception ignored) { return 0; } }
-	 * 
+	 *
 	 * static Object registries = Ref.invokeStatic(Ref.method(Ref.nms("server",
 	 * "MinecraftServer"), "getDefaultRegistryAccess")); static {
 	 * if(registries==null)registries =
@@ -1111,7 +1111,7 @@ public class Invsee extends CssCommand {
 	 * Ref.method(Ref.getClass("com.mojang.serialization.DataResult"), "result");
 	 * static Method getFirst = CODEC == null ? null :
 	 * Ref.method(Ref.getClass("com.mojang.datafixers.util.Pair"), "getFirst");
-	 * 
+	 *
 	 * private Object createLegacyNmsItem(Object compound) throws Exception {
 	 * if(compound==null)return null; if(oldCreateItem!=null) return
 	 * Ref.newInstance(oldCreateItem, compound); if(legacyCreateItem!=null) return

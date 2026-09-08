@@ -60,7 +60,7 @@ public class Anvil extends CssCommand {
 	private void openInv(CommandSender sender, Player target, boolean sendMessages) {
 		new AnvilGUI("Anvil", target) {
 			@Override
-			public void onClose(Player player) {
+			public void onClose(Player player, CloseReason reason) {
 				ItemStack item = getItem(0);
 				if (item != null)
 					target.getInventory().addItem(item);
