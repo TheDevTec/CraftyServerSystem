@@ -10,7 +10,7 @@ import org.bukkit.entity.Player;
 import me.devtec.craftyserversystem.api.API;
 import me.devtec.craftyserversystem.commands.CssCommand;
 import me.devtec.craftyserversystem.events.internal.BossBarListener;
-import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
+import me.devtec.shared.text.TextRenderer;
 import me.devtec.craftyserversystem.utils.bossbar.UserBossBarData;
 import me.devtec.shared.commands.selectors.Selector;
 import me.devtec.shared.commands.structures.CommandStructure;
@@ -62,11 +62,11 @@ public class BossBarHide extends CssCommand {
 		data.setHidden(status);
 		if (sendMessages)
 			if (!sender.equals(target)) {
-				PlaceholdersExecutor PLACEHOLDERS = PlaceholdersExecutor.i().add("sender", sender.getName()).add("target", target.getName());
+				TextRenderer PLACEHOLDERS = renderer().placeholder("sender", sender.getName()).placeholder("target", target.getName());
 				msg(sender, "other." + status + ".sender", PLACEHOLDERS);
 				msg(target, "other." + status + ".target", PLACEHOLDERS);
 			} else
-				msg(sender, "self." + status, PlaceholdersExecutor.EMPTY);
+				msg(sender, "self." + status);
 	}
 
 	public void setStatus(CommandSender sender, Player target, boolean sendMessages, boolean status) {
@@ -75,19 +75,19 @@ public class BossBarHide extends CssCommand {
 			return;
 		if (data.isHidden() == status) {
 			if (!sender.equals(target))
-				msg(sender, "other.already-set-to." + status, PlaceholdersExecutor.i().add("sender", sender.getName()).add("target", target.getName()));
+				msg(sender, "other.already-set-to." + status, renderer().placeholder("sender", sender.getName()).placeholder("target", target.getName()));
 			else
-				msg(sender, "self.already-set-to." + status, PlaceholdersExecutor.EMPTY);
+				msg(sender, "self.already-set-to." + status);
 			return;
 		}
 		data.setHidden(status);
 		if (sendMessages)
 			if (!sender.equals(target)) {
-				PlaceholdersExecutor PLACEHOLDERS = PlaceholdersExecutor.i().add("sender", sender.getName()).add("target", target.getName());
+				TextRenderer PLACEHOLDERS = renderer().placeholder("sender", sender.getName()).placeholder("target", target.getName());
 				msg(sender, "other." + status + ".sender", PLACEHOLDERS);
 				msg(target, "other." + status + ".target", PLACEHOLDERS);
 			} else
-				msg(sender, "self." + status, PlaceholdersExecutor.EMPTY);
+				msg(sender, "self." + status);
 	}
 
 }

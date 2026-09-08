@@ -8,7 +8,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import me.devtec.craftyserversystem.commands.CssCommand;
-import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
 import me.devtec.shared.commands.selectors.Selector;
 import me.devtec.shared.commands.structures.CommandStructure;
 
@@ -19,9 +18,10 @@ public class Weather extends CssCommand {
 		if (isRegistered())
 			return;
 
-		CommandStructure<CommandSender> cmd = CommandStructure.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
-			msgUsage(sender, "usage");
-		}).permission(getPerm("cmd"));
+		CommandStructure<CommandSender> cmd = CommandStructure
+				.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
+					msgUsage(sender, "usage");
+				}).permission(getPerm("cmd"));
 		cmd.argument("sun", (sender, structure, args) -> {
 			if (!(sender instanceof Player)) {
 				msgUsage(sender, "usage");
@@ -85,24 +85,27 @@ public class Weather extends CssCommand {
 		world.setStorm(false);
 		world.setThundering(false);
 		world.setWeatherDuration(36000);
+
 		if (sendMessages)
-			msgOut(sender, "weather.sun", PlaceholdersExecutor.i().add("world", world.getName()));
+			msgOut(sender, "weather.sun", renderer(sender).placeholder("world", world.getName()));
 	}
 
 	public void setRain(CommandSender sender, World world, boolean sendMessages) {
 		world.setStorm(true);
 		world.setThundering(false);
 		world.setWeatherDuration(36000);
+
 		if (sendMessages)
-			msgOut(sender, "weather.rain", PlaceholdersExecutor.i().add("world", world.getName()));
+			msgOut(sender, "weather.rain", renderer(sender).placeholder("world", world.getName()));
 	}
 
 	public void setThunder(CommandSender sender, World world, boolean sendMessages) {
 		world.setStorm(true);
-		world.setThundering(false);
+		world.setThundering(true);
 		world.setWeatherDuration(36000);
+
 		if (sendMessages)
-			msgOut(sender, "weather.thunder", PlaceholdersExecutor.i().add("world", world.getName()));
+			msgOut(sender, "weather.thunder", renderer(sender).placeholder("world", world.getName()));
 	}
 
 }

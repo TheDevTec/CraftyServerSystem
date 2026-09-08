@@ -16,11 +16,11 @@ import org.bukkit.event.player.PlayerTeleportEvent;
 
 import me.devtec.craftyserversystem.Loader;
 import me.devtec.craftyserversystem.commands.CssCommand;
-import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
 import me.devtec.shared.Ref;
 import me.devtec.shared.commands.selectors.Selector;
 import me.devtec.shared.commands.structures.CommandStructure;
 import me.devtec.shared.dataholder.cache.TempMap;
+import me.devtec.shared.text.TextRenderer;
 import me.devtec.theapi.bukkit.BukkitLoader;
 
 public class Gamemode extends CssCommand {
@@ -50,9 +50,10 @@ public class Gamemode extends CssCommand {
 		};
 		Bukkit.getPluginManager().registerEvents(listener, Loader.getPlugin());
 
-		CommandStructure<CommandSender> cmd = CommandStructure.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
-			msgUsage(sender, "cmd");
-		}).permission(getPerm("cmd"));
+		CommandStructure<CommandSender> cmd = CommandStructure
+				.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
+					msgUsage(sender, "cmd");
+				}).permission(getPerm("cmd"));
 
 		// survival
 		CommandStructure<CommandSender> survival = cmd.argument("survival", (sender, structure, args) -> {
@@ -135,7 +136,7 @@ public class Gamemode extends CssCommand {
 						setGameMode(player, GameMode.ADVENTURE, false, sender);
 				});
 
-		if (Ref.isNewerThan(7)) { // 1.8+
+		if (Ref.isAtLeast(8, 0)) { // 1.8+
 			// spectator
 			CommandStructure<CommandSender> spectator = cmd.argument("spectator", (sender, structure, args) -> {
 				if (!(sender instanceof Player)) {
@@ -182,10 +183,12 @@ public class Gamemode extends CssCommand {
 	public void setGameMode(Player target, GameMode mode, boolean sendMessage, CommandSender sender) {
 		if (sendMessage)
 			if (target.equals(sender)) {
-				PlaceholdersExecutor placeholders = PlaceholdersExecutor.i().add("target", target.getName()).add("gamemode", mode.name().toLowerCase());
+				TextRenderer placeholders = renderer().placeholder("target", target.getName()).placeholder("gamemode",
+						mode.name().toLowerCase());
 				msg(sender, "self", placeholders);
 			} else {
-				PlaceholdersExecutor placeholders = PlaceholdersExecutor.i().add("target", target.getName()).add("sender", sender.getName()).add("gamemode", mode.name().toLowerCase());
+				TextRenderer placeholders = renderer().placeholder("target", target.getName())
+						.placeholder("sender", sender.getName()).placeholder("gamemode", mode.name().toLowerCase());
 				msg(target, "other.target", placeholders);
 				msg(sender, "other.sender", placeholders);
 			}

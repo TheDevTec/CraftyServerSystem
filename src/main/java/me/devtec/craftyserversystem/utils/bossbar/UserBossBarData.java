@@ -3,8 +3,8 @@ package me.devtec.craftyserversystem.utils.bossbar;
 import org.bukkit.entity.Player;
 
 import me.devtec.craftyserversystem.api.API;
-import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
 import me.devtec.shared.placeholders.PlaceholderAPI;
+import me.devtec.shared.text.TextRenderer;
 import me.devtec.shared.utility.MathUtils;
 
 public class UserBossBarData extends BossBarData {
@@ -40,48 +40,70 @@ public class UserBossBarData extends BossBarData {
 			hidden = false;
 	}
 
-	public UserBossBarData process(PlaceholdersExecutor placeholders) {
+	public UserBossBarData process(TextRenderer renderer) {
 		if (hidden)
 			return this;
+
+		renderer.target(player.getUniqueId()).colorize();
+
 		for (String placeholder : API.get().getConfigManager().getPlaceholders().getKeys()) {
 			String replaced = PlaceholderAPI.apply(
 					API.get().getConfigManager().getPlaceholders().getString(placeholder + ".placeholder"),
 					player.getUniqueId());
-			placeholders.add(placeholder,
+
+			renderer.placeholder(placeholder,
 					API.get().getConfigManager().getPlaceholders()
 							.getString(placeholder + ".replace." + replaced,
 									API.get().getConfigManager().getPlaceholders()
 											.getString(placeholder + ".replace._DEFAULT", ""))
 							.replace("{placeholder}", replaced));
 		}
+
 		BossBarEmulator bar = bossbar;
+
 		if (bar == null)
-			bar = bossbar = BossBarEmulator.createInstance(player, placeholders.apply(getText()),
-					MathUtils.calculate(placeholders.apply(getProgress())));
+			bar = bossbar = BossBarEmulator.createInstance(player, render(getText(), renderer),
+					MathUtils.calculate(renderPlain(getProgress(), renderer)));
 		else {
 			if (!bar.canSee(player))
 				bar.addPlayer(player);
+
 			if (updateTitleMode != 0) {
 				if (updateTitleMode != 2)
 					updateTitleMode = 0;
-				bar.setText(placeholders.apply(getText()));
+
+				bar.setText(render(getText(), renderer));
 			}
-			bar.setProgress(MathUtils.calculate(placeholders.apply(getProgress())));
+
+			bar.setProgress(MathUtils.calculate(renderPlain(getProgress(), renderer)));
 		}
+
 		if (getStyle() != null)
 			bar.setStyle(getStyle());
+
 		if (getColor() != null)
 			bar.setColor(getColor());
+
 		return this;
+	}
+
+	private String render(String text, TextRenderer renderer) {
+		return renderer.render(PlaceholderAPI.apply(text, player.getUniqueId()), player.getUniqueId());
+	}
+
+	private String renderPlain(String text, TextRenderer renderer) {
+		return renderer.renderPlain(PlaceholderAPI.apply(text, player.getUniqueId()), player.getUniqueId());
 	}
 
 	public UserBossBarData markModified() {
 		updateTitleMode = (byte) (getText().indexOf('{') != -1 || getText().indexOf('%') != -1 ? 2 : 1);
+
 		return this;
 	}
 
 	public void removeBossBar() {
-		bossbar.remove();
+		if (bossbar != null)
+			bossbar.remove();
 	}
 
 	public Player getPlayer() {
@@ -89,9 +111,6 @@ public class UserBossBarData extends BossBarData {
 	}
 
 	public boolean shouldUpdateData(String group) {
-		if (group.equals(this.group))
-			return false;
-		return true;
+		return !group.equals(this.group);
 	}
-
 }

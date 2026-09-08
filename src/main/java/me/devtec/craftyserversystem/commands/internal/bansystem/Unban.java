@@ -7,7 +7,7 @@ import org.bukkit.command.CommandSender;
 
 import me.devtec.craftyserversystem.api.API;
 import me.devtec.craftyserversystem.commands.CssCommand;
-import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
+import me.devtec.shared.text.TextRenderer;
 import me.devtec.shared.commands.structures.CommandStructure;
 
 public class Unban extends CssCommand {
@@ -28,9 +28,9 @@ public class Unban extends CssCommand {
 				modified = true;
 			}
 			if (modified)
-				msg(sender, "success", PlaceholdersExecutor.i().add("user", player));
+				msg(sender, "success", renderer().placeholder("user", player));
 			else
-				msg(sender, "failed", PlaceholdersExecutor.i().add("user", player));
+				msg(sender, "failed", renderer().placeholder("user", player));
 		}, (sender, structure, args) -> {
 			List<String> list = new ArrayList<>();
 			for (Entry entry : API.get().getCommandsAPI().getBanAPI().getActivePunishments(BanType.BAN))

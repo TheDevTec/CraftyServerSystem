@@ -6,9 +6,9 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import me.devtec.craftyserversystem.commands.CssCommand;
-import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
 import me.devtec.shared.commands.selectors.Selector;
 import me.devtec.shared.commands.structures.CommandStructure;
+import me.devtec.shared.text.TextRenderer;
 
 public class PlayerTime extends CssCommand {
 
@@ -17,9 +17,10 @@ public class PlayerTime extends CssCommand {
 		if (isRegistered())
 			return;
 
-		CommandStructure<CommandSender> cmd = CommandStructure.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
-			msgUsage(sender, "usage");
-		}).permission(getPerm("cmd"));
+		CommandStructure<CommandSender> cmd = CommandStructure
+				.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
+					msgUsage(sender, "usage");
+				}).permission(getPerm("cmd"));
 		cmd.argument("day", (sender, structure, args) -> {
 			if (!(sender instanceof Player)) {
 				msgUsage(sender, "usage");
@@ -129,7 +130,8 @@ public class PlayerTime extends CssCommand {
 		target.resetPlayerTime();
 		if (sendMessages)
 			if (!sender.equals(target)) {
-				PlaceholdersExecutor PLACEHOLDERS = PlaceholdersExecutor.i().add("sender", sender.getName()).add("target", target.getName());
+				TextRenderer PLACEHOLDERS = renderer().placeholder("sender", sender.getName()).placeholder("target",
+						target.getName());
 				msgOut(sender, "playtime-reset.other.sender", PLACEHOLDERS);
 				msgOut(target, "playtime-reset.other.target", PLACEHOLDERS);
 			} else
@@ -140,7 +142,8 @@ public class PlayerTime extends CssCommand {
 		target.setPlayerTime(1000, false);
 		if (sendMessages)
 			if (!sender.equals(target)) {
-				PlaceholdersExecutor PLACEHOLDERS = PlaceholdersExecutor.i().add("sender", sender.getName()).add("target", target.getName());
+				TextRenderer PLACEHOLDERS = renderer().placeholder("sender", sender.getName()).placeholder("target",
+						target.getName());
 				msgOut(sender, "playerday.other.sender", PLACEHOLDERS);
 				msgOut(target, "playerday.other.target", PLACEHOLDERS);
 			} else
@@ -151,7 +154,8 @@ public class PlayerTime extends CssCommand {
 		target.setPlayerTime(6000, false);
 		if (sendMessages)
 			if (!sender.equals(target)) {
-				PlaceholdersExecutor PLACEHOLDERS = PlaceholdersExecutor.i().add("sender", sender.getName()).add("target", target.getName());
+				TextRenderer PLACEHOLDERS = renderer().placeholder("sender", sender.getName()).placeholder("target",
+						target.getName());
 				msgOut(sender, "playernoon.other.sender", PLACEHOLDERS);
 				msgOut(target, "playernoon.other.target", PLACEHOLDERS);
 			} else
@@ -162,7 +166,8 @@ public class PlayerTime extends CssCommand {
 		target.setPlayerTime(13000, false);
 		if (sendMessages)
 			if (!sender.equals(target)) {
-				PlaceholdersExecutor PLACEHOLDERS = PlaceholdersExecutor.i().add("sender", sender.getName()).add("target", target.getName());
+				TextRenderer PLACEHOLDERS = renderer().placeholder("sender", sender.getName()).placeholder("target",
+						target.getName());
 				msgOut(sender, "playernight.other.sender", PLACEHOLDERS);
 				msgOut(target, "playernight.other.target", PLACEHOLDERS);
 			} else
@@ -173,7 +178,8 @@ public class PlayerTime extends CssCommand {
 		target.setPlayerTime(18000, false);
 		if (sendMessages)
 			if (!sender.equals(target)) {
-				PlaceholdersExecutor PLACEHOLDERS = PlaceholdersExecutor.i().add("sender", sender.getName()).add("target", target.getName());
+				TextRenderer PLACEHOLDERS = renderer().placeholder("sender", sender.getName()).placeholder("target",
+						target.getName());
 				msgOut(sender, "playermidnight.other.sender", PLACEHOLDERS);
 				msgOut(target, "playermidnight.other.target", PLACEHOLDERS);
 			} else

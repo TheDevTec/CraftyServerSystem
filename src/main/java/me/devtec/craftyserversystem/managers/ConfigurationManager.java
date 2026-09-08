@@ -1,6 +1,14 @@
 package me.devtec.craftyserversystem.managers;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.StandardCopyOption;
+import java.nio.file.attribute.BasicFileAttributes;
 
 import org.bukkit.Bukkit;
 
@@ -73,12 +81,19 @@ public class ConfigurationManager {
 		merge(kits, "kits.yml");
 		merge(economy, "economy.yml");
 		merge(placeholders, "placeholders.yml");
-		if(!new File(FILES_PATH+"guis").exists()) {
-			Config.loadFromPlugin(Loader.getPlugin().getClass(), "guis/example.yml", FILES_PATH + "storage/guis/example.yml").save("yaml");
-			Config.loadFromPlugin(Loader.getPlugin().getClass(), "guis/heal/main.yml", FILES_PATH + "storage/guis/heal/main.yml").save("yaml");
-			Config.loadFromPlugin(Loader.getPlugin().getClass(), "guis/shop/buy_menu.yml", FILES_PATH + "storage/guis/shop/buy_menu.yml").save("yaml");
-			Config.loadFromPlugin(Loader.getPlugin().getClass(), "guis/shop/main.yml", FILES_PATH + "storage/guis/shop/main.yml").save("yaml");
+		migrateGuisFolder();
+		if (!new File(FILES_PATH + "guis").exists()) {
+			Config.loadFromPlugin(Loader.getPlugin().getClass(), "guis/example.yml", FILES_PATH + "guis/example.yml")
+					.save("yaml");
+			Config.loadFromPlugin(Loader.getPlugin().getClass(), "guis/heal/main.yml",
+					FILES_PATH + "guis/heal/main.yml").save("yaml");
+			Config.loadFromPlugin(Loader.getPlugin().getClass(), "guis/shop/buy_menu.yml",
+					FILES_PATH + "guis/shop/buy_menu.yml").save("yaml");
+			Config.loadFromPlugin(Loader.getPlugin().getClass(), "guis/shop/main.yml",
+					FILES_PATH + "guis/shop/main.yml").save("yaml");
 		}
+		Config.loadFromPlugin(Loader.getPlugin().getClass(), "guis/warps/warp.yml", FILES_PATH + "guis/warps/warp.yml")
+				.save("yaml");
 		if (!serverMotd.exists("motds"))
 			merge(serverMotd, "server-motd.yml");
 		merge(consoleFilter, "console-filter.yml");
@@ -89,11 +104,58 @@ public class ConfigurationManager {
 		return this;
 	}
 
+	@SuppressWarnings("resource")
 	private void merge(Config origin, String path) {
 		ClassLoader classLoader = Loader.getPlugin().getClass().getClassLoader();
 		if (origin.merge(new Config().reload(StreamUtils.fromStream(classLoader.getResourceAsStream(path))),
 				MergeStandards.DEFAULT))
 			origin.save("yaml");
+	}
+
+	private static void migrateGuisFolder() {
+		Path source = Paths.get(FILES_PATH, "storage", "guis");
+		Path target = Paths.get(FILES_PATH, "guis");
+
+		if (!Files.isDirectory(source))
+			return;
+
+		try {
+			if (!Files.exists(target))
+				Files.createDirectories(target);
+
+			Files.walkFileTree(source, new SimpleFileVisitor<Path>() {
+				@Override
+				public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+					Path relative = source.relativize(dir);
+					Path destination = target.resolve(relative);
+
+					if (!Files.exists(destination))
+						Files.createDirectories(destination);
+
+					return FileVisitResult.CONTINUE;
+				}
+
+				@Override
+				public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+					Path relative = source.relativize(file);
+					Path destination = target.resolve(relative);
+
+					Files.move(file, destination, StandardCopyOption.REPLACE_EXISTING);
+					return FileVisitResult.CONTINUE;
+				}
+
+				@Override
+				public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+					if (exc != null)
+						throw exc;
+
+					Files.deleteIfExists(dir);
+					return FileVisitResult.CONTINUE;
+				}
+			});
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public String getPrefix() {
@@ -109,11 +171,11 @@ public class ConfigurationManager {
 	}
 
 	public Config getWarpsStorage() {
-		return new Config(FILES_PATH + "storage/warps.yml");
+		return new Config(FILES_PATH + "warps.yml");
 	}
 
 	public Config getBansStorage() {
-		return new Config(FILES_PATH + "storage/banlist.yml");
+		return new Config(FILES_PATH + "banlist.yml");
 	}
 
 	public Position getSpawn() {
@@ -122,12 +184,14 @@ public class ConfigurationManager {
 
 	public void setSpawn(Position position) {
 		spawn = position;
+		@SuppressWarnings("resource")
 		Config data = new Config(FILES_PATH + "spawn.yml");
 		data.set("spawn", position);
 		data.save("yaml");
 	}
 
 	public void loadSpawn() {
+		@SuppressWarnings("resource")
 		Config data = new Config(FILES_PATH + "spawn.yml");
 		spawn = data.getAs("spawn", Position.class,
 				Position.fromLocation(Bukkit.getWorlds().get(0).getSpawnLocation()));

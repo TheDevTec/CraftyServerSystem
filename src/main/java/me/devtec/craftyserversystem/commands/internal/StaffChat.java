@@ -17,7 +17,6 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import me.devtec.craftyserversystem.Loader;
 import me.devtec.craftyserversystem.api.API;
 import me.devtec.craftyserversystem.commands.CssCommand;
-import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
 import me.devtec.shared.commands.structures.CommandStructure;
 import me.devtec.shared.utility.StringUtils;
 
@@ -87,7 +86,7 @@ public class StaffChat extends CssCommand {
 			path = "console";
 		API.get().getMsgManager().sendMessageFromFile(API.get().getConfigManager().getMain(),
 				"staff-chat.formats." + path,
-				PlaceholdersExecutor.i().add("sender", player.getName()).add("message", message), getPerm("cmd"));
+				renderer().placeholder("sender", player.getName()).placeholder("message", message), getPerm("cmd"));
 	}
 
 	@Override

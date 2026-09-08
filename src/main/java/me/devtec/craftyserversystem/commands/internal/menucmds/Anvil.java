@@ -7,9 +7,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import me.devtec.craftyserversystem.commands.CssCommand;
-import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
 import me.devtec.shared.commands.selectors.Selector;
 import me.devtec.shared.commands.structures.CommandStructure;
+import me.devtec.shared.text.TextRenderer;
 import me.devtec.theapi.bukkit.gui.AnvilGUI;
 
 public class Anvil extends CssCommand {
@@ -77,7 +77,7 @@ public class Anvil extends CssCommand {
 			if (sender.equals(target))
 				msg(sender, "self");
 			else {
-				PlaceholdersExecutor ex = PlaceholdersExecutor.i().add("sender", sender.getName()).add("target",
+				TextRenderer ex = renderer().placeholder("sender", sender.getName()).placeholder("target",
 						target.getName());
 				msg(sender, "other.sender", ex);
 				msg(target, "other.target", ex);

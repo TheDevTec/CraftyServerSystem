@@ -8,26 +8,27 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import me.devtec.craftyserversystem.commands.CssCommand;
-import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
 import me.devtec.shared.Ref;
 import me.devtec.shared.commands.selectors.Selector;
 import me.devtec.shared.commands.structures.CommandStructure;
+import me.devtec.shared.text.TextRenderer;
 import me.devtec.theapi.bukkit.BukkitLoader;
 
 public class GamemodeSpectator extends CssCommand {
 
 	@Override
 	public void register() {
-		if (isRegistered() || !Ref.isNewerThan(7))
+		if (isRegistered() || Ref.isBefore(8, 0))
 			return;
 
-		CommandStructure<CommandSender> cmd = CommandStructure.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
-			if (!(sender instanceof Player)) {
-				msgUsage(sender, "cmd");
-				return;
-			}
-			changeGameMode((Player) sender, true, sender);
-		}).permission(getPerm("cmd"));
+		CommandStructure<CommandSender> cmd = CommandStructure
+				.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
+					if (!(sender instanceof Player)) {
+						msgUsage(sender, "cmd");
+						return;
+					}
+					changeGameMode((Player) sender, true, sender);
+				}).permission(getPerm("cmd"));
 		// silent
 		cmd.argument("-s", (sender, structure, args) -> {
 			if (!(sender instanceof Player)) {
@@ -56,10 +57,12 @@ public class GamemodeSpectator extends CssCommand {
 	public void changeGameMode(Player target, boolean sendMessage, CommandSender sender) {
 		if (sendMessage)
 			if (target.equals(sender)) {
-				PlaceholdersExecutor placeholders = PlaceholdersExecutor.i().add("target", target.getName()).add("gamemode", "spectator");
+				TextRenderer placeholders = renderer().placeholder("target", target.getName()).placeholder("gamemode",
+						"spectator");
 				msg(sender, "self", placeholders);
 			} else {
-				PlaceholdersExecutor placeholders = PlaceholdersExecutor.i().add("target", target.getName()).add("sender", sender.getName()).add("gamemode", "spectator");
+				TextRenderer placeholders = renderer().placeholder("target", target.getName())
+						.placeholder("sender", sender.getName()).placeholder("gamemode", "spectator");
 				msg(target, "other.target", placeholders);
 				msg(sender, "other.sender", placeholders);
 			}

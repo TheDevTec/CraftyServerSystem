@@ -7,10 +7,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffect;
 
 import me.devtec.craftyserversystem.commands.CssCommand;
-import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
 import me.devtec.shared.Ref;
 import me.devtec.shared.commands.selectors.Selector;
 import me.devtec.shared.commands.structures.CommandStructure;
+import me.devtec.shared.text.TextRenderer;
 
 public class Heal extends CssCommand {
 
@@ -19,13 +19,14 @@ public class Heal extends CssCommand {
 		if (isRegistered())
 			return;
 
-		CommandStructure<CommandSender> cmd = CommandStructure.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
-			if (!(sender instanceof Player)) {
-				msgUsage(sender, "other");
-				return;
-			}
-			heal((Player) sender, true, sender);
-		}).permission(getPerm("cmd"));
+		CommandStructure<CommandSender> cmd = CommandStructure
+				.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
+					if (!(sender instanceof Player)) {
+						msgUsage(sender, "other");
+						return;
+					}
+					heal((Player) sender, true, sender);
+				}).permission(getPerm("cmd"));
 		// silent
 		cmd.argument("-s", (sender, structure, args) -> {
 			if (!(sender instanceof Player)) {
@@ -58,17 +59,18 @@ public class Heal extends CssCommand {
 		target.setExhaustion(0);
 		target.setFireTicks(0);
 		target.setRemainingAir(target.getMaximumAir());
-		if (Ref.isNewerThan(16))
+		if (Ref.isAfter(16, 0))
 			target.setFreezeTicks(0);
 		for (PotionEffect effect : target.getActivePotionEffects())
 			target.removePotionEffect(effect.getType());
 		if (sendMessage)
 			if (!sender.equals(target)) {
-				PlaceholdersExecutor placeholders = PlaceholdersExecutor.i().add("sender", sender.getName()).add("target", target.getName());
+				TextRenderer placeholders = renderer().placeholder("sender", sender.getName()).placeholder("target",
+						target.getName());
 				msg(target, "other.target", placeholders);
 				msg(sender, "other.sender", placeholders);
 			} else
-				msg(target, "self", PlaceholdersExecutor.i().add("target", target.getName()));
+				msg(target, "self", renderer().placeholder("target", target.getName()));
 	}
 
 }

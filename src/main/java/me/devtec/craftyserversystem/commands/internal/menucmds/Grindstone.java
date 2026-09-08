@@ -8,10 +8,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryType;
 
 import me.devtec.craftyserversystem.commands.CssCommand;
-import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
 import me.devtec.shared.Ref;
 import me.devtec.shared.commands.selectors.Selector;
 import me.devtec.shared.commands.structures.CommandStructure;
+import me.devtec.shared.text.TextRenderer;
 
 public class Grindstone extends CssCommand {
 
@@ -22,16 +22,17 @@ public class Grindstone extends CssCommand {
 
 	@Override
 	public void register() {
-		if (isRegistered() || !Ref.isNewerThan(13))
+		if (isRegistered() || Ref.isAtMost(13, 0))
 			return;
 
-		CommandStructure<CommandSender> cmd = CommandStructure.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
-			if (!(sender instanceof Player)) {
-				msgUsage(sender, "cmd");
-				return;
-			}
-			openInv(sender, (Player) sender, true);
-		}).permission(getPerm("cmd"));
+		CommandStructure<CommandSender> cmd = CommandStructure
+				.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
+					if (!(sender instanceof Player)) {
+						msgUsage(sender, "cmd");
+						return;
+					}
+					openInv(sender, (Player) sender, true);
+				}).permission(getPerm("cmd"));
 		// silent
 		cmd.argument("-s", (sender, structure, args) -> {
 			if (!(sender instanceof Player)) {
@@ -63,7 +64,8 @@ public class Grindstone extends CssCommand {
 			if (sender.equals(target))
 				msg(sender, "self");
 			else {
-				PlaceholdersExecutor ex = PlaceholdersExecutor.i().add("sender", sender.getName()).add("target", target.getName());
+				TextRenderer ex = renderer().placeholder("sender", sender.getName()).placeholder("target",
+						target.getName());
 				msg(sender, "other.sender", ex);
 				msg(target, "other.target", ex);
 			}

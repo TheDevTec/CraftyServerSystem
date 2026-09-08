@@ -8,7 +8,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import me.devtec.craftyserversystem.commands.CssCommand;
-import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
 import me.devtec.shared.commands.selectors.Selector;
 import me.devtec.shared.commands.structures.CommandStructure;
 
@@ -19,19 +18,20 @@ public class Rain extends CssCommand {
 		if (isRegistered())
 			return;
 
-		CommandStructure<CommandSender> cmd = CommandStructure.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
-			if (!(sender instanceof Player)) {
-				msgUsage(sender, "usage");
-				return;
-			}
-			setRain(sender, ((Player) sender).getWorld(), true);
-		}).permission(getPerm("cmd")).argument("-s", (sender, structure, args) -> {
-			if (!(sender instanceof Player)) {
-				msgUsage(sender, "usage");
-				return;
-			}
-			setRain(sender, ((Player) sender).getWorld(), false);
-		}).parent();
+		CommandStructure<CommandSender> cmd = CommandStructure
+				.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
+					if (!(sender instanceof Player)) {
+						msgUsage(sender, "usage");
+						return;
+					}
+					setRain(sender, ((Player) sender).getWorld(), true);
+				}).permission(getPerm("cmd")).argument("-s", (sender, structure, args) -> {
+					if (!(sender instanceof Player)) {
+						msgUsage(sender, "usage");
+						return;
+					}
+					setRain(sender, ((Player) sender).getWorld(), false);
+				}).parent();
 		cmd.selector(Selector.WORLD, (sender, structure, args) -> {
 			setRain(sender, Bukkit.getWorld(args[0]), true);
 		}).argument("-s", (sender, structure, args) -> {
@@ -48,7 +48,7 @@ public class Rain extends CssCommand {
 		world.setThundering(false);
 		world.setWeatherDuration(36000);
 		if (sendMessages)
-			msgOut(sender, "weather.rain", PlaceholdersExecutor.i().add("world", world.getName()));
+			msgOut(sender, "weather.rain", renderer().placeholder("world", world.getName()));
 	}
 
 }

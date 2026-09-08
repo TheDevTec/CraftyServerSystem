@@ -12,7 +12,6 @@ import org.bukkit.inventory.ItemStack;
 
 import me.devtec.craftyserversystem.api.API;
 import me.devtec.craftyserversystem.commands.CssCommand;
-import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
 import me.devtec.shared.commands.selectors.Selector;
 import me.devtec.shared.commands.structures.CommandStructure;
 import me.devtec.shared.utility.ParseUtils;
@@ -26,64 +25,79 @@ public class WarpManager extends CssCommand {
 		if (isRegistered())
 			return;
 
-		// Ugh, horrible
-		me.devtec.craftyserversystem.commands.internal.warp.WarpManager provider = me.devtec.craftyserversystem.commands.internal.warp.WarpManager.getProvider();
+		me.devtec.craftyserversystem.commands.internal.warp.WarpManager provider = me.devtec.craftyserversystem.commands.internal.warp.WarpManager
+				.getProvider();
 
-		CommandStructure<CommandSender> cmd = CommandStructure.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
-			msgUsage(sender, "cmd");
-		}).permission(getPerm("cmd")).callableArgument((sender, structure, args) -> StringUtils.copyPartialMatches(args[0], provider.getWarps()), (sender, structure, args) -> {
-			msgUsage(sender, "cmd");
-		});
+		CommandStructure<CommandSender> cmd = CommandStructure
+				.create(CommandSender.class, DEFAULT_PERMS_CHECKER,
+						(sender, structure, args) -> msgUsage(sender, "cmd"))
+				.permission(getPerm("cmd")).callableArgument(
+						(sender, structure, args) -> StringUtils.copyPartialMatches(args[0], provider.getWarps()),
+						(sender, structure, args) -> msgUsage(sender, "cmd"));
 
-		// icon
 		if (API.get().getConfigManager().getMain().getBoolean("warp.enable-menu"))
 			cmd.argument("icon", (sender, structure, args) -> {
 				ItemStack icon = ((Player) sender).getItemInHand();
+
 				if (icon.getType() == Material.AIR) {
 					msg(sender, "icon.empty-hand");
 					return;
 				}
+
 				Warp.callMenuUpdate();
 				provider.get(args[0]).setIcon(icon);
-				msg(sender, "icon.set", PlaceholdersExecutor.i().add("warp", args[0]).add("type", XMaterial.matchXMaterial(icon).getFormattedName()));
+
+				msg(sender, "icon.set", renderer(sender).placeholder("warp", args[0]).placeholder("type",
+						XMaterial.matchXMaterial(icon).getFormattedName()));
 			}, (sender, structure, args) -> sender instanceof Player ? Arrays.asList("icon") : Collections.emptyList());
 
-		cmd.argument("cost", (sender, structure, args) -> {
-			msgUsage(sender, "cmd-cost");
-		}).selector(Selector.NUMBER, (sender, structure, args) -> {
-			double cost = ParseUtils.getDouble(args[2]);
-			if (cost < 0) {
-				msg(sender, "cost.is-under-zero");
-				return;
-			}
-			Warp.callMenuUpdate();
-			provider.get(args[0]).setCost(cost);
-			msg(sender, "cost.set", PlaceholdersExecutor.i().add("warp", args[0]).add("cost", cost));
-		});
+		cmd.argument("cost", (sender, structure, args) -> msgUsage(sender, "cmd-cost")).selector(Selector.NUMBER,
+				(sender, structure, args) -> {
+					double cost = ParseUtils.getDouble(args[2]);
 
-		cmd.argument("perm", (sender, structure, args) -> {
-			msgUsage(sender, "cmd-perm");
-		}).argument(null, 1, (sender, structure, args) -> {
-			String permission = args[2].toLowerCase();
-			if (permission.equals("none")) {
-				provider.get(args[0]).setPermission(null);
-				Warp.callMenuUpdate();
-				msg(sender, "perm.none", PlaceholdersExecutor.i().add("warp", args[0]));
-				return;
-			}
-			Warp.callMenuUpdate();
-			provider.get(args[0]).setPermission("css.cmd.warp." + permission);
-			msg(sender, "perm.set", PlaceholdersExecutor.i().add("warp", args[0]).add("permission", "css.cmd.warp." + permission));
-		}, (sender, structure, args) -> {
-			List<String> tabCompleter = new ArrayList<>();
-			tabCompleter.add("none");
-			tabCompleter.add(args[0].toLowerCase());
-			tabCompleter.add("{perm}");
-			return tabCompleter;
-		});
+					if (cost < 0) {
+						msg(sender, "cost.is-under-zero");
+						return;
+					}
 
-		// register
+					Warp.callMenuUpdate();
+					provider.get(args[0]).setCost(cost);
+
+					msg(sender, "cost.set", renderer(sender).placeholder("warp", args[0]).placeholder("cost", cost));
+				});
+
+		cmd.argument("perm", (sender, structure, args) -> msgUsage(sender, "cmd-perm")).argument(null, 1,
+				(sender, structure, args) -> {
+					String permission = args[2].toLowerCase();
+
+					if ("none".equals(permission)) {
+						provider.get(args[0]).setPermission(null);
+						Warp.callMenuUpdate();
+
+						msg(sender, "perm.none", renderer(sender).placeholder("warp", args[0]));
+
+						return;
+					}
+
+					String fullPermission = "css.cmd.warp." + permission;
+
+					Warp.callMenuUpdate();
+					provider.get(args[0]).setPermission(fullPermission);
+
+					msg(sender, "perm.set",
+							renderer(sender).placeholder("warp", args[0]).placeholder("permission", fullPermission));
+				}, (sender, structure, args) -> {
+					List<String> tabCompleter = new ArrayList<>();
+
+					tabCompleter.add("none");
+					tabCompleter.add(args[0].toLowerCase());
+					tabCompleter.add("{perm}");
+
+					return tabCompleter;
+				});
+
 		List<String> cmds = getCommands();
+
 		if (!cmds.isEmpty())
 			this.cmd = addBypassSettings(cmd).build().register(cmds.remove(0), cmds.toArray(new String[0]));
 	}

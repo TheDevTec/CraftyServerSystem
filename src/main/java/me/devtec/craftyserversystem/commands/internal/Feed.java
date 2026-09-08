@@ -6,7 +6,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import me.devtec.craftyserversystem.commands.CssCommand;
-import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
+import me.devtec.shared.text.TextRenderer;
 import me.devtec.shared.commands.selectors.Selector;
 import me.devtec.shared.commands.structures.CommandStructure;
 
@@ -55,11 +55,11 @@ public class Feed extends CssCommand {
 		target.setExhaustion(0);
 		if (sendMessage)
 			if (!sender.equals(target)) {
-				PlaceholdersExecutor placeholders = PlaceholdersExecutor.i().add("sender", sender.getName()).add("target", target.getName());
+				TextRenderer placeholders = renderer().placeholder("sender", sender.getName()).placeholder("target", target.getName());
 				msg(target, "other.target", placeholders);
 				msg(sender, "other.sender", placeholders);
 			} else
-				msg(target, "self", PlaceholdersExecutor.i().add("target", target.getName()));
+				msg(target, "self", renderer().placeholder("target", target.getName()));
 	}
 
 }

@@ -7,7 +7,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import me.devtec.craftyserversystem.commands.CssCommand;
-import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
 import me.devtec.shared.commands.selectors.Selector;
 import me.devtec.shared.commands.structures.CommandStructure;
 import me.devtec.shared.utility.StringUtils;
@@ -20,9 +19,10 @@ public class Sudo extends CssCommand {
 		if (isRegistered())
 			return;
 
-		CommandStructure<CommandSender> cmd = CommandStructure.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
-			msgUsage(sender, "cmd");
-		}).permission(getPerm("cmd"));
+		CommandStructure<CommandSender> cmd = CommandStructure
+				.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
+					msgUsage(sender, "cmd");
+				}).permission(getPerm("cmd"));
 		cmd.selector(Selector.PLAYER, (sender, structure, args) -> {
 			msgUsage(sender, "cmd");
 		}).argument(null, -1, (sender, structure, args) -> {
@@ -45,7 +45,7 @@ public class Sudo extends CssCommand {
 					target.chat(finalValue);
 			});
 			if (!silent)
-				msg(sender, "", PlaceholdersExecutor.i().add("target", target.getName()).add("value", value));
+				msg(sender, "", renderer().placeholder("target", target.getName()).placeholder("value", value));
 		});
 
 		// register

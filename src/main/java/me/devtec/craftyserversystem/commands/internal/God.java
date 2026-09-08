@@ -17,10 +17,10 @@ import org.bukkit.event.entity.FoodLevelChangeEvent;
 import me.devtec.craftyserversystem.Loader;
 import me.devtec.craftyserversystem.api.API;
 import me.devtec.craftyserversystem.commands.CssCommand;
-import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
 import me.devtec.shared.Ref;
 import me.devtec.shared.commands.selectors.Selector;
 import me.devtec.shared.commands.structures.CommandStructure;
+import me.devtec.shared.text.TextRenderer;
 
 public class God extends CssCommand {
 
@@ -31,7 +31,7 @@ public class God extends CssCommand {
 		if (isRegistered())
 			return;
 
-		if (Ref.isOlderThan(12))
+		if (Ref.isBefore(12, 0))
 			if (API.get().getConfigManager().getMain().getBoolean("god.anti-void-damage-listener"))
 				listener = new Listener() {
 
@@ -52,7 +52,8 @@ public class God extends CssCommand {
 
 					@EventHandler(ignoreCancelled = true)
 					public void playerVoid(EntityDamageEvent e) {
-						if (e.getCause() != DamageCause.VOID && e.getEntityType() == EntityType.PLAYER && isAllowed((Player) e.getEntity()))
+						if (e.getCause() != DamageCause.VOID && e.getEntityType() == EntityType.PLAYER
+								&& isAllowed((Player) e.getEntity()))
 							e.setCancelled(true);
 					}
 
@@ -67,7 +68,8 @@ public class God extends CssCommand {
 
 				@EventHandler(ignoreCancelled = true)
 				public void playerVoid(EntityDamageEvent e) {
-					if (e.getCause() == DamageCause.VOID && e.getEntityType() == EntityType.PLAYER && isAllowed((Player) e.getEntity()))
+					if (e.getCause() == DamageCause.VOID && e.getEntityType() == EntityType.PLAYER
+							&& isAllowed((Player) e.getEntity()))
 						e.setCancelled(true);
 				}
 
@@ -79,7 +81,8 @@ public class God extends CssCommand {
 
 				@EventHandler(ignoreCancelled = true)
 				public void playerAir(EntityAirChangeEvent e) {
-					if (e.getEntityType() == EntityType.PLAYER && isAllowed((Player) e.getEntity()) && ((Player) e.getEntity()).getRemainingAir() > e.getAmount())
+					if (e.getEntityType() == EntityType.PLAYER && isAllowed((Player) e.getEntity())
+							&& ((Player) e.getEntity()).getRemainingAir() > e.getAmount())
 						e.setCancelled(true);
 				}
 			};
@@ -94,19 +97,21 @@ public class God extends CssCommand {
 
 				@EventHandler(ignoreCancelled = true)
 				public void playerAir(EntityAirChangeEvent e) {
-					if (e.getEntityType() == EntityType.PLAYER && isAllowed((Player) e.getEntity()) && ((Player) e.getEntity()).getRemainingAir() > e.getAmount())
+					if (e.getEntityType() == EntityType.PLAYER && isAllowed((Player) e.getEntity())
+							&& ((Player) e.getEntity()).getRemainingAir() > e.getAmount())
 						e.setCancelled(true);
 				}
 			};
 		Bukkit.getPluginManager().registerEvents(listener, Loader.getPlugin());
 
-		CommandStructure<CommandSender> cmd = CommandStructure.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
-			if (!(sender instanceof Player)) {
-				msgUsage(sender, "other");
-				return;
-			}
-			setGod((Player) sender, !isAllowed((Player) sender), true, sender);
-		}).permission(getPerm("cmd"));
+		CommandStructure<CommandSender> cmd = CommandStructure
+				.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
+					if (!(sender instanceof Player)) {
+						msgUsage(sender, "other");
+						return;
+					}
+					setGod((Player) sender, !isAllowed((Player) sender), true, sender);
+				}).permission(getPerm("cmd"));
 		// silent
 		cmd.argument("-s", (sender, structure, args) -> {
 			if (!(sender instanceof Player)) {
@@ -135,31 +140,33 @@ public class God extends CssCommand {
 	public void setGod(Player target, boolean godStatus, boolean sendMessage, CommandSender sender) {
 		if (godStatus) {
 			me.devtec.shared.API.getUser(target.getUniqueId()).set("css.god", true);
-			if (!Ref.isOlderThan(12))
+			if (Ref.isAtLeast(9, 0))
 				target.setInvulnerable(true);
 			if (sendMessage)
 				if (!sender.equals(target)) {
-					PlaceholdersExecutor placeholders = PlaceholdersExecutor.i().add("sender", sender.getName()).add("target", target.getName());
+					TextRenderer placeholders = renderer().placeholder("sender", sender.getName()).placeholder("target",
+							target.getName());
 					msg(target, "other.true.target", placeholders);
 					msg(sender, "other.true.sender", placeholders);
 				} else
-					msg(target, "self.true", PlaceholdersExecutor.i().add("target", target.getName()));
+					msg(target, "self.true", renderer().placeholder("target", target.getName()));
 		} else {
 			me.devtec.shared.API.getUser(target.getUniqueId()).set("css.god", false);
-			if (!Ref.isOlderThan(12))
+			if (Ref.isAtLeast(9, 0))
 				target.setInvulnerable(false);
 			if (sendMessage)
 				if (!sender.equals(target)) {
-					PlaceholdersExecutor placeholders = PlaceholdersExecutor.i().add("sender", sender.getName()).add("target", target.getName());
+					TextRenderer placeholders = renderer().placeholder("sender", sender.getName()).placeholder("target",
+							target.getName());
 					msg(target, "other.false.target", placeholders);
 					msg(sender, "other.false.sender", placeholders);
 				} else
-					msg(target, "self.false", PlaceholdersExecutor.i().add("target", target.getName()));
+					msg(target, "self.false", renderer().placeholder("target", target.getName()));
 		}
 	}
 
 	public boolean isAllowed(Player target) {
-		if (Ref.isOlderThan(12))
+		if (Ref.isBefore(9, 0))
 			return me.devtec.shared.API.getUser(target.getUniqueId()).getBoolean("css.god");
 		return target.isInvulnerable() || me.devtec.shared.API.getUser(target.getUniqueId()).getBoolean("css.god");
 	}

@@ -22,7 +22,7 @@ import org.bukkit.event.player.PlayerRespawnEvent;
 import me.devtec.craftyserversystem.Loader;
 import me.devtec.craftyserversystem.api.API;
 import me.devtec.craftyserversystem.commands.CssCommand;
-import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
+import me.devtec.shared.text.TextRenderer;
 import me.devtec.shared.commands.selectors.Selector;
 import me.devtec.shared.commands.structures.CommandStructure;
 
@@ -151,11 +151,11 @@ public class Fly extends CssCommand {
 				target.setFlying(true);
 			if (sendMessage)
 				if (!sender.equals(target)) {
-					PlaceholdersExecutor placeholders = PlaceholdersExecutor.i().add("sender", sender.getName()).add("target", target.getName());
+					TextRenderer placeholders = renderer().placeholder("sender", sender.getName()).placeholder("target", target.getName());
 					msg(target, "other.true.target", placeholders);
 					msg(sender, "other.true.sender", placeholders);
 				} else
-					msg(target, "self.true", PlaceholdersExecutor.i().add("target", target.getName()));
+					msg(target, "self.true", renderer().placeholder("target", target.getName()));
 		} else {
 			if (fallDamageCancel != null && listener != null && target.getLocation().add(0, -0.5, 0).getBlock().isEmpty())
 				fallDamageCancel.add(target.getUniqueId());
@@ -163,11 +163,11 @@ public class Fly extends CssCommand {
 			target.setAllowFlight(false);
 			if (sendMessage)
 				if (!sender.equals(target)) {
-					PlaceholdersExecutor placeholders = PlaceholdersExecutor.i().add("sender", sender.getName()).add("target", target.getName());
+					TextRenderer placeholders = renderer().placeholder("sender", sender.getName()).placeholder("target", target.getName());
 					msg(target, "other.false.target", placeholders);
 					msg(sender, "other.false.sender", placeholders);
 				} else
-					msg(target, "self.false", PlaceholdersExecutor.i().add("target", target.getName()));
+					msg(target, "self.false", renderer().placeholder("target", target.getName()));
 		}
 	}
 

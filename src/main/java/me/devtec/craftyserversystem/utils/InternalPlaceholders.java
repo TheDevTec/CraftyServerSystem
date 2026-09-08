@@ -7,30 +7,35 @@ import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
 import me.devtec.craftyserversystem.api.API;
-import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
+import me.devtec.shared.text.TextRenderer;
 import me.devtec.shared.utility.Animation;
 import me.devtec.theapi.bukkit.BukkitLoader;
 
 public class InternalPlaceholders {
 
-	public static PlaceholdersExecutor generatePlaceholders(Player player) {
+	public static TextRenderer generatePlaceholders(Player player) {
 		Location loc = player.getLocation();
-		PlaceholdersExecutor ex = PlaceholdersExecutor.i().papi(player.getUniqueId()).add("player", player.getName())
-				.add("tps", BukkitLoader.getNmsProvider().getServerTPS()[0])
-				.add("ping", BukkitLoader.getNmsProvider().getPing(player)).add("online", countNonVanishPlayers(player))
-				.add("max_players", Bukkit.getMaxPlayers())
-				.add("balance",
+
+		TextRenderer renderer = TextRenderer.forTarget(player.getUniqueId())
+				.placeholder("prefix", API.get().getConfigManager().getPrefix()).placeholder("player", player.getName())
+				.placeholder("tps", BukkitLoader.getNmsProvider().getServerTPS()[0])
+				.placeholder("ping", BukkitLoader.getNmsProvider().getPing(player))
+				.placeholder("online", countNonVanishPlayers(player)).placeholder("max_players", Bukkit.getMaxPlayers())
+				.placeholder("balance",
 						API.get().getEconomyHook().format(
 								API.get().getEconomyHook().getBalance(player.getName(), player.getWorld().getName())))
-				.add("money",
+				.placeholder("money",
 						API.get().getEconomyHook().format(
 								API.get().getEconomyHook().getBalance(player.getName(), player.getWorld().getName())))
-				.add("health", player.getHealth()).add("food", player.getFoodLevel()).add("x", loc.getX())
-				.add("y", loc.getY()).add("z", loc.getZ()).add("pos_x", loc.getBlockX()).add("pos_y", loc.getBlockY())
-				.add("pos_z", loc.getBlockZ()).add("world", loc.getWorld().getName());
+				.placeholder("health", player.getHealth()).placeholder("food", player.getFoodLevel())
+				.placeholder("x", loc.getX()).placeholder("y", loc.getY()).placeholder("z", loc.getZ())
+				.placeholder("pos_x", loc.getBlockX()).placeholder("pos_y", loc.getBlockY())
+				.placeholder("pos_z", loc.getBlockZ()).placeholder("world", loc.getWorld().getName()).colorize();
+
 		for (Entry<String, Animation> entry : API.get().getAnimationManager().getRegistered().entrySet())
-			ex.add("animation:" + entry.getKey(), entry.getValue().get() + "");
-		return ex;
+			renderer.placeholder("animation:" + entry.getKey(), entry.getValue().get());
+
+		return renderer;
 	}
 
 	private static int countNonVanishPlayers(Player player) {

@@ -8,7 +8,7 @@ import org.bukkit.entity.Player;
 
 import me.devtec.craftyserversystem.commands.CssCommand;
 import me.devtec.craftyserversystem.commands.internal.msgsystem.MsgManager;
-import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
+import me.devtec.shared.text.TextRenderer;
 import me.devtec.shared.commands.structures.CommandStructure;
 import me.devtec.shared.utility.OfflineCache.Query;
 import me.devtec.theapi.bukkit.BukkitLoader;
@@ -27,7 +27,7 @@ public class MsgIgnore extends CssCommand {
 		cmd.argument(null, 1, (sender, structure, args) -> {
 			Query query = me.devtec.shared.API.offlineCache().lookupQuery(args[0]);
 			if (query != null) {
-				PlaceholdersExecutor ex = PlaceholdersExecutor.i().add("target", query.getName());
+				TextRenderer ex = renderer().placeholder("target", query.getName());
 				if (MsgManager.get().removeIgnore(sender.getName(), query.getName()))
 					msg(sender, "accepting", ex);
 				else {
@@ -35,7 +35,7 @@ public class MsgIgnore extends CssCommand {
 					msg(sender, "ignoring", ex);
 				}
 			} else
-				msg(sender, "not-exist", PlaceholdersExecutor.i().add("target", args[0]));
+				msg(sender, "not-exist", renderer().placeholder("target", args[0]));
 		}, (sender, structure, args) -> { // Tab completer
 			Collection<? extends Player> onlinePlayers = BukkitLoader.getOnlinePlayers();
 			List<String> players = new ArrayList<>(onlinePlayers.size() + 1);

@@ -6,7 +6,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import me.devtec.craftyserversystem.commands.CssCommand;
-import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
+import me.devtec.shared.text.TextRenderer;
 import me.devtec.shared.commands.selectors.Selector;
 import me.devtec.shared.commands.structures.CommandStructure;
 
@@ -46,11 +46,11 @@ public class PlayerMidnight extends CssCommand {
 		target.setPlayerTime(18000, false);
 		if (sendMessages)
 			if (!sender.equals(target)) {
-				PlaceholdersExecutor PLACEHOLDERS = PlaceholdersExecutor.i().add("sender", sender.getName()).add("target", target.getName());
+				TextRenderer PLACEHOLDERS = renderer().placeholder("sender", sender.getName()).placeholder("target", target.getName());
 				msg(sender, "other.sender", PLACEHOLDERS);
 				msg(target, "other.target", PLACEHOLDERS);
 			} else
-				msg(sender, "self", PlaceholdersExecutor.EMPTY);
+				msg(sender, "self");
 	}
 
 }

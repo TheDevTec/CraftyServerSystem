@@ -2,7 +2,7 @@ package me.devtec.craftyserversystem.commands.internal.bansystem;
 
 import me.devtec.craftyserversystem.annotations.IgnoredClass;
 import me.devtec.shared.annotations.Nullable;
-import me.devtec.shared.database.DatabaseHandler.Result;
+import me.devtec.shared.database.SqlRow;
 import me.devtec.shared.utility.ParseUtils;
 
 @IgnoredClass
@@ -76,11 +76,13 @@ public class Entry {
 		this.cancelled = cancelled;
 	}
 
-	public static Entry fromQuery(Result result) {
-		return new Entry(ParseUtils.getInt(result.getValue()[0]), BanType.valueOf(result.getValue()[1].toUpperCase()),
-				result.getValue()[2], result.getValue()[3], result.getValue()[4],
-				ParseUtils.getLong(result.getValue()[5]), ParseUtils.getLong(result.getValue()[6]),
-				ParseUtils.getInt(result.getValue()[7]) == 1);
+	public static Entry fromQuery(SqlRow result) {
+		return new Entry(ParseUtils.getInt(String.valueOf(result.get("id"))),
+				BanType.valueOf(result.getString("type").toUpperCase()), result.getString("user"),
+				result.getString("reason"), result.getString("admin"),
+				ParseUtils.getLong(String.valueOf(result.get("duration"))),
+				ParseUtils.getLong(String.valueOf(result.get("startDate"))),
+				ParseUtils.getInt(String.valueOf(result.get("cancelled"))) == 1);
 	}
 
 	@Override

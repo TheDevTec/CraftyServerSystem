@@ -7,9 +7,9 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import me.devtec.craftyserversystem.commands.CssCommand;
-import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
 import me.devtec.shared.commands.selectors.Selector;
 import me.devtec.shared.commands.structures.CommandStructure;
+import me.devtec.shared.text.TextRenderer;
 
 public class PlayerRain extends CssCommand {
 
@@ -18,16 +18,17 @@ public class PlayerRain extends CssCommand {
 		if (isRegistered())
 			return;
 
-		CommandStructure<CommandSender> cmd = CommandStructure.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
-			if (!(sender instanceof Player)) {
-				msgUsage(sender, "usage");
-				return;
-			}
-			setRain(sender, (Player) sender);
-		}).permission(getPerm("cmd")).selector(Selector.ENTITY_SELECTOR, (sender, structure, args) -> {
-			for (Player player : selector(sender, args[0]))
-				setRain(sender, player);
-		}).permission(getPerm("other"));
+		CommandStructure<CommandSender> cmd = CommandStructure
+				.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
+					if (!(sender instanceof Player)) {
+						msgUsage(sender, "usage");
+						return;
+					}
+					setRain(sender, (Player) sender);
+				}).permission(getPerm("cmd")).selector(Selector.ENTITY_SELECTOR, (sender, structure, args) -> {
+					for (Player player : selector(sender, args[0]))
+						setRain(sender, player);
+				}).permission(getPerm("other"));
 
 		// register
 		List<String> cmds = getCommands();
@@ -38,11 +39,12 @@ public class PlayerRain extends CssCommand {
 	public void setRain(CommandSender sender, Player target) {
 		target.setPlayerWeather(WeatherType.DOWNFALL);
 		if (!sender.equals(target)) {
-			PlaceholdersExecutor PLACEHOLDERS = PlaceholdersExecutor.i().add("sender", sender.getName()).add("target", target.getName());
+			TextRenderer PLACEHOLDERS = renderer().placeholder("sender", sender.getName()).placeholder("target",
+					target.getName());
 			msgOut(sender, "playerrain.other.sender", PLACEHOLDERS);
 			msgOut(target, "playerrain.other.target", PLACEHOLDERS);
 		} else
-			msgOut(sender, "playerrain.self", PlaceholdersExecutor.EMPTY);
+			msgOut(sender, "playerrain.self");
 	}
 
 }

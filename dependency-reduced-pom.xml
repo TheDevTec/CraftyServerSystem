@@ -58,7 +58,7 @@
     <dependency>
       <groupId>com.github.TheDevTec.TheAPI</groupId>
       <artifactId>TheAPI</artifactId>
-      <version>13.8.5</version>
+      <version>14.0</version>
       <scope>provided</scope>
     </dependency>
     <dependency>

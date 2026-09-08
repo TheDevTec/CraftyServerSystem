@@ -6,7 +6,7 @@ import org.bukkit.command.CommandSender;
 
 import me.devtec.craftyserversystem.commands.CssCommand;
 import me.devtec.craftyserversystem.commands.internal.warp.WarpManager;
-import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
+import me.devtec.shared.text.TextRenderer;
 import me.devtec.shared.commands.structures.CommandStructure;
 import me.devtec.shared.utility.StringUtils;
 
@@ -32,7 +32,7 @@ public class DelWarp extends CssCommand {
 	public void delWarp(String warpName, boolean sendMessage, CommandSender sender) {
 		if (WarpManager.getProvider().delete(warpName)) {
 			if (sendMessage) {
-				PlaceholdersExecutor placeholders = PlaceholdersExecutor.i().add("warp", warpName);
+				TextRenderer placeholders = renderer().placeholder("warp", warpName);
 				msg(sender, "deleted", placeholders);
 			}
 			Warp.callMenuUpdate();

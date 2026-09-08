@@ -24,13 +24,20 @@ import me.devtec.theapi.bukkit.BukkitLoader;
 public class ArmorStandHologram extends Hologram {
 
 	private static final Object entityTypeArmorStand = findEntityType();
-	private static Constructor<?> spawnEntityPacket = Ref.constructor(Ref.nms("network.protocol.game", BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "ClientboundAddEntityPacket" : "PacketPlayOutSpawnEntity"),
-			int.class, UUID.class, double.class, double.class, double.class, float.class, float.class, Ref.nms("world.entity", BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "EntityType" : "EntityTypes"),
-			int.class, Ref.nms("world.phys", BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "Vec3" : "Vec3D"), double.class);
+	private static Constructor<?> spawnEntityPacket = Ref
+			.constructor(
+					Ref.nms("network.protocol.game",
+							BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "ClientboundAddEntityPacket"
+									: "PacketPlayOutSpawnEntity"),
+					int.class, UUID.class, double.class, double.class, double.class, float.class, float.class,
+					Ref.nms("world.entity", BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "EntityType" : "EntityTypes"),
+					int.class, Ref.nms("world.phys", BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "Vec3" : "Vec3D"),
+					double.class);
 	private static byte LEGACY_SPAWN_PACKET;
 	static {
 		if (spawnEntityPacket == null) {
-			spawnEntityPacket = Ref.constructor(Ref.nms("network.protocol.game", "PacketPlayOutSpawnEntity"), int.class, UUID.class, double.class, double.class, double.class, float.class, float.class,
+			spawnEntityPacket = Ref.constructor(Ref.nms("network.protocol.game", "PacketPlayOutSpawnEntity"), int.class,
+					UUID.class, double.class, double.class, double.class, float.class, float.class,
 					Ref.nms("world.entity", "EntityTypes"), int.class, Ref.nms("world.phys", "Vec3D"));
 			LEGACY_SPAWN_PACKET = 1;
 		}
@@ -39,14 +46,18 @@ public class ArmorStandHologram extends Hologram {
 			LEGACY_SPAWN_PACKET = 2;
 		}
 	}
-	private static final Object zero = Ref.isNewerThan(18)
-			? BukkitLoader.NO_OBFUSCATED_NMS_MODE ? Ref.getStatic(Ref.nms("world.phys", "Vec3"), "ZERO") : Ref.getStatic(Ref.nms("world.phys", "Vec3D"), "b")
-					: Ref.getStatic(Ref.nms("world.phys", "Vec3D"), "a");
+	private static final Object zero = Ref.isAtLeast(19, 0)
+			? BukkitLoader.NO_OBFUSCATED_NMS_MODE ? Ref.getStatic(Ref.nms("world.phys", "Vec3"), "ZERO")
+					: Ref.getStatic(Ref.nms("world.phys", "Vec3D"), "b")
+			: Ref.getStatic(Ref.nms("world.phys", "Vec3D"), "a");
 
 	private static Object findEntityType() {
-		Class<?> entityTypes = Ref.nms("world.entity", BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "EntityType" : "EntityTypes");
-		Class<?> nmsHuman = Ref.nms("world.entity.decoration", BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "ArmorStand" : "EntityArmorStand");
-		for (Field field : Ref.getAllFields(Ref.nms("world.entity", BukkitLoader.NO_OBFUSCATED_NMS_MODE && !Ref.isNewerThan(25) ? "EntityType" : "EntityTypes")))
+		Class<?> entityTypes = Ref.nms("world.entity",
+				BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "EntityType" : "EntityTypes");
+		Class<?> nmsHuman = Ref.nms("world.entity.decoration",
+				BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "ArmorStand" : "EntityArmorStand");
+		for (Field field : Ref.getAllFields(Ref.nms("world.entity",
+				BukkitLoader.NO_OBFUSCATED_NMS_MODE && Ref.isAtMost(25, 0) ? "EntityType" : "EntityTypes")))
 			try {
 				if (field.getType().equals(entityTypes) && field.getGenericType() instanceof ParameterizedType
 						&& ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0].equals(nmsHuman))
@@ -68,10 +79,11 @@ public class ArmorStandHologram extends Hologram {
 	private double height;
 	private boolean sneaking;
 
-	public ArmorStandHologram(ClassicTabPlayer owner, World world, double x, double y, double z, double additionalHeight, String text) {
+	public ArmorStandHologram(ClassicTabPlayer owner, World world, double x, double y, double z,
+			double additionalHeight, String text) {
 		this.owner = owner;
 		this.text = text;
-		this.additionalHeight=additionalHeight;
+		this.additionalHeight = additionalHeight;
 		uuid = UUID.randomUUID();
 		prevX = x;
 		prevY = y;
@@ -98,28 +110,35 @@ public class ArmorStandHologram extends Hologram {
 			prevY = additionalY;
 		}
 		metadataPacket = HologramHolder.packetMetadata(id,
-				metadataListValue = Arrays.asList(makeItemInstance(data, owner.getPlayer().isSneaking() ? (byte) 34 : (byte) 32), makeItemInstance(showName, true),
-						makeItemInstance(name, LEGACY_SPAWN_PACKET == 2 ? text : Optional.of(BukkitLoader.getNmsProvider().toIChatBaseComponent(ComponentAPI.fromString(text, true, false)))),
+				metadataListValue = Arrays.asList(
+						makeItemInstance(data, owner.getPlayer().isSneaking() ? (byte) 34 : (byte) 32),
+						makeItemInstance(showName, true),
+						makeItemInstance(name,
+								LEGACY_SPAWN_PACKET == 2 ? text
+										: Optional.of(BukkitLoader.getNmsProvider()
+												.toIChatBaseComponent(ComponentAPI.fromString(text, true, false)))),
 						makeItemInstance(properties, (byte) (16 | 1))));
 		switch (LEGACY_SPAWN_PACKET) {
 		case 0:
-			spawnPacket = Ref.newInstance(spawnEntityPacket, id, uuid, prevX, prevY + height+additionalHeight, prevZ, 0, 0, entityTypeArmorStand, 0, zero, 0);
+			spawnPacket = Ref.newInstance(spawnEntityPacket, id, uuid, prevX, prevY + height + additionalHeight, prevZ,
+					0, 0, entityTypeArmorStand, 0, zero, 0);
 			break;
 		case 1:
-			spawnPacket = Ref.newInstance(spawnEntityPacket, id, uuid, prevX, prevY + height+additionalHeight, prevZ, 0, 0, entityTypeArmorStand, 0, zero);
+			spawnPacket = Ref.newInstance(spawnEntityPacket, id, uuid, prevX, prevY + height + additionalHeight, prevZ,
+					0, 0, entityTypeArmorStand, 0, zero);
 			break;
 		case 2:
 			spawnPacket = Ref.newInstance(spawnEntityPacket);
 			Ref.set(spawnPacket, "a", id);
-			if (Ref.isOlderThan(12)) {
+			if (Ref.isBefore(12, 0)) {
 				Ref.set(spawnPacket, "b", MathUtils.floor(prevX * 32.0));
-				Ref.set(spawnPacket, "c", MathUtils.floor((prevY + height+additionalHeight) * 32.0));
+				Ref.set(spawnPacket, "c", MathUtils.floor((prevY + height + additionalHeight) * 32.0));
 				Ref.set(spawnPacket, "d", MathUtils.floor(prevZ * 32.0));
 				Ref.set(spawnPacket, "j", 78);
 			} else {
 				Ref.set(spawnPacket, "b", uuid);
 				Ref.set(spawnPacket, "c", prevX);
-				Ref.set(spawnPacket, "d", prevY + height+additionalHeight);
+				Ref.set(spawnPacket, "d", prevY + height + additionalHeight);
 				Ref.set(spawnPacket, "e", prevZ);
 				Ref.set(spawnPacket, "k", 78);
 			}
@@ -128,24 +147,33 @@ public class ArmorStandHologram extends Hologram {
 		despawnPacket = BukkitLoader.getNmsProvider().packetEntityDestroy(id);
 	}
 
-	private static Constructor<?> dataWatcherItem = Ref.constructor(Ref.nms("network.syncher", BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "SynchedEntityData$DataItem" : "DataWatcher$Item"),
-			Ref.nms("network.syncher", BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "EntityDataAccessor" : "DataWatcherObject"), Object.class);
-	private static Method dataWatcherMakeInstance = Ref.method(Ref.nms("network.syncher", BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "SynchedEntityData$DataItem" : "DataWatcher$Item"),
+	private static Constructor<?> dataWatcherItem = Ref.constructor(
+			Ref.nms("network.syncher",
+					BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "SynchedEntityData$DataItem" : "DataWatcher$Item"),
+			Ref.nms("network.syncher",
+					BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "EntityDataAccessor" : "DataWatcherObject"),
+			Object.class);
+	private static Method dataWatcherMakeInstance = Ref.method(
+			Ref.nms("network.syncher",
+					BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "SynchedEntityData$DataItem" : "DataWatcher$Item"),
 			BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "value" : "e");
 	static {
 		if (dataWatcherMakeInstance == null)
 			dataWatcherMakeInstance = Ref.method(Ref.nms("network.syncher", "DataWatcher$Item"), "a");
-		if (Ref.isOlderThan(12)) {
-			dataWatcherItem = Ref.constructor(Ref.nms("network.syncher", "DataWatcher$WatchableObject"), int.class, int.class, Object.class);
+		if (Ref.isBefore(12, 0)) {
+			dataWatcherItem = Ref.constructor(Ref.nms("network.syncher", "DataWatcher$WatchableObject"), int.class,
+					int.class, Object.class);
 			dataWatcherMakeInstance = Ref.method(Ref.nms("network.syncher", "DataWatcher$WatchableObject"), "a");
 		}
 
 	}
 
 	private static Object makeItemInstance(Object dataIndex, Object value) {
-		return Ref.isNewerThan(19) || Ref.serverVersionInt() == 19 && Ref.serverVersionRelease() >= 2 ? Ref.invoke(Ref.newInstance(dataWatcherItem, dataIndex, value), dataWatcherMakeInstance)
-				: Ref.isOlderThan(12)
-				? Ref.newInstance(dataWatcherItem, value.getClass() == String.class ? 4 : 0, (int) dataIndex, value instanceof Boolean ? (boolean) value ? (byte) 1 : (byte) 0 : value)
+		return Ref.isAtMost(19, 2)
+				? Ref.invoke(Ref.newInstance(dataWatcherItem, dataIndex, value), dataWatcherMakeInstance)
+				: Ref.isBefore(12, 0)
+						? Ref.newInstance(dataWatcherItem, value.getClass() == String.class ? 4 : 0, (int) dataIndex,
+								value instanceof Boolean ? (boolean) value ? (byte) 1 : (byte) 0 : value)
 						: Ref.newInstance(dataWatcherItem, dataIndex, value);
 	}
 
@@ -167,23 +195,25 @@ public class ArmorStandHologram extends Hologram {
 		if (shouldUpdate) {
 			switch (LEGACY_SPAWN_PACKET) {
 			case 0:
-				spawnPacket = Ref.newInstance(spawnEntityPacket, id, uuid, prevX, prevY + height+additionalHeight, prevZ, 0, 0, entityTypeArmorStand, 0, zero, 0);
+				spawnPacket = Ref.newInstance(spawnEntityPacket, id, uuid, prevX, prevY + height + additionalHeight,
+						prevZ, 0, 0, entityTypeArmorStand, 0, zero, 0);
 				break;
 			case 1:
-				spawnPacket = Ref.newInstance(spawnEntityPacket, id, uuid, prevX, prevY + height+additionalHeight, prevZ, 0, 0, entityTypeArmorStand, 0, zero);
+				spawnPacket = Ref.newInstance(spawnEntityPacket, id, uuid, prevX, prevY + height + additionalHeight,
+						prevZ, 0, 0, entityTypeArmorStand, 0, zero);
 				break;
 			case 2:
 				spawnPacket = Ref.newInstance(spawnEntityPacket);
 				Ref.set(spawnPacket, "a", id);
-				if (Ref.isOlderThan(12)) {
+				if (Ref.isBefore(12, 0)) {
 					Ref.set(spawnPacket, "b", MathUtils.floor(prevX * 32.0));
-					Ref.set(spawnPacket, "c", MathUtils.floor((prevY + height+additionalHeight) * 32.0));
+					Ref.set(spawnPacket, "c", MathUtils.floor((prevY + height + additionalHeight) * 32.0));
 					Ref.set(spawnPacket, "d", MathUtils.floor(prevZ * 32.0));
 					Ref.set(spawnPacket, "j", 78);
 				} else {
 					Ref.set(spawnPacket, "b", uuid);
 					Ref.set(spawnPacket, "c", prevX);
-					Ref.set(spawnPacket, "d", prevY + height+additionalHeight);
+					Ref.set(spawnPacket, "d", prevY + height + additionalHeight);
 					Ref.set(spawnPacket, "e", prevZ);
 					Ref.set(spawnPacket, "k", 78);
 				}
@@ -208,7 +238,11 @@ public class ArmorStandHologram extends Hologram {
 			return;
 		this.text = text;
 
-		metadataListValue.set(2, makeItemInstance(name, LEGACY_SPAWN_PACKET == 2 ? text : Optional.of(BukkitLoader.getNmsProvider().toIChatBaseComponent(ComponentAPI.fromString(text, true, false)))));
+		metadataListValue.set(2,
+				makeItemInstance(name,
+						LEGACY_SPAWN_PACKET == 2 ? text
+								: Optional.of(BukkitLoader.getNmsProvider()
+										.toIChatBaseComponent(ComponentAPI.fromString(text, true, false)))));
 		for (ClassicTabPlayer asPlayer : owner.getWhoSeeAdditionalLines()) {
 			if (!asPlayer.getPlayer().isOnline())
 				continue;
@@ -249,7 +283,7 @@ public class ArmorStandHologram extends Hologram {
 			prevX = playerLoc.getX();
 			prevY = playerLoc.getY();
 			prevZ = playerLoc.getZ();
-			Object teleportPacket = HologramHolder.packetTeleport(id, prevX, prevY + height+additionalHeight, prevZ);
+			Object teleportPacket = HologramHolder.packetTeleport(id, prevX, prevY + height + additionalHeight, prevZ);
 			for (ClassicTabPlayer player : owner.getWhoSeeAdditionalLines())
 				if (player.getPlayer().isOnline())
 					BukkitLoader.getPacketHandler().send(player.getPlayer(), teleportPacket);
@@ -280,7 +314,7 @@ public class ArmorStandHologram extends Hologram {
 			prevX = x;
 			prevY = y;
 			prevZ = z;
-			Object teleportPacket = HologramHolder.packetTeleport(id, prevX, prevY + height+additionalHeight, prevZ);
+			Object teleportPacket = HologramHolder.packetTeleport(id, prevX, prevY + height + additionalHeight, prevZ);
 			for (ClassicTabPlayer player : owner.getWhoSeeAdditionalLines())
 				if (player.getPlayer().isOnline())
 					BukkitLoader.getPacketHandler().send(player.getPlayer(), teleportPacket);
@@ -320,7 +354,7 @@ public class ArmorStandHologram extends Hologram {
 			prevX = playerLoc.getX();
 			prevY = playerLoc.getY();
 			prevZ = playerLoc.getZ();
-			Object teleportPacket = HologramHolder.packetTeleport(id, prevX, prevY + height+additionalHeight, prevZ);
+			Object teleportPacket = HologramHolder.packetTeleport(id, prevX, prevY + height + additionalHeight, prevZ);
 			BukkitLoader.getPacketHandler().send(player, teleportPacket);
 			shouldUpdate = true;
 		}
@@ -349,7 +383,7 @@ public class ArmorStandHologram extends Hologram {
 			prevX = x;
 			prevY = y;
 			prevZ = z;
-			Object teleportPacket = HologramHolder.packetTeleport(id, prevX, prevY + height+additionalHeight, prevZ);
+			Object teleportPacket = HologramHolder.packetTeleport(id, prevX, prevY + height + additionalHeight, prevZ);
 			BukkitLoader.getPacketHandler().send(player, teleportPacket);
 			shouldUpdate = true;
 		}
@@ -400,7 +434,7 @@ public class ArmorStandHologram extends Hologram {
 		}
 		if (ignore)
 			return;
-		Object teleportPacket = HologramHolder.packetTeleport(id, prevX, prevY + height+additionalHeight, prevZ);
+		Object teleportPacket = HologramHolder.packetTeleport(id, prevX, prevY + height + additionalHeight, prevZ);
 		for (ClassicTabPlayer asPlayer : owner.getWhoSeeAdditionalLines()) {
 			if (!asPlayer.getPlayer().isOnline())
 				continue;

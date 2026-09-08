@@ -7,9 +7,9 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import me.devtec.craftyserversystem.commands.CssCommand;
-import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
 import me.devtec.shared.commands.selectors.Selector;
 import me.devtec.shared.commands.structures.CommandStructure;
+import me.devtec.shared.text.TextRenderer;
 
 public class PlayerWeather extends CssCommand {
 
@@ -18,9 +18,10 @@ public class PlayerWeather extends CssCommand {
 		if (isRegistered())
 			return;
 
-		CommandStructure<CommandSender> cmd = CommandStructure.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
-			msgUsage(sender, "usage");
-		}).permission(getPerm("cmd"));
+		CommandStructure<CommandSender> cmd = CommandStructure
+				.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
+					msgUsage(sender, "usage");
+				}).permission(getPerm("cmd"));
 		cmd.argument("sun", (sender, structure, args) -> {
 			if (!(sender instanceof Player)) {
 				msgUsage(sender, "usage");
@@ -91,7 +92,8 @@ public class PlayerWeather extends CssCommand {
 		target.resetPlayerWeather();
 		if (sendMessages)
 			if (!sender.equals(target)) {
-				PlaceholdersExecutor PLACEHOLDERS = PlaceholdersExecutor.i().add("sender", sender.getName()).add("target", target.getName());
+				TextRenderer PLACEHOLDERS = renderer().placeholder("sender", sender.getName()).placeholder("target",
+						target.getName());
 				msgOut(sender, "playerweather-reset.other.sender", PLACEHOLDERS);
 				msgOut(target, "playerweather-reset.other.target", PLACEHOLDERS);
 			} else
@@ -102,7 +104,8 @@ public class PlayerWeather extends CssCommand {
 		target.setPlayerWeather(WeatherType.CLEAR);
 		if (sendMessages)
 			if (!sender.equals(target)) {
-				PlaceholdersExecutor PLACEHOLDERS = PlaceholdersExecutor.i().add("sender", sender.getName()).add("target", target.getName());
+				TextRenderer PLACEHOLDERS = renderer().placeholder("sender", sender.getName()).placeholder("target",
+						target.getName());
 				msgOut(sender, "playersun.other.sender", PLACEHOLDERS);
 				msgOut(target, "playersun.other.target", PLACEHOLDERS);
 			} else
@@ -113,7 +116,8 @@ public class PlayerWeather extends CssCommand {
 		target.setPlayerWeather(WeatherType.DOWNFALL);
 		if (sendMessages)
 			if (!sender.equals(target)) {
-				PlaceholdersExecutor PLACEHOLDERS = PlaceholdersExecutor.i().add("sender", sender.getName()).add("target", target.getName());
+				TextRenderer PLACEHOLDERS = renderer().placeholder("sender", sender.getName()).placeholder("target",
+						target.getName());
 				msgOut(sender, "playerrain.other.sender", PLACEHOLDERS);
 				msgOut(target, "playerrain.other.target", PLACEHOLDERS);
 			} else

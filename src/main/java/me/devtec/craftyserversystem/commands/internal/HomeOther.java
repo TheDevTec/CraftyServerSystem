@@ -7,7 +7,6 @@ import org.bukkit.entity.Player;
 
 import me.devtec.craftyserversystem.commands.CssCommand;
 import me.devtec.craftyserversystem.commands.internal.home.HomeManager;
-import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
 import me.devtec.shared.API;
 import me.devtec.shared.commands.structures.CommandStructure;
 import me.devtec.theapi.bukkit.BukkitLoader;
@@ -20,22 +19,26 @@ public class HomeOther extends CssCommand {
 		if (isRegistered())
 			return;
 
-		CommandStructure<Player> cmd = CommandStructure.create(Player.class, P_DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
-			msgUsage(sender, "cmd");
-		}).permission(getPerm("cmd")).argument(null, (sender, structure, args) -> msgUsage(sender, "cmd"), (sender, structure, args) -> {
-			List<String> players = new ArrayList<>();
-			players.add("{offlinePlayer}");
-			for (Player player : BukkitLoader.getOnlinePlayers())
-				players.add(player.getName());
-			return players;
-		});
+		CommandStructure<Player> cmd = CommandStructure
+				.create(Player.class, P_DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
+					msgUsage(sender, "cmd");
+				}).permission(getPerm("cmd"))
+				.argument(null, (sender, structure, args) -> msgUsage(sender, "cmd"), (sender, structure, args) -> {
+					List<String> players = new ArrayList<>();
+					players.add("{offlinePlayer}");
+					for (Player player : BukkitLoader.getOnlinePlayers())
+						players.add(player.getName());
+					return players;
+				});
 		// home
-		cmd.callableArgument((sender, structure, args) -> HomeManager.get().getHomes(args[0]), 1, (sender, structure, args) -> {
-			String home = args[1].toLowerCase();
-			Position pos = HomeManager.get().getHomePosition(args[0], home);
-			sender.teleport(pos.toLocation());
-			msg(sender, "teleport", PlaceholdersExecutor.i().add("target", API.offlineCache().lookupName(args[0])).add("home", home));
-		});
+		cmd.callableArgument((sender, structure, args) -> HomeManager.get().getHomes(args[0]), 1,
+				(sender, structure, args) -> {
+					String home = args[1].toLowerCase();
+					Position pos = HomeManager.get().getHomePosition(args[0], home);
+					sender.teleport(pos.toLocation());
+					msg(sender, "teleport", renderer().placeholder("target", API.offlineCache().lookupName(args[0]))
+							.placeholder("home", home));
+				});
 		// register
 		List<String> cmds = getCommands();
 		if (!cmds.isEmpty())

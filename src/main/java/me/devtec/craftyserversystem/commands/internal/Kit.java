@@ -18,11 +18,11 @@ import me.devtec.craftyserversystem.Loader;
 import me.devtec.craftyserversystem.api.API;
 import me.devtec.craftyserversystem.commands.CssCommand;
 import me.devtec.craftyserversystem.commands.internal.kits.KitSample;
-import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
 import me.devtec.shared.commands.selectors.Selector;
 import me.devtec.shared.commands.structures.CommandStructure;
 import me.devtec.shared.dataholder.Config;
 import me.devtec.shared.json.Json;
+import me.devtec.shared.text.TextRenderer;
 import me.devtec.shared.utility.ParseUtils;
 import me.devtec.shared.utility.StringUtils;
 import me.devtec.shared.utility.StringUtils.FormatType;
@@ -40,18 +40,21 @@ public class Kit extends CssCommand {
 			return;
 
 		reload();
-		CommandStructure<CommandSender> cmd = CommandStructure.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
-			if (!(sender instanceof Player)) {
-				msgUsage(sender, "console");
-				return;
-			}
-			msgUsage(sender, "cmd");
-		}).permission(getPerm("cmd"));
+		CommandStructure<CommandSender> cmd = CommandStructure
+				.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
+					if (!(sender instanceof Player)) {
+						msgUsage(sender, "console");
+						return;
+					}
+					msgUsage(sender, "cmd");
+				}).permission(getPerm("cmd"));
 		// kit
 		CommandStructure<CommandSender> kitCmd = cmd.callableArgument((sender, structure, args) -> {
 			List<String> value = new ArrayList<>();
 			for (KitSample sample : kits.values())
-				if ((sample.getPermission() == null || sample.getPermission() != null && sender.hasPermission(sample.getPermission())) && sample.getCooldown().tryWithoutWriting(sender))
+				if ((sample.getPermission() == null
+						|| sample.getPermission() != null && sender.hasPermission(sample.getPermission()))
+						&& sample.getCooldown().tryWithoutWriting(sender))
 					value.add(sample.getName());
 			return value;
 		}, (sender, structure, args) -> {
@@ -68,7 +71,8 @@ public class Kit extends CssCommand {
 		}).permission(getPerm("other")).callableArgument((sender, structure, args) -> {
 			if (args[2].isEmpty())
 				return perm(sender, "no-cost") && perm(sender, "no-cooldown") ? Arrays.asList("-c", "-w", "-s")
-						: perm(sender, "no-cost") ? Arrays.asList("-c", "-s") : perm(sender, "no-cooldown") ? Arrays.asList("-w", "-s") : Arrays.asList("-s");
+						: perm(sender, "no-cost") ? Arrays.asList("-c", "-s")
+								: perm(sender, "no-cooldown") ? Arrays.asList("-w", "-s") : Arrays.asList("-s");
 			if (args[2].indexOf('-') != -1) {
 				List<String> result = new ArrayList<>();
 				result.add(args[2]);
@@ -83,14 +87,17 @@ public class Kit extends CssCommand {
 			return Collections.emptyList();
 		}, 1, (sender, structure, args) -> {
 			for (Player player : selector(sender, args[1]))
-				useKit(player, kits.get(args[0].toLowerCase()), perm(sender, "no-cost") ? args[2].indexOf('c') != -1 : false, perm(sender, "no-cooldown") ? args[2].indexOf('w') != -1 : false,
-				args[2].indexOf('s') == -1, sender);
+				useKit(player, kits.get(args[0].toLowerCase()),
+						perm(sender, "no-cost") ? args[2].indexOf('c') != -1 : false,
+						perm(sender, "no-cooldown") ? args[2].indexOf('w') != -1 : false, args[2].indexOf('s') == -1,
+						sender);
 		});
 
 		kitCmd.callableArgument((sender, structure, args) -> {
 			if (args[1].isEmpty())
 				return perm(sender, "no-cost") && perm(sender, "no-cooldown") ? Arrays.asList("-c", "-w", "-s")
-						: perm(sender, "no-cost") ? Arrays.asList("-c", "-s") : perm(sender, "no-cooldown") ? Arrays.asList("-w", "-s") : Arrays.asList("-s");
+						: perm(sender, "no-cost") ? Arrays.asList("-c", "-s")
+								: perm(sender, "no-cooldown") ? Arrays.asList("-w", "-s") : Arrays.asList("-s");
 			if (args[1].indexOf('-') != -1) {
 				List<String> result = new ArrayList<>();
 				result.add(args[1]);
@@ -108,8 +115,10 @@ public class Kit extends CssCommand {
 				msgUsage(sender, "console");
 				return;
 			}
-			useKit((Player) sender, kits.get(args[0].toLowerCase()), perm(sender, "no-cost") ? args[1].indexOf('c') != -1 : false, perm(sender, "no-cooldown") ? args[1].indexOf('w') != -1 : false,
-					args[1].indexOf('s') == -1, sender);
+			useKit((Player) sender, kits.get(args[0].toLowerCase()),
+					perm(sender, "no-cost") ? args[1].indexOf('c') != -1 : false,
+					perm(sender, "no-cooldown") ? args[1].indexOf('w') != -1 : false, args[1].indexOf('s') == -1,
+					sender);
 		});
 
 		// register
@@ -142,37 +151,43 @@ public class Kit extends CssCommand {
 			sample.setMessages(config.getStringList(key + ".messages"));
 			sample.setCommands(config.getStringList(key + ".commands"));
 			for (String content : config.getStringList(key + ".contents")) {
-				if(content.isEmpty())continue;
+				if (content.isEmpty())
+					continue;
 				int slot = 0;
-				if(Character.isDigit(content.charAt(0))) { //slot!
+				if (Character.isDigit(content.charAt(0))) { // slot!
 					int index = content.indexOf(':');
 					slot = ParseUtils.getInt(content, 0, index);
-					content=content.substring(index+1);
+					content = content.substring(index + 1);
 				} else
-					while(true)
-						if(sample.getContents().get(slot)!=null)++slot;
-						else break;
+					while (true)
+						if (sample.getContents().get(slot) != null)
+							++slot;
+						else
+							break;
 				int index = content.indexOf('{');
 				if (index == -1) {
 					Optional<XMaterial> material = XMaterial.matchXMaterial(content.toUpperCase());
 					if (material.isPresent())
-						sample.getContents().put(slot,material.get().parseItem());
+						sample.getContents().put(slot, material.get().parseItem());
 					else {
 						Material bukkitType = Material.getMaterial(content);
 						if (bukkitType != null)
-							sample.getContents().put(slot,new ItemStack(bukkitType));
+							sample.getContents().put(slot, new ItemStack(bukkitType));
 						else
-							Loader.getPlugin().getLogger().warning("An error occurred while building kit '" + key + "'. Material '" + content + "' is invalid. '");
+							Loader.getPlugin().getLogger().warning("An error occurred while building kit '" + key
+									+ "'. Material '" + content + "' is invalid. '");
 					}
 				} else {
 					@SuppressWarnings("unchecked")
-					Map<String, Object> json = new HashMap<>((Map<String, Object>) Json.reader().simpleRead(content.substring(index)));
+					Map<String, Object> json = new HashMap<>(
+							(Map<String, Object>) Json.reader().simpleRead(content.substring(index)));
 					json.put("type", content.substring(0, index));
 					ItemStack stack = ItemMaker.loadFromJson(json);
 					if (stack == null)
-						Loader.getPlugin().getLogger().warning("An error occurred while building kit '" + key + "'. Material '" + json.get("type") + "' is invalid. '");
+						Loader.getPlugin().getLogger().warning("An error occurred while building kit '" + key
+								+ "'. Material '" + json.get("type") + "' is invalid. '");
 					else
-						sample.getContents().put(slot,stack);
+						sample.getContents().put(slot, stack);
 				}
 			}
 			kits.put(key.toLowerCase(), sample);
@@ -184,16 +199,18 @@ public class Kit extends CssCommand {
 		return kits;
 	}
 
-	public void useKit(Player target, KitSample kit, boolean ignoreCost, boolean ignoreCooldown, boolean sendMessage, CommandSender sender) {
-		PlaceholdersExecutor placeholders = PlaceholdersExecutor.i().papi(target.getUniqueId()).add("kit", kit.getName()).add("cost", kit.getCost()).add("admin", sender.getName())
-				.add("target", target.getName()).add("player", target.getName());
+	public void useKit(Player target, KitSample kit, boolean ignoreCost, boolean ignoreCooldown, boolean sendMessage,
+			CommandSender sender) {
+		TextRenderer placeholders = renderer(target).placeholder("kit", kit.getName())
+				.placeholder("cost", kit.getCost()).placeholder("admin", sender.getName())
+				.placeholder("target", target.getName()).placeholder("player", target.getName());
 		if (!ignoreCooldown && !kit.getCooldown().tryWithoutWriting(target)) {
 			long currentTime = System.currentTimeMillis() / 1000;
 			Config file = me.devtec.shared.API.getUser(target.getName());
 			long lastUsedTime = file.getLong("css.cd." + kit.getCooldown().id());
 			long nextUsageIn = lastUsedTime - currentTime;
 			kit.getCooldown().accept(target);
-			placeholders.add("time", StringUtils.formatDouble(FormatType.NORMAL, nextUsageIn));
+			placeholders.placeholder("time", StringUtils.formatDouble(FormatType.NORMAL, nextUsageIn));
 			if (sender.equals(target)) {
 				if (sendMessage)
 					msg(target, "in-cooldown.self", placeholders);
@@ -204,7 +221,8 @@ public class Kit extends CssCommand {
 			}
 			return;
 		}
-		if (!ignoreCost && kit.getCost() > 0 && API.get().getEconomyHook().has(target.getName(), target.getWorld().getName(), kit.getCost())) {
+		if (!ignoreCost && kit.getCost() > 0
+				&& API.get().getEconomyHook().has(target.getName(), target.getWorld().getName(), kit.getCost())) {
 			if (sender.equals(target)) {
 				if (sendMessage)
 					msg(target, "enough-money.self", placeholders);
@@ -217,26 +235,28 @@ public class Kit extends CssCommand {
 		}
 		API.get().getMsgManager().sendMessageFromFile(kit.getMessages(), placeholders, target);
 		BukkitLoader.getNmsProvider().postToMainThread(() -> {
-			if(kit.isOverrideContents())
-				for(int i = 0; i < 40; ++i) {
+			if (kit.isOverrideContents())
+				for (int i = 0; i < 40; ++i) {
 					ItemStack stack = kit.getContents().get(i);
-					if(stack!=null)
+					if (stack != null)
 						target.getInventory().setItem(i, stack);
 				}
 			else
-				for(int i = 0; i < 40; ++i) {
+				for (int i = 0; i < 40; ++i) {
 					ItemStack stack = kit.getContents().get(i);
-					if(stack!=null)
-						if(target.getInventory().getItem(i)==null)
+					if (stack != null)
+						if (target.getInventory().getItem(i) == null)
 							target.getInventory().setItem(i, stack);
 						else if (target.getInventory().firstEmpty() == -1) {
-							if(kit.isDropItems())
+							if (kit.isDropItems())
 								target.getWorld().dropItem(target.getLocation(), stack);
-						}else
+						} else
 							target.getInventory().addItem(stack);
 				}
+			placeholders.colorizeBeforePlaceholders();
 			for (String cmd : kit.getCommands())
-				Bukkit.dispatchCommand(Bukkit.getConsoleSender(), placeholders.applyAfterColorize(cmd));
+				Bukkit.dispatchCommand(Bukkit.getConsoleSender(), placeholders.render(cmd));
+			placeholders.colorize();
 		});
 		if (sender.equals(target)) {
 			if (sendMessage)

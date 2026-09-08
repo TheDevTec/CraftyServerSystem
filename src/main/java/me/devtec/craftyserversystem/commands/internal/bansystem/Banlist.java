@@ -10,7 +10,7 @@ import org.bukkit.entity.Player;
 
 import me.devtec.craftyserversystem.api.API;
 import me.devtec.craftyserversystem.commands.CssCommand;
-import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
+import me.devtec.shared.text.TextRenderer;
 import me.devtec.shared.commands.selectors.Selector;
 import me.devtec.shared.commands.structures.CommandStructure;
 import me.devtec.shared.utility.ParseUtils;
@@ -47,7 +47,7 @@ public class Banlist extends CssCommand {
 
 	public void sendList(CommandSender sender, String user, List<Entry> entries, int page) {
 		if (entries.isEmpty()) {
-			msg(sender, "empty", PlaceholdersExecutor.i().add("user", user));
+			msg(sender, "empty", renderer().placeholder("user", user));
 			return;
 		}
 		int totalPages = entries.size() / 10 + (entries.size() % 10 == 0 ? 0 : 1);
@@ -55,36 +55,36 @@ public class Banlist extends CssCommand {
 			page = 1;
 		if (page > totalPages)
 			page = totalPages;
-		PlaceholdersExecutor placeholders = PlaceholdersExecutor.i().add("page", page).add("totalPages", totalPages).add("previousPage", Math.max(1, page - 1))
-				.add("nextPage", Math.min(totalPages, page + 1)).add("user", user);
+		TextRenderer placeholders = renderer().placeholder("page", page).placeholder("totalPages", totalPages).placeholder("previousPage", Math.max(1, page - 1))
+				.placeholder("nextPage", Math.min(totalPages, page + 1)).placeholder("user", user);
 		msg(sender, "header", placeholders);
 		for (int i = page * 10 - 10; i < page * 10 && i < entries.size(); ++i) {
 			Entry entry = entries.get(i);
-			PlaceholdersExecutor executor;
+			TextRenderer executor;
 			if (entry.getDuration() == 0)
-				executor = PlaceholdersExecutor.i().add("reason", entry.getReason() == null ? API.get().getConfigManager().getMain().getString("bansystem.not-specified-reason") : entry.getReason())
-						.add("admin", entry.getAdmin() == null ? "Console" : entry.getAdmin()).add("id", entry.getId() + "")
-						.add("startDate", API.get().getCommandsAPI().getBanAPI().getTimeFormat().format(Date.from(Instant.ofEpochSecond(entry.getStartDate()))));
+				executor = renderer().placeholder("reason", entry.getReason() == null ? API.get().getConfigManager().getMain().getString("bansystem.not-specified-reason") : entry.getReason())
+						.placeholder("admin", entry.getAdmin() == null ? "Console" : entry.getAdmin()).placeholder("id", entry.getId() + "")
+						.placeholder("startDate", API.get().getCommandsAPI().getBanAPI().getTimeFormat().format(Date.from(Instant.ofEpochSecond(entry.getStartDate()))));
 			else
-				executor = PlaceholdersExecutor.i().add("reason", entry.getReason() == null ? API.get().getConfigManager().getMain().getString("bansystem.not-specified-reason") : entry.getReason())
-						.add("admin", entry.getAdmin() == null ? "Console" : entry.getAdmin()).add("id", entry.getId() + "")
-						.add("startDate", API.get().getCommandsAPI().getBanAPI().getTimeFormat().format(Date.from(Instant.ofEpochSecond(entry.getStartDate()))))
-						.add("expireAfter", TimeUtils.timeToString(entry.getStartDate() + entry.getDuration() - System.currentTimeMillis() / 1000))
-						.add("expireDate", API.get().getCommandsAPI().getBanAPI().getTimeFormat().format(Date.from(Instant.ofEpochSecond(entry.getStartDate() + entry.getDuration()))));
+				executor = renderer().placeholder("reason", entry.getReason() == null ? API.get().getConfigManager().getMain().getString("bansystem.not-specified-reason") : entry.getReason())
+						.placeholder("admin", entry.getAdmin() == null ? "Console" : entry.getAdmin()).placeholder("id", entry.getId() + "")
+						.placeholder("startDate", API.get().getCommandsAPI().getBanAPI().getTimeFormat().format(Date.from(Instant.ofEpochSecond(entry.getStartDate()))))
+						.placeholder("expireAfter", TimeUtils.timeToString(entry.getStartDate() + entry.getDuration() - System.currentTimeMillis() / 1000))
+						.placeholder("expireDate", API.get().getCommandsAPI().getBanAPI().getTimeFormat().format(Date.from(Instant.ofEpochSecond(entry.getStartDate() + entry.getDuration()))));
 			String statusPath = entry.isCancelled() ? "cancelled"
 					: entry.getDuration() == 0 ? "active" : entry.getStartDate() + entry.getDuration() - System.currentTimeMillis() / 1000 <= 0 ? "inactive" : "active";
 			switch (entry.getType()) {
 			case BAN:
-				msg(sender, "entry." + statusPath + ".ban." + (entry.getDuration() == 0 ? "perm" : "temp"), executor.add("position", i + 1));
+				msg(sender, "entry." + statusPath + ".ban." + (entry.getDuration() == 0 ? "perm" : "temp"), executor.placeholder("position", i + 1));
 				break;
 			case MUTE:
-				msg(sender, "entry." + statusPath + ".mute." + (entry.getDuration() == 0 ? "perm" : "temp"), executor.add("position", i + 1));
+				msg(sender, "entry." + statusPath + ".mute." + (entry.getDuration() == 0 ? "perm" : "temp"), executor.placeholder("position", i + 1));
 				break;
 			case KICK:
-				msg(sender, "entry." + statusPath + ".kick", executor.add("position", i + 1));
+				msg(sender, "entry." + statusPath + ".kick", executor.placeholder("position", i + 1));
 				break;
 			case WARN:
-				msg(sender, "entry." + statusPath + ".warn", executor.add("position", i + 1));
+				msg(sender, "entry." + statusPath + ".warn", executor.placeholder("position", i + 1));
 				break;
 			}
 			msg(sender, "footer", placeholders);

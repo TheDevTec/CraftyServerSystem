@@ -22,13 +22,14 @@ import me.devtec.craftyserversystem.api.API;
 import me.devtec.craftyserversystem.api.events.AfkToggleEvent;
 import me.devtec.craftyserversystem.commands.internal.afk.AfkManager;
 import me.devtec.craftyserversystem.events.CssListener;
-import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
 import me.devtec.shared.Pair;
 import me.devtec.shared.Ref;
 import me.devtec.shared.dataholder.Config;
 import me.devtec.shared.events.EventManager;
+import me.devtec.shared.placeholders.PlaceholderAPI;
 import me.devtec.shared.scheduler.Scheduler;
 import me.devtec.shared.scheduler.Tasker;
+import me.devtec.shared.text.TextRenderer;
 import me.devtec.shared.utility.MathUtils;
 import me.devtec.shared.utility.TimeUtils;
 import me.devtec.theapi.bukkit.BukkitLoader;
@@ -39,12 +40,16 @@ import me.devtec.theapi.bukkit.packetlistener.PacketListener;
 public class AfkListener implements CssListener {
 
 	public static Map<UUID, Long> autoAfk;
+
 	private Map<UUID, int[]> positions;
 	private Map<UUID, Pair> movementLocs;
+
 	private boolean invClickEvent;
 	private boolean commandEvent;
 	private boolean blockPlace;
+
 	private PacketListener packetListener;
+	private int task;
 
 	@Override
 	public Config getConfig() {
@@ -56,54 +61,78 @@ public class AfkListener implements CssListener {
 		return API.get().getCommandManager().getRegistered().containsKey("afk");
 	}
 
-	private int task;
-
 	@Override
 	public void reload() {
 		if (task != 0) {
 			Scheduler.cancelTask(task);
 			task = 0;
+
 			if (packetListener != null)
 				packetListener.unregister();
+
 			packetListener = null;
 		}
+
 		invClickEvent = getConfig().getBoolean("afk.inventory-click-reset-afk");
 		commandEvent = getConfig().getBoolean("afk.command-reset-afk");
 		blockPlace = getConfig().getBoolean("afk.block-place-reset-afk");
+
 		boolean movementEvent = getConfig().getBoolean("afk.movement-reset-afk");
 		boolean sameMovementPattern = getConfig().getBoolean("afk.check-same-pattern-movement");
+
 		long afkTime = Math.max(TimeUtils.timeFromString(getConfig().getString("afk.time")), 0);
+
 		if (afkTime != 0) {
 			autoAfk = new ConcurrentHashMap<>();
+
 			task = new Tasker() {
 
 				@Override
 				public void run() {
-					for (Entry<UUID, Long> entry : autoAfk.entrySet())
-						if (entry.getValue() + afkTime - System.currentTimeMillis() / 1000 <= 0) {
-							Config user = me.devtec.shared.API.getUser(entry.getKey());
-							if (!user.getBoolean("afk")) {
-								AfkToggleEvent event = new AfkToggleEvent(entry.getKey(), true);
-								EventManager.call(event);
-								if(event.isCancelled())return;
-								user.set("afk", true);
-								PlaceholdersExecutor placeholders = PlaceholdersExecutor.i().add("player", me.devtec.shared.API.offlineCache().lookupNameById(entry.getKey())).papi(entry.getKey());
-								// Send json message
-								API.get().getMsgManager().sendMessageFromFile(getConfig(), "afk.start.broadcast", placeholders, BukkitLoader.getOnlinePlayers());
-								BukkitLoader.getNmsProvider().postToMainThread(() -> {
-									for (String cmd : placeholders.apply(getConfig().getStringList("afk.start.commands")))
-										Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd);
-								});
-							}
-						}
+					for (Entry<UUID, Long> entry : autoAfk.entrySet()) {
+						if (entry.getValue() + afkTime - System.currentTimeMillis() / 1000 > 0)
+							continue;
+
+						Config user = me.devtec.shared.API.getUser(entry.getKey());
+
+						if (user.getBoolean("afk"))
+							continue;
+
+						AfkToggleEvent event = new AfkToggleEvent(entry.getKey(), true);
+						EventManager.call(event);
+
+						if (event.isCancelled())
+							return;
+
+						user.set("afk", true);
+
+						TextRenderer renderer = TextRenderer.forTarget(entry.getKey())
+								.placeholder("prefix", API.get().getConfigManager().getPrefix()).placeholder("player",
+										me.devtec.shared.API.offlineCache().lookupNameById(entry.getKey()))
+								.colorize();
+
+						API.get().getMsgManager().sendMessageFromFile(getConfig(), "afk.start.broadcast", renderer,
+								BukkitLoader.getOnlinePlayers());
+
+						BukkitLoader.getNmsProvider().postToMainThread(() -> {
+							for (String command : getConfig().getStringList("afk.start.commands"))
+								Bukkit.dispatchCommand(Bukkit.getConsoleSender(),
+										render(command, renderer, entry.getKey()));
+						});
+					}
 				}
 			}.runRepeating(20, 20);
 		}
+
 		if (movementEvent) {
 			positions = new ConcurrentHashMap<>();
+
 			if (sameMovementPattern)
 				movementLocs = new ConcurrentHashMap<>();
-			Class<?> movementPacketClass = Ref.nms("network.protocol.game", BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "ServerboundMovePlayerPacket" : "PacketPlayInFlying");
+
+			Class<?> movementPacketClass = Ref.nms("network.protocol.game",
+					BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "ServerboundMovePlayerPacket" : "PacketPlayInFlying");
+
 			Field xField;
 			Field yField;
 			Field zField;
@@ -111,6 +140,7 @@ public class AfkListener implements CssListener {
 			Field pitchField;
 			Field changedHead;
 			Field changedPosition;
+
 			if (BukkitLoader.NO_OBFUSCATED_NMS_MODE) {
 				xField = Ref.field(movementPacketClass, "x");
 				yField = Ref.field(movementPacketClass, "y");
@@ -119,7 +149,7 @@ public class AfkListener implements CssListener {
 				pitchField = Ref.field(movementPacketClass, "xRot");
 				changedHead = Ref.field(movementPacketClass, "hasRot");
 				changedPosition = Ref.field(movementPacketClass, "hasPos");
-			} else if (Ref.isOlderThan(17)) {
+			} else if (Ref.isBefore(17, 0)) {
 				xField = Ref.field(movementPacketClass, "x");
 				yField = Ref.field(movementPacketClass, "y");
 				zField = Ref.field(movementPacketClass, "z");
@@ -145,63 +175,90 @@ public class AfkListener implements CssListener {
 
 				@Override
 				public void playIn(String player, PacketContainer container, ChannelContainer channel) {
-					if (movementPacketClass.isAssignableFrom(container.getPacket().getClass()) || movementPacketClass.equals(container.getPacket().getClass())) {
-						Object pos = container.getPacket();
-						int x = MathUtils.floor((double) Ref.get(pos, xField));
-						int y = MathUtils.floor((double) Ref.get(pos, yField));
-						int z = MathUtils.floor((double) Ref.get(pos, zField));
-						UUID uuid = me.devtec.shared.API.offlineCache().lookupId(player);
-						if ((boolean) Ref.get(pos, changedHead) && sameMovementPattern) {
-							Pair pair = movementLocs.get(uuid);
-							if (pair != null) {
-								Pair sub = (Pair) pair.getValue();
-								float yaw = (float) Ref.get(pos, yawField);
-								float pitch = (float) Ref.get(pos, pitchField);
-								if (((float[]) sub.getValue())[0] != yaw || ((float[]) sub.getValue())[1] != pitch) {
-									((float[]) sub.getValue())[0] = yaw;
-									((float[]) sub.getValue())[1] = pitch;
-									sub.setKey(0);
-								}
+					Object packet = container.getPacket();
+
+					if (!movementPacketClass.isAssignableFrom(packet.getClass())
+							&& !movementPacketClass.equals(packet.getClass()))
+						return;
+
+					int x = MathUtils.floor((double) Ref.get(packet, xField));
+					int y = MathUtils.floor((double) Ref.get(packet, yField));
+					int z = MathUtils.floor((double) Ref.get(packet, zField));
+
+					UUID uuid = me.devtec.shared.API.offlineCache().lookupId(player);
+
+					if ((boolean) Ref.get(packet, changedHead) && sameMovementPattern) {
+						Pair pair = movementLocs.get(uuid);
+
+						if (pair != null) {
+							Pair sub = (Pair) pair.getValue();
+
+							float yaw = (float) Ref.get(packet, yawField);
+							float pitch = (float) Ref.get(packet, pitchField);
+
+							float[] rotation = (float[]) sub.getValue();
+
+							if (rotation[0] != yaw || rotation[1] != pitch) {
+								rotation[0] = yaw;
+								rotation[1] = pitch;
+								sub.setKey(0);
 							}
 						}
-						if ((boolean) Ref.get(pos, changedPosition) && (sameMovementPattern ? !checkIfInsideWaterFlow(uuid, x, y, z) : true)) {
-							int[] previous = positions.computeIfAbsent(uuid, id -> new int[] { x, z });
-							if (x != previous[0] || z != previous[1]) {
-								positions.put(uuid, new int[] { x, z });
-								AfkManager.getProvider().stopAfk(uuid, true);
-							}
+					}
+
+					if ((boolean) Ref.get(packet, changedPosition)
+							&& (!sameMovementPattern || !checkIfInsideWaterFlow(uuid, x, y, z))) {
+
+						int[] previous = positions.computeIfAbsent(uuid, id -> new int[] { x, z });
+
+						if (x != previous[0] || z != previous[1]) {
+							positions.put(uuid, new int[] { x, z });
+							AfkManager.getProvider().stopAfk(uuid, true);
 						}
 					}
 				}
 
 				private boolean checkIfInsideWaterFlow(UUID uuid, int x, int y, int z) {
-					Pair pair = movementLocs.computeIfAbsent(uuid, i -> Pair.of(new ArrayList<>(), Pair.of(0, new float[2])));
+					Pair pair = movementLocs.computeIfAbsent(uuid,
+							id -> Pair.of(new ArrayList<>(), Pair.of(0, new float[2])));
+
 					@SuppressWarnings("unchecked")
 					List<int[]> movements = (List<int[]>) pair.getKey();
-					int[] start = { x, y, z };
 
+					int[] start = { x, y, z };
 					Pair sub = (Pair) pair.getValue();
 
 					if (movements.size() > 1)
-						for (int[] currentMovement : movements)
-							if (equals(currentMovement, start)) {
-								if ((int) sub.getKey() >= 2)
-									return true;
-								sub.setKey((int) sub.getKey() + 1);
-								return false;
-							}
+						for (int[] currentMovement : movements) {
+							if (!equals(currentMovement, start))
+								continue;
+
+							if ((int) sub.getKey() >= 2)
+								return true;
+
+							sub.setKey((int) sub.getKey() + 1);
+							return false;
+						}
+
 					movements.add(start);
+
 					if (movements.size() > 10)
 						movements.remove(0);
+
 					return false;
 				}
 
-				private boolean equals(int[] is, int[] is2) {
-					return is[0] == is2[0] && is[1] == is2[1] && is[2] == is2[2];
+				private boolean equals(int[] first, int[] second) {
+					return first[0] == second[0] && first[1] == second[1] && first[2] == second[2];
 				}
 			};
+
 			packetListener.register();
 		}
+	}
+
+	private String render(String text, TextRenderer renderer, UUID target) {
+		return renderer.render(PlaceholderAPI.apply(text, target), target);
 	}
 
 	@Override
@@ -210,60 +267,68 @@ public class AfkListener implements CssListener {
 			Scheduler.cancelTask(task);
 			task = 0;
 		}
+
 		if (packetListener != null)
 			packetListener.unregister();
+
 		packetListener = null;
 	}
 
 	@EventHandler
-	public void onJoin(PlayerJoinEvent e) {
-		AfkManager.getProvider().stopAfk(e.getPlayer().getUniqueId(), false);
+	public void onJoin(PlayerJoinEvent event) {
+		AfkManager.getProvider().stopAfk(event.getPlayer().getUniqueId(), false);
 	}
 
 	@EventHandler
-	public void onChat(AsyncPlayerChatEvent e) {
-		AfkManager.getProvider().stopAfk(e.getPlayer().getUniqueId(), true);
+	public void onChat(AsyncPlayerChatEvent event) {
+		AfkManager.getProvider().stopAfk(event.getPlayer().getUniqueId(), true);
 	}
 
 	@EventHandler
-	public void onBlockPlace(BlockPlaceEvent e) {
+	public void onBlockPlace(BlockPlaceEvent event) {
 		if (blockPlace)
-			AfkManager.getProvider().stopAfk(e.getPlayer().getUniqueId(), true);
+			AfkManager.getProvider().stopAfk(event.getPlayer().getUniqueId(), true);
 	}
 
 	@EventHandler
-	public void onQuit(PlayerQuitEvent e) {
-		AfkManager.getProvider().stopAfk(e.getPlayer().getUniqueId(), false);
+	public void onQuit(PlayerQuitEvent event) {
+		UUID uuid = event.getPlayer().getUniqueId();
+
+		AfkManager.getProvider().stopAfk(uuid, false);
+
 		if (autoAfk != null)
-			autoAfk.remove(e.getPlayer().getUniqueId());
+			autoAfk.remove(uuid);
+
 		if (positions != null)
-			positions.remove(e.getPlayer().getUniqueId());
+			positions.remove(uuid);
+
 		if (movementLocs != null)
-			movementLocs.remove(e.getPlayer().getUniqueId());
+			movementLocs.remove(uuid);
 	}
 
 	@EventHandler
-	public void onInvClick(InventoryClickEvent e) {
+	public void onInvClick(InventoryClickEvent event) {
 		if (invClickEvent)
-			AfkManager.getProvider().stopAfk(e.getWhoClicked().getUniqueId(), true);
+			AfkManager.getProvider().stopAfk(event.getWhoClicked().getUniqueId(), true);
 	}
 
 	@EventHandler
-	public void onInvDrag(InventoryDragEvent e) {
+	public void onInvDrag(InventoryDragEvent event) {
 		if (invClickEvent)
-			AfkManager.getProvider().stopAfk(e.getWhoClicked().getUniqueId(), true);
+			AfkManager.getProvider().stopAfk(event.getWhoClicked().getUniqueId(), true);
 	}
 
 	@EventHandler
-	public void onCommand(PlayerCommandPreprocessEvent e) {
-		if (commandEvent && !isAfkCommand(e.getMessage().substring(1).toLowerCase().split(" ")[0]))
-			AfkManager.getProvider().stopAfk(e.getPlayer().getUniqueId(), true);
+	public void onCommand(PlayerCommandPreprocessEvent event) {
+		if (commandEvent && !isAfkCommand(event.getMessage().substring(1).toLowerCase().split(" ")[0]))
+			AfkManager.getProvider().stopAfk(event.getPlayer().getUniqueId(), true);
 	}
 
 	private boolean isAfkCommand(String cmd) {
 		for (String afkCommand : API.get().getConfigManager().getCommands().getStringList("afk.cmd"))
 			if (cmd.equals(afkCommand.toLowerCase()))
 				return true;
+
 		return false;
 	}
 }

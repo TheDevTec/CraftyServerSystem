@@ -6,7 +6,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import me.devtec.craftyserversystem.commands.CssCommand;
-import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
+import me.devtec.shared.text.TextRenderer;
 import me.devtec.shared.commands.selectors.Selector;
 import me.devtec.shared.commands.structures.CommandStructure;
 
@@ -60,7 +60,7 @@ public class CraftingTable extends CssCommand {
 			if (sender.equals(target))
 				msg(sender, "self");
 			else {
-				PlaceholdersExecutor ex = PlaceholdersExecutor.i().add("sender", sender.getName()).add("target", target.getName());
+				TextRenderer ex = renderer().placeholder("sender", sender.getName()).placeholder("target", target.getName());
 				msg(sender, "other.sender", ex);
 				msg(target, "other.target", ex);
 			}

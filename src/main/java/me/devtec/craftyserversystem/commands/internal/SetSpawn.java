@@ -7,10 +7,7 @@ import org.bukkit.entity.Player;
 
 import me.devtec.craftyserversystem.api.API;
 import me.devtec.craftyserversystem.commands.CssCommand;
-import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
 import me.devtec.shared.commands.structures.CommandStructure;
-import me.devtec.shared.utility.StringUtils;
-import me.devtec.shared.utility.StringUtils.FormatType;
 import me.devtec.theapi.bukkit.game.Position;
 
 public class SetSpawn extends CssCommand {
@@ -20,9 +17,10 @@ public class SetSpawn extends CssCommand {
 		if (isRegistered())
 			return;
 
-		CommandStructure<Player> cmd = CommandStructure.create(Player.class, P_DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
-			setSpawn(Position.fromEntity(sender), sender);
-		}).permission(getPerm("cmd"));
+		CommandStructure<Player> cmd = CommandStructure
+				.create(Player.class, P_DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
+					setSpawn(Position.fromEntity(sender), sender);
+				}).permission(getPerm("cmd"));
 
 		// register
 		List<String> cmds = getCommands();
@@ -32,12 +30,11 @@ public class SetSpawn extends CssCommand {
 
 	public void setSpawn(Position pos, CommandSender sender) {
 		API.get().getConfigManager().setSpawn(pos);
-		if (sender != null) {
-			PlaceholdersExecutor placeholders = PlaceholdersExecutor.i().add("world", pos.getWorldName()).add("x", StringUtils.formatDouble(FormatType.NORMAL, pos.getX()))
-					.add("y", StringUtils.formatDouble(FormatType.NORMAL, pos.getY())).add("z", StringUtils.formatDouble(FormatType.NORMAL, pos.getZ()))
-					.add("yaw", StringUtils.formatDouble(FormatType.NORMAL, pos.getYaw())).add("pitch", StringUtils.formatDouble(FormatType.NORMAL, pos.getPitch()));
-			msg(sender, "set", placeholders);
-		}
+		if (sender != null)
+			msg(sender, "set",
+					renderer().placeholder("world", pos.getWorldName()).placeholder("x", pos.getX())
+							.placeholder("y", pos.getY()).placeholder("z", pos.getZ()).placeholder("yaw", pos.getYaw())
+							.placeholder("pitch", pos.getPitch()));
 	}
 
 }

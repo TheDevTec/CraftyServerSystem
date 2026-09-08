@@ -6,9 +6,9 @@ import java.util.List;
 import org.bukkit.entity.Player;
 
 import me.devtec.craftyserversystem.commands.CssCommand;
-import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
 import me.devtec.shared.commands.selectors.Selector;
 import me.devtec.shared.commands.structures.CommandStructure;
+import me.devtec.shared.text.TextRenderer;
 
 public class Tphere extends CssCommand {
 
@@ -17,27 +17,28 @@ public class Tphere extends CssCommand {
 		if (isRegistered())
 			return;
 
-		CommandStructure<Player> cmd = CommandStructure.create(Player.class, P_DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
-			msgUsage(sender, "cmd");
-		}).permission(getPerm("cmd")).selector(Selector.ENTITY_SELECTOR, (sender, structure, args) -> {
-			Collection<? extends Player> collection = selector(sender, args[0]);
-			if (collection.isEmpty() || collection.size() == 1 && collection.contains(sender)) {
-				teleport(sender, true, sender);
-				return;
-			}
-			for (Player target : collection)
-				if (!target.getUniqueId().equals(sender.getUniqueId()))
-					teleport(target, true, sender);
-		}).argument("-s", (sender, structure, args) -> { // silent
-			Collection<? extends Player> collection = selector(sender, args[0]);
-			if (collection.isEmpty() || collection.size() == 1 && collection.contains(sender)) {
-				teleport(sender, true, sender);
-				return;
-			}
-			for (Player target : collection)
-				if (!target.getUniqueId().equals(sender.getUniqueId()))
-					teleport(target, false, sender);
-		});
+		CommandStructure<Player> cmd = CommandStructure
+				.create(Player.class, P_DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
+					msgUsage(sender, "cmd");
+				}).permission(getPerm("cmd")).selector(Selector.ENTITY_SELECTOR, (sender, structure, args) -> {
+					Collection<? extends Player> collection = selector(sender, args[0]);
+					if (collection.isEmpty() || collection.size() == 1 && collection.contains(sender)) {
+						teleport(sender, true, sender);
+						return;
+					}
+					for (Player target : collection)
+						if (!target.getUniqueId().equals(sender.getUniqueId()))
+							teleport(target, true, sender);
+				}).argument("-s", (sender, structure, args) -> { // silent
+					Collection<? extends Player> collection = selector(sender, args[0]);
+					if (collection.isEmpty() || collection.size() == 1 && collection.contains(sender)) {
+						teleport(sender, true, sender);
+						return;
+					}
+					for (Player target : collection)
+						if (!target.getUniqueId().equals(sender.getUniqueId()))
+							teleport(target, false, sender);
+				});
 
 		// register
 		List<String> cmds = getCommands();
@@ -47,11 +48,12 @@ public class Tphere extends CssCommand {
 
 	public void teleport(Player target, boolean sendMessage, Player sender) {
 		if (target.equals(sender)) {
-			msg(sender, "failed.self", PlaceholdersExecutor.EMPTY);
+			msg(sender, "failed.self");
 			return;
 		}
 		target.teleport(sender);
-		PlaceholdersExecutor placeholders = PlaceholdersExecutor.i().add("sender", sender.getName()).add("target", target.getName());
+		TextRenderer placeholders = renderer().placeholder("sender", sender.getName()).placeholder("target",
+				target.getName());
 		if (sendMessage) {
 			msg(target, "success.target", placeholders);
 			msg(sender, "success.sender", placeholders);

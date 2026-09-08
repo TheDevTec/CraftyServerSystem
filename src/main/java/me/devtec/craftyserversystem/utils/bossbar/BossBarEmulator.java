@@ -26,7 +26,7 @@ public interface BossBarEmulator {
 	}
 
 	static BossBarEmulator createInstance(Player player, String text, double progress) {
-		if (Ref.isOlderThan(9))
+		if (Ref.isAtLeast(8, 0))
 			return new OldBossBarEmulator(player, text, progress);
 		return new ModernBossBarEmulator(player, text, progress);
 	}

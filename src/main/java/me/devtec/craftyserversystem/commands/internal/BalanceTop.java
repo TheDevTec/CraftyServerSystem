@@ -14,13 +14,13 @@ import me.devtec.craftyserversystem.api.API;
 import me.devtec.craftyserversystem.commands.CssCommand;
 import me.devtec.craftyserversystem.economy.CssEconomyHook;
 import me.devtec.craftyserversystem.economy.EconomyHook;
-import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
 import me.devtec.shared.commands.selectors.Selector;
 import me.devtec.shared.commands.structures.CommandStructure;
 import me.devtec.shared.scheduler.Scheduler;
 import me.devtec.shared.scheduler.Tasker;
 import me.devtec.shared.sorting.SortingAPI;
 import me.devtec.shared.sorting.SortingAPI.ComparableObject;
+import me.devtec.shared.text.TextRenderer;
 import me.devtec.shared.utility.OfflineCache.Query;
 import me.devtec.shared.utility.ParseUtils;
 import me.devtec.shared.utility.TimeUtils;
@@ -37,7 +37,8 @@ public class BalanceTop extends CssCommand {
 		if (isRegistered())
 			return;
 
-		minimumBalanceToShow = API.get().getConfigManager().getEconomy().getDouble("settings.balance-top.minimum-money");
+		minimumBalanceToShow = API.get().getConfigManager().getEconomy()
+				.getDouble("settings.balance-top.minimum-money");
 		int entriesPerPage = API.get().getConfigManager().getEconomy().getInt("settings.balance-top.entries-per-page");
 		task = new Tasker() {
 
@@ -45,11 +46,13 @@ public class BalanceTop extends CssCommand {
 			public void run() {
 				calculate(minimumBalanceToShow);
 			}
-		}.runRepeating((long) (Math.random() * 10 * 8), 20 * Math.max(1, TimeUtils.timeFromString(API.get().getConfigManager().getEconomy().getString("settings.balance-top.update-every"))));
+		}.runRepeating((long) (Math.random() * 10 * 8), 20 * Math.max(1, TimeUtils.timeFromString(
+				API.get().getConfigManager().getEconomy().getString("settings.balance-top.update-every"))));
 
-		CommandStructure<CommandSender> cmd = CommandStructure.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
-			listBalanceTop(sender, balanceTop.get(getWorldGroup(sender)), 1, entriesPerPage);
-		}).permission(getPerm("cmd"));
+		CommandStructure<CommandSender> cmd = CommandStructure
+				.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
+					listBalanceTop(sender, balanceTop.get(getWorldGroup(sender)), 1, entriesPerPage);
+				}).permission(getPerm("cmd"));
 		// other
 		cmd.selector(Selector.INTEGER, (sender, structure, args) -> {
 			int page = ParseUtils.getInt(args[0]);
@@ -61,23 +64,27 @@ public class BalanceTop extends CssCommand {
 			this.cmd = addBypassSettings(cmd).build().register(cmds.remove(0), cmds.toArray(new String[0]));
 	}
 
-	public void listBalanceTop(CommandSender sender, ComparableObject<String, Double>[] comparableObjects, int page, int maxEntries) {
+	public void listBalanceTop(CommandSender sender, ComparableObject<String, Double>[] comparableObjects, int page,
+			int maxEntries) {
 		if (comparableObjects == null) {
 			msg(sender, "loading");
 			return;
 		}
 		EconomyHook hook = API.get().getEconomyHook();
-		int totalPages = Math.max(1, comparableObjects.length / maxEntries + (comparableObjects.length % maxEntries == 0 ? 0 : 1));
+		int totalPages = Math.max(1,
+				comparableObjects.length / maxEntries + (comparableObjects.length % maxEntries == 0 ? 0 : 1));
 		if (page <= 0)
 			page = 1;
 		if (page > totalPages)
 			page = totalPages;
-		PlaceholdersExecutor placeholders = PlaceholdersExecutor.i().add("page", page).add("totalPages", totalPages).add("previousPage", Math.max(1, page - 1)).add("nextPage",
-				Math.min(totalPages, page + 1));
+		TextRenderer placeholders = renderer().placeholder("page", page).placeholder("totalPages", totalPages)
+				.placeholder("previousPage", Math.max(1, page - 1))
+				.placeholder("nextPage", Math.min(totalPages, page + 1));
 		msg(sender, "header", placeholders);
 		for (int i = page * maxEntries - maxEntries; i < page * maxEntries && i < comparableObjects.length; ++i) {
 			ComparableObject<String, Double> comp = comparableObjects[i];
-			msg(sender, "key", PlaceholdersExecutor.i().add("position", i + 1).add("target", comp.getKey()).add("balance", hook.format(comp.getValue())));
+			msg(sender, "key", renderer().placeholder("position", i + 1).placeholder("target", comp.getKey())
+					.placeholder("balance", hook.format(comp.getValue())));
 		}
 		msg(sender, "footer", placeholders);
 	}
@@ -89,7 +96,8 @@ public class BalanceTop extends CssCommand {
 			CssEconomyHook css = (CssEconomyHook) hook;
 			if (css.economy.isEnabledPerWorldEconomy())
 				if (sender instanceof BlockCommandSender)
-					worldGroup = css.economy.getWorldGroup(((BlockCommandSender) sender).getBlock().getWorld().getName());
+					worldGroup = css.economy
+							.getWorldGroup(((BlockCommandSender) sender).getBlock().getWorld().getName());
 				else if (sender instanceof Player)
 					worldGroup = css.economy.getWorldGroup(((Player) sender).getWorld().getName());
 		}
@@ -125,7 +133,8 @@ public class BalanceTop extends CssCommand {
 					for (Entry<String, List<String>> entry : hook.economy.getPerWorldGroups().entrySet()) {
 						if (entry.getValue().isEmpty())
 							continue;
-						double balance = API.get().getEconomyHook().getBalance(query.getName(), entry.getValue().get(0));
+						double balance = API.get().getEconomyHook().getBalance(query.getName(),
+								entry.getValue().get(0));
 						if (balance >= minimumBalanceToShow)
 							bal.get(entry.getKey()).put(query.getName(), balance);
 					}

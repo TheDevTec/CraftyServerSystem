@@ -8,7 +8,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import me.devtec.craftyserversystem.commands.CssCommand;
-import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
 import me.devtec.shared.commands.selectors.Selector;
 import me.devtec.shared.commands.structures.CommandStructure;
 
@@ -19,9 +18,10 @@ public class Time extends CssCommand {
 		if (isRegistered())
 			return;
 
-		CommandStructure<CommandSender> cmd = CommandStructure.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
-			msgUsage(sender, "usage");
-		}).permission(getPerm("cmd"));
+		CommandStructure<CommandSender> cmd = CommandStructure
+				.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
+					msgUsage(sender, "usage");
+				}).permission(getPerm("cmd"));
 
 		cmd.argument("day", (sender, structure, args) -> {
 			if (!(sender instanceof Player)) {
@@ -103,25 +103,25 @@ public class Time extends CssCommand {
 	public void setDay(CommandSender sender, World target, boolean sendMessage) {
 		target.setTime(1000);
 		if (sendMessage)
-			msgOut(sender, "time.day", PlaceholdersExecutor.i().add("world", target.getName()));
+			msgOut(sender, "time.day", renderer().placeholder("world", target.getName()));
 	}
 
 	public void setNoon(CommandSender sender, World target, boolean sendMessage) {
 		target.setTime(6000);
 		if (sendMessage)
-			msgOut(sender, "time.noon", PlaceholdersExecutor.i().add("world", target.getName()));
+			msgOut(sender, "time.noon", renderer().placeholder("world", target.getName()));
 	}
 
 	public void setNight(CommandSender sender, World target, boolean sendMessage) {
 		target.setTime(13000);
 		if (sendMessage)
-			msgOut(sender, "time.night", PlaceholdersExecutor.i().add("world", target.getName()));
+			msgOut(sender, "time.night", renderer().placeholder("world", target.getName()));
 	}
 
 	public void setMidnight(CommandSender sender, World target, boolean sendMessage) {
 		target.setTime(18000);
 		if (sendMessage)
-			msgOut(sender, "time.midnight", PlaceholdersExecutor.i().add("world", target.getName()));
+			msgOut(sender, "time.midnight", renderer().placeholder("world", target.getName()));
 	}
 
 }

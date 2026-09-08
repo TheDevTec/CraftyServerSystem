@@ -12,7 +12,6 @@ import org.bukkit.entity.Player;
 
 import me.devtec.craftyserversystem.api.API;
 import me.devtec.craftyserversystem.commands.CssCommand;
-import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
 import me.devtec.shared.commands.structures.CommandStructure;
 import me.devtec.shared.utility.OfflineCache.Query;
 import me.devtec.shared.utility.StringUtils;
@@ -26,14 +25,17 @@ public class Balance extends CssCommand {
 		if (isRegistered())
 			return;
 
-		CommandStructure<CommandSender> cmd = CommandStructure.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
-			if (!(sender instanceof Player)) {
-				msgUsage(sender, "cmd");
-				return;
-			}
-			msg(sender, "self", PlaceholdersExecutor.i().add("balance",
-					StringUtils.formatDouble(FormatType.COMPLEX, API.get().getEconomyHook().getBalance(sender.getName(), ((Player) sender).getWorld().getName()))));
-		}).permission(getPerm("cmd"));
+		CommandStructure<CommandSender> cmd = CommandStructure
+				.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
+					if (!(sender instanceof Player)) {
+						msgUsage(sender, "cmd");
+						return;
+					}
+					msg(sender, "self",
+							renderer().placeholder("balance",
+									StringUtils.formatDouble(FormatType.COMPLEX, API.get().getEconomyHook()
+											.getBalance(sender.getName(), ((Player) sender).getWorld().getName()))));
+				}).permission(getPerm("cmd"));
 		// other
 		cmd.argument(null, 1, (sender, structure, args) -> {
 			Query query = me.devtec.shared.API.offlineCache().lookupQuery(args[0]);
@@ -45,10 +47,12 @@ public class Balance extends CssCommand {
 					world = ((BlockCommandSender) sender).getBlock().getWorld();
 				else
 					world = Bukkit.getWorlds().get(0);
-				msg(sender, "other", PlaceholdersExecutor.i().add("target", query.getName()).add("balance",
-						StringUtils.formatDouble(FormatType.COMPLEX, API.get().getEconomyHook().getBalance(query.getName(), world.getName()))));
+				msg(sender, "other",
+						renderer().placeholder("target", query.getName()).placeholder("balance",
+								StringUtils.formatDouble(FormatType.COMPLEX,
+										API.get().getEconomyHook().getBalance(query.getName(), world.getName()))));
 			} else
-				msg(sender, "no-account", PlaceholdersExecutor.i().add("target", args[0]));
+				msg(sender, "no-account", renderer().placeholder("target", args[0]));
 		}, (sender, structure, args) -> {
 			Collection<? extends Player> onlinePlayers = BukkitLoader.getOnlinePlayers();
 			List<String> players = new ArrayList<>(onlinePlayers.size() + 1);

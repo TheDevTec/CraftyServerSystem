@@ -8,9 +8,9 @@ import org.bukkit.entity.Player;
 
 import me.devtec.craftyserversystem.api.API;
 import me.devtec.craftyserversystem.commands.CssCommand;
-import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
 import me.devtec.shared.commands.selectors.Selector;
 import me.devtec.shared.commands.structures.CommandStructure;
+import me.devtec.shared.text.TextRenderer;
 import me.devtec.theapi.bukkit.BukkitLoader;
 
 public class Spawn extends CssCommand {
@@ -20,13 +20,14 @@ public class Spawn extends CssCommand {
 		if (isRegistered())
 			return;
 
-		CommandStructure<CommandSender> cmd = CommandStructure.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
-			if (!(sender instanceof Player)) {
-				msgUsage(sender, "cmd");
-				return;
-			}
-			spawn((Player) sender, true, sender);
-		}).permission(getPerm("cmd"));
+		CommandStructure<CommandSender> cmd = CommandStructure
+				.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
+					if (!(sender instanceof Player)) {
+						msgUsage(sender, "cmd");
+						return;
+					}
+					spawn((Player) sender, true, sender);
+				}).permission(getPerm("cmd"));
 
 		// silent
 		cmd.argument("-s", (sender, structure, args) -> {
@@ -56,17 +57,18 @@ public class Spawn extends CssCommand {
 
 	public void spawn(Player target, boolean sendMessage, CommandSender sender) {
 		if (sendMessage)
-			if (target.equals(sender)) {
-				PlaceholdersExecutor placeholders = PlaceholdersExecutor.i().add("target", target.getName());
-				msg(sender, "self", placeholders);
-			} else {
-				PlaceholdersExecutor placeholders = PlaceholdersExecutor.i().add("target", target.getName()).add("sender", sender.getName());
+			if (target.equals(sender))
+				msg(sender, "self", renderer().placeholder("target", target.getName()));
+			else {
+				TextRenderer placeholders = renderer().placeholder("target", target.getName()).placeholder("sender",
+						sender.getName());
 				msg(sender, "other.target", placeholders);
 				msg(sender, "other.sender", placeholders);
 			}
 		// You can teleport entity only in primary thread
 		if (!Bukkit.isPrimaryThread())
-			BukkitLoader.getNmsProvider().postToMainThread(() -> target.teleport(API.get().getConfigManager().getSpawn().toLocation()));
+			BukkitLoader.getNmsProvider()
+					.postToMainThread(() -> target.teleport(API.get().getConfigManager().getSpawn().toLocation()));
 		else
 			target.teleport(API.get().getConfigManager().getSpawn().toLocation());
 	}

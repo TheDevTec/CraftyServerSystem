@@ -12,7 +12,7 @@ import org.bukkit.entity.Player;
 
 import me.devtec.craftyserversystem.commands.CssCommand;
 import me.devtec.craftyserversystem.commands.internal.msgsystem.MsgManager;
-import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
+import me.devtec.shared.text.TextRenderer;
 import me.devtec.shared.commands.selectors.Selector;
 import me.devtec.shared.commands.structures.CommandStructure;
 import me.devtec.shared.utility.StringUtils;
@@ -63,10 +63,10 @@ public class Msg extends CssCommand {
 			return;
 		}
 		if (!MsgManager.get().trySendMessage(senderName, targetName)) {
-			msg(sender, "not-accepting", PlaceholdersExecutor.i().add("target", targetName));
+			msg(sender, "not-accepting", renderer().placeholder("target", targetName));
 			return;
 		}
-		PlaceholdersExecutor ex = PlaceholdersExecutor.i().add("sender", senderName).add("target", targetName).add("message", message);
+		TextRenderer ex = renderer().placeholder("sender", senderName).placeholder("target", targetName).placeholder("message", message);
 		msg(sender, "receive.sender", ex);
 		msg(target, "receive.target", ex);
 		MsgManager.get().setReply(sender instanceof Player ? senderName : null, target instanceof Player ? targetName : null);

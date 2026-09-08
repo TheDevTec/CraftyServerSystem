@@ -31,8 +31,7 @@ public interface HologramHolder {
 			posY = Ref.field(entityTeleport, BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "y" : "c"),
 			posZ = Ref.field(entityTeleport, BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "z" : "d"),
 			onGround = Ref.field(entityTeleport, BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "onGround" : "g");
-	Field metadataId = Ref.isNewerThan(19) || Ref.serverVersionInt() == 19 && Ref.serverVersionRelease() >= 2 ? null
-			: Ref.field(metadataClass, int.class);
+	Field metadataId = Ref.isAtMost(19, 2) ? null : Ref.field(metadataClass, int.class);
 	Field metadataList = Ref.field(metadataClass, List.class);
 	Class<?> vec3D = Ref.nms("world.phys", "Vec3") == null ? Ref.nms("world.phys", "Vec3D")
 			: Ref.nms("world.phys", "Vec3");
@@ -45,9 +44,8 @@ public interface HologramHolder {
 
 	static Object packetMetadata(int id, List<?> list) {
 		try {
-			return Ref.isNewerThan(19) || Ref.serverVersionInt() == 19 && Ref.serverVersionRelease() >= 2
-					? Ref.newInstance(metadataConstructor, id, list)
-							: initMetadataPacket(Ref.newUnsafeInstance(metadataClass), id, list);
+			return Ref.isAtMost(19, 2) ? Ref.newInstance(metadataConstructor, id, list)
+					: initMetadataPacket(Ref.newUnsafeInstance(metadataClass), id, list);
 		} catch (Exception e) {
 			return null;
 		}
@@ -67,7 +65,7 @@ public interface HologramHolder {
 		try {
 			Object teleportPacket = Ref.newUnsafeInstance(entityTeleport);
 			Ref.set(teleportPacket, entityId, id);
-			if (Ref.isOlderThan(12)) {
+			if (Ref.isBefore(12, 0)) {
 				Ref.set(teleportPacket, posX, MathUtils.floor(x * 32));
 				Ref.set(teleportPacket, posY, MathUtils.floor(y * 32));
 				Ref.set(teleportPacket, posZ, MathUtils.floor(z * 32));
@@ -86,8 +84,8 @@ public interface HologramHolder {
 	static int increaseAndGetId(World world) {
 		if (integer != null)
 			return integer.incrementAndGet();
-		if(levelEntityCount!=null)
-			return (int)Ref.invoke(BukkitLoader.getNmsProvider().getWorld(world), levelEntityCount);
+		if (levelEntityCount != null)
+			return (int) Ref.invoke(BukkitLoader.getNmsProvider().getWorld(world), levelEntityCount);
 		int count = (int) Ref.getStatic(entityCount);
 		Ref.setStatic(entityCount, count + 1);
 		return count;

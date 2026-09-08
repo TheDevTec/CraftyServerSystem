@@ -14,11 +14,11 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import me.devtec.craftyserversystem.commands.CssCommand;
-import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
 import me.devtec.shared.commands.selectors.Selector;
 import me.devtec.shared.commands.structures.CommandStructure;
 import me.devtec.shared.dataholder.Config;
 import me.devtec.shared.json.Json;
+import me.devtec.shared.text.TextRenderer;
 import me.devtec.shared.utility.ParseUtils;
 import me.devtec.shared.utility.StringUtils;
 import me.devtec.theapi.bukkit.BukkitLoader;
@@ -30,18 +30,19 @@ public class CssUser extends CssCommand {
 		if (isRegistered())
 			return;
 
-		CommandStructure<CommandSender> cmd = CommandStructure.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
-			msgUsage(sender, "cmd");
-		}).permission(getPerm("cmd")).argument(null, 1, (sender, structure, args) -> {
-			msgUsage(sender, "cmd");
-		}, (sender, structure, args) -> {
-			List<String> tablist = new ArrayList<>();
-			tablist.add("{offlinePlayer}");
-			tablist.add("{uuid}");
-			for (Player player : BukkitLoader.getOnlinePlayers())
-				tablist.add(player.getName());
-			return tablist;
-		});
+		CommandStructure<CommandSender> cmd = CommandStructure
+				.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
+					msgUsage(sender, "cmd");
+				}).permission(getPerm("cmd")).argument(null, 1, (sender, structure, args) -> {
+					msgUsage(sender, "cmd");
+				}, (sender, structure, args) -> {
+					List<String> tablist = new ArrayList<>();
+					tablist.add("{offlinePlayer}");
+					tablist.add("{uuid}");
+					for (Player player : BukkitLoader.getOnlinePlayers())
+						tablist.add(player.getName());
+					return tablist;
+				});
 		// get [path]
 		cmd.argument("get", (sender, structure, args) -> {
 			msgUsage(sender, "get");
@@ -59,9 +60,10 @@ public class CssUser extends CssCommand {
 				user = me.devtec.shared.API.getUser(args[0]);
 			}
 			if (!user.existsKey(args[2]))
-				msg(sender, "does-not-exist", PlaceholdersExecutor.i().add("user", name).add("path", args[2]));
+				msg(sender, "does-not-exist", renderer().placeholder("user", name).placeholder("path", args[2]));
 			else
-				msg(sender, "get", PlaceholdersExecutor.i().add("user", name).add("path", args[2]).add("value", "" + user.get(args[2])));
+				msg(sender, "get", renderer().placeholder("user", name).placeholder("path", args[2])
+						.placeholder("value", "" + user.get(args[2])));
 		}, (sender, structure, args) -> {
 			Config user;
 			try {
@@ -101,9 +103,10 @@ public class CssUser extends CssCommand {
 				user = me.devtec.shared.API.getUser(args[0]);
 			}
 			if (user.getKeys().isEmpty())
-				msg(sender, "keys.empty-primary", PlaceholdersExecutor.i().add("user", name));
+				msg(sender, "keys.empty-primary", renderer().placeholder("user", name));
 			else
-				msg(sender, "keys.primary", PlaceholdersExecutor.i().add("user", name).add("keys", StringUtils.join(user.getKeys(), ", ")));
+				msg(sender, "keys.primary", renderer().placeholder("user", name).placeholder("keys",
+						StringUtils.join(user.getKeys(), ", ")));
 		}).argument(null, 1, (sender, structure, args) -> {
 			Config user;
 			String name = null;
@@ -118,13 +121,14 @@ public class CssUser extends CssCommand {
 				user = me.devtec.shared.API.getUser(args[0]);
 			}
 			if (!user.exists(args[2]))
-				msg(sender, "does-not-exist", PlaceholdersExecutor.i().add("user", name).add("path", args[2]));
+				msg(sender, "does-not-exist", renderer().placeholder("user", name).placeholder("path", args[2]));
 			else {
 				Set<String> keys = user.getKeys(args[2]);
 				if (keys.isEmpty())
-					msg(sender, "keys.empty", PlaceholdersExecutor.i().add("user", name).add("path", args[2]));
+					msg(sender, "keys.empty", renderer().placeholder("user", name).placeholder("path", args[2]));
 				else
-					msg(sender, "keys.sub", PlaceholdersExecutor.i().add("user", name).add("path", args[2]).add("keys", StringUtils.join(keys, ", ")));
+					msg(sender, "keys.sub", renderer().placeholder("user", name).placeholder("path", args[2])
+							.placeholder("keys", StringUtils.join(keys, ", ")));
 			}
 		}, (sender, structure, args) -> {
 			Config user;
@@ -220,7 +224,8 @@ public class CssUser extends CssCommand {
 				finalValue = decimal.longValue();
 			} else
 				user.set(args[2], number); // uknown number format - So we override value
-			msg(sender, "addNumber", PlaceholdersExecutor.i().add("user", name).add("path", args[2]).add("value", finalValue + ""));
+			msg(sender, "addNumber", renderer().placeholder("user", name).placeholder("path", args[2])
+					.placeholder("value", finalValue + ""));
 		});
 		// addToList [path] [value]
 		cmd.argument("addToList", (sender, structure, args) -> {
@@ -270,11 +275,15 @@ public class CssUser extends CssCommand {
 			boolean added = list.add(value);
 			if (added) {
 				user.set(args[2], list);
-				msg(sender, "addToList.success", PlaceholdersExecutor.i().add("user", name).add("path", args[2]).add("value", value + ""));
+				msg(sender, "addToList.success", renderer().placeholder("user", name).placeholder("path", args[2])
+						.placeholder("value", value + ""));
 			} else
-				msg(sender, "addToList.failed", PlaceholdersExecutor.i().add("user", name).add("path", args[2]).add("value", value + ""));
-		}, (sender, structure, args) -> args[args.length - 1].isEmpty() ? Arrays.asList("\"string\"", "number", "true", "false", "null", "[0,1,2]", "{\"key\":\"value\"}")
-				: Arrays.asList(args[args.length - 1], "\"string\"", "number", "true", "false", "null", "[0,1,2]", "{\"key\":\"value\"}"));
+				msg(sender, "addToList.failed", renderer().placeholder("user", name).placeholder("path", args[2])
+						.placeholder("value", value + ""));
+		}, (sender, structure, args) -> args[args.length - 1].isEmpty()
+				? Arrays.asList("\"string\"", "number", "true", "false", "null", "[0,1,2]", "{\"key\":\"value\"}")
+				: Arrays.asList(args[args.length - 1], "\"string\"", "number", "true", "false", "null", "[0,1,2]",
+						"{\"key\":\"value\"}"));
 		// showList {page}
 		cmd.argument("showList", (sender, structure, args) -> {
 			msgUsage(sender, "showList");
@@ -292,7 +301,7 @@ public class CssUser extends CssCommand {
 				user = me.devtec.shared.API.getUser(args[0]);
 			}
 			Collection<Object> list = user.getList(args[2]);
-			showList(sender, PlaceholdersExecutor.i().add("user", name).add("path", args[2]), list, 0);
+			showList(sender, renderer().placeholder("user", name).placeholder("path", args[2]), list, 0);
 		}, (sender, structure, args) -> {
 			Config user;
 			try {
@@ -330,7 +339,8 @@ public class CssUser extends CssCommand {
 				user = me.devtec.shared.API.getUser(args[0]);
 			}
 			Collection<Object> list = user.getList(args[2]);
-			showList(sender, PlaceholdersExecutor.i().add("user", name).add("path", args[2]), list, ParseUtils.getInt(args[3]));
+			showList(sender, renderer().placeholder("user", name).placeholder("path", args[2]), list,
+					ParseUtils.getInt(args[3]));
 		});
 		// removeFromList [path] [value/-pos:{listPos}]
 		cmd.argument("removeFromList", (sender, structure, args) -> {
@@ -349,7 +359,7 @@ public class CssUser extends CssCommand {
 				user = me.devtec.shared.API.getUser(args[0]);
 			}
 			Collection<Object> list = user.getList(args[2]);
-			showList(sender, PlaceholdersExecutor.i().add("user", name).add("path", args[2]), list, 0);
+			showList(sender, renderer().placeholder("user", name).placeholder("path", args[2]), list, 0);
 		}, (sender, structure, args) -> {
 			Config user;
 			try {
@@ -389,13 +399,14 @@ public class CssUser extends CssCommand {
 			}
 			Collection<Object> list = user.getList(args[2]);
 			if (list == null) {
-				msg(sender, "does-not-exist", PlaceholdersExecutor.i().add("user", name).add("path", args[2]));
+				msg(sender, "does-not-exist", renderer().placeholder("user", name).placeholder("path", args[2]));
 				return;
 			}
 			boolean modified = false;
 			if (list != null)
 				if (value != null && value.toString().startsWith("-pos:")) {
-					int pos = Math.max(0, Math.min(ParseUtils.getInt(value.toString(), 5, value.toString().length()), list.size() - 1));
+					int pos = Math.max(0, Math.min(ParseUtils.getInt(value.toString(), 5, value.toString().length()),
+							list.size() - 1));
 					if (list instanceof List) {
 						((List<Object>) list).remove(pos);
 						modified = true;
@@ -414,11 +425,15 @@ public class CssUser extends CssCommand {
 					modified = list.remove(value);
 			if (modified) {
 				user.set(args[2], list);
-				msg(sender, "removeFromList.success", PlaceholdersExecutor.i().add("user", name).add("path", args[2]).add("value", value + ""));
+				msg(sender, "removeFromList.success", renderer().placeholder("user", name).placeholder("path", args[2])
+						.placeholder("value", value + ""));
 			} else
-				msg(sender, "removeFromList.failed", PlaceholdersExecutor.i().add("user", name).add("path", args[2]).add("value", value + ""));
-		}, (sender, structure, args) -> args[args.length - 1].isEmpty() ? Arrays.asList("\"string\"", "number", "true", "false", "null", "[0,1,2]", "{\"key\":\"value\"}")
-				: Arrays.asList(args[args.length - 1], "\"string\"", "number", "true", "false", "null", "[0,1,2]", "{\"key\":\"value\"}"));
+				msg(sender, "removeFromList.failed", renderer().placeholder("user", name).placeholder("path", args[2])
+						.placeholder("value", value + ""));
+		}, (sender, structure, args) -> args[args.length - 1].isEmpty()
+				? Arrays.asList("\"string\"", "number", "true", "false", "null", "[0,1,2]", "{\"key\":\"value\"}")
+				: Arrays.asList(args[args.length - 1], "\"string\"", "number", "true", "false", "null", "[0,1,2]",
+						"{\"key\":\"value\"}"));
 		// Set [path] [value]
 		cmd.argument("set", (sender, structure, args) -> {
 			msgUsage(sender, "set");
@@ -462,9 +477,12 @@ public class CssUser extends CssCommand {
 				user = me.devtec.shared.API.getUser(args[0]);
 			}
 			user.set(args[2], value);
-			msg(sender, "set", PlaceholdersExecutor.i().add("user", name).add("path", args[2]).add("value", value + ""));
-		}, (sender, structure, args) -> args[args.length - 1].isEmpty() ? Arrays.asList("\"string\"", "number", "true", "false", "null", "[0,1,2]", "{\"key\":\"value\"}")
-				: Arrays.asList(args[args.length - 1], "\"string\"", "number", "true", "false", "null", "[0,1,2]", "{\"key\":\"value\"}"));
+			msg(sender, "set",
+					renderer().placeholder("user", name).placeholder("path", args[2]).placeholder("value", value + ""));
+		}, (sender, structure, args) -> args[args.length - 1].isEmpty()
+				? Arrays.asList("\"string\"", "number", "true", "false", "null", "[0,1,2]", "{\"key\":\"value\"}")
+				: Arrays.asList(args[args.length - 1], "\"string\"", "number", "true", "false", "null", "[0,1,2]",
+						"{\"key\":\"value\"}"));
 
 		// register
 		List<String> cmds = getCommands();
@@ -472,7 +490,7 @@ public class CssUser extends CssCommand {
 			this.cmd = addBypassSettings(cmd).build().register(cmds.remove(0), cmds.toArray(new String[0]));
 	}
 
-	private void showList(CommandSender sender, PlaceholdersExecutor executor, Collection<Object> list, int page) {
+	private void showList(CommandSender sender, TextRenderer executor, Collection<Object> list, int page) {
 		if (list == null) {
 			msg(sender, "does-not-exist", executor);
 			return;
@@ -486,14 +504,20 @@ public class CssUser extends CssCommand {
 			page = totalPages;
 		if (page < 0)
 			page = 0;
-		msg(sender, "showList.header", executor.add("nextPage", page + 1 <= totalPages ? "" + (page + 1) : page + "").add("previousPage", page != 0 ? "" + (page - 1) : "" + page)
-				.add("size", list.size() + "").add("page", page + 1).add("totalPages", totalPages + 1));
+		msg(sender, "showList.header",
+				executor.placeholder("nextPage", page + 1 <= totalPages ? "" + (page + 1) : page + "")
+						.placeholder("previousPage", page != 0 ? "" + (page - 1) : "" + page)
+						.placeholder("size", list.size() + "").placeholder("page", page + 1)
+						.placeholder("totalPages", totalPages + 1));
 		if (list instanceof List) {
 			List<Object> listObj = (List<Object>) list;
 			int multiplier = (page + 1) * 10;
 			for (int i = multiplier - 10; i < multiplier && list.size() > i; ++i)
-				msg(sender, "showList.entry", PlaceholdersExecutor.i().add("user", executor.get("{user}")).add("path", executor.get("{path}")).add("value", listObj.get(i) + "").add("position", i + 1)
-						.add("listPosition", i + ""));
+				msg(sender, "showList.entry",
+						renderer().placeholder("user", executor.placeholderValue("user"))
+								.placeholder("path", executor.placeholderValue("path"))
+								.placeholder("value", listObj.get(i) + "").placeholder("position", i + 1)
+								.placeholder("listPosition", i + ""));
 		} else {
 			Iterator<Object> itr = list.iterator();
 			int pos = (page + 1) * 10 - 10;
@@ -505,8 +529,11 @@ public class CssUser extends CssCommand {
 			int multiplier = (page + 1) * 10;
 			while (itr.hasNext() && pos != 10) {
 				Object obj = itr.next();
-				msg(sender, "showList.entry", PlaceholdersExecutor.i().add("user", executor.get("{user}")).add("path", executor.get("{path}")).add("value", obj + "")
-						.add("position", (multiplier - 10 + pos + 1) * page + "").add("listPosition", multiplier - 10 + pos + ""));
+				msg(sender, "showList.entry",
+						renderer().placeholder("user", executor.placeholderValue("user"))
+								.placeholder("path", executor.placeholderValue("path")).placeholder("value", obj + "")
+								.placeholder("position", (multiplier - 10 + pos + 1) * page + "")
+								.placeholder("listPosition", multiplier - 10 + pos + ""));
 			}
 		}
 		msg(sender, "showList.footer", executor);

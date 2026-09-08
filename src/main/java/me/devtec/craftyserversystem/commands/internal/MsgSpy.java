@@ -10,7 +10,7 @@ import org.bukkit.entity.Player;
 
 import me.devtec.craftyserversystem.commands.CssCommand;
 import me.devtec.craftyserversystem.commands.internal.msgsystem.MsgManager;
-import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
+import me.devtec.shared.text.TextRenderer;
 import me.devtec.shared.commands.selectors.Selector;
 import me.devtec.shared.commands.structures.CommandStructure;
 import me.devtec.shared.utility.OfflineCache.Query;
@@ -55,7 +55,7 @@ public class MsgSpy extends CssCommand {
 			if (query != null) {
 				boolean status = !MsgManager.get().getSpy(query.getName());
 				MsgManager.get().setSpy(query.getName(), status);
-				PlaceholdersExecutor ex = PlaceholdersExecutor.i().add("sender", sender.getName()).add("target", query.getName());
+				TextRenderer ex = renderer().placeholder("sender", sender.getName()).placeholder("target", query.getName());
 				if (status) {
 					msg(sender, "other.enabled.sender", ex);
 					Player target = Bukkit.getPlayer(query.getUUID());
@@ -68,7 +68,7 @@ public class MsgSpy extends CssCommand {
 						msg(target, "other.disabled.target", ex);
 				}
 			} else
-				msg(sender, "not-exist", PlaceholdersExecutor.i().add("target", args[0]));
+				msg(sender, "not-exist", renderer().placeholder("target", args[0]));
 		}, (sender, structure, args) -> { // Tab completer
 			Collection<? extends Player> onlinePlayers = BukkitLoader.getOnlinePlayers();
 			List<String> players = new ArrayList<>(onlinePlayers.size() + 1);
@@ -79,7 +79,7 @@ public class MsgSpy extends CssCommand {
 		}).permission(getPerm("other")).selector(Selector.BOOLEAN, (sender, structure, args) -> {
 			Query query = me.devtec.shared.API.offlineCache().lookupQuery(args[0]);
 			if (query != null) {
-				PlaceholdersExecutor ex = PlaceholdersExecutor.i().add("sender", sender.getName()).add("target", query.getName());
+				TextRenderer ex = renderer().placeholder("sender", sender.getName()).placeholder("target", query.getName());
 				boolean status = ParseUtils.getBoolean(args[1]);
 				boolean cStatus = !MsgManager.get().getSpy(query.getName());
 				if (status == cStatus) {
@@ -102,7 +102,7 @@ public class MsgSpy extends CssCommand {
 						msg(target, "other.disabled.target", ex);
 				}
 			} else
-				msg(sender, "not-exist", PlaceholdersExecutor.i().add("target", args[0]));
+				msg(sender, "not-exist", renderer().placeholder("target", args[0]));
 		});
 		// register
 		List<String> cmds = getCommands();

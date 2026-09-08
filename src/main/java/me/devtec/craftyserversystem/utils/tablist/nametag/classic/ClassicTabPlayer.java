@@ -15,7 +15,7 @@ import me.devtec.craftyserversystem.utils.tablist.nametag.NametagManagerAPI;
 import me.devtec.craftyserversystem.utils.tablist.nametag.TabAPI;
 import me.devtec.craftyserversystem.utils.tablist.nametag.TabAPI.SimpleTeam;
 import me.devtec.craftyserversystem.utils.tablist.nametag.hologram.ArmorStandHologram;
-import me.devtec.shared.components.Component;
+import me.devtec.shared.components.base.Component;
 import me.devtec.shared.dataholder.cache.ConcurrentSet;
 import me.devtec.theapi.bukkit.BukkitLoader;
 import me.devtec.theapi.bukkit.nms.utils.TeamUtils;
@@ -24,7 +24,8 @@ import me.devtec.theapi.bukkit.nms.utils.TeamUtils.Visibility;
 
 public class ClassicTabPlayer {
 	private final static AtomicInteger counter = new AtomicInteger(0);
-	private final static Object emptyTablistHeaderFooterPacket = BukkitLoader.getNmsProvider().packetPlayerListHeaderFooter(Component.EMPTY_COMPONENT, Component.EMPTY_COMPONENT);
+	private final static Object emptyTablistHeaderFooterPacket = BukkitLoader.getNmsProvider()
+			.packetPlayerListHeaderFooter(Component.EMPTY_COMPONENT, Component.EMPTY_COMPONENT);
 
 	public enum Display {
 		TABLIST, NAMETAG
@@ -39,7 +40,7 @@ public class ClassicTabPlayer {
 	@Getter
 	private final Set<SimpleTeam> teams = new ConcurrentSet<>();
 
-	//INTERNAL
+	// INTERNAL
 	private boolean ready = false;
 	private List<Object> packets = new ArrayList<>();
 
@@ -66,7 +67,7 @@ public class ClassicTabPlayer {
 	private SimpleTeam primaryTeam;
 
 	public ClassicTabPlayer(Player player) {
-		this.player=player;
+		this.player = player;
 	}
 
 	public void sendPacket(Object packet) {
@@ -77,118 +78,120 @@ public class ClassicTabPlayer {
 	}
 
 	public void changePrimaryTeam(SimpleTeam newTeam) {
-		if(newTeam == null || primaryTeam!=null && primaryTeam.getTeam().equals(newTeam.getTeam()))return;
-		if(primaryTeam!=null) {
-			for(ClassicTabPlayer player : TabAPI.getPlayers())
-				if(player.getTeams().contains(primaryTeam)) {
+		if (newTeam == null || primaryTeam != null && primaryTeam.getTeam().equals(newTeam.getTeam()))
+			return;
+		if (primaryTeam != null) {
+			for (ClassicTabPlayer player : TabAPI.getPlayers())
+				if (player.getTeams().contains(primaryTeam)) {
 					player.removeTeam(primaryTeam.getTeam());
 					player.createTeam(newTeam);
-				} else if(player.getPlayer().equals(getPlayer())|| player.getPlayer().canSee(getPlayer()))
+				} else if (player.getPlayer().equals(getPlayer()) || player.getPlayer().canSee(getPlayer()))
 					player.createTeam(newTeam);
 		} else
-			for(ClassicTabPlayer player : TabAPI.getPlayers())
-				if(player.getPlayer().equals(getPlayer())|| player.getPlayer().canSee(getPlayer()))
+			for (ClassicTabPlayer player : TabAPI.getPlayers())
+				if (player.getPlayer().equals(getPlayer()) || player.getPlayer().canSee(getPlayer()))
 					player.createTeam(newTeam);
 		primaryTeam = newTeam;
 	}
 
 	public void createTeam(SimpleTeam team) {
-		if(getTeams().stream().filter(t -> t.getTeam().equals(team.getTeam())).findAny().isEmpty())
-			sendPacket(TeamUtils.createTeamPacket(TeamUtils.METHOD_ADD, team.getTeam(), team.getColor(), team.getPrefix(), team.getSuffix(), team.getDisplayName(), team.getNametagVisibility(), team.getCollisionRule(), team.getFriendlyFlags(), team.getPlayers()));
+		if (!getTeams().stream().filter(t -> t.getTeam().equals(team.getTeam())).findAny().isPresent())
+			sendPacket(TeamUtils.createTeamPacket(TeamUtils.METHOD_ADD, team.getTeam(), team.getColor(),
+					team.getPrefix(), team.getSuffix(), team.getDisplayName(), team.getNametagVisibility(),
+					team.getCollisionRule(), team.getFriendlyFlags(), team.getPlayers()));
 	}
 
 	public void joinTeam(SimpleTeam team) {
-		sendPacket(TeamUtils.createTeamPacket(TeamUtils.METHOD_JOIN, team.getTeam(), team.getColor(), team.getPrefix(), team.getSuffix(), team.getDisplayName(), team.getNametagVisibility(), team.getCollisionRule(), team.getFriendlyFlags(), team.getPlayers()));
+		sendPacket(TeamUtils.createTeamPacket(TeamUtils.METHOD_JOIN, team.getTeam(), team.getColor(), team.getPrefix(),
+				team.getSuffix(), team.getDisplayName(), team.getNametagVisibility(), team.getCollisionRule(),
+				team.getFriendlyFlags(), team.getPlayers()));
 	}
-
 
 	public void updateTeam(SimpleTeam team) {
-		sendPacket(TeamUtils.createTeamPacket(TeamUtils.METHOD_CHANGE, team.getTeam(), team.getColor(), team.getPrefix(), team.getSuffix(), team.getDisplayName(), team.getNametagVisibility(), team.getCollisionRule(), team.getFriendlyFlags(), team.getPlayers()));
+		sendPacket(TeamUtils.createTeamPacket(TeamUtils.METHOD_CHANGE, team.getTeam(), team.getColor(),
+				team.getPrefix(), team.getSuffix(), team.getDisplayName(), team.getNametagVisibility(),
+				team.getCollisionRule(), team.getFriendlyFlags(), team.getPlayers()));
 	}
-
 
 	public void leaveTeam(SimpleTeam team) {
-		sendPacket(TeamUtils.createTeamPacket(TeamUtils.METHOD_LEAVE, team.getTeam(), null, null, null, null, null, null, 0, team.getPlayers()));
+		sendPacket(TeamUtils.createTeamPacket(TeamUtils.METHOD_LEAVE, team.getTeam(), null, null, null, null, null,
+				null, 0, team.getPlayers()));
 	}
-
 
 	public void removeTeam(String team) {
-		sendPacket(TeamUtils.createTeamPacket(TeamUtils.METHOD_REMOVE, team, null, null, null, null, null, null, 0, null));
+		sendPacket(
+				TeamUtils.createTeamPacket(TeamUtils.METHOD_REMOVE, team, null, null, null, null, null, null, 0, null));
 	}
-
 
 	@Override
 	public boolean equals(Object obj) {
-		return obj instanceof ClassicTabPlayer && ((ClassicTabPlayer)obj).id==id;
+		return obj instanceof ClassicTabPlayer && ((ClassicTabPlayer) obj).id == id;
 	}
-
 
 	@Override
 	public int hashCode() {
 		return id;
 	}
 
-
 	public void showLines(ClassicTabPlayer holder) {
-		if(getWhoSeeAdditionalLines().add(holder))
-			for(ArmorStandHologram hologram : getAdditionalLines())
+		if (getWhoSeeAdditionalLines().add(holder))
+			for (ArmorStandHologram hologram : getAdditionalLines())
 				hologram.show(holder);
 	}
 
-
 	public void hideLines(ClassicTabPlayer holder) {
-		if(getWhoSeeAdditionalLines().remove(holder))
-			for(ArmorStandHologram hologram : getAdditionalLines())
+		if (getWhoSeeAdditionalLines().remove(holder))
+			for (ArmorStandHologram hologram : getAdditionalLines())
 				hologram.hide(holder);
 	}
 
-
 	public void afterConnection() {
-		ready=true;
-		for(Object packet : packets)
+		ready = true;
+		for (Object packet : packets)
 			BukkitLoader.getPacketHandler().send(getPlayer(), packet);
-		packets=null;
+		packets = null;
 	}
-
 
 	public void onDisconnect() {
 		player.setPlayerListName(null);
 		sendPacket(emptyTablistHeaderFooterPacket);
 		if (getPlayer().getVehicle() != null)
 			NametagManagerAPI.get().watchingEntityMove.remove(getPlayer().getVehicle().getEntityId());
-		for(ArmorStandHologram hologram : getAdditionalLines())
+		for (ArmorStandHologram hologram : getAdditionalLines())
 			hologram.hideAll();
 		additionalLines.clear();
 		whoSeeAdditionalLines.clear();
 	}
 
-
 	public Component getPrefix(Display display) {
-		if(display==Display.NAMETAG)
+		if (display == Display.NAMETAG)
 			return tagPrefix;
 		return tabPrefix;
 	}
 
-
 	public Component getSuffix(Display display) {
-		if(display==Display.NAMETAG)
+		if (display == Display.NAMETAG)
 			return tagSuffix;
 		return tabSuffix;
 	}
 
-
 	public void setPrefix(Display display, Component value) {
-		if(display==Display.NAMETAG){
-			if(!Objects.equals(tagPrefix,value)) {
-				tagPrefix=value;
-				if(getPrimaryTeam()==null)
-					changePrimaryTeam(new SimpleTeam(NametagManagerAPI.get().getTeamManager().getTeam(player.getUniqueId()), getPrefix(Display.NAMETAG), getSuffix(Display.NAMETAG), null, ChatColor.WHITE, 0, CollisionRule.ALWAYS, Visibility.ALWAYS).joinPlayer(getPlayer().getName()));
-				else{
+		if (display == Display.NAMETAG) {
+			if (!Objects.equals(tagPrefix, value)) {
+				tagPrefix = value;
+				if (getPrimaryTeam() == null)
+					changePrimaryTeam(
+							new SimpleTeam(NametagManagerAPI.get().getTeamManager().getTeam(player.getUniqueId()),
+									getPrefix(Display.NAMETAG), getSuffix(Display.NAMETAG), null, ChatColor.WHITE, 0,
+									CollisionRule.ALWAYS, Visibility.ALWAYS).joinPlayer(getPlayer().getName()));
+				else {
 					SimpleTeam team = getPrimaryTeam();
 					team.setPrefix(value);
-					Object packet = TeamUtils.createTeamPacket(TeamUtils.METHOD_CHANGE, team.getTeam(), team.getColor(), team.getPrefix(), team.getSuffix(), team.getDisplayName(), team.getNametagVisibility(), team.getCollisionRule(), team.getFriendlyFlags(), team.getPlayers());
-					for(ClassicTabPlayer holder : TabAPI.getPlayers())
-						if(holder.getTeams().contains(team)) {
+					Object packet = TeamUtils.createTeamPacket(TeamUtils.METHOD_CHANGE, team.getTeam(), team.getColor(),
+							team.getPrefix(), team.getSuffix(), team.getDisplayName(), team.getNametagVisibility(),
+							team.getCollisionRule(), team.getFriendlyFlags(), team.getPlayers());
+					for (ClassicTabPlayer holder : TabAPI.getPlayers())
+						if (holder.getTeams().contains(team)) {
 							holder.sendPacket(packet);
 							sendPacket(packet);
 						}
@@ -196,24 +199,31 @@ public class ClassicTabPlayer {
 			}
 			return;
 		}
-		if(!Objects.equals(tabPrefix,value)) {
-			tabPrefix=value;
-			player.setPlayerListName(getTablistFormat().replace("{prefix}", value==null?"":value.toString()).replace("{player}", getPlayer().getName()).replace("{suffix}", tabSuffix==null?"":tabSuffix.toString()));
+		if (!Objects.equals(tabPrefix, value)) {
+			tabPrefix = value;
+			player.setPlayerListName(getTablistFormat().replace("{prefix}", value == null ? "" : value.toString())
+					.replace("{player}", getPlayer().getName())
+					.replace("{suffix}", tabSuffix == null ? "" : tabSuffix.toString()));
 		}
 	}
 
 	public void setSuffix(Display display, Component value) {
-		if(display==Display.NAMETAG){
-			if(!Objects.equals(tagPrefix,value)) {
-				tagSuffix=value;
-				if(getPrimaryTeam()==null)
-					changePrimaryTeam(new SimpleTeam(NametagManagerAPI.get().getTeamManager().getTeam(player.getUniqueId()), getPrefix(Display.NAMETAG), getSuffix(Display.NAMETAG), null, ChatColor.WHITE, 0, CollisionRule.ALWAYS, Visibility.ALWAYS).joinPlayer(getPlayer().getName()));
-				else{
+		if (display == Display.NAMETAG) {
+			if (!Objects.equals(tagPrefix, value)) {
+				tagSuffix = value;
+				if (getPrimaryTeam() == null)
+					changePrimaryTeam(
+							new SimpleTeam(NametagManagerAPI.get().getTeamManager().getTeam(player.getUniqueId()),
+									getPrefix(Display.NAMETAG), getSuffix(Display.NAMETAG), null, ChatColor.WHITE, 0,
+									CollisionRule.ALWAYS, Visibility.ALWAYS).joinPlayer(getPlayer().getName()));
+				else {
 					SimpleTeam team = getPrimaryTeam();
 					team.setSuffix(value);
-					Object packet = TeamUtils.createTeamPacket(TeamUtils.METHOD_CHANGE, team.getTeam(), team.getColor(), team.getPrefix(), team.getSuffix(), team.getDisplayName(), team.getNametagVisibility(), team.getCollisionRule(), team.getFriendlyFlags(), team.getPlayers());
-					for(ClassicTabPlayer holder : TabAPI.getPlayers())
-						if(holder.getTeams().contains(team)) {
+					Object packet = TeamUtils.createTeamPacket(TeamUtils.METHOD_CHANGE, team.getTeam(), team.getColor(),
+							team.getPrefix(), team.getSuffix(), team.getDisplayName(), team.getNametagVisibility(),
+							team.getCollisionRule(), team.getFriendlyFlags(), team.getPlayers());
+					for (ClassicTabPlayer holder : TabAPI.getPlayers())
+						if (holder.getTeams().contains(team)) {
 							holder.sendPacket(packet);
 							sendPacket(packet);
 						}
@@ -221,29 +231,34 @@ public class ClassicTabPlayer {
 			}
 			return;
 		}
-		if(!Objects.equals(tabSuffix,value)) {
-			tabSuffix=value;
-			player.setPlayerListName(getTablistFormat().replace("{prefix}", tabPrefix==null?"":tabPrefix.toString()).replace("{player}", getPlayer().getName()).replace("{suffix}", value==null?"":value.toString()));
+		if (!Objects.equals(tabSuffix, value)) {
+			tabSuffix = value;
+			player.setPlayerListName(
+					getTablistFormat().replace("{prefix}", tabPrefix == null ? "" : tabPrefix.toString())
+							.replace("{player}", getPlayer().getName())
+							.replace("{suffix}", value == null ? "" : value.toString()));
 		}
 	}
 
-
 	public void setHeader(Component value) {
-		if(value==null && (this.header==null || this.header.isEmpty()) || value!=null && !value.isEmpty() && header!=null && Objects.equals(value, header))return;
-		this.header=value;
+		if (value == null && (this.header == null || this.header.isEmpty())
+				|| value != null && !value.isEmpty() && header != null && Objects.equals(value, header))
+			return;
+		this.header = value;
 		sendPacket(BukkitLoader.getNmsProvider().packetPlayerListHeaderFooter(header, footer));
 	}
 
-
 	public void setFooter(Component value) {
-		if(value==null && (this.footer==null || this.footer.isEmpty()) || value!=null && !value.isEmpty() && footer!=null && Objects.equals(value, footer))return;
-		this.footer=value;
+		if (value == null && (this.footer == null || this.footer.isEmpty())
+				|| value != null && !value.isEmpty() && footer != null && Objects.equals(value, footer))
+			return;
+		this.footer = value;
 		sendPacket(BukkitLoader.getNmsProvider().packetPlayerListHeaderFooter(header, footer));
 	}
 
 	@Override
 	public String toString() {
-		return "TabPlayer[name="+player.getName()+",ready="+ready+"]";
+		return "TabPlayer[name=" + player.getName() + ",ready=" + ready + "]";
 	}
 
 }

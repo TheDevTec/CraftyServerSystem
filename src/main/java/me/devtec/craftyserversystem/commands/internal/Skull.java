@@ -9,9 +9,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import me.devtec.craftyserversystem.commands.CssCommand;
-import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
 import me.devtec.shared.commands.selectors.Selector;
 import me.devtec.shared.commands.structures.CommandStructure;
+import me.devtec.shared.text.TextRenderer;
 import me.devtec.theapi.bukkit.BukkitLoader;
 import me.devtec.theapi.bukkit.game.ItemMaker;
 
@@ -22,9 +22,10 @@ public class Skull extends CssCommand {
 		if (isRegistered())
 			return;
 
-		CommandStructure<CommandSender> cmd = CommandStructure.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
-			msgUsage(sender, "usage");
-		}).permission(getPerm("cmd"));
+		CommandStructure<CommandSender> cmd = CommandStructure
+				.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
+					msgUsage(sender, "usage");
+				}).permission(getPerm("cmd"));
 		// Head owner
 		CommandStructure<CommandSender> headValue = cmd.argument(null, (sender, structure, args) -> {
 			if (sender instanceof Player)
@@ -77,11 +78,12 @@ public class Skull extends CssCommand {
 			target.getWorld().dropItem(target.getLocation(), head);
 		if (sendMessages)
 			if (!sender.equals(target)) {
-				PlaceholdersExecutor placeholders = PlaceholdersExecutor.i().add("sender", sender.getName()).add("target", target.getName()).add("owner", owner);
+				TextRenderer placeholders = renderer().placeholder("sender", sender.getName())
+						.placeholder("target", target.getName()).placeholder("owner", owner);
 				msg(sender, "other.sender", placeholders);
 				msg(target, "other.target", placeholders);
 			} else
-				msg(target, "self", PlaceholdersExecutor.i().add("owner", owner));
+				msg(target, "self", renderer().placeholder("owner", owner));
 	}
 
 }

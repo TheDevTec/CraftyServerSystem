@@ -11,15 +11,22 @@ import me.devtec.shared.Ref;
 import me.devtec.theapi.bukkit.BukkitLoader;
 
 public class Hologram implements HologramHolder {
-	static Object data = Ref.isOlderThan(12) ? 0 : findDataWatcherObject(Ref.nms("world.entity", "Entity"), Byte.class);
-	static Object name = Ref.isOlderThan(12) ? 2 : findDataWatcherObject(Ref.nms("world.entity", "Entity"), Optional.class);
+	static Object data = Ref.isBefore(12, 0) ? 0 : findDataWatcherObject(Ref.nms("world.entity", "Entity"), Byte.class);
+	static Object name = Ref.isBefore(12, 0) ? 2
+			: findDataWatcherObject(Ref.nms("world.entity", "Entity"), Optional.class);
 	static {
 		if (name == null)
 			name = findDataWatcherObject(Ref.nms("world.entity", "Entity"), String.class);
 	}
-	static Object showName = Ref.isOlderThan(12) ? 3 : findDataWatcherObject(Ref.nms("world.entity", "Entity"), Boolean.class);
-	static Object properties = Ref.isOlderThan(12) ? 10
-			: findDataWatcherObject(Ref.nms("world.entity.decoration", BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "ArmorStand" : "EntityArmorStand"), Byte.class);
+	static Object showName = Ref.isBefore(12, 0) ? 3
+			: findDataWatcherObject(Ref.nms("world.entity", "Entity"), Boolean.class);
+	static Object properties = Ref
+			.isBefore(12, 0)
+					? 10
+					: findDataWatcherObject(
+							Ref.nms("world.entity.decoration",
+									BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "ArmorStand" : "EntityArmorStand"),
+							Byte.class);
 
 	protected int id;
 	protected UUID uuid;
@@ -40,10 +47,14 @@ public class Hologram implements HologramHolder {
 	private static final Object findDataWatcherObject(Class<?> inside, Class<?> holder) {
 		for (Field field : Ref.getAllFields(inside))
 			try {
-				if (field.getType().equals(Ref.nms("network.syncher", BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "EntityDataAccessor" : "DataWatcherObject"))
+				if (field.getType()
+						.equals(Ref.nms("network.syncher",
+								BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "EntityDataAccessor" : "DataWatcherObject"))
 						&& field.getGenericType() instanceof ParameterizedType) {
-					if (((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0] instanceof ParameterizedType)
-						if (((ParameterizedType) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0]).getRawType().equals(holder))
+					if (((ParameterizedType) field.getGenericType())
+							.getActualTypeArguments()[0] instanceof ParameterizedType)
+						if (((ParameterizedType) ((ParameterizedType) field.getGenericType())
+								.getActualTypeArguments()[0]).getRawType().equals(holder))
 							return Ref.get(null, field);
 					if (((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0].equals(holder))
 						return Ref.get(null, field);
@@ -56,6 +67,6 @@ public class Hologram implements HologramHolder {
 
 	@Override
 	public boolean equals(Object obj) {
-		return obj instanceof Hologram ? ((Hologram)obj).uuid.equals(uuid) : false;
+		return obj instanceof Hologram ? ((Hologram) obj).uuid.equals(uuid) : false;
 	}
 }

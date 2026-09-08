@@ -8,9 +8,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import me.devtec.craftyserversystem.commands.CssCommand;
-import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
 import me.devtec.shared.commands.selectors.Selector;
 import me.devtec.shared.commands.structures.CommandStructure;
+import me.devtec.shared.text.TextRenderer;
 
 public class Hat extends CssCommand {
 
@@ -19,17 +19,18 @@ public class Hat extends CssCommand {
 		if (isRegistered())
 			return;
 
-		CommandStructure<Player> cmd = CommandStructure.create(Player.class, P_DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
-			ItemStack inHand = sender.getItemInHand();
-			if (inHand.getType() == Material.AIR) {
-				msg(sender, "empty-hand");
-				return;
-			}
-			ItemStack helmet = sender.getEquipment().getHelmet();
-			sender.getEquipment().setHelmet(inHand);
-			sender.setItemInHand(helmet);
-			msg(sender, "set.self");
-		}).permission(getPerm("cmd"));
+		CommandStructure<Player> cmd = CommandStructure
+				.create(Player.class, P_DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
+					ItemStack inHand = sender.getItemInHand();
+					if (inHand.getType() == Material.AIR) {
+						msg(sender, "empty-hand");
+						return;
+					}
+					ItemStack helmet = sender.getEquipment().getHelmet();
+					sender.getEquipment().setHelmet(inHand);
+					sender.setItemInHand(helmet);
+					msg(sender, "set.self");
+				}).permission(getPerm("cmd"));
 		// other
 		cmd.selector(Selector.PLAYER, (sender, structure, args) -> {
 			Player target = Bukkit.getPlayer(args[0]);
@@ -41,7 +42,8 @@ public class Hat extends CssCommand {
 			ItemStack helmet = target.getEquipment().getHelmet();
 			target.getEquipment().setHelmet(inHand);
 			sender.setItemInHand(helmet);
-			PlaceholdersExecutor placeholders = PlaceholdersExecutor.i().add("sender", sender.getName()).add("target", target.getName());
+			TextRenderer placeholders = renderer().placeholder("sender", sender.getName()).placeholder("target",
+					target.getName());
 			msg(sender, "set.other.sender", placeholders);
 			msg(target, "set.other.targer", placeholders);
 		}).permission(getPerm("other"));

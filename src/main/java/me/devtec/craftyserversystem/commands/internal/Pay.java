@@ -15,7 +15,7 @@ import org.bukkit.entity.Player;
 import me.devtec.craftyserversystem.api.API;
 import me.devtec.craftyserversystem.commands.CssCommand;
 import me.devtec.craftyserversystem.economy.EconomyHook;
-import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
+import me.devtec.shared.text.TextRenderer;
 import me.devtec.shared.Pair;
 import me.devtec.shared.annotations.Nonnull;
 import me.devtec.shared.commands.structures.CommandStructure;
@@ -159,13 +159,13 @@ public class Pay extends CssCommand {
 			Query query = me.devtec.shared.API.offlineCache().lookupQuery(args[0]);
 			if (query != null) {
 				if (query.getUUID().equals(sender.getUniqueId())) {
-					msg(sender, "failed.self", PlaceholdersExecutor.EMPTY);
+					msg(sender, "failed.self");
 					return;
 				}
 				World world = sender.getWorld();
 				double money = Economy.multipleByMoneyFormat(ParseUtils.getDouble(args[1]), args[1]);
 				if (money <= 0) {
-					msg(sender, "failed.must-be-above-zero", PlaceholdersExecutor.EMPTY);
+					msg(sender, "failed.must-be-above-zero");
 					return;
 				}
 				Pair pair = Pair.of(sender.getName(), money);
@@ -174,7 +174,7 @@ public class Pay extends CssCommand {
 					money = (double) limitResult.getKey();
 					if (money <= 0) {
 						msg(sender, "failed.over-limit",
-								PlaceholdersExecutor.i().add("limit", StringUtils.formatDouble(FormatType.COMPLEX, money * -1)).add("period", TimeUtils.timeToString((long) limitResult.getValue())));
+								renderer().placeholder("limit", StringUtils.formatDouble(FormatType.COMPLEX, money * -1)).placeholder("period", TimeUtils.timeToString((long) limitResult.getValue())));
 						return;
 					}
 				}
@@ -188,17 +188,17 @@ public class Pay extends CssCommand {
 						records.add(System.currentTimeMillis() / 1000 + ":" + money);
 						user.set("pay-limit.records", records);
 					}
-					PlaceholdersExecutor placeholders = PlaceholdersExecutor.i().add("sender", sender.getName()).add("target", query.getName())
-							.add("balance_without_fee", StringUtils.formatDouble(FormatType.COMPLEX, money)).add("balance", StringUtils.formatDouble(FormatType.COMPLEX, money - fee));
+					TextRenderer placeholders = renderer().placeholder("sender", sender.getName()).placeholder("target", query.getName())
+							.placeholder("balance_without_fee", StringUtils.formatDouble(FormatType.COMPLEX, money)).placeholder("balance", StringUtils.formatDouble(FormatType.COMPLEX, money - fee));
 					msg(sender, "success.sender", placeholders);
 					Player target = Bukkit.getPlayer(query.getUUID());
 					if (target != null)
 						msg(target, "success.target", placeholders);
 				} else
-					msg(sender, "failed.money", PlaceholdersExecutor.i().add("target", query.getName()).add("balance_without_fee", StringUtils.formatDouble(FormatType.COMPLEX, money))
-							.add("balance", StringUtils.formatDouble(FormatType.COMPLEX, money - fee)).add("fee", StringUtils.formatDouble(FormatType.COMPLEX, fee)));
+					msg(sender, "failed.money", renderer().placeholder("target", query.getName()).placeholder("balance_without_fee", StringUtils.formatDouble(FormatType.COMPLEX, money))
+							.placeholder("balance", StringUtils.formatDouble(FormatType.COMPLEX, money - fee)).placeholder("fee", StringUtils.formatDouble(FormatType.COMPLEX, fee)));
 			} else
-				msg(sender, "no-account", PlaceholdersExecutor.i().add("target", args[0]));
+				msg(sender, "no-account", renderer().placeholder("target", args[0]));
 		}, (sender, structure, args) -> {
 			List<String> tabCompleter = new ArrayList<>();
 			if (args[1].isEmpty()) {

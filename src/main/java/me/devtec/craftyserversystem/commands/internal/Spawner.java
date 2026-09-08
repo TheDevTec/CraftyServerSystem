@@ -11,7 +11,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.util.BlockIterator;
 
 import me.devtec.craftyserversystem.commands.CssCommand;
-import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
 import me.devtec.shared.commands.selectors.Selector;
 import me.devtec.shared.commands.structures.CommandStructure;
 import me.devtec.shared.dataholder.StringContainer;
@@ -25,9 +24,10 @@ public class Spawner extends CssCommand {
 		if (isRegistered())
 			return;
 
-		CommandStructure<Player> cmd = CommandStructure.create(Player.class, P_DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
-			msgUsage(sender, "usage");
-		}).permission(getPerm("cmd"))
+		CommandStructure<Player> cmd = CommandStructure
+				.create(Player.class, P_DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
+					msgUsage(sender, "usage");
+				}).permission(getPerm("cmd"))
 				// Entity type
 				.selector(Selector.ENTITY_TYPE, (sender, structure, args) -> {
 					spawner(getLookingBlock(sender, 15), true, sender, EntityType.valueOf(args[0].toUpperCase()));
@@ -47,7 +47,8 @@ public class Spawner extends CssCommand {
 		Block lastBlock = iter.next();
 		while (iter.hasNext()) {
 			lastBlock = iter.next();
-			if (lastBlock.getType() == Material.AIR || lastBlock.getType().name().equals("CAVE_AIR") || lastBlock.isLiquid() || !lastBlock.getType().isSolid())
+			if (lastBlock.getType() == Material.AIR || "CAVE_AIR".equals(lastBlock.getType().name())
+					|| lastBlock.isLiquid() || !lastBlock.getType().isSolid())
 				continue;
 			break;
 		}
@@ -65,7 +66,7 @@ public class Spawner extends CssCommand {
 			spawner.update(false, false);
 		});
 		if (sendMessage)
-			msg(sender, "changed", PlaceholdersExecutor.i().add("type", getFormattedNameOf(type)));
+			msg(sender, "changed", renderer().placeholder("type", getFormattedNameOf(type)));
 	}
 
 	public String getFormattedNameOf(EntityType type) {
@@ -78,7 +79,7 @@ public class Spawner extends CssCommand {
 				continue;
 			}
 			container.append(' ');
-			if (split.equals("OF") || split.equals("THE"))
+			if ("OF".equals(split) || "THE".equals(split))
 				container.append(split.toLowerCase());
 			else
 				container.append(split.charAt(0)).append(split.substring(1).toLowerCase());

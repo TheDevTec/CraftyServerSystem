@@ -2,6 +2,7 @@ package me.devtec.craftyserversystem.commands.internal;
 
 import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -52,13 +53,13 @@ import me.devtec.craftyserversystem.nbt.NbtList;
 import me.devtec.craftyserversystem.nbt.NbtReader;
 import me.devtec.craftyserversystem.nbt.NbtTag;
 import me.devtec.craftyserversystem.nbt.NbtWriter;
-import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
 import me.devtec.shared.API;
 import me.devtec.shared.Ref;
 import me.devtec.shared.commands.structures.CommandStructure;
 import me.devtec.shared.json.Json;
 import me.devtec.shared.scheduler.Scheduler;
 import me.devtec.shared.scheduler.Tasker;
+import me.devtec.shared.text.TextRenderer;
 import me.devtec.shared.utility.OfflineCache.Query;
 import me.devtec.theapi.bukkit.BukkitLoader;
 import me.devtec.theapi.bukkit.game.ItemMaker;
@@ -86,52 +87,55 @@ public class Invsee extends CssCommand {
 	private final int CRAFT_2_SLOT = 14;
 	private final int CRAFT_3_SLOT = 15;
 
-	private static ItemGUI EMPTY = new EmptyItemGUI(ItemMaker.of(XMaterial.BLACK_STAINED_GLASS_PANE).displayName("&7").build());
+	private static ItemGUI EMPTY = new EmptyItemGUI(
+			ItemMaker.of(XMaterial.BLACK_STAINED_GLASS_PANE).displayName("&7").build());
 
 	@Override
 	public void register() {
 		if (isRegistered())
 			return;
 
-		if (Ref.isNewerThan(9) && Ref.isOlderThan(13)) // 1.10 - 1.12
+		if (Ref.isAtLeast(10, 0) && Ref.isBefore(13, 0)) // 1.10 - 1.12
 			swapItemListener = new Listener() {
 
-			@EventHandler(ignoreCancelled = true)
-			public void onSwap(PlayerSwapHandItemsEvent e) {
-				GUI gui = guiHandler.get(e.getPlayer().getUniqueId());
-				if (gui != null) {
-					gui.setItem(18 + e.getPlayer().getInventory().getHeldItemSlot(), new EmptyItemGUI(e.getMainHandItem()).setUnstealable(false));
-					gui.setItem(OFFHAND_SLOT, new EmptyItemGUI(e.getOffHandItem()).setUnstealable(false));
+				@EventHandler(ignoreCancelled = true)
+				public void onSwap(PlayerSwapHandItemsEvent e) {
+					GUI gui = guiHandler.get(e.getPlayer().getUniqueId());
+					if (gui != null) {
+						gui.setItem(18 + e.getPlayer().getInventory().getHeldItemSlot(),
+								new EmptyItemGUI(e.getMainHandItem()).setUnstealable(false));
+						gui.setItem(OFFHAND_SLOT, new EmptyItemGUI(e.getOffHandItem()).setUnstealable(false));
+					}
 				}
-			}
-		};
-		else if (Ref.isNewerThan(13)) // 1.14+
+			};
+		else if (Ref.isAfter(13, 0)) // 1.14+
 			swapItemListener = new Listener() {
 
-			@EventHandler(ignoreCancelled = true)
-			public void onSwap(PlayerSwapHandItemsEvent e) {
-				GUI gui = guiHandler.get(e.getPlayer().getUniqueId());
-				if (gui != null) {
-					gui.setItem(18 + e.getPlayer().getInventory().getHeldItemSlot(), new EmptyItemGUI(e.getMainHandItem()).setUnstealable(false));
-					gui.setItem(OFFHAND_SLOT, new EmptyItemGUI(e.getOffHandItem()).setUnstealable(false));
+				@EventHandler(ignoreCancelled = true)
+				public void onSwap(PlayerSwapHandItemsEvent e) {
+					GUI gui = guiHandler.get(e.getPlayer().getUniqueId());
+					if (gui != null) {
+						gui.setItem(18 + e.getPlayer().getInventory().getHeldItemSlot(),
+								new EmptyItemGUI(e.getMainHandItem()).setUnstealable(false));
+						gui.setItem(OFFHAND_SLOT, new EmptyItemGUI(e.getOffHandItem()).setUnstealable(false));
+					}
 				}
-			}
 
-			@EventHandler(ignoreCancelled = true)
-			public void onDispense(BlockDispenseArmorEvent e) {
-				if (e.getTargetEntity().getType() == EntityType.PLAYER) {
-					GUI gui = guiHandler.get(e.getTargetEntity().getUniqueId());
-					if (gui != null)
-						new Tasker() {
+				@EventHandler(ignoreCancelled = true)
+				public void onDispense(BlockDispenseArmorEvent e) {
+					if (e.getTargetEntity().getType() == EntityType.PLAYER) {
+						GUI gui = guiHandler.get(e.getTargetEntity().getUniqueId());
+						if (gui != null)
+							new Tasker() {
 
-						@Override
-						public void run() {
-							updateinv(gui, (Player) e.getTargetEntity());
-						}
-					}.runLater(1);
+								@Override
+								public void run() {
+									updateinv(gui, (Player) e.getTargetEntity());
+								}
+							}.runLater(1);
+					}
 				}
-			}
-		};
+			};
 
 		listener = new Listener() {
 
@@ -144,7 +148,8 @@ public class Invsee extends CssCommand {
 						if (items.getKey() >= 36)
 							slot -= 36;
 						Inventory top = e.getWhoClicked().getOpenInventory().getTopInventory();
-						if (e.getWhoClicked().getOpenInventory().getBottomInventory().equals(e.getWhoClicked().getInventory()) && top.getType() == InventoryType.CRAFTING) {
+						if (e.getWhoClicked().getOpenInventory().getBottomInventory()
+								.equals(e.getWhoClicked().getInventory()) && top.getType() == InventoryType.CRAFTING) {
 							if (items.getKey() == 0) { // result
 								BukkitLoader.getNmsProvider().postToMainThread(() -> {
 									gui.setItem(CRAFT_0_SLOT, new EmptyItemGUI(top.getItem(1)).setUnstealable(false));
@@ -191,7 +196,9 @@ public class Invsee extends CssCommand {
 					int slot = e.getSlot() + 18;
 					Inventory top = e.getWhoClicked().getOpenInventory().getTopInventory();
 					if (e.getClickedInventory() != null && e.getClickedInventory().getType() == InventoryType.CRAFTING
-							&& e.getWhoClicked().getOpenInventory().getBottomInventory().equals(e.getWhoClicked().getInventory()) && top.getType() == InventoryType.CRAFTING) {
+							&& e.getWhoClicked().getOpenInventory().getBottomInventory()
+									.equals(e.getWhoClicked().getInventory())
+							&& top.getType() == InventoryType.CRAFTING) {
 						if (e.getSlot() == 0) { // result
 							BukkitLoader.getNmsProvider().postToMainThread(() -> {
 								gui.setItem(CRAFT_0_SLOT, new EmptyItemGUI(top.getItem(1)).setUnstealable(false));
@@ -226,7 +233,8 @@ public class Invsee extends CssCommand {
 					switch (e.getAction()) {
 					case COLLECT_TO_CURSOR:
 					case MOVE_TO_OTHER_INVENTORY:
-						BukkitLoader.getNmsProvider().postToMainThread(() -> updateinv(gui, (Player) e.getWhoClicked()));
+						BukkitLoader.getNmsProvider()
+								.postToMainThread(() -> updateinv(gui, (Player) e.getWhoClicked()));
 						break;
 					case SWAP_WITH_CURSOR:
 						gui.setItem(slot, new EmptyItemGUI(e.getCursor()).setUnstealable(false));
@@ -235,8 +243,10 @@ public class Invsee extends CssCommand {
 					case DROP_ONE_CURSOR:
 					case DROP_ONE_SLOT:
 					case PLACE_ONE: {
-						gui.setItem(slot, new EmptyItemGUI(e.getCurrentItem().getType() == Material.AIR ? asOne(e.getCursor()) : asQuantity(e.getCurrentItem(), e.getCurrentItem().getAmount() + 1))
-								.setUnstealable(false));
+						gui.setItem(slot,
+								new EmptyItemGUI(e.getCurrentItem().getType() == Material.AIR ? asOne(e.getCursor())
+										: asQuantity(e.getCurrentItem(), e.getCurrentItem().getAmount() + 1))
+										.setUnstealable(false));
 						ItemStack cursor = subtract(e.getCursor(), 1);
 						if (cursor.getAmount() == 0)
 							gui.remove(CURSOR_SLOT);
@@ -245,12 +255,17 @@ public class Invsee extends CssCommand {
 						break;
 					}
 					case PLACE_SOME:
-						int remaining = e.getCurrentItem().getAmount() + e.getCursor().getAmount() - e.getCurrentItem().getMaxStackSize();
-						gui.setItem(slot, new EmptyItemGUI(add(e.getCurrentItem(), e.getCursor().getAmount())).setUnstealable(false));
-						gui.setItem(CURSOR_SLOT, new EmptyItemGUI(asQuantity(e.getCursor(), remaining)).setUnstealable(false));
+						int remaining = e.getCurrentItem().getAmount() + e.getCursor().getAmount()
+								- e.getCurrentItem().getMaxStackSize();
+						gui.setItem(slot, new EmptyItemGUI(add(e.getCurrentItem(), e.getCursor().getAmount()))
+								.setUnstealable(false));
+						gui.setItem(CURSOR_SLOT,
+								new EmptyItemGUI(asQuantity(e.getCursor(), remaining)).setUnstealable(false));
 						break;
 					case PICKUP_HALF:
-						gui.setItem(slot, new EmptyItemGUI(asQuantity(e.getCurrentItem(), e.getCurrentItem().getAmount() / 2)).setUnstealable(false));
+						gui.setItem(slot,
+								new EmptyItemGUI(asQuantity(e.getCurrentItem(), e.getCurrentItem().getAmount() / 2))
+										.setUnstealable(false));
 						ItemStack cursor = subtract(e.getCursor(), e.getCursor().getAmount() / 2);
 						if (cursor.getAmount() == 0)
 							gui.remove(CURSOR_SLOT);
@@ -278,21 +293,25 @@ public class Invsee extends CssCommand {
 						break;
 					case HOTBAR_MOVE_AND_READD:
 					case HOTBAR_SWAP:
-						ItemStack currentItem = e.getClick() == ClickType.NUMBER_KEY ? e.getWhoClicked().getInventory().getItem(e.getHotbarButton()) : e.getCurrentItem();
+						ItemStack currentItem = e.getClick() == ClickType.NUMBER_KEY
+								? e.getWhoClicked().getInventory().getItem(e.getHotbarButton())
+								: e.getCurrentItem();
 						if (e.getCurrentItem().getType() == Material.AIR)
 							gui.remove(e.getHotbarButton() + 18);
 						else
-							gui.setItem(e.getHotbarButton() + 18, new EmptyItemGUI(e.getCurrentItem()).setUnstealable(false));
+							gui.setItem(e.getHotbarButton() + 18,
+									new EmptyItemGUI(e.getCurrentItem()).setUnstealable(false));
 						if (currentItem == null)
 							gui.remove(slot);
 						else
 							gui.setItem(slot, new EmptyItemGUI(currentItem).setUnstealable(false));
 						break;
 					case PLACE_ALL:
-						gui.setItem(slot,
-								new EmptyItemGUI(e.getCursor().isSimilar(e.getCurrentItem())
-										? asQuantity(e.getCursor(), Math.min(e.getCursor().getAmount() + e.getCurrentItem().getAmount(), e.getCursor().getMaxStackSize()))
-												: e.getCursor()).setUnstealable(false));
+						gui.setItem(slot, new EmptyItemGUI(e.getCursor().isSimilar(e.getCurrentItem())
+								? asQuantity(e.getCursor(),
+										Math.min(e.getCursor().getAmount() + e.getCurrentItem().getAmount(),
+												e.getCursor().getMaxStackSize()))
+								: e.getCursor()).setUnstealable(false));
 						gui.removeItem(CURSOR_SLOT);
 						break;
 					case CLONE_STACK:
@@ -341,11 +360,11 @@ public class Invsee extends CssCommand {
 				if (gui != null)
 					new Tasker() {
 
-					@Override
-					public void run() {
-						updateinv(gui, (Player) e.getPlayer());
-					}
-				}.runLater(1);
+						@Override
+						public void run() {
+							updateinv(gui, (Player) e.getPlayer());
+						}
+					}.runLater(1);
 			}
 
 			@EventHandler(ignoreCancelled = true)
@@ -354,25 +373,26 @@ public class Invsee extends CssCommand {
 				if (gui != null)
 					new Tasker() {
 
-					@Override
-					public void run() {
-						updateinv(gui, e.getPlayer());
-					}
-				}.runLater(1);
-			}
-
-			@EventHandler
-			public void onUse(PlayerInteractEvent e) {
-				if (e.hasItem() && (e.getAction() == Action.RIGHT_CLICK_AIR || e.getAction() == Action.RIGHT_CLICK_BLOCK)) {
-					GUI gui = guiHandler.get(e.getPlayer().getUniqueId());
-					if (gui != null)
-						new Tasker() {
-
 						@Override
 						public void run() {
 							updateinv(gui, e.getPlayer());
 						}
 					}.runLater(1);
+			}
+
+			@EventHandler
+			public void onUse(PlayerInteractEvent e) {
+				if (e.hasItem()
+						&& (e.getAction() == Action.RIGHT_CLICK_AIR || e.getAction() == Action.RIGHT_CLICK_BLOCK)) {
+					GUI gui = guiHandler.get(e.getPlayer().getUniqueId());
+					if (gui != null)
+						new Tasker() {
+
+							@Override
+							public void run() {
+								updateinv(gui, e.getPlayer());
+							}
+						}.runLater(1);
 				}
 			}
 
@@ -415,24 +435,25 @@ public class Invsee extends CssCommand {
 		if (swapItemListener != null)
 			Bukkit.getPluginManager().registerEvents(swapItemListener, Loader.getPlugin());
 
-		CommandStructure<Player> cmd = CommandStructure.create(Player.class, P_DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
-			msgUsage(sender, "cmd");
-		}).permission(getPerm("cmd"));
+		CommandStructure<Player> cmd = CommandStructure
+				.create(Player.class, P_DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
+					msgUsage(sender, "cmd");
+				}).permission(getPerm("cmd"));
 		cmd.callableArgument((player, structure, args) -> {
 			List<String> match = new ArrayList<>();
-			if(args[0].isEmpty()) {
-				for(Query query : API.offlineCache().getQueries())
+			if (args[0].isEmpty()) {
+				for (Query query : API.offlineCache().getQueries())
 					match.add(query.getName());
 				return match;
 			}
 			String arg = args[0].toLowerCase();
-			for(Query query : API.offlineCache().getQueries())
-				if(query.getName().toLowerCase().contains(arg))
+			for (Query query : API.offlineCache().getQueries())
+				if (query.getName().toLowerCase().contains(arg))
 					match.add(query.getName());
 			return match;
 		}, (sender, structure, args) -> {
 			UUID found = API.offlineCache().lookupId(args[0]);
-			if(found==null) {
+			if (found == null) {
 				msg(sender, "no-match");
 				return;
 			}
@@ -461,7 +482,6 @@ public class Invsee extends CssCommand {
 		}
 	}
 
-
 	private static class OfflineInventory {
 		private final Path file;
 		private final NbtCompound root;
@@ -483,7 +503,7 @@ public class Invsee extends CssCommand {
 		if (name == null)
 			name = target.toString();
 
-		PlaceholdersExecutor ex = PlaceholdersExecutor.i().add("target", name);
+		TextRenderer ex = renderer().placeholder("target", name);
 		GUI gui = guiHandler.get(target);
 
 		if (gui == null)
@@ -509,7 +529,7 @@ public class Invsee extends CssCommand {
 
 	public void invsee(Player sender, Player target) {
 		UUID targetId = target.getUniqueId();
-		PlaceholdersExecutor ex = PlaceholdersExecutor.i().add("target", target.getName());
+		TextRenderer ex = renderer().placeholder("target", target.getName());
 		GUI gui = guiHandler.get(targetId);
 
 		if (gui == null) {
@@ -588,7 +608,8 @@ public class Invsee extends CssCommand {
 			}
 
 			@Override
-			public void onMultipleIteract(Player player, Map<Integer, ItemStack> guiSlots, Map<Integer, ItemStack> playerSlots) {
+			public void onMultipleIteract(Player player, Map<Integer, ItemStack> guiSlots,
+					Map<Integer, ItemStack> playerSlots) {
 				Player target = Bukkit.getPlayer(targetId);
 				if (target == null)
 					return;
@@ -598,7 +619,8 @@ public class Invsee extends CssCommand {
 			}
 
 			@Override
-			public boolean onInteractItem(Player player, ItemStack newItem, ItemStack oldItem, ClickType type, int slot, boolean gui) {
+			public boolean onInteractItem(Player player, ItemStack newItem, ItemStack oldItem, ClickType type, int slot,
+					boolean gui) {
 				if (!gui)
 					return false;
 
@@ -630,7 +652,7 @@ public class Invsee extends CssCommand {
 			target.setItemOnCursor(item);
 			break;
 		case OFFHAND_SLOT:
-			if (Ref.isNewerThan(8))
+			if (Ref.isAfter(8, 0))
 				inv.setItemInOffHand(item);
 			break;
 		case CRAFT_0_SLOT:
@@ -638,7 +660,8 @@ public class Invsee extends CssCommand {
 		case CRAFT_2_SLOT:
 		case CRAFT_3_SLOT: {
 			Inventory top = target.getOpenInventory().getTopInventory();
-			boolean crafting = target.getOpenInventory().getBottomInventory().equals(target.getInventory()) && top.getType() == InventoryType.CRAFTING;
+			boolean crafting = target.getOpenInventory().getBottomInventory().equals(target.getInventory())
+					&& top.getType() == InventoryType.CRAFTING;
 			if (!crafting)
 				break;
 
@@ -692,11 +715,12 @@ public class Invsee extends CssCommand {
 		inv.setLeggings(normalize(gui.getItem(LEGGINGS_SLOT)));
 		inv.setBoots(normalize(gui.getItem(BOOTS_SLOT)));
 
-		if (Ref.isNewerThan(8))
+		if (Ref.isAfter(8, 0))
 			inv.setItemInOffHand(normalize(gui.getItem(OFFHAND_SLOT)));
 
 		Inventory top = target.getOpenInventory().getTopInventory();
-		boolean crafting = target.getOpenInventory().getBottomInventory().equals(target.getInventory()) && top.getType() == InventoryType.CRAFTING;
+		boolean crafting = target.getOpenInventory().getBottomInventory().equals(target.getInventory())
+				&& top.getType() == InventoryType.CRAFTING;
 		if (crafting) {
 			top.setItem(1, normalize(gui.getItem(CRAFT_0_SLOT)));
 			top.setItem(2, normalize(gui.getItem(CRAFT_1_SLOT)));
@@ -714,7 +738,8 @@ public class Invsee extends CssCommand {
 			setGuiItem(gui, 18 + i, inv.getItem(i));
 
 		Inventory top = target.getOpenInventory().getTopInventory();
-		boolean isOpenPlayerInv = target.getOpenInventory().getBottomInventory().equals(target.getInventory()) && top.getType() == InventoryType.CRAFTING;
+		boolean isOpenPlayerInv = target.getOpenInventory().getBottomInventory().equals(target.getInventory())
+				&& top.getType() == InventoryType.CRAFTING;
 
 		setGuiItem(gui, HEAD_SLOT, inv.getHelmet());
 		setGuiItem(gui, CHESTPLATE_SLOT, inv.getChestplate());
@@ -722,7 +747,7 @@ public class Invsee extends CssCommand {
 		setGuiItem(gui, BOOTS_SLOT, inv.getBoots());
 		setGuiItem(gui, CURSOR_SLOT, target.getItemOnCursor());
 
-		if (Ref.isNewerThan(8))
+		if (Ref.isAfter(8, 0))
 			setGuiItem(gui, OFFHAND_SLOT, inv.getItemInOffHand());
 		else
 			gui.setItem(OFFHAND_SLOT, EMPTY);
@@ -751,7 +776,7 @@ public class Invsee extends CssCommand {
 		setGuiItem(gui, CHESTPLATE_SLOT, inventory.get(102));
 		setGuiItem(gui, HEAD_SLOT, inventory.get(103));
 
-		if (Ref.isNewerThan(8))
+		if (Ref.isAfter(8, 0))
 			setGuiItem(gui, OFFHAND_SLOT, inventory.get(-106));
 		else
 			gui.setItem(OFFHAND_SLOT, EMPTY);
@@ -786,7 +811,8 @@ public class Invsee extends CssCommand {
 
 	private OfflineInventory loadOfflineInventory(UUID target) throws IOException {
 
-		Path file = (Ref.isNewerThan(25) ? Path.of("world", "players", "data") : Bukkit.getWorlds().get(0).getWorldFolder().toPath().resolve("playerdata")).resolve(target + ".dat");
+		Path file = (Ref.isAtLeast(26, 0) ? new File("world/players/data").toPath()
+				: Bukkit.getWorlds().get(0).getWorldFolder().toPath().resolve("playerdata")).resolve(target + ".dat");
 		if (!Files.exists(file))
 			return null;
 
@@ -820,7 +846,8 @@ public class Invsee extends CssCommand {
 		if (material == null || material == Material.AIR)
 			return null;
 
-		ItemMaker maker = ItemMaker.of(material).amount(Math.max(1, getNumber(item.getAny("count"), getNumber(item.getAny("Count"), 1))));
+		ItemMaker maker = ItemMaker.of(material)
+				.amount(Math.max(1, getNumber(item.getAny("count"), getNumber(item.getAny("Count"), 1))));
 		NbtCompound components = item.getCompound("components");
 		NbtCompound legacyTag = item.getCompound("tag");
 		if (components != null)
@@ -977,171 +1004,123 @@ public class Invsee extends CssCommand {
 
 	/* Legacy NMS item deserializer removed. */
 	/*
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private ItemStack deserializeItem(NbtCompound item, Path temp) throws Exception {
-		Object unsafe = Bukkit.getUnsafe();
-		Method deserialize = findMethod(unsafe.getClass(), "deserializeItem", byte[].class);
-
-		if (deserialize != null) {
-			Map copy = new java.util.LinkedHashMap(item.values());
-			Method dataVersion = findMethod(unsafe.getClass(), "getDataVersion");
-			if (dataVersion != null)
-				copy.put("DataVersion", ((Number) dataVersion.invoke(unsafe)).intValue());
-
-			NbtCompound serialized = new NbtCompound("", copy);
-			NbtWriter.write(temp, serialized, true);
-			return (ItemStack) deserialize.invoke(unsafe, Files.readAllBytes(temp));
-		}
-
-		Object compound = toNmsCompound(item);
-		Object nmsItem = createLegacyNmsItem(compound);
-		return nmsItem == null ? null : BukkitLoader.getNmsProvider().asBukkitItem(nmsItem);
-	}
-
-	private Object toNmsCompound(NbtCompound source) throws Exception {
-		Object compound = BukkitLoader.getNmsProvider().parseNBT("{}");
-		for (Entry<String, Object> entry : source.values().entrySet())
-			setNmsValue(compound, entry.getKey(), entry.getValue());
-		return compound;
-	}
-
-	private void setNmsValue(Object compound, String key, Object value) throws Exception {
-		if (value instanceof NbtValue)
-			value = ((NbtValue) value).value();
-		if (value == null)
-			return;
-
-		if (value instanceof NbtCompound) {
-			BukkitLoader.getNmsProvider().setNBTBase(compound, key, toNmsCompound((NbtCompound) value));
-			return;
-		}
-		if (value instanceof NbtList) {
-			BukkitLoader.getNmsProvider().setNBTBase(compound, key, toNmsList((NbtList) value));
-			return;
-		}
-		if (value instanceof String || value instanceof Character) {
-			BukkitLoader.getNmsProvider().setString(compound, key, String.valueOf(value));
-			return;
-		}
-		if (value instanceof Boolean || value instanceof Byte) {
-			BukkitLoader.getNmsProvider().setByte(compound, key,
-					value instanceof Boolean ? (byte) ((Boolean) value ? 1 : 0) : (Byte) value);
-			return;
-		}
-		if (value instanceof Short) {
-			BukkitLoader.getNmsProvider().setShort(compound, key, (Short) value);
-			return;
-		}
-		if (value instanceof Integer) {
-			BukkitLoader.getNmsProvider().setInteger(compound, key, (Integer) value);
-			return;
-		}
-		if (value instanceof Long) {
-			BukkitLoader.getNmsProvider().setLong(compound, key, (Long) value);
-			return;
-		}
-		if (value instanceof Float) {
-			BukkitLoader.getNmsProvider().setFloat(compound, key, (Float) value);
-			return;
-		}
-		if (value instanceof Double) {
-			BukkitLoader.getNmsProvider().setDouble(compound, key, (Double) value);
-			return;
-		}
-		if (value instanceof byte[]) {
-			BukkitLoader.getNmsProvider().setByteArray(compound, key, (byte[]) value);
-			return;
-		}
-		if (value instanceof int[]) {
-			BukkitLoader.getNmsProvider().setIntArray(compound, key, (int[]) value);
-			return;
-		}
-		if (!(value instanceof long[]))
-			throw new IOException("Unsupported NBT value: " + value.getClass().getName());
-		BukkitLoader.getNmsProvider().setNBTBase(compound, key, createNmsLongArray((long[]) value));
-	}
-
-	private Object createNmsLongArray(long[] values) {
-		StringBuilder snbt = new StringBuilder("{value:[L;");
-		for (int i = 0; i < values.length; ++i) {
-			if (i != 0)
-				snbt.append(',');
-			snbt.append(values[i]).append('L');
-		}
-		return BukkitLoader.getNmsProvider().getNBTBase(BukkitLoader.getNmsProvider().parseNBT(snbt.append("]}").toString()),
-				"value");
-	}
-
-	private Object toNmsList(NbtList source) throws Exception {
-		Object holder = BukkitLoader.getNmsProvider().parseNBT("{value:[]}");
-		Object list = BukkitLoader.getNmsProvider().getNBTBase(holder, "value");
-		for (Object value : source.values())
-			appendNmsListValue(list, createNmsTag(value));
-		return list;
-	}
-
-	private Object createNmsTag(Object value) throws Exception {
-		Object holder = BukkitLoader.getNmsProvider().parseNBT("{}");
-		setNmsValue(holder, "value", value);
-		return BukkitLoader.getNmsProvider().getNBTBase(holder, "value");
-	}
-
-	private void appendNmsListValue(Object list, Object value) throws Exception {
-		for (Method method : list.getClass().getDeclaredMethods()) {
-			if (Modifier.isStatic(method.getModifiers()) || !"add".equals(method.getName()))
-				continue;
-			Class<?>[] parameters = method.getParameterTypes();
-			if (parameters.length == 1 && parameters[0].isAssignableFrom(value.getClass())) {
-				method.setAccessible(true);
-				method.invoke(list, value);
-				return;
-			}
-			if (parameters.length == 2 && parameters[0] == int.class && parameters[1].isAssignableFrom(value.getClass())) {
-				method.setAccessible(true);
-				method.invoke(list, listSize(list), value);
-				return;
-			}
-		}
-		throw new IOException("Unable to append NBT list value on " + Bukkit.getBukkitVersion());
-	}
-
-	private int listSize(Object list) {
-		try {
-			Method size = list.getClass().getMethod("size");
-			return ((Number) size.invoke(list)).intValue();
-		} catch (Exception ignored) {
-			return 0;
-		}
-	}
-
-	static Object registries = Ref.invokeStatic(Ref.method(Ref.nms("server", "MinecraftServer"), "getDefaultRegistryAccess"));
-	static {
-		if(registries==null)registries = Ref.invoke(Ref.invokeStatic(Ref.method(Ref.nms("server", "MinecraftServer"), "getServer")), "registryAccess");
-	}
-	static Method parseItem = Ref.findMethodByName(Ref.nms("world.item", "ItemStack"), "parseOptional");
-	static Method legacyCreateItem = Ref.method(Ref.nms("world.item", "ItemStack"), Ref.isOlderThan(9) ? "createStack":Ref.isOlderThan(19)?"a":"of", Ref.nms("nbt", Ref.isOlderThan(19)?"NBTTagCompound":"CompoundTag"));
-	static Constructor<?> oldCreateItem = Ref.constructor(Ref.nms("world.item", "ItemStack"), Ref.nms("", "NBTTagCompound"));
-	static Object CODEC = Ref.getStatic(Ref.field(Ref.nms("world.item", "ItemStack"), "CODEC"));
-	static Method decode = CODEC == null ? null : Ref.method(CODEC.getClass(), "decode", Ref.getClass("com.mojang.serialization.DynamicOps"), Object.class);
-	static Object NbtOps = Ref.getStatic(Ref.field(Ref.nms("nbt", "NbtOps"), "INSTANCE"));
-	static Method result = CODEC == null ? null : Ref.method(Ref.getClass("com.mojang.serialization.DataResult"), "result");
-	static Method getFirst = CODEC == null ? null : Ref.method(Ref.getClass("com.mojang.datafixers.util.Pair"), "getFirst");
-
-	private Object createLegacyNmsItem(Object compound) throws Exception {
-		if(compound==null)return null;
-		if(oldCreateItem!=null)
-			return Ref.newInstance(oldCreateItem, compound);
-		if(legacyCreateItem!=null)
-			return Ref.invokeStatic(legacyCreateItem, compound);
-		if(parseItem!=null)
-			return Ref.invokeStatic(parseItem, registries, compound);
-		if(decode!=null) {
-			Optional<?> decoded = (Optional<?>) Ref.invoke(Ref.invoke(CODEC, decode, NbtOps, compound), result);
-			return decoded.isPresent() ? Ref.invoke(decoded.get(), getFirst) : null;
-		}
-		return null;
-	}
-	*/
+	 * @SuppressWarnings({ "rawtypes", "unchecked" }) private ItemStack
+	 * deserializeItem(NbtCompound item, Path temp) throws Exception { Object unsafe
+	 * = Bukkit.getUnsafe(); Method deserialize = findMethod(unsafe.getClass(),
+	 * "deserializeItem", byte[].class);
+	 * 
+	 * if (deserialize != null) { Map copy = new
+	 * java.util.LinkedHashMap(item.values()); Method dataVersion =
+	 * findMethod(unsafe.getClass(), "getDataVersion"); if (dataVersion != null)
+	 * copy.put("DataVersion", ((Number) dataVersion.invoke(unsafe)).intValue());
+	 * 
+	 * NbtCompound serialized = new NbtCompound("", copy); NbtWriter.write(temp,
+	 * serialized, true); return (ItemStack) deserialize.invoke(unsafe,
+	 * Files.readAllBytes(temp)); }
+	 * 
+	 * Object compound = toNmsCompound(item); Object nmsItem =
+	 * createLegacyNmsItem(compound); return nmsItem == null ? null :
+	 * BukkitLoader.getNmsProvider().asBukkitItem(nmsItem); }
+	 * 
+	 * private Object toNmsCompound(NbtCompound source) throws Exception { Object
+	 * compound = BukkitLoader.getNmsProvider().parseNBT("{}"); for (Entry<String,
+	 * Object> entry : source.values().entrySet()) setNmsValue(compound,
+	 * entry.getKey(), entry.getValue()); return compound; }
+	 * 
+	 * private void setNmsValue(Object compound, String key, Object value) throws
+	 * Exception { if (value instanceof NbtValue) value = ((NbtValue)
+	 * value).value(); if (value == null) return;
+	 * 
+	 * if (value instanceof NbtCompound) {
+	 * BukkitLoader.getNmsProvider().setNBTBase(compound, key,
+	 * toNmsCompound((NbtCompound) value)); return; } if (value instanceof NbtList)
+	 * { BukkitLoader.getNmsProvider().setNBTBase(compound, key, toNmsList((NbtList)
+	 * value)); return; } if (value instanceof String || value instanceof Character)
+	 * { BukkitLoader.getNmsProvider().setString(compound, key,
+	 * String.valueOf(value)); return; } if (value instanceof Boolean || value
+	 * instanceof Byte) { BukkitLoader.getNmsProvider().setByte(compound, key, value
+	 * instanceof Boolean ? (byte) ((Boolean) value ? 1 : 0) : (Byte) value);
+	 * return; } if (value instanceof Short) {
+	 * BukkitLoader.getNmsProvider().setShort(compound, key, (Short) value); return;
+	 * } if (value instanceof Integer) {
+	 * BukkitLoader.getNmsProvider().setInteger(compound, key, (Integer) value);
+	 * return; } if (value instanceof Long) {
+	 * BukkitLoader.getNmsProvider().setLong(compound, key, (Long) value); return; }
+	 * if (value instanceof Float) {
+	 * BukkitLoader.getNmsProvider().setFloat(compound, key, (Float) value); return;
+	 * } if (value instanceof Double) {
+	 * BukkitLoader.getNmsProvider().setDouble(compound, key, (Double) value);
+	 * return; } if (value instanceof byte[]) {
+	 * BukkitLoader.getNmsProvider().setByteArray(compound, key, (byte[]) value);
+	 * return; } if (value instanceof int[]) {
+	 * BukkitLoader.getNmsProvider().setIntArray(compound, key, (int[]) value);
+	 * return; } if (!(value instanceof long[])) throw new
+	 * IOException("Unsupported NBT value: " + value.getClass().getName());
+	 * BukkitLoader.getNmsProvider().setNBTBase(compound, key,
+	 * createNmsLongArray((long[]) value)); }
+	 * 
+	 * private Object createNmsLongArray(long[] values) { StringBuilder snbt = new
+	 * StringBuilder("{value:[L;"); for (int i = 0; i < values.length; ++i) { if (i
+	 * != 0) snbt.append(','); snbt.append(values[i]).append('L'); } return
+	 * BukkitLoader.getNmsProvider().getNBTBase(BukkitLoader.getNmsProvider().
+	 * parseNBT(snbt.append("]}").toString()), "value"); }
+	 * 
+	 * private Object toNmsList(NbtList source) throws Exception { Object holder =
+	 * BukkitLoader.getNmsProvider().parseNBT("{value:[]}"); Object list =
+	 * BukkitLoader.getNmsProvider().getNBTBase(holder, "value"); for (Object value
+	 * : source.values()) appendNmsListValue(list, createNmsTag(value)); return
+	 * list; }
+	 * 
+	 * private Object createNmsTag(Object value) throws Exception { Object holder =
+	 * BukkitLoader.getNmsProvider().parseNBT("{}"); setNmsValue(holder, "value",
+	 * value); return BukkitLoader.getNmsProvider().getNBTBase(holder, "value"); }
+	 * 
+	 * private void appendNmsListValue(Object list, Object value) throws Exception {
+	 * for (Method method : list.getClass().getDeclaredMethods()) { if
+	 * (Modifier.isStatic(method.getModifiers()) || !"add".equals(method.getName()))
+	 * continue; Class<?>[] parameters = method.getParameterTypes(); if
+	 * (parameters.length == 1 && parameters[0].isAssignableFrom(value.getClass()))
+	 * { method.setAccessible(true); method.invoke(list, value); return; } if
+	 * (parameters.length == 2 && parameters[0] == int.class &&
+	 * parameters[1].isAssignableFrom(value.getClass())) {
+	 * method.setAccessible(true); method.invoke(list, listSize(list), value);
+	 * return; } } throw new IOException("Unable to append NBT list value on " +
+	 * Bukkit.getBukkitVersion()); }
+	 * 
+	 * private int listSize(Object list) { try { Method size =
+	 * list.getClass().getMethod("size"); return ((Number)
+	 * size.invoke(list)).intValue(); } catch (Exception ignored) { return 0; } }
+	 * 
+	 * static Object registries = Ref.invokeStatic(Ref.method(Ref.nms("server",
+	 * "MinecraftServer"), "getDefaultRegistryAccess")); static {
+	 * if(registries==null)registries =
+	 * Ref.invoke(Ref.invokeStatic(Ref.method(Ref.nms("server", "MinecraftServer"),
+	 * "getServer")), "registryAccess"); } static Method parseItem =
+	 * Ref.findMethodByName(Ref.nms("world.item", "ItemStack"), "parseOptional");
+	 * static Method legacyCreateItem = Ref.method(Ref.nms("world.item",
+	 * "ItemStack"), Ref.isOlderThan(9) ?
+	 * "createStack":Ref.isOlderThan(19)?"a":"of", Ref.nms("nbt",
+	 * Ref.isOlderThan(19)?"NBTTagCompound":"CompoundTag")); static Constructor<?>
+	 * oldCreateItem = Ref.constructor(Ref.nms("world.item", "ItemStack"),
+	 * Ref.nms("", "NBTTagCompound")); static Object CODEC =
+	 * Ref.getStatic(Ref.field(Ref.nms("world.item", "ItemStack"), "CODEC")); static
+	 * Method decode = CODEC == null ? null : Ref.method(CODEC.getClass(), "decode",
+	 * Ref.getClass("com.mojang.serialization.DynamicOps"), Object.class); static
+	 * Object NbtOps = Ref.getStatic(Ref.field(Ref.nms("nbt", "NbtOps"),
+	 * "INSTANCE")); static Method result = CODEC == null ? null :
+	 * Ref.method(Ref.getClass("com.mojang.serialization.DataResult"), "result");
+	 * static Method getFirst = CODEC == null ? null :
+	 * Ref.method(Ref.getClass("com.mojang.datafixers.util.Pair"), "getFirst");
+	 * 
+	 * private Object createLegacyNmsItem(Object compound) throws Exception {
+	 * if(compound==null)return null; if(oldCreateItem!=null) return
+	 * Ref.newInstance(oldCreateItem, compound); if(legacyCreateItem!=null) return
+	 * Ref.invokeStatic(legacyCreateItem, compound); if(parseItem!=null) return
+	 * Ref.invokeStatic(parseItem, registries, compound); if(decode!=null) {
+	 * Optional<?> decoded = (Optional<?>) Ref.invoke(Ref.invoke(CODEC, decode,
+	 * NbtOps, compound), result); return decoded.isPresent() ?
+	 * Ref.invoke(decoded.get(), getFirst) : null; } return null; }
+	 */
 
 	private void saveOfflineInventory(GUI gui, OfflineInventory offline) throws IOException {
 		List<Object> inventory = new ArrayList<>();
@@ -1156,7 +1135,7 @@ public class Invsee extends CssCommand {
 			addOfflineItem(inventory, gui.getItem(CHESTPLATE_SLOT), 102, itemTemp);
 			addOfflineItem(inventory, gui.getItem(HEAD_SLOT), 103, itemTemp);
 
-			if (Ref.isNewerThan(8))
+			if (Ref.isAfter(8, 0))
 				addOfflineItem(inventory, gui.getItem(OFFHAND_SLOT), -106, itemTemp);
 		} finally {
 			Files.deleteIfExists(itemTemp);
@@ -1228,7 +1207,8 @@ public class Invsee extends CssCommand {
 		Object saved = null;
 
 		for (Method method : nmsItem.getClass().getDeclaredMethods()) {
-			if (Modifier.isStatic(method.getModifiers()) || method.getParameterTypes().length != 1 || !compound.getClass().isAssignableFrom(method.getReturnType()))
+			if (Modifier.isStatic(method.getModifiers()) || method.getParameterTypes().length != 1
+					|| !compound.getClass().isAssignableFrom(method.getReturnType()))
 				continue;
 			if (!method.getParameterTypes()[0].isAssignableFrom(compound.getClass())
 					&& !compound.getClass().isAssignableFrom(method.getParameterTypes()[0]))
@@ -1259,7 +1239,8 @@ public class Invsee extends CssCommand {
 				if (!Modifier.isStatic(method.getModifiers()) || method.getParameterTypes().length != 2)
 					continue;
 				Class<?>[] params = method.getParameterTypes();
-				if (!params[0].isAssignableFrom(compound.getClass()) && !compound.getClass().isAssignableFrom(params[0]) || !java.io.DataOutput.class.isAssignableFrom(params[1]))
+				if (!params[0].isAssignableFrom(compound.getClass()) && !compound.getClass().isAssignableFrom(params[0])
+						|| !java.io.DataOutput.class.isAssignableFrom(params[1]))
 					continue;
 
 				method.setAccessible(true);

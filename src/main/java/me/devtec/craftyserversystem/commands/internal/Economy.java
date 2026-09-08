@@ -12,7 +12,6 @@ import org.bukkit.entity.Player;
 
 import me.devtec.craftyserversystem.api.API;
 import me.devtec.craftyserversystem.commands.CssCommand;
-import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
 import me.devtec.shared.commands.structures.CommandStructure;
 import me.devtec.shared.utility.OfflineCache.Query;
 import me.devtec.shared.utility.ParseUtils;
@@ -27,9 +26,10 @@ public class Economy extends CssCommand {
 		if (isRegistered())
 			return;
 
-		CommandStructure<CommandSender> cmd = CommandStructure.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
-			msgUsage(sender, "cmd");
-		}).permission(getPerm("cmd"));
+		CommandStructure<CommandSender> cmd = CommandStructure
+				.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
+					msgUsage(sender, "cmd");
+				}).permission(getPerm("cmd"));
 
 		// add
 		cmd.argument("add", (sender, structure, args) -> {
@@ -55,9 +55,10 @@ public class Economy extends CssCommand {
 				else
 					world = Bukkit.getWorlds().get(0);
 				API.get().getEconomyHook().deposit(query.getName(), world.getName(), value);
-				msg(sender, "add", PlaceholdersExecutor.i().add("target", query.getName()).add("balance", StringUtils.formatDouble(FormatType.COMPLEX, value)));
+				msg(sender, "add", renderer().placeholder("target", query.getName()).placeholder("balance",
+						StringUtils.formatDouble(FormatType.COMPLEX, value)));
 			} else
-				msg(sender, "no-account", PlaceholdersExecutor.i().add("target", args[1]));
+				msg(sender, "no-account", renderer().placeholder("target", args[1]));
 		}, (sender, structure, args) -> {
 			List<String> tabCompleter = new ArrayList<>();
 			if (args[2].isEmpty()) {
@@ -95,9 +96,10 @@ public class Economy extends CssCommand {
 				else
 					world = Bukkit.getWorlds().get(0);
 				API.get().getEconomyHook().withdraw(query.getName(), world.getName(), value);
-				msg(sender, "remove", PlaceholdersExecutor.i().add("target", query.getName()).add("balance", StringUtils.formatDouble(FormatType.COMPLEX, value)));
+				msg(sender, "remove", renderer().placeholder("target", query.getName()).placeholder("balance",
+						StringUtils.formatDouble(FormatType.COMPLEX, value)));
 			} else
-				msg(sender, "no-account", PlaceholdersExecutor.i().add("target", args[1]));
+				msg(sender, "no-account", renderer().placeholder("target", args[1]));
 		}, (sender, structure, args) -> {
 			List<String> tabCompleter = new ArrayList<>();
 			if (args[2].isEmpty()) {
@@ -141,9 +143,10 @@ public class Economy extends CssCommand {
 					API.get().getEconomyHook().deposit(query.getName(), world.getName(), value - currentBalance);
 				else if (currentBalance != value)
 					API.get().getEconomyHook().withdraw(query.getName(), world.getName(), currentBalance - value);
-				msg(sender, "set", PlaceholdersExecutor.i().add("target", query.getName()).add("balance", StringUtils.formatDouble(FormatType.COMPLEX, value)));
+				msg(sender, "set", renderer().placeholder("target", query.getName()).placeholder("balance",
+						StringUtils.formatDouble(FormatType.COMPLEX, value)));
 			} else
-				msg(sender, "no-account", PlaceholdersExecutor.i().add("target", args[1]));
+				msg(sender, "no-account", renderer().placeholder("target", args[1]));
 		}, (sender, structure, args) -> {
 			List<String> tabCompleter = new ArrayList<>();
 			if (args[2].isEmpty()) {

@@ -1,0 +1,204 @@
+title: "&8Warps &7({page}/{totalPages})"
+
+loop:
+  value: WARP
+
+  item:
+    B:
+      action: PREVIOUS_PAGE
+
+      available:
+        type: LIME_STAINED_GLASS_PANE
+        displayName: "&aPrevious page"
+        lore:
+        - ""
+        - "&7Go to page &f{previousPage}"
+        - ""
+
+      unavailable:
+        type: BLACK_STAINED_GLASS_PANE
+        displayName: "&c"
+
+    N:
+      action: NEXT_PAGE
+
+      available:
+        type: LIME_STAINED_GLASS_PANE
+        displayName: "&aNext page"
+        lore:
+        - ""
+        - "&7Go to page &f{nextPage}"
+        - ""
+
+      unavailable:
+        type: BLACK_STAINED_GLASS_PANE
+        displayName: "&c"
+
+    result:
+      conditions:
+
+        # Warp requires a permission and player doesn't have it.
+        0:
+          check:
+          - "CHECK_PLACEHOLDER:{warp_requires_permission}==true"
+          - "CHECK_PLACEHOLDER:{warp_has_permission}==false"
+
+          type: "{warp_material}"
+          displayName: "&c{warp}"
+
+          lore:
+          - ""
+          - "&7World: &f{warp_world}"
+          - "&7Permission: &c{warp_permission}"
+          - ""
+          - "&cYou don't have permission"
+          - "&cto use this warp."
+          - ""
+
+          click:
+            commands: []
+            messages: []
+            actions:
+            - "WARP"
+
+        # Player can use the permission, but doesn't have enough money.
+        1:
+          check:
+          - "CHECK_PLACEHOLDER:{warp_has_permission}==true"
+          - "CHECK_PLACEHOLDER:{warp_has_cost}==true"
+          - "CHECK_PLACEHOLDER:{warp_has_money}==false"
+
+          type: "{warp_material}"
+          displayName: "&c{warp}"
+
+          lore:
+          - ""
+          - "&7World: &f{warp_world}"
+          - "&7Cost: &c{warp_cost}"
+          - ""
+          - "&cYou don't have enough money."
+          - ""
+
+          click:
+            commands: []
+            messages: []
+            actions:
+            - "WARP"
+
+        # Warp has both permission and cost.
+        2:
+          check:
+          - "CHECK_PLACEHOLDER:{warp_requires_permission}==true"
+          - "CHECK_PLACEHOLDER:{warp_has_permission}==true"
+          - "CHECK_PLACEHOLDER:{warp_has_cost}==true"
+          - "CHECK_PLACEHOLDER:{warp_has_money}==true"
+
+          type: "{warp_material}"
+          displayName: "&a{warp}"
+
+          lore:
+          - ""
+          - "&7World: &f{warp_world}"
+          - "&7Cost: &f{warp_cost}"
+          - "&7Permission: &f{warp_permission}"
+          - ""
+          - "&aClick to teleport"
+          - ""
+
+          click:
+            commands: []
+            messages: []
+            actions:
+            - "WARP"
+
+        # Warp requires permission but is free.
+        3:
+          check:
+          - "CHECK_PLACEHOLDER:{warp_requires_permission}==true"
+          - "CHECK_PLACEHOLDER:{warp_has_permission}==true"
+          - "CHECK_PLACEHOLDER:{warp_has_cost}==false"
+
+          type: "{warp_material}"
+          displayName: "&a{warp}"
+
+          lore:
+          - ""
+          - "&7World: &f{warp_world}"
+          - "&7Permission: &f{warp_permission}"
+          - ""
+          - "&aClick to teleport"
+          - ""
+
+          click:
+            commands: []
+            messages: []
+            actions:
+            - "WARP"
+
+        # Warp doesn't require permission, but has a cost.
+        4:
+          check:
+          - "CHECK_PLACEHOLDER:{warp_requires_permission}==false"
+          - "CHECK_PLACEHOLDER:{warp_has_cost}==true"
+          - "CHECK_PLACEHOLDER:{warp_has_money}==true"
+
+          type: "{warp_material}"
+          displayName: "&a{warp}"
+
+          lore:
+          - ""
+          - "&7World: &f{warp_world}"
+          - "&7Cost: &f{warp_cost}"
+          - ""
+          - "&aClick to teleport"
+          - ""
+
+          click:
+            commands: []
+            messages: []
+            actions:
+            - "WARP"
+
+      # Free warp without permission.
+      type: "{warp_material}"
+      displayName: "&a{warp}"
+
+      lore:
+      - ""
+      - "&7World: &f{warp_world}"
+      - ""
+      - "&aClick to teleport"
+      - ""
+
+      click:
+        commands: []
+        messages: []
+        actions:
+        - "WARP"
+
+lines:
+- "xxxxxxxxx"
+- "#########"
+- "#########"
+- "#########"
+- "#########"
+- "xBxxcxxNx"
+
+items:
+  x:
+    type: BLACK_STAINED_GLASS_PANE
+    displayName: "&c"
+
+  c:
+    type: RED_STAINED_GLASS_PANE
+    displayName: "&cClose"
+    lore:
+    - ""
+    - "&7Click to close menu!"
+    - ""
+
+    click:
+      commands: []
+      messages: []
+      actions:
+      - "CLOSE_MENU"

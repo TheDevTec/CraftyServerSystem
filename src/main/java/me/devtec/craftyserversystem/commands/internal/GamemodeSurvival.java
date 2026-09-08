@@ -8,7 +8,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import me.devtec.craftyserversystem.commands.CssCommand;
-import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
+import me.devtec.shared.text.TextRenderer;
 import me.devtec.shared.commands.selectors.Selector;
 import me.devtec.shared.commands.structures.CommandStructure;
 import me.devtec.theapi.bukkit.BukkitLoader;
@@ -55,10 +55,10 @@ public class GamemodeSurvival extends CssCommand {
 	public void changeGameMode(Player target, boolean sendMessage, CommandSender sender) {
 		if (sendMessage)
 			if (target.equals(sender)) {
-				PlaceholdersExecutor placeholders = PlaceholdersExecutor.i().add("target", target.getName()).add("gamemode", "survival");
+				TextRenderer placeholders = renderer().placeholder("target", target.getName()).placeholder("gamemode", "survival");
 				msg(sender, "self", placeholders);
 			} else {
-				PlaceholdersExecutor placeholders = PlaceholdersExecutor.i().add("target", target.getName()).add("sender", sender.getName()).add("gamemode", "survival");
+				TextRenderer placeholders = renderer().placeholder("target", target.getName()).placeholder("sender", sender.getName()).placeholder("gamemode", "survival");
 				msg(target, "other.target", placeholders);
 				msg(sender, "other.sender", placeholders);
 			}

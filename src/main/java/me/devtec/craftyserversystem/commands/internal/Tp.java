@@ -15,9 +15,9 @@ import org.bukkit.entity.Player;
 
 import me.devtec.craftyserversystem.api.API;
 import me.devtec.craftyserversystem.commands.CssCommand;
-import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
 import me.devtec.shared.commands.selectors.Selector;
 import me.devtec.shared.commands.structures.CommandStructure;
+import me.devtec.shared.text.TextRenderer;
 import me.devtec.shared.utility.MathUtils;
 import me.devtec.shared.utility.ParseUtils;
 import me.devtec.theapi.bukkit.BukkitLoader;
@@ -43,7 +43,7 @@ public class Tp extends CssCommand {
 						else {
 							Player target = collection.iterator().next();
 							((LivingEntity) sender).teleport(target);
-							msg(sender, "players.self", PlaceholdersExecutor.i().add("destination", target.getName()));
+							msg(sender, "players.self", renderer().placeholder("destination", target.getName()));
 						}
 					} else
 						msgUsage(sender, "cmd");
@@ -73,8 +73,8 @@ public class Tp extends CssCommand {
 				Player target = targets.iterator().next();
 				for (Player player : collection) {
 					player.teleport(target);
-					PlaceholdersExecutor executor = PlaceholdersExecutor.i().add("destination", target.getName())
-							.add("sender", sender.getName()).add("target", target.getName());
+					TextRenderer executor = renderer().placeholder("destination", target.getName())
+							.placeholder("sender", sender.getName()).placeholder("target", target.getName());
 					msg(sender, "players.sender", executor);
 					msg(player, "players.target", executor);
 				}
@@ -111,7 +111,7 @@ public class Tp extends CssCommand {
 					sender instanceof ConsoleCommandSender ? null
 							: sender instanceof BlockCommandSender ? ((BlockCommandSender) sender).getBlock().getWorld()
 									: ((LivingEntity) sender).getWorld(),
-									players, x, y, z, null, null, individual, useMath);
+					players, x, y, z, null, null, individual, useMath);
 		}).selector(Selector.POSITION, (sender, structure, args) -> { // yaw
 			Collection<? extends Player> players = selector(sender, args[0]);
 			String x = args[1];
@@ -127,7 +127,7 @@ public class Tp extends CssCommand {
 					sender instanceof ConsoleCommandSender ? null
 							: sender instanceof BlockCommandSender ? ((BlockCommandSender) sender).getBlock().getWorld()
 									: ((LivingEntity) sender).getWorld(),
-									players, x, y, z, yaw, null, individual, useMath);
+					players, x, y, z, yaw, null, individual, useMath);
 		}).selector(Selector.POSITION, (sender, structure, args) -> { // pitch
 			Collection<? extends Player> players = selector(sender, args[0]);
 			String x = args[1];
@@ -144,7 +144,7 @@ public class Tp extends CssCommand {
 					sender instanceof ConsoleCommandSender ? null
 							: sender instanceof BlockCommandSender ? ((BlockCommandSender) sender).getBlock().getWorld()
 									: ((LivingEntity) sender).getWorld(),
-									players, x, y, z, yaw, pitch, individual, useMath);
+					players, x, y, z, yaw, pitch, individual, useMath);
 		});
 
 		// tp <x> <y> <z> {yaw} {pitch}
@@ -176,7 +176,7 @@ public class Tp extends CssCommand {
 					sender instanceof ConsoleCommandSender ? null
 							: sender instanceof BlockCommandSender ? ((BlockCommandSender) sender).getBlock().getWorld()
 									: ((LivingEntity) sender).getWorld(),
-									Arrays.asList((Player) sender), x, y, z, null, null, individual, useMath);
+					Arrays.asList((Player) sender), x, y, z, null, null, individual, useMath);
 		}).selector(Selector.POSITION, (sender, structure, args) -> { // yaw
 			if (!(sender instanceof Player)) {
 				msgUsage(sender, "loc");
@@ -195,7 +195,7 @@ public class Tp extends CssCommand {
 					sender instanceof ConsoleCommandSender ? null
 							: sender instanceof BlockCommandSender ? ((BlockCommandSender) sender).getBlock().getWorld()
 									: ((LivingEntity) sender).getWorld(),
-									Arrays.asList((Player) sender), x, y, z, yaw, null, individual, useMath);
+					Arrays.asList((Player) sender), x, y, z, yaw, null, individual, useMath);
 		}).selector(Selector.POSITION, (sender, structure, args) -> { // pitch
 			if (!(sender instanceof Player)) {
 				msgUsage(sender, "loc");
@@ -215,15 +215,16 @@ public class Tp extends CssCommand {
 					sender instanceof ConsoleCommandSender ? null
 							: sender instanceof BlockCommandSender ? ((BlockCommandSender) sender).getBlock().getWorld()
 									: ((LivingEntity) sender).getWorld(),
-									Arrays.asList((Player) sender), x, y, z, yaw, pitch, individual, useMath);
+					Arrays.asList((Player) sender), x, y, z, yaw, pitch, individual, useMath);
 		});
 		// tp <selected players> <world> <x y z> {yaw} {pitch}
-		selectorCmd.selector(Selector.WORLD,  (sender, structure, args) -> { // world
-			if(API.get().getConfigManager().getMain().getBoolean("teleport.world-without-coords")) {
+		selectorCmd.selector(Selector.WORLD, (sender, structure, args) -> { // world
+			if (API.get().getConfigManager().getMain().getBoolean("teleport.world-without-coords")) {
 				Collection<? extends Player> players = selector(sender, args[0]);
 				World world = Bukkit.getWorld(args[1]);
 				Location loc = world.getSpawnLocation();
-				teleport(sender, world, players, loc.getX()+"", loc.getY()+"", loc.getZ()+"", null, null, false, false);
+				teleport(sender, world, players, loc.getX() + "", loc.getY() + "", loc.getZ() + "", null, null, false,
+						false);
 				return;
 			}
 			msgUsage(sender, "loc-world");
@@ -277,10 +278,11 @@ public class Tp extends CssCommand {
 				msgUsage(sender, "loc-world");
 				return;
 			}
-			if(API.get().getConfigManager().getMain().getBoolean("teleport.world-without-coords")) {
+			if (API.get().getConfigManager().getMain().getBoolean("teleport.world-without-coords")) {
 				World world = Bukkit.getWorld(args[0]);
 				Location loc = world.getSpawnLocation();
-				teleport(sender, world, Arrays.asList((Player) sender), loc.getX()+"", loc.getY()+"", loc.getZ()+"", null, null, false, false);
+				teleport(sender, world, Arrays.asList((Player) sender), loc.getX() + "", loc.getY() + "",
+						loc.getZ() + "", null, null, false, false);
 				return;
 			}
 			msgUsage(sender, "self-loc-world");
@@ -308,7 +310,8 @@ public class Tp extends CssCommand {
 			boolean individual = x.indexOf('~') != -1 || y.indexOf('~') != -1 || z.indexOf('~') != -1;
 			boolean useMath = individual || x.indexOf('+') != -1 || x.indexOf('-') != -1 || y.indexOf('+') != -1
 					|| y.indexOf('-') != -1 || z.indexOf('+') != -1 || z.indexOf('-') != -1;
-			teleport(sender, Bukkit.getWorld(world), Arrays.asList((Player) sender), x, y, z, null, null, individual, useMath);
+			teleport(sender, Bukkit.getWorld(world), Arrays.asList((Player) sender), x, y, z, null, null, individual,
+					useMath);
 		}).selector(Selector.POSITION, (sender, structure, args) -> { // yaw
 			if (!(sender instanceof Player)) {
 				msgUsage(sender, "loc");
@@ -324,7 +327,8 @@ public class Tp extends CssCommand {
 			boolean useMath = individual || x.indexOf('+') != -1 || x.indexOf('-') != -1 || y.indexOf('+') != -1
 					|| y.indexOf('-') != -1 || z.indexOf('+') != -1 || z.indexOf('-') != -1 || yaw.indexOf('+') != -1
 					|| yaw.indexOf('-') != -1;
-			teleport(sender, Bukkit.getWorld(world), Arrays.asList((Player) sender), x, y, z, yaw, null, individual, useMath);
+			teleport(sender, Bukkit.getWorld(world), Arrays.asList((Player) sender), x, y, z, yaw, null, individual,
+					useMath);
 		}).selector(Selector.POSITION, (sender, structure, args) -> { // pitch
 			if (!(sender instanceof Player)) {
 				msgUsage(sender, "loc");
@@ -341,7 +345,8 @@ public class Tp extends CssCommand {
 			boolean useMath = individual || x.indexOf('+') != -1 || x.indexOf('-') != -1 || y.indexOf('+') != -1
 					|| y.indexOf('-') != -1 || z.indexOf('+') != -1 || z.indexOf('-') != -1 || yaw.indexOf('+') != -1
 					|| yaw.indexOf('-') != -1 || pitch.indexOf('+') != -1 || pitch.indexOf('-') != -1;
-			teleport(sender, Bukkit.getWorld(world), Arrays.asList((Player) sender), x, y, z, yaw, pitch, individual, useMath);
+			teleport(sender, Bukkit.getWorld(world), Arrays.asList((Player) sender), x, y, z, yaw, pitch, individual,
+					useMath);
 		});
 
 		// register
@@ -363,10 +368,10 @@ public class Tp extends CssCommand {
 			if (world == null)
 				BukkitLoader.getNmsProvider().postToMainThread(() -> {
 					for (Player player : players) {
-						PlaceholdersExecutor executor = PlaceholdersExecutor.i().add("sender", sender.getName())
-								.add("target", player.getName()).add("x", finalX).add("y", finalY).add("z", finalZ)
-								.add("yaw", finalYaw).add("pitch", finalPitch)
-								.add("world", player.getWorld().getName());
+						TextRenderer executor = renderer().placeholder("sender", sender.getName())
+								.placeholder("target", player.getName()).placeholder("x", finalX)
+								.placeholder("y", finalY).placeholder("z", finalZ).placeholder("yaw", finalYaw)
+								.placeholder("pitch", finalPitch).placeholder("world", player.getWorld().getName());
 						if (sender.equals(player))
 							msg(sender, "loc.self", executor);
 						else {
@@ -381,9 +386,10 @@ public class Tp extends CssCommand {
 				Location loc = new Location(world, finalX, finalY, finalZ, finalYaw, finalPitch);
 				BukkitLoader.getNmsProvider().postToMainThread(() -> {
 					for (Player player : players) {
-						PlaceholdersExecutor executor = PlaceholdersExecutor.i().add("sender", sender.getName())
-								.add("target", player.getName()).add("x", finalX).add("y", finalY).add("z", finalZ)
-								.add("yaw", finalYaw).add("pitch", finalPitch).add("world", world.getName());
+						TextRenderer executor = renderer().placeholder("sender", sender.getName())
+								.placeholder("target", player.getName()).placeholder("x", finalX)
+								.placeholder("y", finalY).placeholder("z", finalZ).placeholder("yaw", finalYaw)
+								.placeholder("pitch", finalPitch).placeholder("world", world.getName());
 						if (sender.equals(player))
 							msg(sender, "loc.self", executor);
 						else {
@@ -399,27 +405,28 @@ public class Tp extends CssCommand {
 				for (Player player : players) {
 					double finalX = useMath
 							? MathUtils.calculate(x.replace("~", "+" + player.getLocation().getX() + "+"))
-									: ParseUtils.getDouble(x.replace("~", "+" + player.getLocation().getX() + "+"));
+							: ParseUtils.getDouble(x.replace("~", "+" + player.getLocation().getX() + "+"));
 					double finalY = useMath
 							? MathUtils.calculate(y.replace("~", "+" + player.getLocation().getY() + "+"))
-									: ParseUtils.getDouble(y.replace("~", "+" + player.getLocation().getY() + "+"));
+							: ParseUtils.getDouble(y.replace("~", "+" + player.getLocation().getY() + "+"));
 					double finalZ = useMath
 							? MathUtils.calculate(z.replace("~", "+" + player.getLocation().getZ() + "+"))
-									: ParseUtils.getDouble(z.replace("~", "+" + player.getLocation().getZ() + "+"));
+							: ParseUtils.getDouble(z.replace("~", "+" + player.getLocation().getZ() + "+"));
 					float finalYaw = yaw == null ? 0F
 							: useMath
-							? (float) MathUtils
-									.calculate(yaw.replace("~", "+" + player.getLocation().getYaw() + "+"))
+									? (float) MathUtils
+											.calculate(yaw.replace("~", "+" + player.getLocation().getYaw() + "+"))
 									: ParseUtils.getFloat(yaw.replace("~", "+" + player.getLocation().getYaw() + "+"));
 					float finalPitch = pitch == null ? 0F
 							: useMath
-							? (float) MathUtils
-									.calculate(pitch.replace("~", "+" + player.getLocation().getPitch() + "+"))
+									? (float) MathUtils
+											.calculate(pitch.replace("~", "+" + player.getLocation().getPitch() + "+"))
 									: ParseUtils
-									.getFloat(pitch.replace("~", "+" + player.getLocation().getPitch() + "+"));
-					PlaceholdersExecutor executor = PlaceholdersExecutor.i().add("sender", sender.getName())
-							.add("target", player.getName()).add("x", finalX).add("y", finalY).add("z", finalZ)
-							.add("yaw", finalYaw).add("pitch", finalPitch).add("world", player.getWorld().getName());
+											.getFloat(pitch.replace("~", "+" + player.getLocation().getPitch() + "+"));
+					TextRenderer executor = renderer().placeholder("sender", sender.getName())
+							.placeholder("target", player.getName()).placeholder("x", finalX).placeholder("y", finalY)
+							.placeholder("z", finalZ).placeholder("yaw", finalYaw).placeholder("pitch", finalPitch)
+							.placeholder("world", player.getWorld().getName());
 					if (sender.equals(player))
 						msg(sender, "loc.self", executor);
 					else {
@@ -435,27 +442,28 @@ public class Tp extends CssCommand {
 				for (Player player : players) {
 					double finalX = useMath
 							? MathUtils.calculate(x.replace("~", "+" + player.getLocation().getX() + "+"))
-									: ParseUtils.getDouble(x.replace("~", "+" + player.getLocation().getX() + "+"));
+							: ParseUtils.getDouble(x.replace("~", "+" + player.getLocation().getX() + "+"));
 					double finalY = useMath
 							? MathUtils.calculate(y.replace("~", "+" + player.getLocation().getY() + "+"))
-									: ParseUtils.getDouble(y.replace("~", "+" + player.getLocation().getY() + "+"));
+							: ParseUtils.getDouble(y.replace("~", "+" + player.getLocation().getY() + "+"));
 					double finalZ = useMath
 							? MathUtils.calculate(z.replace("~", "+" + player.getLocation().getZ() + "+"))
-									: ParseUtils.getDouble(z.replace("~", "+" + player.getLocation().getZ() + "+"));
+							: ParseUtils.getDouble(z.replace("~", "+" + player.getLocation().getZ() + "+"));
 					float finalYaw = yaw == null ? 0F
 							: useMath
-							? (float) MathUtils
-									.calculate(yaw.replace("~", "+" + player.getLocation().getYaw() + "+"))
+									? (float) MathUtils
+											.calculate(yaw.replace("~", "+" + player.getLocation().getYaw() + "+"))
 									: ParseUtils.getFloat(yaw.replace("~", "+" + player.getLocation().getYaw() + "+"));
 					float finalPitch = pitch == null ? 0F
 							: useMath
-							? (float) MathUtils
-									.calculate(pitch.replace("~", "+" + player.getLocation().getPitch() + "+"))
+									? (float) MathUtils
+											.calculate(pitch.replace("~", "+" + player.getLocation().getPitch() + "+"))
 									: ParseUtils
-									.getFloat(pitch.replace("~", "+" + player.getLocation().getPitch() + "+"));
-					PlaceholdersExecutor executor = PlaceholdersExecutor.i().add("sender", sender.getName())
-							.add("target", player.getName()).add("x", finalX).add("y", finalY).add("z", finalZ)
-							.add("yaw", finalYaw).add("pitch", finalPitch).add("world", world.getName());
+											.getFloat(pitch.replace("~", "+" + player.getLocation().getPitch() + "+"));
+					TextRenderer executor = renderer().placeholder("sender", sender.getName())
+							.placeholder("target", player.getName()).placeholder("x", finalX).placeholder("y", finalY)
+							.placeholder("z", finalZ).placeholder("yaw", finalYaw).placeholder("pitch", finalPitch)
+							.placeholder("world", world.getName());
 					if (sender.equals(player))
 						msg(sender, "loc.self", executor);
 					else {

@@ -7,7 +7,6 @@ import org.bukkit.entity.Player;
 
 import me.devtec.craftyserversystem.commands.CssCommand;
 import me.devtec.craftyserversystem.commands.internal.home.HomeManager;
-import me.devtec.craftyserversystem.placeholders.PlaceholdersExecutor;
 import me.devtec.shared.commands.structures.CommandStructure;
 
 public class DelHome extends CssCommand {
@@ -17,13 +16,15 @@ public class DelHome extends CssCommand {
 		if (isRegistered())
 			return;
 
-		CommandStructure<Player> cmd = CommandStructure.create(Player.class, P_DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
-			msgUsage(sender, "cmd");
-		}).permission(getPerm("cmd"));
+		CommandStructure<Player> cmd = CommandStructure
+				.create(Player.class, P_DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
+					msgUsage(sender, "cmd");
+				}).permission(getPerm("cmd"));
 		// home
-		cmd.callableArgument((sender, structure, args) -> HomeManager.get().getHomes(sender.getName()), 1, (sender, structure, args) -> {
-			delHome(sender.getName(), args[0].toLowerCase(), true, sender);
-		});
+		cmd.callableArgument((sender, structure, args) -> HomeManager.get().getHomes(sender.getName()), 1,
+				(sender, structure, args) -> {
+					delHome(sender.getName(), args[0].toLowerCase(), true, sender);
+				});
 		// register
 		List<String> cmds = getCommands();
 		if (!cmds.isEmpty())
@@ -33,6 +34,6 @@ public class DelHome extends CssCommand {
 	public void delHome(String owner, String homeName, boolean sendMessage, CommandSender sender) {
 		HomeManager.get().delHome(owner, homeName);
 		if (sendMessage)
-			msg(sender, "del", PlaceholdersExecutor.i().add("owner", owner).add("home", homeName));
+			msg(sender, "del", renderer().placeholder("owner", owner).placeholder("home", homeName));
 	}
 }
