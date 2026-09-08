@@ -7,7 +7,6 @@ import org.bukkit.command.CommandSender;
 
 import me.devtec.craftyserversystem.api.API;
 import me.devtec.craftyserversystem.commands.CssCommand;
-import me.devtec.shared.text.TextRenderer;
 import me.devtec.shared.commands.structures.CommandStructure;
 
 public class Unban extends CssCommand {
@@ -17,26 +16,28 @@ public class Unban extends CssCommand {
 		if (isRegistered())
 			return;
 
-		CommandStructure<CommandSender> cmd = CommandStructure.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
-			msgUsage(sender, "cmd");
-		}).permission(getPerm("cmd")).argument(null, (sender, structure, args) -> {
-			String player = args[0];
-			boolean modified = false;
-			for (Entry entry : API.get().getCommandsAPI().getBanAPI().getActivePunishments(player, null, BanType.BAN)) {
-				entry.setCancelled(true);
-				API.get().getCommandsAPI().getBanAPI().saveModifiedEntry(entry);
-				modified = true;
-			}
-			if (modified)
-				msg(sender, "success", renderer().placeholder("user", player));
-			else
-				msg(sender, "failed", renderer().placeholder("user", player));
-		}, (sender, structure, args) -> {
-			List<String> list = new ArrayList<>();
-			for (Entry entry : API.get().getCommandsAPI().getBanAPI().getActivePunishments(BanType.BAN))
-				list.add(entry.getUser());
-			return list;
-		});
+		CommandStructure<CommandSender> cmd = CommandStructure
+				.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
+					msgUsage(sender, "cmd");
+				}).permission(getPerm("cmd")).argument(null, (sender, structure, args) -> {
+					String player = args[0];
+					boolean modified = false;
+					for (Entry entry : API.get().getCommandsAPI().getBanAPI().getActivePunishments(player, null,
+							BanType.BAN)) {
+						entry.setCancelled(true);
+						API.get().getCommandsAPI().getBanAPI().saveModifiedEntry(entry);
+						modified = true;
+					}
+					if (modified)
+						msg(sender, "success", renderer().placeholder("user", player));
+					else
+						msg(sender, "failed", renderer().placeholder("user", player));
+				}, (sender, structure, args) -> {
+					List<String> list = new ArrayList<>();
+					for (Entry entry : API.get().getCommandsAPI().getBanAPI().getActivePunishments(BanType.BAN))
+						list.add(entry.getUser());
+					return list;
+				});
 		// register
 		List<String> cmds = getCommands();
 		if (!cmds.isEmpty())
