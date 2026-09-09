@@ -40,6 +40,7 @@ import me.devtec.shared.placeholders.PlaceholderAPI;
 import me.devtec.shared.scheduler.Tasker;
 import me.devtec.shared.text.TextRenderer;
 import me.devtec.shared.text.TextRenderer.ColorMode;
+import me.devtec.shared.utility.StringUtils;
 import me.devtec.theapi.bukkit.BukkitLoader;
 import me.devtec.theapi.bukkit.game.ItemMaker;
 import me.devtec.theapi.bukkit.gui.GUI;
@@ -244,7 +245,6 @@ public class MessageManager {
 			Object chatBase;
 			boolean collection = false;
 			Object valueAtPath = config.get(path);
-
 			if (config.isJson(path) && (valueAtPath instanceof Collection || valueAtPath instanceof Map)) {
 
 				if (valueAtPath instanceof Collection && ((Collection<?>) valueAtPath).isEmpty()
@@ -390,7 +390,7 @@ public class MessageManager {
 							itemName = container.toString();
 						}
 
-						String id = UUID.randomUUID().toString();
+						String id = createShortId();
 
 						GUI inventory = new GUI(TextRenderer.create().placeholder("player", owner.getName())
 								.renderPlain(config.getString("placeholders.item.inv-title")), 27);
@@ -426,7 +426,7 @@ public class MessageManager {
 						iterator.add(item);
 
 					} else if (find[1] == 5) {
-						String id = UUID.randomUUID().toString();
+						String id = createShortId();
 
 						GUI inventory = new GUI(TextRenderer.create().placeholder("player", owner.getName())
 								.renderPlain(config.getString("placeholders.inventory.inv-title")), 36);
@@ -465,7 +465,7 @@ public class MessageManager {
 						iterator.add(item);
 
 					} else if (find[1] == 4) {
-						String id = UUID.randomUUID().toString();
+						String id = createShortId();
 
 						GUI inventory = new GUI(
 								TextRenderer.create().placeholder("player", owner.getName())
@@ -513,6 +513,24 @@ public class MessageManager {
 			for (Component component : components)
 				if (component.getExtra() != null)
 					replaceChatPlaceholders(config, component.getExtra(), totalPlaceholders, limitPlaceholders);
+		}
+
+		private String createShortId() {
+			final char[] chars = "0123456789abcdefghijklmnopqrstuvwxyz".toCharArray();
+
+			while (true) {
+				char[] id = new char[6];
+
+				for (int i = 0; i < id.length; ++i)
+					id[i] = chars[StringUtils.random.nextInt(chars.length)];
+
+				String result = new String(id);
+
+				synchronized (PreCommandListener.guis) {
+					if (!PreCommandListener.guis.containsKey(result))
+						return result;
+				}
+			}
 		}
 
 		private int[] find(int startAt, String value) {
