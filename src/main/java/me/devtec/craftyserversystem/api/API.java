@@ -252,7 +252,7 @@ public class API {
 				Constructor<?> cons = Ref.constructor(
 						Ref.getClass("me.devtec.craftyserversystem.economy.CssEconomyVaultImplementation"),
 						double.class, double.class, double.class, boolean.class, Map.class);
-				this.economy = (CssEconomy) Ref.newInstance(cons, economy.getDouble("settings.startup-money"),
+				this.economy = Ref.newInstance(cons, economy.getDouble("settings.startup-money"),
 						"UNLIMITED".equals(economy.getString("settings.minimum-money")) ? Double.NEGATIVE_INFINITY
 								: economy.getDouble("settings.minimum-money"),
 						"UNLIMITED".equals(economy.getString("settings.maximum-money")) ? Double.POSITIVE_INFINITY
@@ -504,7 +504,7 @@ public class API {
 				Constructor<?> cons = Ref.constructor(
 						Ref.getClass("me.devtec.craftyserversystem.economy.CssEconomyVaultImplementation"),
 						double.class, double.class, double.class, boolean.class, Map.class);
-				this.economy = (CssEconomy) Ref.newInstance(cons, economy.getDouble("settings.startup-money"),
+				this.economy = Ref.newInstance(cons, economy.getDouble("settings.startup-money"),
 						"UNLIMITED".equals(economy.getString("settings.minimum-money")) ? Double.NEGATIVE_INFINITY
 								: economy.getDouble("settings.minimum-money"),
 						"UNLIMITED".equals(economy.getString("settings.maximum-money")) ? Double.POSITIVE_INFINITY
