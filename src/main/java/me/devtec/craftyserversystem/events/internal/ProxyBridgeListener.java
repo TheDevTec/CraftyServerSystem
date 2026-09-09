@@ -31,53 +31,57 @@ public class ProxyBridgeListener implements PluginMessageListener {
 
 	@Override
 	public void onPluginMessageReceived(String channel, Player player, byte[] message) {
-		if(!CHANNEL.equalsIgnoreCase(channel) || message==null)return;
+		if (!CHANNEL.equalsIgnoreCase(channel) || message == null)
+			return;
 		ByteArrayDataInput input = ByteStreams.newDataInput(message);
 		String action = input.readUTF();
-		switch(action) {
+		switch (action) {
 		case "open_gui": {
 			String guiWithJson = input.readUTF();
 			String playerTarget = input.readUTF();
 			int splitAt = guiWithJson.indexOf('{');
-			if(splitAt!=-1) {
-				String id = guiWithJson.substring(0, splitAt-1);
+			if (splitAt != -1) {
+				String id = guiWithJson.substring(0, splitAt);
 				GuiCreator gui = GuiCreator.guis.get(id);
-				if(gui==null) {
+				if (gui == null) {
 					Loader.getPlugin().getLogger().warning("[GuiExpansion] Not found menu with id " + id + "!");
 					return;
 				}
 				@SuppressWarnings("unchecked")
-				Map<String, Object> placeholders = (Map<String, Object>) Json.reader().simpleRead(guiWithJson.substring(splitAt));
+				Map<String, Object> placeholders = (Map<String, Object>) Json.reader()
+						.simpleRead(guiWithJson.substring(splitAt));
 
-				if(gui instanceof LoopGuiCreator && placeholders.containsKey("page")) {
+				if (gui instanceof LoopGuiCreator && placeholders.containsKey("page")) {
 					LoopGuiCreator loop = (LoopGuiCreator) gui;
 					Object page = placeholders.get("page");
-					for(Player target : selector(Bukkit.getConsoleSender(), playerTarget)) {
+					for (Player target : selector(Bukkit.getConsoleSender(), playerTarget)) {
 						Config data = GuiCreator.sharedData.computeIfAbsent(target.getUniqueId(), t -> new Config());
-						for(Entry<String, Object> value : placeholders.entrySet())
+						for (Entry<String, Object> value : placeholders.entrySet())
 							data.set(value.getKey(), value.getValue());
-						loop.open(target, page instanceof Number ? ((Number)page).intValue() : 1);
+						loop.open(target, page instanceof Number ? ((Number) page).intValue() : 1);
 					}
-				}else
-					for(Player target : selector(Bukkit.getConsoleSender(), playerTarget)) {
+				} else
+					for (Player target : selector(Bukkit.getConsoleSender(), playerTarget)) {
 						Config data = GuiCreator.sharedData.computeIfAbsent(target.getUniqueId(), t -> new Config());
-						for(Entry<String, Object> value : placeholders.entrySet())
+						for (Entry<String, Object> value : placeholders.entrySet())
 							data.set(value.getKey(), value.getValue());
 						gui.open(target);
 					}
-			}else {
+			} else {
 				GuiCreator gui = GuiCreator.guis.get(guiWithJson);
-				if(gui==null) {
-					Loader.getPlugin().getLogger().warning("[GuiExpansion] Not found menu with id " + guiWithJson + "!");
+				if (gui == null) {
+					Loader.getPlugin().getLogger()
+							.warning("[GuiExpansion] Not found menu with id " + guiWithJson + "!");
 					return;
 				}
-				for(Player target : selector(Bukkit.getConsoleSender(), playerTarget))
+				for (Player target : selector(Bukkit.getConsoleSender(), playerTarget))
 					gui.open(target);
 			}
 			break;
 		}
 		default:
-			Loader.getPlugin().getLogger().warning("Proxy tried to call unsupported action named '"+action+"', skipped.");
+			Loader.getPlugin().getLogger()
+					.warning("Proxy tried to call unsupported action named '" + action + "', skipped.");
 			break;
 		}
 	}
