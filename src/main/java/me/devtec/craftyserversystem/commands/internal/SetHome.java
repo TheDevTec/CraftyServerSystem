@@ -20,7 +20,7 @@ public class SetHome extends CssCommand {
 
 		CommandStructure<Player> cmd = CommandStructure
 				.create(Player.class, P_DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
-					Set<String> homes = HomeManager.get().getHomes(sender.getName());
+					Set<String> homes = new HashSet<>(HomeManager.get().getHomes(sender.getName()));
 					if (!homes.isEmpty())
 						homes.remove("home");
 					if (homes.size() >= HomeManager.get().getMaximumHomes(sender.getName())) {
@@ -35,7 +35,7 @@ public class SetHome extends CssCommand {
 				}).permission(getPerm("cmd"));
 		// home
 		cmd.argument(null, 1, (sender, structure, args) -> {
-			Set<String> homes = HomeManager.get().getHomes(sender.getName());
+			Set<String> homes = new HashSet<>(HomeManager.get().getHomes(sender.getName()));
 			if (!homes.isEmpty())
 				homes.remove(args[0].toLowerCase());
 			int maxHomes = HomeManager.get().getMaximumHomes(sender.getName());
@@ -51,9 +51,7 @@ public class SetHome extends CssCommand {
 							.placeholder("y", pos.getY()).placeholder("z", pos.getZ()).placeholder("yaw", pos.getYaw())
 							.placeholder("pitch", pos.getPitch()).placeholder("world", pos.getWorldName()));
 		}, (sender, structure, args) -> {
-			Set<String> homes = HomeManager.get().getHomes(sender.getName());
-			if (homes.isEmpty())
-				homes = new HashSet<>();
+			Set<String> homes = new HashSet<>(HomeManager.get().getHomes(sender.getName()));
 			homes.add("{homeName}");
 			return homes;
 		});
