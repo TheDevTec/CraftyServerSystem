@@ -1,0 +1,88 @@
+title: "&8Kit Commands &7- &f[kit_name] &8({page}/{totalPages})"
+
+loop:
+  value: kit_editor_commands
+
+  item:
+    B:
+      action: PREVIOUS_PAGE
+
+      available:
+        type: ARROW
+        displayName: "&aPrevious page"
+        lore:
+        - ""
+        - "&7Go to page &f{previousPage}"
+        - ""
+
+      unavailable:
+        type: BLACK_STAINED_GLASS_PANE
+        displayName: "&c"
+
+    N:
+      action: NEXT_PAGE
+
+      available:
+        type: ARROW
+        displayName: "&aNext page"
+        lore:
+        - ""
+        - "&7Go to page &f{nextPage}"
+        - ""
+
+      unavailable:
+        type: BLACK_STAINED_GLASS_PANE
+        displayName: "&c"
+
+    result:
+      type: COMMAND_BLOCK
+      displayName: "&eCommand #{command_number}"
+      lore:
+      - ""
+      - "&f/{command}"
+      - ""
+      - "&cShift + Left click to remove."
+      - ""
+
+lines:
+- "xxxxxxxxx"
+- "#########"
+- "#########"
+- "#########"
+- "#########"
+- "xBxxabxNx"
+
+items:
+  x:
+    type: BLACK_STAINED_GLASS_PANE
+    displayName: "&c"
+
+  a:
+    type: LIME_DYE
+    displayName: "&aAdd command"
+    lore:
+    - ""
+    - "&7Add a new command to this kit."
+    - ""
+    - "&eClick to continue."
+    - ""
+
+    click:
+      commands: []
+      messages: []
+      actions:
+      - "kit_editor_add_command"
+
+  b:
+    type: ARROW
+    displayName: "&cBack"
+    lore:
+    - ""
+    - "&7Return to kit overview."
+    - ""
+
+    click:
+      commands: []
+      messages: []
+      actions:
+      - "OPEN_MENU:kit-editor/detail"

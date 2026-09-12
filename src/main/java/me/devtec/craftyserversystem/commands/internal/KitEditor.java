@@ -1,9 +1,13 @@
 package me.devtec.craftyserversystem.commands.internal;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.function.Consumer;
 
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -20,686 +24,1190 @@ import me.devtec.shared.utility.TimeUtils;
 import me.devtec.theapi.bukkit.game.ItemMaker;
 import me.devtec.theapi.bukkit.gui.AnvilGUI;
 import me.devtec.theapi.bukkit.gui.EmptyItemGUI;
-import me.devtec.theapi.bukkit.gui.GUI;
 import me.devtec.theapi.bukkit.gui.GUI.ClickType;
 import me.devtec.theapi.bukkit.gui.HolderGUI;
 import me.devtec.theapi.bukkit.gui.ItemGUI;
+import me.devtec.theapi.bukkit.gui.expansion.GuiCreator;
+import me.devtec.theapi.bukkit.gui.expansion.actions.ActionManager;
+import me.devtec.theapi.bukkit.gui.expansion.guis.LoopGuiCreator;
+import me.devtec.theapi.bukkit.gui.expansion.items.ConditionItem;
+import me.devtec.theapi.bukkit.gui.expansion.items.ItemPackage;
+import me.devtec.theapi.bukkit.gui.expansion.loop.LoopManager;
+import me.devtec.theapi.bukkit.gui.expansion.utils.Utils;
 import me.devtec.theapi.bukkit.xseries.XMaterial;
 
 public class KitEditor extends CssCommand {
-	private static ItemGUI empty = new EmptyItemGUI(
-			ItemMaker.of(XMaterial.BLACK_STAINED_GLASS_PANE).displayName("&c").build());
+
+	private static final String GUI_MAIN = "kit-editor/main";
+	private static final String GUI_DETAIL = "kit-editor/detail";
+	private static final String GUI_SETTINGS = "kit-editor/settings";
+	private static final String GUI_MESSAGES = "kit-editor/messages";
+	private static final String GUI_COMMANDS = "kit-editor/commands";
+	private static final String GUI_CONTENTS = "kit-editor/contents";
+
+	private static final String LOOP_KITS = "kit_editor_kits";
+	private static final String LOOP_MESSAGES = "kit_editor_messages";
+	private static final String LOOP_COMMANDS = "kit_editor_commands";
+	private static final String LOOP_SLOTS = "kit_editor_slots";
+
+	private static final String DATA_KIT = "kit_editor_kit";
+
+	/*
+	 * Pořadí # slotů v contents.yml.
+	 *
+	 * Prvních 5:
+	 *
+	 * Helmet / Chestplate / Leggings / Boots / Offhand
+	 *
+	 * potom:
+	 *
+	 * 9-35 main inventory 0-8 hotbar
+	 */
+	private static final int[] INVENTORY_SLOT_ORDER = createInventorySlotOrder();
 
 	@Override
 	public void register() {
 		if (isRegistered() || !API.get().getConfigManager().getCommands().getBoolean("kit.enabled", true))
 			return;
 
-		CommandStructure<Player> cmd = CommandStructure
-				.create(Player.class, P_DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
-					openEditor(sender, 1);
-				}).permission(getPerm("cmd"));
+		registerActions();
+		registerLoops();
 
-		// register
+		/*
+		 * GUI soubory už načítá CssGui.
+		 *
+		 * Loop GUI po registraci providerů reloadneme, stejně jako Warp.
+		 */
+		reloadLoopGui(GUI_MAIN);
+		reloadLoopGui(GUI_MESSAGES);
+		reloadLoopGui(GUI_COMMANDS);
+		reloadLoopGui(GUI_CONTENTS);
+
+		CommandStructure<Player> cmd = CommandStructure
+				.create(Player.class, P_DEFAULT_PERMS_CHECKER, (sender, structure, args) -> openMain(sender))
+				.permission(getPerm("cmd"));
+
 		List<String> cmds = getCommands();
+
 		if (!cmds.isEmpty())
 			this.cmd = addBypassSettings(cmd).build().register(cmds.remove(0), cmds.toArray(new String[0]));
 	}
 
-	public void openEditor(Player player, int requestedPage) {
-		Map<String, KitSample> kits = ((Kit) API.get().getCommandManager().getRegistered().get("kit")).getKits();
-		int totalPages = kits.size() / 27 + (kits.size() % 27 == 0 ? 0 : 1);
-		if (requestedPage > totalPages)
-			requestedPage = totalPages;
-		if (requestedPage < 1)
-			requestedPage = 1;
-		final int page = requestedPage;
-		GUI gui = new GUI("&fKit Editor " + page + "/" + totalPages, 45);
-		for (int i = 0; i < 9; ++i)
-			gui.setItem(i, empty);
-		for (int i = 36; i < 45; ++i)
-			gui.setItem(i, empty);
-		gui.setItem(40, new ItemGUI(ItemMaker.of(XMaterial.RED_STAINED_GLASS_PANE).displayName("&cClose")
-				.lore("", "&8» &7Click to close menu", "").build()) {
-			@Override
-			public void onClick(Player player, HolderGUI gui, ClickType click) {
-				gui.close(player);
-			}
-		});
-		gui.setItem(4, new ItemGUI(ItemMaker.of(XMaterial.LIME_STAINED_GLASS_PANE).displayName("&aCreate new kit")
-				.lore("", "&8» &7Click to open kit creator", "").build()) {
-			@Override
-			public void onClick(Player player, HolderGUI gui, ClickType click) {
-				openKitCreator(player, page);
-			}
-		});
-		KitSample[] kitSamples = kits.values().toArray(new KitSample[0]);
-		for (int i = page * 27 - 27; i < page * 27; ++i) {
-			if (kitSamples.length <= i || kitSamples[i] == null)
-				break;
-			KitSample kit = kitSamples[i];
-			gui.addItem(new ItemGUI(ItemMaker.of(XMaterial.CHEST).displayName("&f" + kitSamples[i].getName())
-					.lore("", "&8» &7Click to open kit editor", "").build()) {
-				@Override
-				public void onClick(Player player, HolderGUI gui, ClickType click) {
-					openEditorOf(player, page, kit);
-				}
-			});
-		}
-		if (page != totalPages)
-			gui.setItem(42, new ItemGUI(ItemMaker.ofHead().skinValues(
-					"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZGQ5OTNiOGMxMzU4ODkxOWI5ZjhiNDJkYjA2NWQ1YWRmZTc4YWYxODI4MTViNGU2ZjBmOTFiYTY4M2RlYWM5In19fQ==")
-					.displayName("&fNext page &e&l>>>").lore("", "&8» &7Click to continue to next page", "").build()) {
-				@Override
-				public void onClick(Player player, HolderGUI gui, ClickType click) {
-					openEditor(player, page + 1);
-				}
-			});
-		if (page != 1)
-			gui.setItem(38, new ItemGUI(ItemMaker.ofHead().skinValues(
-					"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZjRiZmVmMTRlODQyMGEyNTZlNDU3YTRhN2M4ODExMmUxNzk0ODVlNTIzNDU3ZTQzODUxNzdiYWQifX19")
-					.displayName("&e&l<<< &fPrevious page").lore("", "&8» &7Click to return to previous page", "")
-					.build()) {
-				@Override
-				public void onClick(Player player, HolderGUI gui, ClickType click) {
-					openEditor(player, page - 1);
-				}
-			});
-		gui.open(player);
+	@Override
+	public void unregister() {
+		super.unregister();
+
+		LoopManager.unregister(LOOP_KITS);
+		LoopManager.unregister(LOOP_MESSAGES);
+		LoopManager.unregister(LOOP_COMMANDS);
+		LoopManager.unregister(LOOP_SLOTS);
+
+		ActionManager.unregister("kit_editor_select");
+		ActionManager.unregister("kit_editor_create");
+		ActionManager.unregister("kit_editor_delete");
+
+		ActionManager.unregister("kit_editor_edit_cost");
+		ActionManager.unregister("kit_editor_edit_permission");
+		ActionManager.unregister("kit_editor_edit_cooldown_permission");
+		ActionManager.unregister("kit_editor_edit_cooldown_time");
+
+		ActionManager.unregister("kit_editor_toggle_override");
+		ActionManager.unregister("kit_editor_toggle_drop");
+
+		ActionManager.unregister("kit_editor_add_message");
+		ActionManager.unregister("kit_editor_add_command");
+
+		ActionManager.unregister("kit_editor_import_inventory");
+		ActionManager.unregister("kit_editor_clear_contents");
 	}
 
-	public void openEditorOf(Player player, int page, KitSample kit) {
-		GUI gui = new GUI("&fKit Editor of " + kit.getName(), 54) {
-			@Override
-			public void onClose(Player player, CloseReason reason) {
-				if (((Kit) API.get().getCommandManager().getRegistered().get("kit")).getKits()
-						.containsKey(kit.getName())) {
-					// save
-					Config config = API.get().getConfigManager().getKits();
-					config.remove(kit.getName());
-					config.set(kit.getName() + ".permission", kit.getPermission());
-					config.set(kit.getName() + ".settings.cost", kit.getCost());
-					config.set(kit.getName() + ".settings.override-contents-in-slots", kit.isOverrideContents());
-					config.set(kit.getName() + ".settings.drop-items-when-full-inv", kit.isDropItems());
-					config.set(kit.getName() + ".settings.cooldown.bypass-perm", kit.getCooldown().getBypassPerm());
-					config.set(kit.getName() + ".settings.cooldown.time",
-							TimeUtils.timeToString(kit.getCooldown().getTime()));
-					config.set(kit.getName() + ".messages", kit.getMessages());
-					config.set(kit.getName() + ".commands", kit.getCommands());
-					List<String> contents = new ArrayList<>();
-					for (Entry<Integer, ItemStack> stack : kit.getContents().entrySet()) {
-						@SuppressWarnings("unchecked")
-						Map<String, Object> map = (Map<String, Object>) Json.writer()
-								.writeWithoutParse(stack.getValue());
-						String type = map.remove("type").toString();
-						if (map.isEmpty())
-							contents.add(stack.getKey() + ":" + type);
-						else
-							contents.add(stack.getKey() + ":" + type + Json.writer().simpleWrite(map));
+	/*
+	 * ============================================================ ACTIONS
+	 * ============================================================
+	 */
+
+	private void registerActions() {
+
+		/*
+		 * ============================================================ SELECT KIT
+		 * ============================================================
+		 */
+
+		ActionManager.register("kit_editor_select", (holder, values) -> (gui, player, sharedData, placeholders) -> {
+
+			String kitName = resolve(player, placeholders, values);
+
+			KitSample kit = findKit(kitName);
+
+			if (kit == null)
+				return;
+
+			syncKitData(sharedData, kit);
+		});
+
+		/*
+		 * ============================================================ CREATE
+		 * ============================================================
+		 */
+
+		ActionManager.register("kit_editor_create",
+				(holder, values) -> (gui, player, sharedData, placeholders) -> openKitCreator(player, sharedData));
+
+		/*
+		 * ============================================================ DELETE
+		 * ============================================================
+		 */
+
+		ActionManager.register("kit_editor_delete", (holder, values) -> (gui, player, sharedData, placeholders) -> {
+
+			KitSample kit = selectedKit(sharedData);
+
+			if (kit == null)
+				return;
+
+			deleteKit(kit);
+
+			clearKitData(sharedData);
+		});
+
+		/*
+		 * ============================================================ COST
+		 * ============================================================
+		 */
+
+		ActionManager.register("kit_editor_edit_cost", (holder, values) -> (gui, player, sharedData, placeholders) -> {
+
+			KitSample kit = selectedKit(sharedData);
+
+			if (kit == null)
+				return;
+
+			openTextInput(player,
+
+					"&fKit Cost",
+
+					String.valueOf(kit.getCost()),
+
+					XMaterial.GOLD_INGOT,
+
+					value -> {
+
+						double cost = value == null || value.trim().isEmpty() ? 0
+								: Economy.multipleByMoneyFormat(ParseUtils.getDouble(value), value);
+
+						kit.setCost(cost);
+
+						saveAndSync(sharedData, kit);
+					},
+
+					GUI_SETTINGS);
+		});
+
+		/*
+		 * ============================================================ PERMISSION
+		 * ============================================================
+		 */
+
+		ActionManager.register("kit_editor_edit_permission",
+				(holder, values) -> (gui, player, sharedData, placeholders) -> {
+
+					KitSample kit = selectedKit(sharedData);
+
+					if (kit == null)
+						return;
+
+					openTextInput(player,
+
+							"&fKit Permission",
+
+							kit.getPermission() == null ? "css.kit." + kit.getName() : kit.getPermission(),
+
+							XMaterial.NAME_TAG,
+
+							value -> {
+
+								kit.setPermission(value == null || value.trim().isEmpty() ? null : value.trim());
+
+								saveAndSync(sharedData, kit);
+							},
+
+							GUI_SETTINGS);
+				});
+
+		/*
+		 * ============================================================ COOLDOWN BYPASS
+		 * PERMISSION ============================================================
+		 */
+
+		ActionManager.register("kit_editor_edit_cooldown_permission",
+				(holder, values) -> (gui, player, sharedData, placeholders) -> {
+
+					KitSample kit = selectedKit(sharedData);
+
+					if (kit == null)
+						return;
+
+					openTextInput(player,
+
+							"&fCooldown Bypass Permission",
+
+							kit.getCooldown().getBypassPerm() == null ? "css.cooldown.kits"
+									: kit.getCooldown().getBypassPerm(),
+
+							XMaterial.NAME_TAG,
+
+							value -> {
+
+								kit.getCooldown()
+										.setBypassPerm(value == null || value.trim().isEmpty() ? null : value.trim());
+
+								saveAndSync(sharedData, kit);
+							},
+
+							GUI_SETTINGS);
+				});
+
+		/*
+		 * ============================================================ COOLDOWN TIME
+		 * ============================================================
+		 */
+
+		ActionManager.register("kit_editor_edit_cooldown_time",
+				(holder, values) -> (gui, player, sharedData, placeholders) -> {
+
+					KitSample kit = selectedKit(sharedData);
+
+					if (kit == null)
+						return;
+
+					openTextInput(player,
+
+							"&fCooldown Time",
+
+							TimeUtils.timeToString(kit.getCooldown().getTime()),
+
+							XMaterial.CLOCK,
+
+							value -> {
+
+								kit.getCooldown().setTime(value == null || value.trim().isEmpty() ? 0
+										: TimeUtils.timeFromString(value.trim()));
+
+								saveAndSync(sharedData, kit);
+							},
+
+							GUI_SETTINGS);
+				});
+
+		/*
+		 * ============================================================ OVERRIDE
+		 * CONTENTS ============================================================
+		 */
+
+		ActionManager.register("kit_editor_toggle_override",
+				(holder, values) -> (gui, player, sharedData, placeholders) -> {
+
+					KitSample kit = selectedKit(sharedData);
+
+					if (kit == null)
+						return;
+
+					kit.setOverrideContents(!kit.isOverrideContents());
+
+					saveAndSync(sharedData, kit);
+				});
+
+		/*
+		 * ============================================================ DROP ITEMS
+		 * ============================================================
+		 */
+
+		ActionManager.register("kit_editor_toggle_drop",
+				(holder, values) -> (gui, player, sharedData, placeholders) -> {
+
+					KitSample kit = selectedKit(sharedData);
+
+					if (kit == null)
+						return;
+
+					kit.setDropItems(!kit.isDropItems());
+
+					saveAndSync(sharedData, kit);
+				});
+
+		/*
+		 * ============================================================ ADD MESSAGE
+		 * ============================================================
+		 */
+
+		ActionManager.register("kit_editor_add_message",
+				(holder, values) -> (gui, player, sharedData, placeholders) -> {
+
+					KitSample kit = selectedKit(sharedData);
+
+					if (kit == null)
+						return;
+
+					openTextInput(player,
+
+							"&fAdd Message",
+
+							"Message Here",
+
+							XMaterial.PAPER,
+
+							value -> {
+
+								kit.getMessages().add(value == null ? "" : value);
+
+								saveAndSync(sharedData, kit);
+							},
+
+							GUI_MESSAGES);
+				});
+
+		/*
+		 * ============================================================ ADD COMMAND
+		 * ============================================================
+		 */
+
+		ActionManager.register("kit_editor_add_command",
+				(holder, values) -> (gui, player, sharedData, placeholders) -> {
+
+					KitSample kit = selectedKit(sharedData);
+
+					if (kit == null)
+						return;
+
+					openTextInput(player,
+
+							"&fAdd Command",
+
+							"Command Here",
+
+							XMaterial.COMMAND_BLOCK,
+
+							value -> {
+
+								if (value == null || value.trim().isEmpty())
+									return;
+
+								String command = value.trim();
+
+								if (command.startsWith("/"))
+									command = command.substring(1);
+
+								kit.getCommands().add(command);
+
+								saveAndSync(sharedData, kit);
+							},
+
+							GUI_COMMANDS);
+				});
+
+		/*
+		 * ============================================================ IMPORT PLAYER
+		 * INVENTORY
+		 *
+		 * Přesně 0-40.
+		 *
+		 * Tzn:
+		 *
+		 * hotbar main inventory boots leggings chestplate helmet offhand
+		 * ============================================================
+		 */
+
+		ActionManager.register("kit_editor_import_inventory",
+				(holder, values) -> (gui, player, sharedData, placeholders) -> {
+
+					KitSample kit = selectedKit(sharedData);
+
+					if (kit == null)
+						return;
+
+					kit.getContents().clear();
+
+					for (int slot = 0; slot <= 40; ++slot) {
+
+						ItemStack item = player.getInventory().getItem(slot);
+
+						if (isEmpty(item))
+							continue;
+
+						kit.getContents().put(slot, item.clone());
 					}
-					config.set(kit.getName() + ".contents", contents);
-					config.save("yaml");
-				} else
-					// remove
-					API.get().getConfigManager().getKits().remove(kit.getName()).save("yaml");
+
+					saveAndSync(sharedData, kit);
+				});
+
+		/*
+		 * ============================================================ CLEAR CONTENTS
+		 * ============================================================
+		 */
+
+		ActionManager.register("kit_editor_clear_contents",
+				(holder, values) -> (gui, player, sharedData, placeholders) -> {
+
+					KitSample kit = selectedKit(sharedData);
+
+					if (kit == null)
+						return;
+
+					kit.getContents().clear();
+
+					saveAndSync(sharedData, kit);
+				});
+	}
+
+	/*
+	 * ============================================================ LOOPS
+	 * ============================================================
+	 */
+
+	private void registerLoops() {
+
+		registerKitLoop();
+		registerMessageLoop();
+		registerCommandLoop();
+		registerSlotLoop();
+	}
+
+	/*
+	 * ============================================================ KIT LIST
+	 * ============================================================
+	 */
+
+	private void registerKitLoop() {
+
+		LoopManager.register(LOOP_KITS, () -> (holder, player, sharedData, conditions, defaultItem) -> {
+
+			List<ItemGUI> result = new ArrayList<>();
+
+			for (KitSample kit : kits().values()) {
+
+				Map<String, Object> placeholders = new LinkedHashMap<>();
+
+				placeholders.put("kit", kit.getName());
+
+				placeholders.put("kit_name", kit.getName());
+
+				placeholders.put("kit_permission", kit.getPermission() == null ? "none" : kit.getPermission());
+
+				placeholders.put("kit_cost", kit.getCost());
+
+				placeholders.put("kit_contents", kit.getContents().size());
+
+				placeholders.put("kit_messages", kit.getMessages().size());
+
+				placeholders.put("kit_commands", kit.getCommands().size());
+
+				addLoopItem(result, player, sharedData, placeholders, conditions, defaultItem);
+			}
+
+			return result;
+		});
+	}
+
+	/*
+	 * ============================================================ MESSAGES
+	 * ============================================================
+	 */
+
+	private void registerMessageLoop() {
+
+		LoopManager.register(LOOP_MESSAGES, () -> (holder, player, sharedData, conditions, defaultItem) -> {
+
+			KitSample kit = selectedKit(sharedData);
+
+			if (kit == null)
+				return Collections.emptyList();
+
+			List<ItemGUI> result = new ArrayList<>();
+
+			for (int i = 0; i < kit.getMessages().size(); ++i) {
+
+				String message = kit.getMessages().get(i);
+
+				int index = i;
+
+				Map<String, Object> placeholders = new LinkedHashMap<>();
+
+				placeholders.put("message", message);
+
+				placeholders.put("message_index", index);
+
+				placeholders.put("message_number", index + 1);
+
+				ItemPackage itemPackage = findLoopItem(player, sharedData, placeholders, conditions, defaultItem);
+
+				if (itemPackage == null)
+					continue;
+
+				result.add(createRemovableTextItem(itemPackage, player, sharedData, placeholders,
+
+						() -> {
+
+							if (index < 0 || index >= kit.getMessages().size())
+								return;
+
+							kit.getMessages().remove(index);
+
+							saveAndSync(sharedData, kit);
+
+							openGui(player, GUI_MESSAGES);
+						}));
+			}
+
+			return result;
+		});
+	}
+
+	/*
+	 * ============================================================ COMMANDS
+	 * ============================================================
+	 */
+
+	private void registerCommandLoop() {
+
+		LoopManager.register(LOOP_COMMANDS, () -> (holder, player, sharedData, conditions, defaultItem) -> {
+
+			KitSample kit = selectedKit(sharedData);
+
+			if (kit == null)
+				return Collections.emptyList();
+
+			List<ItemGUI> result = new ArrayList<>();
+
+			for (int i = 0; i < kit.getCommands().size(); ++i) {
+
+				String command = kit.getCommands().get(i);
+
+				int index = i;
+
+				Map<String, Object> placeholders = new LinkedHashMap<>();
+
+				placeholders.put("command", command);
+
+				placeholders.put("command_index", index);
+
+				placeholders.put("command_number", index + 1);
+
+				ItemPackage itemPackage = findLoopItem(player, sharedData, placeholders, conditions, defaultItem);
+
+				if (itemPackage == null)
+					continue;
+
+				result.add(createRemovableTextItem(itemPackage, player, sharedData, placeholders,
+
+						() -> {
+
+							if (index < 0 || index >= kit.getCommands().size())
+								return;
+
+							kit.getCommands().remove(index);
+
+							saveAndSync(sharedData, kit);
+
+							openGui(player, GUI_COMMANDS);
+						}));
+			}
+
+			return result;
+		});
+	}
+
+	/*
+	 * ============================================================ EXACT INVENTORY
+	 * SLOT EDITOR ============================================================
+	 */
+
+	private void registerSlotLoop() {
+
+		LoopManager.register(LOOP_SLOTS, () -> (holder, player, sharedData, conditions, defaultItem) -> {
+
+			KitSample kit = selectedKit(sharedData);
+
+			if (kit == null)
+				return Collections.emptyList();
+
+			List<ItemGUI> items = new ArrayList<>(41);
+
+			for (int slot : INVENTORY_SLOT_ORDER)
+				items.add(createInventorySlotItem(player, sharedData, kit, slot));
+
+			return items;
+		});
+	}
+
+	/*
+	 * ============================================================ INVENTORY SLOT
+	 * ITEM ============================================================
+	 */
+
+	private ItemGUI createInventorySlotItem(Player viewer, Config sharedData, KitSample kit, int inventorySlot) {
+
+		ItemStack stored = kit.getContents().get(inventorySlot);
+
+		ItemStack display = createSlotDisplay(stored, inventorySlot);
+
+		return new ItemGUI(display) {
+
+			@Override
+			public void onClick(Player player, HolderGUI gui, ClickType click) {
+
+				/*
+				 * Pokud hráč drží item na cursoru, zkopírujeme ho přímo do tohoto přesného
+				 * inventory slotu kitu.
+				 *
+				 * Item hráči NEODEBÍRÁME.
+				 */
+				ItemStack cursor = player.getItemOnCursor();
+
+				if (!isEmpty(cursor)) {
+
+					kit.getContents().put(inventorySlot, cursor.clone());
+
+					saveAndSync(sharedData, kit);
+
+					openGui(player, GUI_CONTENTS);
+
+					return;
+				}
+
+				ItemStack current = kit.getContents().get(inventorySlot);
+
+				if (isEmpty(current))
+					return;
+
+				/*
+				 * SHIFT + LEFT = remove
+				 */
+				if (click.isLeftClick() && click.isShiftClick()) {
+
+					kit.getContents().remove(inventorySlot);
+
+					saveAndSync(sharedData, kit);
+
+					openGui(player, GUI_CONTENTS);
+
+					return;
+				}
+
+				/*
+				 * RIGHT = copy do vlastního inventáře
+				 */
+				if (click.isRightClick())
+					player.getInventory().addItem(current.clone());
 			}
 		};
-		for (int i = 0; i < 9; ++i)
-			gui.setItem(i, empty);
-		for (int i = 45; i < 54; ++i)
-			gui.setItem(i, empty);
-		gui.setItem(22, new ItemGUI(
-				ItemMaker.of(XMaterial.REPEATER).displayName("&cSettings").lore("", "&8» &7Kit settings", "").build()) {
-			@Override
-			public void onClick(Player player, HolderGUI guir, ClickType click) {
-				openKitSettings(player, page, kit);
-			}
-		});
-		gui.setItem(29, new ItemGUI(ItemMaker.of(XMaterial.COMMAND_BLOCK).displayName("&dCommands")
-				.lore("", "&8» &7Commands", "").build()) {
-			@Override
-			public void onClick(Player player, HolderGUI guir, ClickType click) {
-				openCommands(player, page, kit, 1);
-			}
-		});
-		gui.setItem(31, new ItemGUI(
-				ItemMaker.of(XMaterial.CHEST).displayName("&6Contents").lore("", "&8» &7Kit contents", "").build()) {
-			@Override
-			public void onClick(Player player, HolderGUI guir, ClickType click) {
-				openContents(player, page, kit, 1);
-			}
-		});
-		gui.setItem(33, new ItemGUI(ItemMaker.of(XMaterial.WRITABLE_BOOK).displayName("&fMessages")
-				.lore("", "&8» &7Messages", "").build()) {
-			@Override
-			public void onClick(Player player, HolderGUI guir, ClickType click) {
-				openMessages(player, page, kit, 1);
-			}
-		});
-		gui.setItem(49, new ItemGUI(ItemMaker.of(XMaterial.LIME_STAINED_GLASS_PANE).displayName("&eSave & return back")
-				.lore("", "&8» &7Click to save changes into file & return back to main menu", "").build()) {
+	}
+
+	private ItemStack createSlotDisplay(ItemStack stored, int slot) {
+
+		if (isEmpty(stored))
+			return ItemMaker.of(emptySlotMaterial(slot)).displayName("&7" + slotDisplayName(slot))
+					.lore("", "&8» &7Player inventory slot: &e" + slot, "", "&8» &7Place an item on your cursor",
+							"&8» &7and click this slot to assign it.", "")
+					.build();
+
+		ItemMaker maker = ItemMaker.of(stored.clone());
+
+		List<String> lore = new ArrayList<>();
+
+		if (maker.getLore() != null)
+			lore.addAll(maker.getLore());
+
+		lore.add("");
+		lore.add("&8» &7Kit slot: &e" + slotDisplayName(slot));
+
+		lore.add("&8» &7Player inventory slot: &e" + slot);
+
+		lore.add("");
+		lore.add("&8» &7Cursor item: &eReplace");
+
+		lore.add("&8» &7Right click: &eCopy item");
+
+		lore.add("&8» &7Shift + Left: &cRemove");
+
+		lore.add("");
+
+		maker.lore(lore);
+
+		return maker.build();
+	}
+
+	private static XMaterial emptySlotMaterial(int slot) {
+
+		switch (slot) {
+
+		case 39:
+			return XMaterial.LEATHER_HELMET;
+
+		case 38:
+			return XMaterial.LEATHER_CHESTPLATE;
+
+		case 37:
+			return XMaterial.LEATHER_LEGGINGS;
+
+		case 36:
+			return XMaterial.LEATHER_BOOTS;
+
+		case 40:
+			return XMaterial.SHIELD;
+
+		default:
+			return XMaterial.LIGHT_GRAY_STAINED_GLASS_PANE;
+		}
+	}
+
+	private static String slotDisplayName(int slot) {
+
+		switch (slot) {
+
+		case 39:
+			return "Helmet";
+
+		case 38:
+			return "Chestplate";
+
+		case 37:
+			return "Leggings";
+
+		case 36:
+			return "Boots";
+
+		case 40:
+			return "Offhand";
+
+		default: {
+
+			if (slot >= 0 && slot <= 8)
+
+				return "Hotbar " + (slot + 1);
+
+			return "Inventory " + slot;
+		}
+		}
+	}
+
+	/*
+	 * ============================================================ LOOP UTILITIES
+	 * ============================================================
+	 */
+
+	private static void addLoopItem(List<ItemGUI> items, Player player, Config sharedData,
+			Map<String, Object> placeholders, List<ConditionItem> conditions, ItemPackage defaultItem) {
+
+		ItemPackage result = findLoopItem(player, sharedData, placeholders, conditions, defaultItem);
+
+		if (result == null)
+			return;
+
+		items.add(createLoopItem(result, player, sharedData, placeholders));
+	}
+
+	private static ItemPackage findLoopItem(Player player, Config sharedData, Map<String, Object> placeholders,
+			List<ConditionItem> conditions, ItemPackage defaultItem) {
+
+		for (ConditionItem condition : conditions) {
+
+			ItemPackage result = condition.test(player, sharedData, placeholders);
+
+			if (result != null && result.getItem() != null)
+
+				return result;
+		}
+
+		return defaultItem != null && defaultItem.getItem() != null ? defaultItem : null;
+	}
+
+	private static ItemGUI createLoopItem(ItemPackage itemPackage, Player player, Config sharedData,
+			Map<String, Object> placeholders) {
+
+		return new ItemGUI(Utils.applyPlaceholders(itemPackage.getTypePlaceholder(), itemPackage.getItem(),
+				placeholders, player)) {
+
 			@Override
 			public void onClick(Player player, HolderGUI gui, ClickType click) {
-				openEditor(player, page);
+
+				itemPackage.runActions(gui, player, sharedData, placeholders);
 			}
-		});
-		gui.setItem(52, new ItemGUI(ItemMaker.of(XMaterial.TNT).displayName("&4DELETE KIT")
-				.lore("", "&8» &7Click to delete kit", "&8» &7Click with SHIFT to confirm", "").build()) {
+		};
+	}
+
+	/*
+	 * Messages / Commands potřebují ClickType, proto nemůžeme remove dát pouze do
+	 * ActionManager.
+	 */
+	private static ItemGUI createRemovableTextItem(ItemPackage itemPackage, Player player, Config sharedData,
+			Map<String, Object> placeholders, Runnable remove) {
+
+		return new ItemGUI(Utils.applyPlaceholders(itemPackage.getTypePlaceholder(), itemPackage.getItem(),
+				placeholders, player)) {
+
 			@Override
 			public void onClick(Player player, HolderGUI gui, ClickType click) {
-				if (click.isShiftClick()) {
-					((Kit) API.get().getCommandManager().getRegistered().get("kit")).getKits().remove(kit.getName());
-					openEditor(player, page);
-				}
+
+				if (click.isLeftClick() && click.isShiftClick())
+
+					remove.run();
 			}
-		});
-		gui.open(player);
+		};
 	}
 
-	protected void openMessages(Player player, int guiPage, KitSample kit, int requestedPage) {
-		int totalPages = Math.max(1, kit.getMessages().size() / 36 + (kit.getMessages().size() % 36 == 0 ? 0 : 1));
-		if (requestedPage > totalPages)
-			requestedPage = totalPages;
-		if (requestedPage < 1)
-			requestedPage = 1;
-		final int page = requestedPage;
-		GUI gui = new GUI("&fKit Messages of " + kit.getName() + " " + page + "/" + totalPages, 54);
-		for (int i = 0; i < 9; ++i)
-			gui.setItem(i, empty);
-		for (int i = 45; i < 54; ++i)
-			gui.setItem(i, empty);
-		gui.setItem(49, new ItemGUI(ItemMaker.of(XMaterial.YELLOW_STAINED_GLASS_PANE).displayName("&eReturn back")
-				.lore("", "&8» &7Click to return back to previous menu", "").build()) {
-			@Override
-			public void onClick(Player player, HolderGUI guir, ClickType click) {
-				openEditorOf(player, guiPage, kit);
-			}
-		});
-		String[] items = kit.getMessages().toArray(new String[0]);
-		for (int i = page * 36 - 36; i < page * 36; ++i) {
-			if (items.length <= i || items[i] == null)
-				break;
-			String item = items[i];
-			int id = i;
-			gui.addItem(new ItemGUI(ItemMaker.of(XMaterial.PAPER).displayName("&fMessage #" + i)
-					.lore("", "&8» &f" + item, "", "&8» &7Left + Shift click to remove this message").build()) {
-				@Override
-				public void onClick(Player player, HolderGUI gui, ClickType click) {
-					if (click.isLeftClick() && click.isShiftClick()) {
-						kit.getMessages().remove(id);
-						openContents(player, guiPage, kit, page);
-					}
-				}
-			});
-		}
-		if (page != totalPages)
-			gui.setItem(51, new ItemGUI(ItemMaker.ofHead().skinValues(
-					"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZGQ5OTNiOGMxMzU4ODkxOWI5ZjhiNDJkYjA2NWQ1YWRmZTc4YWYxODI4MTViNGU2ZjBmOTFiYTY4M2RlYWM5In19fQ==")
-					.displayName("&fNext page &e&l>>>").lore("", "&8» &7Click to continue to next page", "").build()) {
-				@Override
-				public void onClick(Player player, HolderGUI gui, ClickType click) {
-					openMessages(player, guiPage, kit, page + 1);
-				}
-			});
-		if (page != 1)
-			gui.setItem(47, new ItemGUI(ItemMaker.ofHead().skinValues(
-					"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZjRiZmVmMTRlODQyMGEyNTZlNDU3YTRhN2M4ODExMmUxNzk0ODVlNTIzNDU3ZTQzODUxNzdiYWQifX19")
-					.displayName("&e&l<<< &fPrevious page").lore("", "&8» &7Click to return to previous page", "")
-					.build()) {
-				@Override
-				public void onClick(Player player, HolderGUI gui, ClickType click) {
-					openMessages(player, guiPage, kit, page - 1);
-				}
-			});
-		gui.setItem(52, new ItemGUI(ItemMaker.of(XMaterial.WRITABLE_BOOK).displayName("&aAdd message")
-				.lore("", "&8» &7Click to add new message", "").build()) {
-			@Override
-			public void onClick(Player player, HolderGUI guir, ClickType click) {
-				AnvilGUI anvil = new AnvilGUI("&fType message") {
-					@Override
-					public boolean onInteractItem(Player player, ItemStack newItem, ItemStack oldItem, ClickType type,
-							int slot, boolean guiClick) {
-						if (guiClick) {
-							if (getRenameText() == null || getRenameText().trim().isEmpty())
-								kit.getMessages().add("");
-							else
-								kit.getMessages().add(getRenameText());
-							close(player);
-						}
-						return false;
-					}
+	/*
+	 * ============================================================ CREATE KIT
+	 * ============================================================
+	 */
 
-					@Override
-					public void onClose(Player player, CloseReason reason) {
-						openMessages(player, guiPage, kit, page);
-					}
-				};
-				anvil.setItem(0, new EmptyItemGUI(ItemMaker.of(XMaterial.PAPER).displayName("Message Here").build()));
-				anvil.open(player);
-			}
-		});
-		gui.open(player);
-	}
+	private void openKitCreator(Player player, Config sharedData) {
 
-	protected void openContents(Player player, int guiPage, KitSample kit, int requestedPage) {
-		int totalPages = Math.max(1, kit.getContents().size() / 36 + (kit.getContents().size() % 36 == 0 ? 0 : 1));
-		if (requestedPage > totalPages)
-			requestedPage = totalPages;
-		if (requestedPage < 1)
-			requestedPage = 1;
-		final int page = requestedPage;
-		GUI gui = new GUI("&fKit Contents of " + kit.getName() + " " + page + "/" + totalPages, 54);
-		for (int i = 0; i < 9; ++i)
-			gui.setItem(i, empty);
-		for (int i = 45; i < 54; ++i)
-			gui.setItem(i, empty);
-		gui.setItem(49, new ItemGUI(ItemMaker.of(XMaterial.YELLOW_STAINED_GLASS_PANE).displayName("&eReturn back")
-				.lore("", "&8» &7Click to return back to previous menu", "").build()) {
-			@Override
-			public void onClick(Player player, HolderGUI guir, ClickType click) {
-				openEditorOf(player, guiPage, kit);
-			}
-		});
-		ItemStack[] items = kit.getContents().values().toArray(new ItemStack[0]);
-		for (int i = page * 36 - 36; i < page * 36; ++i) {
-			if (items.length <= i || items[i] == null)
-				break;
-			ItemStack item = items[i];
-			ItemMaker maker = ItemMaker.of(item);
-			List<String> newLore = new ArrayList<>();
-			if (maker.getLore() != null)
-				newLore.addAll(maker.getLore());
-			newLore.add("");
-			newLore.add("&8» &7Left + Shift click to remove this item");
-			newLore.add("&8» &7Right click to copy item into your inventory");
-			maker.lore(newLore);
-			int id = i;
-			gui.addItem(new ItemGUI(maker.build()) {
-				@Override
-				public void onClick(Player player, HolderGUI gui, ClickType click) {
-					if (click.isLeftClick() && click.isShiftClick()) {
-						kit.getContents().remove(id);
-						openContents(player, guiPage, kit, page);
-					} else if (click.isRightClick())
-						player.getInventory().addItem(item);
-				}
-			});
-		}
-		if (page != totalPages)
-			gui.setItem(51, new ItemGUI(ItemMaker.ofHead().skinValues(
-					"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZGQ5OTNiOGMxMzU4ODkxOWI5ZjhiNDJkYjA2NWQ1YWRmZTc4YWYxODI4MTViNGU2ZjBmOTFiYTY4M2RlYWM5In19fQ==")
-					.displayName("&fNext page &e&l>>>").lore("", "&8» &7Click to continue to next page", "").build()) {
-				@Override
-				public void onClick(Player player, HolderGUI gui, ClickType click) {
-					openContents(player, guiPage, kit, page + 1);
-				}
-			});
-		if (page != 1)
-			gui.setItem(47, new ItemGUI(ItemMaker.ofHead().skinValues(
-					"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZjRiZmVmMTRlODQyMGEyNTZlNDU3YTRhN2M4ODExMmUxNzk0ODVlNTIzNDU3ZTQzODUxNzdiYWQifX19")
-					.displayName("&e&l<<< &fPrevious page").lore("", "&8» &7Click to return to previous page", "")
-					.build()) {
-				@Override
-				public void onClick(Player player, HolderGUI gui, ClickType click) {
-					openContents(player, guiPage, kit, page - 1);
-				}
-			});
-		gui.setItem(52, new ItemGUI(ItemMaker.of(XMaterial.EMERALD).displayName("&aAdd items")
-				.lore("", "&8» &7Click to open insert menu", "").build()) {
-			@Override
-			public void onClick(Player player, HolderGUI gui, ClickType click) {
-				GUI gui2 = new GUI("&fInsert items", 54) {
-					@Override
-					public void onClose(Player player, CloseReason reason) {
-						for (int i = 0; i < 45; ++i) {
-							ItemStack item = getItem(i);
-							if (item != null && item.getType() != Material.AIR) {
-								int slot = 0;
-								while (true)
-									if (kit.getContents().get(slot) != null)
-										++slot;
-									else
-										break;
-								kit.getContents().put(slot, item);
-							}
-						}
-					}
-				};
-				for (int i = 45; i < 54; ++i)
-					gui2.setItem(i, empty);
-				gui2.setInsertable(true);
-				gui2.setItem(49,
-						new ItemGUI(ItemMaker.of(XMaterial.YELLOW_STAINED_GLASS_PANE).displayName("&eReturn back")
-								.lore("", "&8» &7Click to return back to previous menu", "").build()) {
-							@Override
-							public void onClick(Player player, HolderGUI guir, ClickType click) {
-								openContents(player, guiPage, kit, page);
-							}
-						});
-				gui2.open(player);
-			}
-		});
-		gui.open(player);
-	}
-
-	protected void openCommands(Player player, int guiPage, KitSample kit, int requestedPage) {
-		int totalPages = Math.max(1, kit.getCommands().size() / 36 + (kit.getCommands().size() % 36 == 0 ? 0 : 1));
-		if (requestedPage > totalPages)
-			requestedPage = totalPages;
-		if (requestedPage < 1)
-			requestedPage = 1;
-		final int page = requestedPage;
-		GUI gui = new GUI("&fKit Commands of " + kit.getName() + " " + page + "/" + totalPages, 54);
-		for (int i = 0; i < 9; ++i)
-			gui.setItem(i, empty);
-		for (int i = 45; i < 54; ++i)
-			gui.setItem(i, empty);
-		gui.setItem(49, new ItemGUI(ItemMaker.of(XMaterial.YELLOW_STAINED_GLASS_PANE).displayName("&eReturn back")
-				.lore("", "&8» &7Click to return back to previous menu", "").build()) {
-			@Override
-			public void onClick(Player player, HolderGUI guir, ClickType click) {
-				openEditorOf(player, guiPage, kit);
-			}
-		});
-		String[] items = kit.getCommands().toArray(new String[0]);
-		for (int i = page * 36 - 36; i < page * 36; ++i) {
-			if (items.length <= i || items[i] == null)
-				break;
-			String item = items[i];
-			int id = i;
-			gui.addItem(new ItemGUI(ItemMaker.of(XMaterial.PAPER).displayName("&fCommand #" + i)
-					.lore("", "&8» &f" + item, "", "&8» &7Left + Shift click to remove this command").build()) {
-				@Override
-				public void onClick(Player player, HolderGUI gui, ClickType click) {
-					if (click.isLeftClick() && click.isShiftClick()) {
-						kit.getCommands().remove(id);
-						openContents(player, guiPage, kit, page);
-					}
-				}
-			});
-		}
-		if (page != totalPages)
-			gui.setItem(51, new ItemGUI(ItemMaker.ofHead().skinValues(
-					"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZGQ5OTNiOGMxMzU4ODkxOWI5ZjhiNDJkYjA2NWQ1YWRmZTc4YWYxODI4MTViNGU2ZjBmOTFiYTY4M2RlYWM5In19fQ==")
-					.displayName("&fNext page &e&l>>>").lore("", "&8» &7Click to continue to next page", "").build()) {
-				@Override
-				public void onClick(Player player, HolderGUI gui, ClickType click) {
-					openCommands(player, guiPage, kit, page + 1);
-				}
-			});
-		if (page != 1)
-			gui.setItem(47, new ItemGUI(ItemMaker.ofHead().skinValues(
-					"eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZjRiZmVmMTRlODQyMGEyNTZlNDU3YTRhN2M4ODExMmUxNzk0ODVlNTIzNDU3ZTQzODUxNzdiYWQifX19")
-					.displayName("&e&l<<< &fPrevious page").lore("", "&8» &7Click to return to previous page", "")
-					.build()) {
-				@Override
-				public void onClick(Player player, HolderGUI gui, ClickType click) {
-					openCommands(player, guiPage, kit, page - 1);
-				}
-			});
-		gui.setItem(52,
-				new ItemGUI(ItemMaker.of(XMaterial.WRITABLE_BOOK).displayName("&aAdd command")
-						.lore("", "&8» &7Click to add new command", "&8» &7Type command without slash (/)",
-								"&8» &7Use {player} as placeholder", "")
-						.build()) {
-					@Override
-					public void onClick(Player player, HolderGUI guir, ClickType click) {
-						AnvilGUI anvil = new AnvilGUI("&fType message") {
-							@Override
-							public boolean onInteractItem(Player player, ItemStack newItem, ItemStack oldItem,
-									ClickType type, int slot, boolean guiClick) {
-								if (guiClick) {
-									if (getRenameText() != null && !getRenameText().trim().isEmpty())
-										kit.getCommands().add(getRenameText());
-									close(player);
-								}
-								return false;
-							}
-
-							@Override
-							public void onClose(Player player, CloseReason reason) {
-								openCommands(player, guiPage, kit, page);
-							}
-						};
-						anvil.setItem(0,
-								new EmptyItemGUI(ItemMaker.of(XMaterial.PAPER).displayName("Command Here").build()));
-						anvil.open(player);
-					}
-				});
-		gui.open(player);
-	}
-
-	public void openKitSettings(Player player, int page, KitSample kit) {
-		GUI gui = new GUI("&fKit Settings of " + kit.getName(), 54);
-		for (int i = 0; i < 9; ++i)
-			gui.setItem(i, empty);
-		for (int i = 45; i < 54; ++i)
-			gui.setItem(i, empty);
-		gui.setItem(49, new ItemGUI(ItemMaker.of(XMaterial.YELLOW_STAINED_GLASS_PANE).displayName("&eReturn back")
-				.lore("", "&8» &7Click to return back to previous menu", "").build()) {
-			@Override
-			public void onClick(Player player, HolderGUI guir, ClickType click) {
-				openEditorOf(player, page, kit);
-			}
-		});
-		gui.setItem(19, new ItemGUI(ItemMaker.of(XMaterial.GOLD_INGOT).displayName("&6Cost")
-				.lore("", "&8» &7Cost: &e" + kit.getCost(), "", "&8» &7Click to change cost", "").build()) {
-			@Override
-			public void onClick(Player player, HolderGUI guir, ClickType click) {
-				ItemGUI item = this;
-				AnvilGUI anvil = new AnvilGUI("&fTime") {
-					@Override
-					public boolean onInteractItem(Player player, ItemStack newItem, ItemStack oldItem, ClickType type,
-							int slot, boolean guiClick) {
-						if (guiClick) {
-							kit.setCost(getRenameText() == null || getRenameText().trim().isEmpty() ? 0
-									: Economy.multipleByMoneyFormat(ParseUtils.getDouble(getRenameText()),
-											getRenameText()));
-							item.setItem(ItemMaker.of(XMaterial.GOLD_INGOT).displayName("&6Cost")
-									.lore("", "&8» &7Cost: &e" + kit.getCost(), "", "&8» &7Click to change cost", "")
-									.build());
-							gui.setItem(19, item);
-							close(player);
-						}
-						return false;
-					}
-
-					@Override
-					public void onClose(Player player, CloseReason reason) {
-						gui.open(player);
-					}
-				};
-				anvil.setItem(0, new EmptyItemGUI(ItemMaker.of(XMaterial.CLOCK)
-						.displayName(TimeUtils.timeToString(kit.getCooldown().getTime())).build()));
-				anvil.open(player);
-			}
-		});
-		gui.setItem(22,
-				new ItemGUI(ItemMaker.of(XMaterial.ENDER_PEARL).displayName("&6Cooldown")
-						.lore("", "&8» &7Bypass Permission: &e" + kit.getCooldown().getBypassPerm(),
-								"&8» &7Time: &e" + kit.getCooldown().getTime(), "",
-								"&8» &7Left click to change bypass permission", "&8» &7Right click to change time", "")
-						.build()) {
-					@Override
-					public void onClick(Player player, HolderGUI guir, ClickType click) {
-						ItemGUI item = this;
-						if (click.isLeftClick()) {
-							AnvilGUI anvil = new AnvilGUI("&fBypass Permission") {
-								@Override
-								public boolean onInteractItem(Player player, ItemStack newItem, ItemStack oldItem,
-										ClickType type, int slot, boolean guiClick) {
-									if (guiClick) {
-										kit.getCooldown().setBypassPerm(
-												getRenameText() == null || getRenameText().trim().isEmpty() ? null
-														: getRenameText());
-										item.setItem(ItemMaker.of(XMaterial.ENDER_PEARL).displayName("&6Cooldown")
-												.lore("",
-														"&8» &7Bypass Permission: &e"
-																+ kit.getCooldown().getBypassPerm(),
-														"&8» &7Time: &e" + kit.getCooldown().getTime(), "",
-														"&8» &7Left click to change bypass permission",
-														"&8» &7Right click to change time", "")
-												.build());
-										gui.setItem(22, item);
-										close(player);
-									}
-									return false;
-								}
-
-								@Override
-								public void onClose(Player player, CloseReason reason) {
-									gui.open(player);
-								}
-							};
-							anvil.setItem(0,
-									new EmptyItemGUI(ItemMaker.of(XMaterial.NAME_TAG)
-											.displayName(kit.getCooldown().getBypassPerm() == null ? "css.cooldown.kits"
-													: kit.getPermission())
-											.build()));
-							anvil.open(player);
-						} else {
-							AnvilGUI anvil = new AnvilGUI("&fTime") {
-								@Override
-								public boolean onInteractItem(Player player, ItemStack newItem, ItemStack oldItem,
-										ClickType type, int slot, boolean guiClick) {
-									if (guiClick) {
-										kit.getCooldown()
-												.setTime(getRenameText() == null || getRenameText().trim().isEmpty() ? 0
-														: TimeUtils.timeFromString(getRenameText()));
-										item.setItem(ItemMaker.of(XMaterial.ENDER_PEARL).displayName("&6Cooldown")
-												.lore("",
-														"&8» &7Bypass Permission: &e"
-																+ kit.getCooldown().getBypassPerm(),
-														"&8» &7Time: &e" + kit.getCooldown().getTime(), "",
-														"&8» &7Left click to change bypass permission",
-														"&8» &7Right click to change time", "")
-												.build());
-										gui.setItem(22, item);
-										close(player);
-									}
-									return false;
-								}
-
-								@Override
-								public void onClose(Player player, CloseReason reason) {
-									gui.open(player);
-								}
-							};
-							anvil.setItem(0, new EmptyItemGUI(ItemMaker.of(XMaterial.CLOCK)
-									.displayName(TimeUtils.timeToString(kit.getCooldown().getTime())).build()));
-							anvil.open(player);
-						}
-					}
-				});
-		gui.setItem(24,
-				new ItemGUI(ItemMaker.of(XMaterial.BARRIER).displayName("&cPermission").lore("",
-						"&8» &7Permission: &e" + kit.getPermission(), "", "&8» &7Click to change kit permission", "")
-						.build()) {
-					@Override
-					public void onClick(Player player, HolderGUI guir, ClickType click) {
-						ItemGUI item = this;
-						AnvilGUI anvil = new AnvilGUI("&fKit Permission") {
-							@Override
-							public boolean onInteractItem(Player player, ItemStack newItem, ItemStack oldItem,
-									ClickType type, int slot, boolean guiClick) {
-								if (guiClick) {
-									kit.setPermission(getRenameText() == null || getRenameText().trim().isEmpty() ? null
-											: getRenameText());
-									item.setItem(ItemMaker.of(XMaterial.BARRIER).displayName("&cPermission")
-											.lore("", "&8» &7Permission: &e" + kit.getPermission(), "",
-													"&8» &7Click to change kit permission", "")
-											.build());
-									gui.setItem(24, item);
-									close(player);
-								}
-								return false;
-							}
-
-							@Override
-							public void onClose(Player player, CloseReason reason) {
-								gui.open(player);
-							}
-						};
-						anvil.setItem(0,
-								new EmptyItemGUI(ItemMaker.of(XMaterial.NAME_TAG).displayName(
-										kit.getPermission() == null ? "css.kit." + kit.getName() : kit.getPermission())
-										.build()));
-						anvil.open(player);
-					}
-				});
-		gui.setItem(30,
-				new ItemGUI(ItemMaker.of(XMaterial.INK_SAC).displayName("&dOverride contents in slots")
-						.lore("", "&8» &7Status: &e" + kit.isOverrideContents(), "", "&8» &7Click to toggle status", "")
-						.build()) {
-					@Override
-					public void onClick(Player player, HolderGUI guir, ClickType click) {
-						kit.setOverrideContents(!kit.isOverrideContents());
-						setItem(ItemMaker.of(XMaterial.INK_SAC).displayName("&dOverride contents in slots").lore("",
-								"&8» &7Status: &e" + kit.isOverrideContents(), "", "&8» &7Click to toggle status", "")
-								.build());
-						gui.setItem(30, this);
-					}
-				});
-		gui.setItem(32, new ItemGUI(ItemMaker.of(XMaterial.FEATHER)
-				.displayName("&fDrops items on the ground if inventory is full")
-				.lore("", "&8» &7Status: &e" + kit.isDropItems(), "", "&8» &7Click to toggle status", "").build()) {
-			@Override
-			public void onClick(Player player, HolderGUI guir, ClickType click) {
-				kit.setDropItems(!kit.isDropItems());
-				setItem(ItemMaker.of(XMaterial.FEATHER).displayName("&fDrops items on the ground if inventory is full")
-						.lore("", "&8» &7Status: &e" + kit.isDropItems(), "", "&8» &7Click to toggle status", "")
-						.build());
-				gui.setItem(32, this);
-			}
-		});
-		gui.open(player);
-	}
-
-	public void openKitCreator(Player player, int page) {
 		AnvilGUI anvil = new AnvilGUI("&fType kit name") {
+
 			@Override
 			public boolean onInteractItem(Player player, ItemStack newItem, ItemStack oldItem, ClickType type, int slot,
 					boolean guiClick) {
-				if (guiClick && getRenameText() != null && !getRenameText().trim().isEmpty()
-						&& !"kitnamehere".equalsIgnoreCase(getRenameText().replace(" ", ""))) {
-					KitSample kit = ((Kit) API.get().getCommandManager().getRegistered().get("kit")).getKits()
-							.get(getRenameText().replace(" ", ""));
-					if (kit == null) {
-						kit = new KitSample(getRenameText().replace(" ", ""));
-						((Kit) API.get().getCommandManager().getRegistered().get("kit")).getKits().put(kit.getName(),
-								kit);
-						// save
-						Config config = API.get().getConfigManager().getKits();
-						config.set(kit.getName() + ".permission", kit.getPermission());
-						config.set(kit.getName() + ".settings.cost", kit.getCost());
-						config.set(kit.getName() + ".settings.override-contents-in-slots", kit.isOverrideContents());
-						config.set(kit.getName() + ".settings.drop-items-when-full-inv", kit.isDropItems());
-						config.set(kit.getName() + ".settings.cooldown.bypass-perm", kit.getCooldown().getBypassPerm());
-						config.set(kit.getName() + ".settings.cooldown.time",
-								TimeUtils.timeToString(kit.getCooldown().getTime()));
-						config.set(kit.getName() + ".messages", kit.getMessages());
-						config.set(kit.getName() + ".commands", kit.getCommands());
-						List<String> contents = new ArrayList<>();
-						for (Entry<Integer, ItemStack> stack : kit.getContents().entrySet()) {
-							@SuppressWarnings("unchecked")
-							Map<String, Object> map = (Map<String, Object>) Json.writer()
-									.writeWithoutParse(stack.getValue());
-							String material = map.remove("type").toString();
-							if (map.isEmpty())
-								contents.add(stack.getKey() + ":" + material);
-							else
-								contents.add(stack.getKey() + ":" + material + Json.writer().simpleWrite(map));
-						}
-						config.set(kit.getName() + ".contents", contents);
-						config.save("yaml");
-					}
-					openEditorOf(player, page, kit);
+
+				if (!guiClick)
+					return false;
+
+				String name = getRenameText();
+
+				if (name == null)
+					return false;
+
+				name = name.replace(" ", "").trim();
+
+				if (name.isEmpty() || "kitnamehere".equalsIgnoreCase(name))
+					return false;
+
+				KitSample existing = findKit(name);
+
+				if (existing != null) {
+
+					syncKitData(sharedData, existing);
+
+					close(player);
+
+					return false;
 				}
+
+				KitSample kit = new KitSample(name);
+
+				kits().put(name.toLowerCase(Locale.ROOT), kit);
+
+				saveKit(kit);
+
+				syncKitData(sharedData, kit);
+
+				close(player);
+
 				return false;
 			}
 
+			@Override
+			public void onClose(Player player, CloseReason reason) {
+
+				if (selectedKit(sharedData) != null)
+
+					openGui(player, GUI_DETAIL);
+				else
+					openGui(player, GUI_MAIN);
+			}
 		};
+
 		anvil.setItem(0, new EmptyItemGUI(ItemMaker.of(XMaterial.NAME_TAG).displayName("Kit Name Here").build()));
+
 		anvil.open(player);
+	}
+
+	/*
+	 * ============================================================ GENERIC ANVIL
+	 * INPUT ============================================================
+	 */
+
+	private void openTextInput(Player player, String title, String initialValue, XMaterial material,
+			Consumer<String> consumer, String returnGui) {
+
+		AnvilGUI anvil = new AnvilGUI(title) {
+
+			@Override
+			public boolean onInteractItem(Player player, ItemStack newItem, ItemStack oldItem, ClickType type, int slot,
+					boolean guiClick) {
+
+				if (!guiClick)
+					return false;
+
+				consumer.accept(getRenameText());
+
+				close(player);
+
+				return false;
+			}
+
+			@Override
+			public void onClose(Player player, CloseReason reason) {
+
+				openGui(player, returnGui);
+			}
+		};
+
+		String display = initialValue == null || initialValue.isEmpty() ? " " : initialValue;
+
+		anvil.setItem(0, new EmptyItemGUI(ItemMaker.of(material).displayName(display).build()));
+
+		anvil.open(player);
+	}
+
+	/*
+	 * ============================================================ GUI
+	 * ============================================================
+	 */
+
+	private void openMain(Player player) {
+
+		Config data = sharedData(player);
+
+		clearKitData(data);
+
+		openGui(player, GUI_MAIN);
+	}
+
+	private static void openGui(Player player, String id) {
+
+		GuiCreator creator = GuiCreator.guis.get(id);
+
+		if (creator != null)
+			creator.open(player);
+	}
+
+	private static void reloadLoopGui(String id) {
+
+		GuiCreator creator = GuiCreator.guis.get(id);
+
+		if (creator instanceof LoopGuiCreator)
+			((LoopGuiCreator) creator).reload();
+	}
+
+	/*
+	 * ============================================================ KIT STATE
+	 * ============================================================
+	 */
+
+	private static Config sharedData(Player player) {
+
+		return GuiCreator.sharedData.computeIfAbsent(player.getUniqueId(), ignored -> new Config());
+	}
+
+	private KitSample selectedKit(Config sharedData) {
+
+		String name = sharedData.getString(DATA_KIT);
+
+		return findKit(name);
+	}
+
+	private void syncKitData(Config data, KitSample kit) {
+
+		data.set(DATA_KIT, kit.getName());
+
+		data.set("kit_name", kit.getName());
+
+		data.set("kit_permission", kit.getPermission() == null ? "none" : kit.getPermission());
+
+		data.set("kit_cost", kit.getCost());
+
+		data.set("kit_override_contents", kit.isOverrideContents());
+
+		data.set("kit_drop_items", kit.isDropItems());
+
+		data.set("kit_cooldown_permission",
+				kit.getCooldown().getBypassPerm() == null ? "none" : kit.getCooldown().getBypassPerm());
+
+		data.set("kit_cooldown_time", TimeUtils.timeToString(kit.getCooldown().getTime()));
+
+		data.set("kit_contents_count", kit.getContents().size());
+
+		data.set("kit_messages_count", kit.getMessages().size());
+
+		data.set("kit_commands_count", kit.getCommands().size());
+	}
+
+	private static void clearKitData(Config data) {
+
+		data.remove(DATA_KIT);
+
+		data.remove("kit_name");
+		data.remove("kit_permission");
+		data.remove("kit_cost");
+
+		data.remove("kit_override_contents");
+		data.remove("kit_drop_items");
+
+		data.remove("kit_cooldown_permission");
+		data.remove("kit_cooldown_time");
+
+		data.remove("kit_contents_count");
+		data.remove("kit_messages_count");
+		data.remove("kit_commands_count");
+	}
+
+	/*
+	 * ============================================================ KIT LOOKUP
+	 * ============================================================
+	 */
+
+	private Map<String, KitSample> kits() {
+
+		return ((Kit) API.get().getCommandManager().getRegistered().get("kit")).getKits();
+	}
+
+	private KitSample findKit(String name) {
+
+		if (name == null || name.trim().isEmpty())
+			return null;
+
+		KitSample direct = kits().get(name.toLowerCase(Locale.ROOT));
+
+		if (direct != null)
+			return direct;
+
+		for (KitSample kit : kits().values())
+
+			if (kit.getName().equalsIgnoreCase(name))
+
+				return kit;
+
+		return null;
+	}
+
+	/*
+	 * ============================================================ SAVE
+	 * ============================================================
+	 */
+
+	private void saveAndSync(Config data, KitSample kit) {
+
+		saveKit(kit);
+
+		syncKitData(data, kit);
+	}
+
+	private void saveKit(KitSample kit) {
+
+		Config config = API.get().getConfigManager().getKits();
+
+		String key = kit.getName();
+
+		config.remove(key);
+
+		config.set(key + ".permission", kit.getPermission());
+
+		config.set(key + ".settings.cost", kit.getCost());
+
+		config.set(key + ".settings.override-contents-in-slots", kit.isOverrideContents());
+
+		config.set(key + ".settings.drop-items-when-full-inv", kit.isDropItems());
+
+		config.set(key + ".settings.cooldown.bypass-perm", kit.getCooldown().getBypassPerm());
+
+		config.set(key + ".settings.cooldown.time", TimeUtils.timeToString(kit.getCooldown().getTime()));
+
+		config.set(key + ".messages", kit.getMessages());
+
+		config.set(key + ".commands", kit.getCommands());
+
+		List<Entry<Integer, ItemStack>> entries = new ArrayList<>(kit.getContents().entrySet());
+
+		entries.sort(Entry.comparingByKey());
+
+		List<String> contents = new ArrayList<>();
+
+		for (Entry<Integer, ItemStack> entry : entries) {
+
+			ItemStack stack = entry.getValue();
+
+			if (isEmpty(stack))
+				continue;
+
+			@SuppressWarnings("unchecked")
+			Map<String, Object> map = (Map<String, Object>) Json.writer().writeWithoutParse(stack);
+
+			String type = map.remove("type").toString();
+
+			if (map.isEmpty())
+
+				contents.add(entry.getKey() + ":" + type);
+
+			else
+				contents.add(entry.getKey() + ":" + type + Json.writer().simpleWrite(map));
+		}
+
+		config.set(key + ".contents", contents);
+
+		config.save("yaml");
+	}
+
+	/*
+	 * ============================================================ DELETE
+	 * ============================================================
+	 */
+
+	private void deleteKit(KitSample kit) {
+
+		kits().remove(kit.getName().toLowerCase(Locale.ROOT));
+
+		API.get().getCooldownManager().unregister(kit.getCooldown().id());
+
+		API.get().getConfigManager().getKits().remove(kit.getName()).save("yaml");
+	}
+
+	/*
+	 * ============================================================ UTILS
+	 * ============================================================
+	 */
+
+	private static String resolve(Player player, Map<String, Object> placeholders, String values) {
+
+		if (values == null || values.isEmpty())
+			return "";
+
+		return Utils.replacePlaceholders(values, placeholders, player.getUniqueId());
+	}
+
+	private static boolean isEmpty(ItemStack item) {
+
+		return item == null || item.getType() == Material.AIR;
+	}
+
+	private static int[] createInventorySlotOrder() {
+
+		int[] slots = new int[41];
+
+		int index = 0;
+
+		/*
+		 * Armor + offhand
+		 */
+		slots[index++] = 39;
+		slots[index++] = 38;
+		slots[index++] = 37;
+		slots[index++] = 36;
+		slots[index++] = 40;
+
+		/*
+		 * Main inventory
+		 */
+		for (int slot = 9; slot <= 35; ++slot)
+
+			slots[index++] = slot;
+
+		/*
+		 * Hotbar
+		 */
+		for (int slot = 0; slot <= 8; ++slot)
+
+			slots[index++] = slot;
+
+		return slots;
 	}
 }

@@ -34,11 +34,19 @@ import me.devtec.theapi.bukkit.gui.expansion.utils.Utils;
 
 public class Warp extends CssCommand {
 
-	private static final String LOOP_NAME = "warp";
+	private static final String LOOP_NAME = "WARP";
 	private static final String GUI_NAME = "warp";
 
+	private static final String ACTION_WARP = "WARP";
+	private static final String ACTION_WARP_SILENT = "WARP_SILENT";
+	private static final String ACTION_WARP_INSTANT = "WARP_INSTANT";
+	private static final String ACTION_WARP_SILENT_INSTANT = "WARP_SILENT_INSTANT";
+
 	public static void callMenuUpdate() {
-		// LoopManager generates warp items dynamically every time the menu is opened.
+		GuiCreator gui = GuiCreator.guis.get(GUI_NAME);
+
+		if (gui instanceof LoopGuiCreator)
+			((LoopGuiCreator) gui).reload();
 	}
 
 	@Override
@@ -46,10 +54,11 @@ public class Warp extends CssCommand {
 		super.unregister();
 
 		LoopManager.unregister(LOOP_NAME);
-		ActionManager.unregister("warp");
-		ActionManager.unregister("warp_silent");
-		ActionManager.unregister("warp_instant");
-		ActionManager.unregister("warp_silent_instant");
+
+		ActionManager.unregister(ACTION_WARP);
+		ActionManager.unregister(ACTION_WARP_SILENT);
+		ActionManager.unregister(ACTION_WARP_INSTANT);
+		ActionManager.unregister(ACTION_WARP_SILENT_INSTANT);
 
 		WarpManager.getProvider().unload(true);
 	}
@@ -65,6 +74,7 @@ public class Warp extends CssCommand {
 		registerActions();
 
 		GuiCreator gui = GuiCreator.guis.get(GUI_NAME);
+
 		if (gui instanceof LoopGuiCreator)
 			((LoopGuiCreator) gui).reload();
 
@@ -79,6 +89,7 @@ public class Warp extends CssCommand {
 				}
 
 				GuiCreator creator = GuiCreator.guis.get(GUI_NAME);
+
 				if (creator == null) {
 					msgUsage(sender, "cmd");
 					return;
@@ -158,12 +169,14 @@ public class Warp extends CssCommand {
 		List<String> commands = getCommands();
 
 		if (!commands.isEmpty())
-			this.cmd = addBypassSettings(cmd).build().register(commands.remove(0), commands.toArray(new String[0]));
+			this.cmd = addBypassSettings(cmd).build().register(commands.remove(0),
+					commands.toArray(new String[commands.size()]));
 	}
 
 	private void registerLoop() {
 		LoopManager.register(LOOP_NAME, () -> (holder, player, sharedData, conditions, defaultItem) -> {
-			List<ItemGUI> items = new ArrayList<>();
+
+			List<ItemGUI> items = new ArrayList<ItemGUI>();
 
 			for (String warpName : WarpManager.getProvider().getWarps()) {
 				WarpInfo warp = WarpManager.getProvider().get(warpName);
@@ -184,14 +197,19 @@ public class Warp extends CssCommand {
 	}
 
 	private void registerActions() {
-		registerWarpAction("warp", true, false);
-		registerWarpAction("warp_silent", false, false);
-		registerWarpAction("warp_instant", true, true);
-		registerWarpAction("warp_silent_instant", false, true);
+		registerWarpAction(ACTION_WARP, true, false);
+
+		registerWarpAction(ACTION_WARP_SILENT, false, false);
+
+		registerWarpAction(ACTION_WARP_INSTANT, true, true);
+
+		registerWarpAction(ACTION_WARP_SILENT_INSTANT, false, true);
 	}
 
 	private void registerWarpAction(String actionName, boolean sendMessages, boolean instant) {
+
 		ActionManager.register(actionName, (holder, values) -> (gui, player, sharedData, placeholders) -> {
+
 			String warpName = resolveWarpName(player, placeholders, values);
 
 			if (warpName == null)
@@ -202,13 +220,17 @@ public class Warp extends CssCommand {
 	}
 
 	private Map<String, Object> createWarpPlaceholders(Player player, String warpName, WarpInfo warp) {
+
 		Map<String, Object> placeholders = new HashMap<>(24);
 
 		String permission = warp.getPermission() == null ? "" : warp.getPermission();
 
 		boolean requiresPermission = !permission.isEmpty();
+
 		boolean hasPermission = !requiresPermission || player.hasPermission(permission);
+
 		boolean hasCost = warp.getCost() > 0;
+
 		boolean hasMoney = !hasCost
 				|| API.get().getEconomyHook().has(player.getName(), player.getWorld().getName(), warp.getCost());
 
@@ -224,6 +246,7 @@ public class Warp extends CssCommand {
 		placeholders.put("warp_permission", permission);
 
 		placeholders.put("world", warp.getPosition().getWorld().getName());
+
 		placeholders.put("warp_world", warp.getPosition().getWorld().getName());
 
 		placeholders.put("warp_material", material.name());
@@ -231,14 +254,17 @@ public class Warp extends CssCommand {
 		placeholders.put("warp_valid", warp.isValid());
 
 		placeholders.put("warp_requires_permission", requiresPermission);
+
 		placeholders.put("warp_has_permission", hasPermission);
 
 		placeholders.put("warp_has_cost", hasCost);
+
 		placeholders.put("warp_has_money", hasMoney);
 
 		placeholders.put("warp_can_use", hasPermission && hasMoney);
 
 		placeholders.put("warp_has_cooldown", warp.getCooldown() != null);
+
 		placeholders.put("warp_cooldown", warp.getCooldown() == null ? "" : warp.getCooldown().id());
 
 		return placeholders;
@@ -247,24 +273,29 @@ public class Warp extends CssCommand {
 	private static ItemPackage findWarpItem(Player player, Config sharedData, Map<String, Object> placeholders,
 			List<ConditionItem> conditions, ItemPackage defaultItem) {
 
-		for (ConditionItem condition : conditions) {
-			ItemPackage result = condition.test(player, sharedData, placeholders);
+		if (conditions != null)
+			for (ConditionItem condition : conditions) {
+				ItemPackage result = condition.test(player, sharedData, placeholders);
 
-			if (result != null && result.getItem() != null)
-				return result;
-		}
+				if (result != null && result.getItem() != null)
+					return result;
+			}
 
-		return defaultItem != null && defaultItem.getItem() != null ? defaultItem : null;
+		if (defaultItem == null || defaultItem.getItem() == null)
+			return null;
+
+		return defaultItem;
 	}
 
-	private static ItemGUI createWarpItem(ItemPackage result, Player placeholderPlayer, Config sharedData,
-			Map<String, Object> placeholders) {
+	private static ItemGUI createWarpItem(final ItemPackage result, final Player placeholderPlayer,
+			final Config sharedData, final Map<String, Object> placeholders) {
 
 		return new ItemGUI(Utils.applyPlaceholders(result.getTypePlaceholder(), result.getItem(), placeholders,
 				placeholderPlayer)) {
 
 			@Override
 			public void onClick(Player player, HolderGUI gui, ClickType click) {
+
 				result.runActions(gui, player, sharedData, placeholders);
 			}
 		};
@@ -275,12 +306,14 @@ public class Warp extends CssCommand {
 		String warpName = values;
 
 		if (warpName == null || warpName.trim().isEmpty()) {
-			Object value = placeholders.get("warp");
+
+			Object value = placeholders == null ? null : placeholders.get("warp");
 
 			if (value == null)
 				return null;
 
-			warpName = value.toString();
+			warpName = String.valueOf(value);
+
 		} else
 			warpName = Utils.replacePlaceholders(warpName, placeholders, player.getUniqueId());
 
@@ -289,7 +322,10 @@ public class Warp extends CssCommand {
 
 		warpName = warpName.trim();
 
-		return warpName.isEmpty() ? null : warpName.toLowerCase(Locale.ROOT);
+		if (warpName.isEmpty())
+			return null;
+
+		return warpName.toLowerCase(Locale.ROOT);
 	}
 
 	public WarpResult warp(Player target, String warpName, boolean sendMessages, boolean instant,
@@ -302,10 +338,11 @@ public class Warp extends CssCommand {
 
 		WarpResult result = warp.warp(target, instant);
 
-		if (!sendMessages)
+		if (!sendMessages || result == null)
 			return result;
 
 		if (!sender.equals(target)) {
+
 			TextRenderer targetRenderer = createWarpRenderer(target, sender, target, warpName, warp);
 
 			TextRenderer senderRenderer = createWarpRenderer(sender, sender, target, warpName, warp);
@@ -328,8 +365,13 @@ public class Warp extends CssCommand {
 
 				msg(sender, "other.success.sender", senderRenderer);
 				break;
+
+			default:
+				break;
 			}
+
 		} else {
+
 			TextRenderer renderer = createWarpRenderer(target, sender, target, warpName, warp);
 
 			switch (result) {
@@ -343,6 +385,9 @@ public class Warp extends CssCommand {
 
 			case SUCCESS:
 				msg(target, "self.success", renderer);
+				break;
+
+			default:
 				break;
 			}
 		}

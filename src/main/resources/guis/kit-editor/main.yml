@@ -1,0 +1,86 @@
+title: "&8Kit Editor &7({page}/{totalPages})"
+
+loop:
+  value: kit_editor_kits
+
+  item:
+    B:
+      action: PREVIOUS_PAGE
+
+      available:
+        type: ARROW
+        displayName: "&aPrevious page"
+        lore:
+        - ""
+        - "&7Go to page &f{previousPage}"
+        - ""
+
+      unavailable:
+        type: BLACK_STAINED_GLASS_PANE
+        displayName: "&c"
+
+    N:
+      action: NEXT_PAGE
+
+      available:
+        type: ARROW
+        displayName: "&aNext page"
+        lore:
+        - ""
+        - "&7Go to page &f{nextPage}"
+        - ""
+
+      unavailable:
+        type: BLACK_STAINED_GLASS_PANE
+        displayName: "&c"
+
+    result:
+      type: CHEST
+      displayName: "&a{kit_name}"
+      lore:
+      - ""
+      - "&8» &7Permission: &f{kit_permission}"
+      - "&8» &7Cost: &e{kit_cost}"
+      - ""
+      - "&8» &7Contents: &f{kit_contents}"
+      - "&8» &7Messages: &f{kit_messages}"
+      - "&8» &7Commands: &f{kit_commands}"
+      - ""
+      - "&eClick to edit this kit."
+      - ""
+
+      click:
+        commands: []
+        messages: []
+        actions:
+        - "kit_editor_select:{kit}"
+        - "OPEN_MENU:kit-editor/detail"
+
+lines:
+- "xxxxxxxxx"
+- "#########"
+- "#########"
+- "#########"
+- "#########"
+- "xBxxaxxNx"
+
+items:
+  x:
+    type: BLACK_STAINED_GLASS_PANE
+    displayName: "&c"
+
+  a:
+    type: ANVIL
+    displayName: "&aCreate new kit"
+    lore:
+    - ""
+    - "&7Create a new kit."
+    - ""
+    - "&eClick to continue."
+    - ""
+
+    click:
+      commands: []
+      messages: []
+      actions:
+      - "kit_editor_create"

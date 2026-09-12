@@ -1,0 +1,122 @@
+title: "&8Kit Editor &7- &f[kit_name]"
+
+lines:
+- "xxxxxxxxx"
+- "x s m c x"
+- "x i k d x"
+- "xxxxbxxxx"
+
+items:
+  x:
+    type: BLACK_STAINED_GLASS_PANE
+    displayName: "&c"
+
+  s:
+    type: COMPARATOR
+    displayName: "&eSettings"
+    lore:
+    - ""
+    - "&8» &7Cost: &f[kit_cost]"
+    - "&8» &7Permission: &f[kit_permission]"
+    - "&8» &7Cooldown: &f[kit_cooldown_time]"
+    - ""
+    - "&eClick to edit settings."
+    - ""
+
+    click:
+      commands: []
+      messages: []
+      actions:
+      - "OPEN_MENU:kit-editor/settings"
+
+  m:
+    type: PAPER
+    displayName: "&eMessages"
+    lore:
+    - ""
+    - "&8» &7Messages: &f[kit_messages_count]"
+    - ""
+    - "&eClick to edit kit messages."
+    - ""
+
+    click:
+      commands: []
+      messages: []
+      actions:
+      - "OPEN_MENU:kit-editor/messages"
+
+  c:
+    type: COMMAND_BLOCK
+    displayName: "&eCommands"
+    lore:
+    - ""
+    - "&8» &7Commands: &f[kit_commands_count]"
+    - ""
+    - "&eClick to edit kit commands."
+    - ""
+
+    click:
+      commands: []
+      messages: []
+      actions:
+      - "OPEN_MENU:kit-editor/commands"
+
+  i:
+    type: CHEST
+    displayName: "&eContents"
+    lore:
+    - ""
+    - "&8» &7Items: &f[kit_contents_count]"
+    - ""
+    - "&eClick to edit exact inventory slots."
+    - ""
+
+    click:
+      commands: []
+      messages: []
+      actions:
+      - "OPEN_MENU:kit-editor/contents"
+
+  k:
+    type: NAME_TAG
+    displayName: "&a[kit_name]"
+    lore:
+    - ""
+    - "&8» &7Permission: &f[kit_permission]"
+    - "&8» &7Cost: &e[kit_cost]"
+    - "&8» &7Cooldown: &f[kit_cooldown_time]"
+    - ""
+    - "&8» &7Override contents: &f[kit_override_contents]"
+    - "&8» &7Drop items: &f[kit_drop_items]"
+    - ""
+
+  d:
+    type: BARRIER
+    displayName: "&cDelete kit"
+    lore:
+    - ""
+    - "&cThis permanently deletes &f[kit_name]&c."
+    - ""
+    - "&cClick to delete."
+    - ""
+
+    click:
+      commands: []
+      messages: []
+      actions:
+      - "kit_editor_delete"
+      - "OPEN_MENU:kit-editor/main"
+
+  b:
+    type: ARROW
+    displayName: "&cBack"
+    lore:
+    - ""
+    - "&7Return to the kit list."
+    - ""
+
+    click:
+      commands: []
+      messages: []
+      actions:
+      - "OPEN_MENU:kit-editor/main"

@@ -1,0 +1,75 @@
+title: "&8Kit Contents &7- &f[kit_name]"
+
+loop:
+  value: kit_editor_slots
+
+  item:
+    result:
+      type: LIGHT_GRAY_STAINED_GLASS_PANE
+      displayName: "&7Inventory slot"
+
+lines:
+- "xx#####xx"
+- "#########"
+- "#########"
+- "#########"
+- "#########"
+- "xbxxixcxx"
+
+items:
+  x:
+    type: BLACK_STAINED_GLASS_PANE
+    displayName: "&c"
+
+  b:
+    type: ARROW
+    displayName: "&cBack"
+    lore:
+    - ""
+    - "&7Return to kit overview."
+    - ""
+
+    click:
+      commands: []
+      messages: []
+      actions:
+      - "OPEN_MENU:kit-editor/detail"
+
+  i:
+    type: CHEST
+    displayName: "&aImport your inventory"
+    lore:
+    - ""
+    - "&7Copies your current inventory"
+    - "&7into this kit."
+    - ""
+    - "&8» &7Slots &f0-40 &7are imported."
+    - "&8» &7Your own items are not removed."
+    - ""
+    - "&eClick to import."
+    - ""
+
+    click:
+      commands: []
+      messages: []
+      actions:
+      - "kit_editor_import_inventory"
+      - "UPDATE_ITEM:#"
+
+  c:
+    type: BARRIER
+    displayName: "&cClear kit contents"
+    lore:
+    - ""
+    - "&7Removes all stored items"
+    - "&7from this kit."
+    - ""
+    - "&cClick to clear."
+    - ""
+
+    click:
+      commands: []
+      messages: []
+      actions:
+      - "kit_editor_clear_contents"
+      - "UPDATE_ITEM:#"

@@ -1,9 +1,10 @@
 title: "&8Warps &7({page}/{totalPages})"
 
 loop:
-  value: WARP
+  value: warp
 
   item:
+
     B:
       action: PREVIOUS_PAGE
 
@@ -35,9 +36,13 @@ loop:
         displayName: "&c"
 
     result:
+
       conditions:
 
-        # Warp requires a permission and player doesn't have it.
+        #
+        # 0
+        # Warp requires permission and player doesn't have it.
+        #
         0:
           check:
           - "CHECK_PLACEHOLDER:{warp_requires_permission}==true"
@@ -54,17 +59,20 @@ loop:
           - "&cYou don't have permission"
           - "&cto use this warp."
           - ""
+          - "&7Click for more information."
 
           click:
             commands: []
             messages: []
             actions:
-            - "WARP"
+            - "warp"
 
-        # Player can use the permission, but doesn't have enough money.
+        #
+        # 1
+        # Warp costs money and player can't afford it.
+        #
         1:
           check:
-          - "CHECK_PLACEHOLDER:{warp_has_permission}==true"
           - "CHECK_PLACEHOLDER:{warp_has_cost}==true"
           - "CHECK_PLACEHOLDER:{warp_has_money}==false"
 
@@ -78,20 +86,22 @@ loop:
           - ""
           - "&cYou don't have enough money."
           - ""
+          - "&7Click for more information."
 
           click:
             commands: []
             messages: []
             actions:
-            - "WARP"
+            - "warp"
 
-        # Warp has both permission and cost.
+        #
+        # 2
+        # Permission + paid.
+        #
         2:
           check:
           - "CHECK_PLACEHOLDER:{warp_requires_permission}==true"
-          - "CHECK_PLACEHOLDER:{warp_has_permission}==true"
           - "CHECK_PLACEHOLDER:{warp_has_cost}==true"
-          - "CHECK_PLACEHOLDER:{warp_has_money}==true"
 
           type: "{warp_material}"
           displayName: "&a{warp}"
@@ -109,14 +119,15 @@ loop:
             commands: []
             messages: []
             actions:
-            - "WARP"
+            - "warp"
 
-        # Warp requires permission but is free.
+        #
+        # 3
+        # Permission + free.
+        #
         3:
           check:
           - "CHECK_PLACEHOLDER:{warp_requires_permission}==true"
-          - "CHECK_PLACEHOLDER:{warp_has_permission}==true"
-          - "CHECK_PLACEHOLDER:{warp_has_cost}==false"
 
           type: "{warp_material}"
           displayName: "&a{warp}"
@@ -133,14 +144,15 @@ loop:
             commands: []
             messages: []
             actions:
-            - "WARP"
+            - "warp"
 
-        # Warp doesn't require permission, but has a cost.
+        #
+        # 4
+        # No permission requirement + paid.
+        #
         4:
           check:
-          - "CHECK_PLACEHOLDER:{warp_requires_permission}==false"
           - "CHECK_PLACEHOLDER:{warp_has_cost}==true"
-          - "CHECK_PLACEHOLDER:{warp_has_money}==true"
 
           type: "{warp_material}"
           displayName: "&a{warp}"
@@ -157,9 +169,13 @@ loop:
             commands: []
             messages: []
             actions:
-            - "WARP"
+            - "warp"
 
-      # Free warp without permission.
+      #
+      # DEFAULT
+      #
+      # No permission requirement + free.
+      #
       type: "{warp_material}"
       displayName: "&a{warp}"
 
@@ -174,7 +190,7 @@ loop:
         commands: []
         messages: []
         actions:
-        - "WARP"
+        - "warp"
 
 lines:
 - "xxxxxxxxx"
@@ -185,6 +201,7 @@ lines:
 - "xBxxcxxNx"
 
 items:
+
   x:
     type: BLACK_STAINED_GLASS_PANE
     displayName: "&c"
@@ -192,6 +209,7 @@ items:
   c:
     type: RED_STAINED_GLASS_PANE
     displayName: "&cClose"
+
     lore:
     - ""
     - "&7Click to close menu!"

@@ -1,0 +1,128 @@
+title: "&8Kit Settings &7- &f[kit_name]"
+
+lines:
+- "xxxxxxxxx"
+- "x c p y x"
+- "x t o d x"
+- "xxxxbxxxx"
+
+items:
+  x:
+    type: BLACK_STAINED_GLASS_PANE
+    displayName: "&c"
+
+  c:
+    type: GOLD_INGOT
+    displayName: "&eCost"
+    lore:
+    - ""
+    - "&8» &7Current: &f[kit_cost]"
+    - ""
+    - "&eClick to edit."
+    - ""
+
+    click:
+      commands: []
+      messages: []
+      actions:
+      - "kit_editor_edit_cost"
+
+  p:
+    type: NAME_TAG
+    displayName: "&ePermission"
+    lore:
+    - ""
+    - "&8» &7Current:"
+    - "&f[kit_permission]"
+    - ""
+    - "&eClick to edit."
+    - ""
+
+    click:
+      commands: []
+      messages: []
+      actions:
+      - "kit_editor_edit_permission"
+
+  y:
+    type: TRIPWIRE_HOOK
+    displayName: "&eCooldown bypass permission"
+    lore:
+    - ""
+    - "&8» &7Current:"
+    - "&f[kit_cooldown_permission]"
+    - ""
+    - "&eClick to edit."
+    - ""
+
+    click:
+      commands: []
+      messages: []
+      actions:
+      - "kit_editor_edit_cooldown_permission"
+
+  t:
+    type: CLOCK
+    displayName: "&eCooldown time"
+    lore:
+    - ""
+    - "&8» &7Current: &f[kit_cooldown_time]"
+    - ""
+    - "&7Examples: &f30s&7, &f5m&7, &f1h"
+    - ""
+    - "&eClick to edit."
+    - ""
+
+    click:
+      commands: []
+      messages: []
+      actions:
+      - "kit_editor_edit_cooldown_time"
+
+  o:
+    type: HOPPER
+    displayName: "&eOverride contents in slots"
+    lore:
+    - ""
+    - "&8» &7Enabled: &f[kit_override_contents]"
+    - ""
+    - "&eClick to toggle."
+    - ""
+
+    click:
+      commands: []
+      messages: []
+      actions:
+      - "kit_editor_toggle_override"
+      - "UPDATE_ITEM:o"
+
+  d:
+    type: DROPPER
+    displayName: "&eDrop items when inventory is full"
+    lore:
+    - ""
+    - "&8» &7Enabled: &f[kit_drop_items]"
+    - ""
+    - "&eClick to toggle."
+    - ""
+
+    click:
+      commands: []
+      messages: []
+      actions:
+      - "kit_editor_toggle_drop"
+      - "UPDATE_ITEM:d"
+
+  b:
+    type: ARROW
+    displayName: "&cBack"
+    lore:
+    - ""
+    - "&7Return to kit overview."
+    - ""
+
+    click:
+      commands: []
+      messages: []
+      actions:
+      - "OPEN_MENU:kit-editor/detail"
