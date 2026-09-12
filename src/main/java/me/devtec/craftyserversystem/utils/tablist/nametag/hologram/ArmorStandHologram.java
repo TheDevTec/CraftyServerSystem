@@ -169,7 +169,7 @@ public class ArmorStandHologram extends Hologram {
 	}
 
 	private static Object makeItemInstance(Object dataIndex, Object value) {
-		return Ref.isAtMost(19, 2)
+		return Ref.isAtLeast(19, 2)
 				? Ref.invoke(Ref.newInstance(dataWatcherItem, dataIndex, value), dataWatcherMakeInstance)
 				: Ref.isBefore(12, 0)
 						? Ref.newInstance(dataWatcherItem, value.getClass() == String.class ? 4 : 0, (int) dataIndex,
