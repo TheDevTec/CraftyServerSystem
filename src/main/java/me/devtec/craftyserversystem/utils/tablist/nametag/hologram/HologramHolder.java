@@ -31,7 +31,7 @@ public interface HologramHolder {
 			posY = Ref.field(entityTeleport, BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "y" : "c"),
 			posZ = Ref.field(entityTeleport, BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "z" : "d"),
 			onGround = Ref.field(entityTeleport, BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "onGround" : "g");
-	Field metadataId = Ref.isAtMost(19, 2) ? null : Ref.field(metadataClass, int.class);
+	Field metadataId = Ref.isAtLeast(19, 2) ? null : Ref.field(metadataClass, int.class);
 	Field metadataList = Ref.field(metadataClass, List.class);
 	Class<?> vec3D = Ref.nms("world.phys", "Vec3") == null ? Ref.nms("world.phys", "Vec3D")
 			: Ref.nms("world.phys", "Vec3");
@@ -44,7 +44,7 @@ public interface HologramHolder {
 
 	static Object packetMetadata(int id, List<?> list) {
 		try {
-			return Ref.isAtMost(19, 2) ? Ref.newInstance(metadataConstructor, id, list)
+			return Ref.isAtLeast(19, 2) ? Ref.newInstance(metadataConstructor, id, list)
 					: initMetadataPacket(Ref.newUnsafeInstance(metadataClass), id, list);
 		} catch (Exception e) {
 			return null;
