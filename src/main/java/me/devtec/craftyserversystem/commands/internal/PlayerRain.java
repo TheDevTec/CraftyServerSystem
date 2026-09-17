@@ -15,32 +15,30 @@ public class PlayerRain extends CssCommand {
 
 	@Override
 	public void register() {
-		if (isRegistered())
+		if(isRegistered())
 			return;
 
-		CommandStructure<CommandSender> cmd = CommandStructure
-				.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
-					if (!(sender instanceof Player)) {
-						msgUsage(sender, "usage");
-						return;
-					}
-					setRain(sender, (Player) sender);
-				}).permission(getPerm("cmd")).selector(Selector.ENTITY_SELECTOR, (sender, structure, args) -> {
-					for (Player player : selector(sender, args[0]))
-						setRain(sender, player);
-				}).permission(getPerm("other"));
+		CommandStructure<CommandSender> cmd = CommandStructure.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
+			if(!(sender instanceof Player)) {
+				msgUsage(sender, "usage");
+				return;
+			}
+			setRain(sender, (Player) sender);
+		}).permission(getPerm("cmd")).selector(Selector.ENTITY_SELECTOR, (sender, structure, args) -> {
+			for(Player player : selector(sender, args[0]))
+				setRain(sender, player);
+		}).permission(getPerm("other"));
 
 		// register
 		List<String> cmds = getCommands();
-		if (!cmds.isEmpty())
+		if(!cmds.isEmpty())
 			this.cmd = addBypassSettings(cmd).build().register(cmds.remove(0), cmds.toArray(new String[0]));
 	}
 
 	public void setRain(CommandSender sender, Player target) {
 		target.setPlayerWeather(WeatherType.DOWNFALL);
-		if (!sender.equals(target)) {
-			TextRenderer PLACEHOLDERS = renderer().placeholder("sender", sender.getName()).placeholder("target",
-					target.getName());
+		if(!sender.equals(target)) {
+			TextRenderer PLACEHOLDERS = renderer().placeholder("sender", sender.getName()).placeholder("target", target.getName());
 			msgOut(sender, "playerrain.other.sender", PLACEHOLDERS);
 			msgOut(target, "playerrain.other.target", PLACEHOLDERS);
 		} else

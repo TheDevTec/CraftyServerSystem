@@ -44,7 +44,7 @@ public class CssEconomyVaultImplementation extends CssEconomy implements Economy
 
 	@Override
 	public EconomyResponse depositPlayer(String player, String world, double balance) {
-		if (deposit(player, world, balance))
+		if(deposit(player, world, balance))
 			return new EconomyResponse(balance, balance, ResponseType.SUCCESS, "Deposited money into player's account");
 		return new EconomyResponse(balance, balance, ResponseType.FAILURE, "Amount of money cannot be in the negative");
 	}
@@ -66,7 +66,7 @@ public class CssEconomyVaultImplementation extends CssEconomy implements Economy
 
 	@Override
 	public EconomyResponse withdrawPlayer(String player, String world, double balance) {
-		if (withdraw(player, world, balance))
+		if(withdraw(player, world, balance))
 			return new EconomyResponse(balance, balance, ResponseType.SUCCESS, "Withdrawn money from player's account");
 		return new EconomyResponse(balance, balance, ResponseType.FAILURE, "Amount of money cannot be in the negative");
 	}

@@ -28,22 +28,22 @@ public class God extends CssCommand {
 
 	@Override
 	public void register() {
-		if (isRegistered())
+		if(isRegistered())
 			return;
 
-		if (Ref.isBefore(12, 0))
-			if (API.get().getConfigManager().getMain().getBoolean("god.anti-void-damage-listener"))
+		if(Ref.isBefore(12, 0))
+			if(API.get().getConfigManager().getMain().getBoolean("god.anti-void-damage-listener"))
 				listener = new Listener() {
 
 					@EventHandler(ignoreCancelled = true)
 					public void playerVoid(EntityDamageEvent e) {
-						if (e.getEntityType() == EntityType.PLAYER && isAllowed((Player) e.getEntity()))
+						if(e.getEntityType() == EntityType.PLAYER && isAllowed((Player) e.getEntity()))
 							e.setCancelled(true);
 					}
 
 					@EventHandler(ignoreCancelled = true)
 					public void playerFood(FoodLevelChangeEvent e) {
-						if (e.getEntityType() == EntityType.PLAYER && isAllowed((Player) e.getEntity()))
+						if(e.getEntityType() == EntityType.PLAYER && isAllowed((Player) e.getEntity()))
 							e.setCancelled(true);
 					}
 				};
@@ -52,37 +52,34 @@ public class God extends CssCommand {
 
 					@EventHandler(ignoreCancelled = true)
 					public void playerVoid(EntityDamageEvent e) {
-						if (e.getCause() != DamageCause.VOID && e.getEntityType() == EntityType.PLAYER
-								&& isAllowed((Player) e.getEntity()))
+						if(e.getCause() != DamageCause.VOID && e.getEntityType() == EntityType.PLAYER && isAllowed((Player) e.getEntity()))
 							e.setCancelled(true);
 					}
 
 					@EventHandler(ignoreCancelled = true)
 					public void playerFood(FoodLevelChangeEvent e) {
-						if (e.getEntityType() == EntityType.PLAYER && isAllowed((Player) e.getEntity()))
+						if(e.getEntityType() == EntityType.PLAYER && isAllowed((Player) e.getEntity()))
 							e.setCancelled(true);
 					}
 				};
-		else if (API.get().getConfigManager().getMain().getBoolean("god.anti-void-damage-listener"))
+		else if(API.get().getConfigManager().getMain().getBoolean("god.anti-void-damage-listener"))
 			listener = new Listener() {
 
 				@EventHandler(ignoreCancelled = true)
 				public void playerVoid(EntityDamageEvent e) {
-					if (e.getCause() == DamageCause.VOID && e.getEntityType() == EntityType.PLAYER
-							&& isAllowed((Player) e.getEntity()))
+					if(e.getCause() == DamageCause.VOID && e.getEntityType() == EntityType.PLAYER && isAllowed((Player) e.getEntity()))
 						e.setCancelled(true);
 				}
 
 				@EventHandler(ignoreCancelled = true)
 				public void playerFood(FoodLevelChangeEvent e) {
-					if (e.getEntityType() == EntityType.PLAYER && isAllowed((Player) e.getEntity()))
+					if(e.getEntityType() == EntityType.PLAYER && isAllowed((Player) e.getEntity()))
 						e.setCancelled(true);
 				}
 
 				@EventHandler(ignoreCancelled = true)
 				public void playerAir(EntityAirChangeEvent e) {
-					if (e.getEntityType() == EntityType.PLAYER && isAllowed((Player) e.getEntity())
-							&& ((Player) e.getEntity()).getRemainingAir() > e.getAmount())
+					if(e.getEntityType() == EntityType.PLAYER && isAllowed((Player) e.getEntity()) && ((Player) e.getEntity()).getRemainingAir() > e.getAmount())
 						e.setCancelled(true);
 				}
 			};
@@ -91,30 +88,28 @@ public class God extends CssCommand {
 
 				@EventHandler(ignoreCancelled = true)
 				public void playerFood(FoodLevelChangeEvent e) {
-					if (e.getEntityType() == EntityType.PLAYER && isAllowed((Player) e.getEntity()))
+					if(e.getEntityType() == EntityType.PLAYER && isAllowed((Player) e.getEntity()))
 						e.setCancelled(true);
 				}
 
 				@EventHandler(ignoreCancelled = true)
 				public void playerAir(EntityAirChangeEvent e) {
-					if (e.getEntityType() == EntityType.PLAYER && isAllowed((Player) e.getEntity())
-							&& ((Player) e.getEntity()).getRemainingAir() > e.getAmount())
+					if(e.getEntityType() == EntityType.PLAYER && isAllowed((Player) e.getEntity()) && ((Player) e.getEntity()).getRemainingAir() > e.getAmount())
 						e.setCancelled(true);
 				}
 			};
 		Bukkit.getPluginManager().registerEvents(listener, Loader.getPlugin());
 
-		CommandStructure<CommandSender> cmd = CommandStructure
-				.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
-					if (!(sender instanceof Player)) {
-						msgUsage(sender, "other");
-						return;
-					}
-					setGod((Player) sender, !isAllowed((Player) sender), true, sender);
-				}).permission(getPerm("cmd"));
+		CommandStructure<CommandSender> cmd = CommandStructure.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
+			if(!(sender instanceof Player)) {
+				msgUsage(sender, "other");
+				return;
+			}
+			setGod((Player) sender, !isAllowed((Player) sender), true, sender);
+		}).permission(getPerm("cmd"));
 		// silent
 		cmd.argument("-s", (sender, structure, args) -> {
-			if (!(sender instanceof Player)) {
+			if(!(sender instanceof Player)) {
 				msgUsage(sender, "other");
 				return;
 			}
@@ -122,42 +117,40 @@ public class God extends CssCommand {
 		});
 		// other
 		cmd.selector(Selector.ENTITY_SELECTOR, (sender, structure, args) -> {
-			for (Player player : selector(sender, args[0]))
+			for(Player player : selector(sender, args[0]))
 				setGod(player, !isAllowed(player), true, sender);
 		}).permission(getPerm("other"))
-				// silent
-				.argument("-s", (sender, structure, args) -> {
-					for (Player player : selector(sender, args[0]))
-						setGod(player, !isAllowed(player), false, sender);
-				});
+		        // silent
+		        .argument("-s", (sender, structure, args) -> {
+			        for(Player player : selector(sender, args[0]))
+				        setGod(player, !isAllowed(player), false, sender);
+		        });
 
 		// register
 		List<String> cmds = getCommands();
-		if (!cmds.isEmpty())
+		if(!cmds.isEmpty())
 			this.cmd = addBypassSettings(cmd).build().register(cmds.remove(0), cmds.toArray(new String[0]));
 	}
 
 	public void setGod(Player target, boolean godStatus, boolean sendMessage, CommandSender sender) {
-		if (godStatus) {
+		if(godStatus) {
 			me.devtec.shared.API.getUser(target.getUniqueId()).set("css.god", true);
-			if (Ref.isAtLeast(9, 0))
+			if(Ref.isAtLeast(9, 0))
 				target.setInvulnerable(true);
-			if (sendMessage)
-				if (!sender.equals(target)) {
-					TextRenderer placeholders = renderer().placeholder("sender", sender.getName()).placeholder("target",
-							target.getName());
+			if(sendMessage)
+				if(!sender.equals(target)) {
+					TextRenderer placeholders = renderer().placeholder("sender", sender.getName()).placeholder("target", target.getName());
 					msg(target, "other.true.target", placeholders);
 					msg(sender, "other.true.sender", placeholders);
 				} else
 					msg(target, "self.true", renderer().placeholder("target", target.getName()));
 		} else {
 			me.devtec.shared.API.getUser(target.getUniqueId()).set("css.god", false);
-			if (Ref.isAtLeast(9, 0))
+			if(Ref.isAtLeast(9, 0))
 				target.setInvulnerable(false);
-			if (sendMessage)
-				if (!sender.equals(target)) {
-					TextRenderer placeholders = renderer().placeholder("sender", sender.getName()).placeholder("target",
-							target.getName());
+			if(sendMessage)
+				if(!sender.equals(target)) {
+					TextRenderer placeholders = renderer().placeholder("sender", sender.getName()).placeholder("target", target.getName());
 					msg(target, "other.false.target", placeholders);
 					msg(sender, "other.false.sender", placeholders);
 				} else
@@ -166,7 +159,7 @@ public class God extends CssCommand {
 	}
 
 	public boolean isAllowed(Player target) {
-		if (Ref.isBefore(9, 0))
+		if(Ref.isBefore(9, 0))
 			return me.devtec.shared.API.getUser(target.getUniqueId()).getBoolean("css.god");
 		return target.isInvulnerable() || me.devtec.shared.API.getUser(target.getUniqueId()).getBoolean("css.god");
 	}
@@ -174,7 +167,7 @@ public class God extends CssCommand {
 	@Override
 	public void unregister() {
 		super.unregister();
-		if (listener != null) {
+		if(listener != null) {
 			HandlerList.unregisterAll(listener);
 			listener = null;
 		}

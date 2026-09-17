@@ -28,20 +28,18 @@ public class ChatIgnore extends CssCommand {
 
 	@Override
 	public void register() {
-		if (isRegistered())
+		if(isRegistered())
 			return;
 
-		boolean onlyPings = me.devtec.craftyserversystem.api.API.get().getConfigManager().getMain()
-				.getBoolean("chatIgnore.only-pings-in-chat");
-		if (!me.devtec.craftyserversystem.api.API.get().getConfigManager().getChat().getBoolean("enabled")) {
+		boolean onlyPings = me.devtec.craftyserversystem.api.API.get().getConfigManager().getMain().getBoolean("chatIgnore.only-pings-in-chat");
+		if(!me.devtec.craftyserversystem.api.API.get().getConfigManager().getChat().getBoolean("enabled")) {
 			listener = new Listener() {
 				@EventHandler
 				public void onChat(AsyncPlayerChatEvent e) {
 					Iterator<Player> itr = e.getRecipients().iterator();
-					if (itr.hasNext())
-						for (Player player = itr.next(); itr.hasNext(); player = itr.next())
-							if (API.getUser(player.getUniqueId()).getBoolean("css.chatignore")
-									&& (!onlyPings || onlyPings && notContainsName(e.getMessage(), player.getName())))
+					if(itr.hasNext())
+						for(Player player = itr.next(); itr.hasNext(); player = itr.next())
+							if(API.getUser(player.getUniqueId()).getBoolean("css.chatignore") && (!onlyPings || onlyPings && notContainsName(e.getMessage(), player.getName())))
 								itr.remove();
 				}
 
@@ -52,23 +50,22 @@ public class ChatIgnore extends CssCommand {
 			Bukkit.getPluginManager().registerEvents(listener, Loader.getPlugin());
 		}
 
-		CommandStructure<CommandSender> cmd = CommandStructure
-				.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
-					if (sender instanceof Player) {
-						Config user = API.getUser(((Player) sender).getUniqueId());
-						if (user.getBoolean("css.chatignore")) {
-							user.set("css.chatignore", false);
-							msg(sender, "accepting.self");
-							return;
-						}
-						user.set("css.chatignore", true);
-						msg(sender, "ignoring.self");
-					} else
-						msgUsage(sender, "other");
-				}).permission(getPerm("cmd"));
+		CommandStructure<CommandSender> cmd = CommandStructure.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
+			if(sender instanceof Player) {
+				Config user = API.getUser(((Player) sender).getUniqueId());
+				if(user.getBoolean("css.chatignore")) {
+					user.set("css.chatignore", false);
+					msg(sender, "accepting.self");
+					return;
+				}
+				user.set("css.chatignore", true);
+				msg(sender, "ignoring.self");
+			} else
+				msgUsage(sender, "other");
+		}).permission(getPerm("cmd"));
 		cmd.argument("-s", (sender, structure, args) -> {
 			Config user = API.getUser(((Player) sender).getUniqueId());
-			if (user.getBoolean("css.chatignore")) {
+			if(user.getBoolean("css.chatignore")) {
 				user.set("css.chatignore", false);
 				return;
 			}
@@ -76,29 +73,27 @@ public class ChatIgnore extends CssCommand {
 		}, (sender, structure, args) -> sender instanceof Player ? Arrays.asList("-s") : Collections.emptyList());
 		cmd.selector(Selector.BOOLEAN, (sender, structure, args) -> {
 			Config user = API.getUser(((Player) sender).getUniqueId());
-			if (!ParseUtils.getBoolean(args[0])) {
+			if(!ParseUtils.getBoolean(args[0])) {
 				user.set("css.chatignore", false);
 				msg(sender, "accepting.self");
 				return;
 			}
 			user.set("css.chatignore", true);
 			msg(sender, "ignoring.self");
-		}, (sender, structure, args) -> sender instanceof Player ? Arrays.asList("true", "false")
-				: Collections.emptyList()).argument("-s", (sender, structure, args) -> {
-					Config user = API.getUser(((Player) sender).getUniqueId());
-					if (!ParseUtils.getBoolean(args[0])) {
-						user.set("css.chatignore", false);
-						return;
-					}
-					user.set("css.chatignore", true);
-				});
+		}, (sender, structure, args) -> sender instanceof Player ? Arrays.asList("true", "false") : Collections.emptyList()).argument("-s", (sender, structure, args) -> {
+			Config user = API.getUser(((Player) sender).getUniqueId());
+			if(!ParseUtils.getBoolean(args[0])) {
+				user.set("css.chatignore", false);
+				return;
+			}
+			user.set("css.chatignore", true);
+		});
 		// Other
 		CommandStructure<CommandSender> other = cmd.selector(Selector.PLAYER, (sender, structure, args) -> {
 			Player player = Bukkit.getPlayer(args[0]);
 			Config user = API.getUser(player.getUniqueId());
-			TextRenderer ex = renderer().placeholder("target", player.getName()).placeholder("sender",
-					sender.getName());
-			if (user.getBoolean("css.chatignore")) {
+			TextRenderer ex = renderer().placeholder("target", player.getName()).placeholder("sender", sender.getName());
+			if(user.getBoolean("css.chatignore")) {
 				user.set("css.chatignore", false);
 				msg(sender, "accepting.other.sender", ex);
 				msg(player, "accepting.other.target", ex);
@@ -111,7 +106,7 @@ public class ChatIgnore extends CssCommand {
 		other.argument("-s", (sender, structure, args) -> {
 			Player player = Bukkit.getPlayer(args[0]);
 			Config user = API.getUser(player.getUniqueId());
-			if (user.getBoolean("css.chatignore")) {
+			if(user.getBoolean("css.chatignore")) {
 				user.set("css.chatignore", false);
 				return;
 			}
@@ -120,9 +115,8 @@ public class ChatIgnore extends CssCommand {
 		other.selector(Selector.BOOLEAN, (sender, structure, args) -> {
 			Player player = Bukkit.getPlayer(args[0]);
 			Config user = API.getUser(player.getUniqueId());
-			TextRenderer ex = renderer().placeholder("target", player.getName()).placeholder("sender",
-					sender.getName());
-			if (!ParseUtils.getBoolean(args[1])) {
+			TextRenderer ex = renderer().placeholder("target", player.getName()).placeholder("sender", sender.getName());
+			if(!ParseUtils.getBoolean(args[1])) {
 				user.set("css.chatignore", false);
 				msg(sender, "accepting.other.sender", ex);
 				msg(player, "accepting.other.target", ex);
@@ -134,7 +128,7 @@ public class ChatIgnore extends CssCommand {
 		}).argument("-s", (sender, structure, args) -> {
 			Player player = Bukkit.getPlayer(args[0]);
 			Config user = API.getUser(player.getUniqueId());
-			if (!ParseUtils.getBoolean(args[1])) {
+			if(!ParseUtils.getBoolean(args[1])) {
 				user.set("css.chatignore", false);
 				return;
 			}
@@ -142,14 +136,14 @@ public class ChatIgnore extends CssCommand {
 		});
 		// register
 		List<String> cmds = getCommands();
-		if (!cmds.isEmpty())
+		if(!cmds.isEmpty())
 			this.cmd = addBypassSettings(cmd).build().register(cmds.remove(0), cmds.toArray(new String[0]));
 	}
 
 	@Override
 	public void unregister() {
 		super.unregister();
-		if (listener != null) {
+		if(listener != null) {
 			HandlerList.unregisterAll(listener);
 			listener = null;
 		}

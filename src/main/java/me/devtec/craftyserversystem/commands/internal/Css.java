@@ -14,13 +14,12 @@ public class Css extends CssCommand {
 
 	@Override
 	public void register() {
-		if (isRegistered())
+		if(isRegistered())
 			return;
 
-		CommandStructure<CommandSender> cmd = CommandStructure
-				.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
-					msgUsage(sender, "cmd");
-				}).permission(getPerm("cmd"));
+		CommandStructure<CommandSender> cmd = CommandStructure.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
+			msgUsage(sender, "cmd");
+		}).permission(getPerm("cmd"));
 		// reload
 		cmd.argument("reload", (sender, structure, args) -> {
 			long millisStart = System.currentTimeMillis();
@@ -31,14 +30,13 @@ public class Css extends CssCommand {
 		});
 		// version
 		cmd.argument("version", (sender, structure, args) -> {
-			msg(sender, "version", renderer().placeholder("version", Loader.getPlugin().getDescription().getVersion())
-					.placeholder("version", Loader.getPlugin().getDescription().getVersion())
-					.placeholder("authors", StringUtils.join(Loader.getPlugin().getDescription().getAuthors(), ", ")));
+			msg(sender, "version", renderer().placeholder("version", Loader.getPlugin().getDescription().getVersion()).placeholder("version", Loader.getPlugin().getDescription().getVersion())
+			        .placeholder("authors", StringUtils.join(Loader.getPlugin().getDescription().getAuthors(), ", ")));
 		}, "ver");
 
 		// register
 		List<String> cmds = getCommands();
-		if (!cmds.isEmpty())
+		if(!cmds.isEmpty())
 			this.cmd = addBypassSettings(cmd).build().register(cmds.remove(0), cmds.toArray(new String[0]));
 	}
 

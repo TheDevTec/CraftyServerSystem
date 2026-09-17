@@ -31,19 +31,19 @@ public class ConsoleFilterListener implements CssListener {
 	public void reload() {
 		ConsoleBanFilter.init();
 		List<Pattern> list = new ArrayList<>();
-		for (String regex : getConfig().getStringList("list"))
+		for(String regex : getConfig().getStringList("list"))
 			try {
 				list.add(Pattern.compile(regex));
-			} catch (Exception e) {
+			} catch(Exception e) {
 				JavaPlugin.getPlugin(Loader.class).getLogger().warning("Failed to compile regex Pattern '" + regex + "', skipping..");
 			}
-		if (!list.isEmpty())
+		if(!list.isEmpty())
 			ConsoleBanFilter.registerFilter(predicate = t -> {
 				try {
-					for (Pattern pattern : list)
-						if (pattern.matcher(t).find())
+					for(Pattern pattern : list)
+						if(pattern.matcher(t).find())
 							return true;
-				} catch (Exception e) {
+				} catch(Exception e) {
 				}
 				return false;
 			});
@@ -51,7 +51,7 @@ public class ConsoleFilterListener implements CssListener {
 
 	@Override
 	public void unregister() {
-		if (predicate != null) {
+		if(predicate != null) {
 			ConsoleBanFilter.unregisterFilter(predicate);
 			predicate = null;
 		}

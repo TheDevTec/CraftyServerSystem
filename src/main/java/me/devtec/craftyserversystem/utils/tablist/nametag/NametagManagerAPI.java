@@ -33,7 +33,7 @@ public class NametagManagerAPI {
 	private static NametagManagerAPI instance;
 
 	public static NametagManagerAPI get() {
-		if (instance == null)
+		if(instance == null)
 			instance = new NametagManagerAPI();
 		return instance;
 	}
@@ -48,8 +48,8 @@ public class NametagManagerAPI {
 	}
 
 	public boolean isPlayer(int id) {
-		for (Player player : BukkitLoader.getOnlinePlayers())
-			if (player.getEntityId() == id)
+		for(Player player : BukkitLoader.getOnlinePlayers())
+			if(player.getEntityId() == id)
 				return true;
 		return false;
 	}
@@ -70,27 +70,26 @@ public class NametagManagerAPI {
 	public void load() {
 		isLoaded = true;
 
-		switch (me.devtec.craftyserversystem.api.API.get().getConfigManager().getTab().getString("sorting.by")
-				.toUpperCase()) {
-		case "GROUP_WEIGHT":
-			if (Bukkit.getPluginManager().isPluginEnabled("LuckPerms")) {
-				teamManager = new LuckPermsTeamManager();
+		switch(me.devtec.craftyserversystem.api.API.get().getConfigManager().getTab().getString("sorting.by").toUpperCase()) {
+			case "GROUP_WEIGHT" :
+				if(Bukkit.getPluginManager().isPluginEnabled("LuckPerms")) {
+					teamManager = new LuckPermsTeamManager();
+					break;
+				}
+			case "GROUP" :
+				if(Bukkit.getPluginManager().isPluginEnabled("Vault")) {
+					teamManager = new VaultTeamManager();
+					break;
+				}
+			default :
+				teamManager = new DefaultTeamManager();
 				break;
-			}
-		case "GROUP":
-			if (Bukkit.getPluginManager().isPluginEnabled("Vault")) {
-				teamManager = new VaultTeamManager();
-				break;
-			}
-		default:
-			teamManager = new DefaultTeamManager();
-			break;
 		}
 
 		teamManager.reload();
 
-		Class<?> entityTypes, outVelocity, outMount, outMetadata, outDestroy, clientBundle, outTeleport, inVehicleMove,
-				outSpawnEntity, clientPlayerInfoUpdate, clientPlayerInfoRemove, entityPose, outBed, outAnimation;
+		Class<?> entityTypes, outVelocity, outMount, outMetadata, outDestroy, clientBundle, outTeleport, inVehicleMove, outSpawnEntity, clientPlayerInfoUpdate, clientPlayerInfoRemove, entityPose,
+		        outBed, outAnimation;
 
 		Field idField;
 		Field mobsField;
@@ -112,7 +111,7 @@ public class NametagManagerAPI {
 		Field animationEntityId;
 		Field animationId;
 
-		if (BukkitLoader.NO_OBFUSCATED_NMS_MODE) {
+		if(BukkitLoader.NO_OBFUSCATED_NMS_MODE) {
 			entityTypes = Ref.nms("world.entity", "EntityType");
 			outVelocity = Ref.nms("network.protocol.game", "ClientboundSetEntityMotionPacket");
 			outMount = Ref.nms("network.protocol.game", "ClientboundSetEntityLinkPacket");
@@ -143,8 +142,7 @@ public class NametagManagerAPI {
 			metaEntityId = Ref.field(outMetadata, int.class);
 			velocityEntityId = Ref.field(outVelocity, int.class);
 			metaData = Ref.field(outMetadata, List.class);
-			playerInfoUuidField = Ref.field(Ref.nms("network.protocol.game", "ClientboundPlayerInfoUpdatePacket$Entry"),
-					UUID.class);
+			playerInfoUuidField = Ref.field(Ref.nms("network.protocol.game", "ClientboundPlayerInfoUpdatePacket$Entry"), UUID.class);
 			valueField = Ref.field(Ref.nms("network.syncher", "SynchedEntityData$DataValue"), "value");
 			animationEntityId = null;
 			animationId = null;
@@ -153,8 +151,8 @@ public class NametagManagerAPI {
 			outVelocity = Ref.nms("network.protocol.game", "PacketPlayOutEntityVelocity");
 
 			outMount = Ref.nms("network.protocol.game", "PacketPlayOutMount") == null
-					? Ref.nms("network.protocol.game", "PacketPlayOutAttachEntity")
-					: Ref.nms("network.protocol.game", "PacketPlayOutMount");
+			        ? Ref.nms("network.protocol.game", "PacketPlayOutAttachEntity")
+			        : Ref.nms("network.protocol.game", "PacketPlayOutMount");
 
 			outMetadata = Ref.nms("network.protocol.game", "PacketPlayOutEntityMetadata");
 			outDestroy = Ref.nms("network.protocol.game", "PacketPlayOutEntityDestroy");
@@ -163,25 +161,22 @@ public class NametagManagerAPI {
 			inVehicleMove = Ref.nms("network.protocol.game", "PacketPlayInVehicleMove");
 
 			outSpawnEntity = Ref.nms("network.protocol.game", "PacketPlayOutNamedEntitySpawn") == null
-					? Ref.nms("network.protocol.game", "PacketPlayOutSpawnEntity")
-					: Ref.nms("network.protocol.game", "PacketPlayOutNamedEntitySpawn");
+			        ? Ref.nms("network.protocol.game", "PacketPlayOutSpawnEntity")
+			        : Ref.nms("network.protocol.game", "PacketPlayOutNamedEntitySpawn");
 
-			clientPlayerInfoUpdate = Ref.isAtLeast(19, 2)
-					? Ref.nms("network.protocol.game", "ClientboundPlayerInfoUpdatePacket")
-					: Ref.nms("network.protocol.game", "PacketPlayOutPlayerInfo");
+			clientPlayerInfoUpdate = Ref.isAtLeast(19, 2) ? Ref.nms("network.protocol.game", "ClientboundPlayerInfoUpdatePacket") : Ref.nms("network.protocol.game", "PacketPlayOutPlayerInfo");
 
 			clientPlayerInfoRemove = Ref.nms("network.protocol.game", "ClientboundPlayerInfoRemovePacket");
 			entityPose = Ref.nms("world.entity", "EntityPose");
 			outBed = Ref.nms("", "PacketPlayOutBed");
 
 			outAnimation = Ref.nms("network.protocol.game", "ClientboundAnimatePacket") == null
-					? Ref.nms("network.protocol.game", "PacketPlayOutAnimation")
-					: Ref.nms("network.protocol.game", "ClientboundAnimatePacket");
+			        ? Ref.nms("network.protocol.game", "PacketPlayOutAnimation")
+			        : Ref.nms("network.protocol.game", "ClientboundAnimatePacket");
 
 			idField = Ref.isBefore(12, 0) ? Ref.field(outMount, "c") : Ref.field(outMount, int.class);
 
-			mobsField = Ref.field(outMount, int[].class) == null ? Ref.field(outMount, "b")
-					: Ref.field(outMount, int[].class);
+			mobsField = Ref.field(outMount, int[].class) == null ? Ref.field(outMount, "b") : Ref.field(outMount, int[].class);
 
 			isLeashed = Ref.field(outMount, "a");
 			integersField = Ref.field(outDestroy, "a");
@@ -198,24 +193,18 @@ public class NametagManagerAPI {
 			metaData = Ref.field(outMetadata, List.class);
 
 			playerInfoUuidField = Ref.isAtLeast(19, 2)
-					? Ref.field(Ref.nms("network.protocol.game", "ClientboundPlayerInfoUpdatePacket$b"), UUID.class)
-					: Ref.field(Ref.nms("network.protocol.game", "PacketPlayOutPlayerInfo$PlayerInfoData"),
-							Ref.getClass("com.mojang.authlib.GameProfile"));
+			        ? Ref.field(Ref.nms("network.protocol.game", "ClientboundPlayerInfoUpdatePacket$b"), UUID.class)
+			        : Ref.field(Ref.nms("network.protocol.game", "PacketPlayOutPlayerInfo$PlayerInfoData"), Ref.getClass("com.mojang.authlib.GameProfile"));
 
-			valueField = Ref
-					.isAtLeast(19, 2)
-							? Ref.field(Ref.nms("network.syncher", "DataWatcher$b"), "c")
-							: Ref.field(
-									Ref.isBefore(12, 0) ? Ref.nms("network.syncher", "DataWatcher$WatchableObject")
-											: Ref.nms("network.syncher", "DataWatcher$Item"),
-									Ref.isBefore(12, 0) ? "c" : "b");
+			valueField = Ref.isAtLeast(19, 2)
+			        ? Ref.field(Ref.nms("network.syncher", "DataWatcher$b"), "c")
+			        : Ref.field(Ref.isBefore(12, 0) ? Ref.nms("network.syncher", "DataWatcher$WatchableObject") : Ref.nms("network.syncher", "DataWatcher$Item"), Ref.isBefore(12, 0) ? "c" : "b");
 
 			animationId = Ref.field(outAnimation, "b");
 			animationEntityId = Ref.field(outAnimation, "a");
 		}
 
-		Class<?> vec3D = Ref.nms("world.phys", "Vec3") == null ? Ref.nms("world.phys", "Vec3D")
-				: Ref.nms("world.phys", "Vec3");
+		Class<?> vec3D = Ref.nms("world.phys", "Vec3") == null ? Ref.nms("world.phys", "Vec3D") : Ref.nms("world.phys", "Vec3");
 
 		Field bedId = Ref.field(outBed, int.class);
 
@@ -224,56 +213,56 @@ public class NametagManagerAPI {
 		Field positionVec = Ref.field(Ref.nms("world.entity", "PositionMoveRotation"), vec3D);
 		Field positionVecVehicle = Ref.field(inVehicleMove, vec3D);
 
-		if (positionVec != null) {
-			if (BukkitLoader.NO_OBFUSCATED_NMS_MODE) {
+		if(positionVec != null) {
+			if(BukkitLoader.NO_OBFUSCATED_NMS_MODE) {
 				xyz[0] = Ref.field(vec3D, "x");
 				xyz[1] = Ref.field(vec3D, "y");
 				xyz[2] = Ref.field(vec3D, "z");
 			} else
-				for (Field field : vec3D.getDeclaredFields()) {
-					if (field.getType() != double.class)
+				for(Field field : vec3D.getDeclaredFields()) {
+					if(field.getType() != double.class)
 						continue;
 
-					if (xyz[0] == null)
+					if(xyz[0] == null)
 						xyz[0] = field;
-					else if (xyz[1] == null)
+					else if(xyz[1] == null)
 						xyz[1] = field;
-					else if (xyz[2] == null) {
+					else if(xyz[2] == null) {
 						xyz[2] = field;
 						break;
 					}
 				}
-		} else if (Ref.isBefore(12, 0)) {
+		} else if(Ref.isBefore(12, 0)) {
 			boolean firstInt = true;
 
-			for (Field field : outTeleport.getDeclaredFields()) {
-				if (field.getType() != int.class)
+			for(Field field : outTeleport.getDeclaredFields()) {
+				if(field.getType() != int.class)
 					continue;
 
-				if (firstInt) {
+				if(firstInt) {
 					firstInt = false;
 					continue;
 				}
 
-				if (xyz[0] == null)
+				if(xyz[0] == null)
 					xyz[0] = field;
-				else if (xyz[1] == null)
+				else if(xyz[1] == null)
 					xyz[1] = field;
-				else if (xyz[2] == null) {
+				else if(xyz[2] == null) {
 					xyz[2] = field;
 					break;
 				}
 			}
 		} else
-			for (Field field : outTeleport.getDeclaredFields()) {
-				if (field.getType() != double.class)
+			for(Field field : outTeleport.getDeclaredFields()) {
+				if(field.getType() != double.class)
 					continue;
 
-				if (xyz[0] == null)
+				if(xyz[0] == null)
 					xyz[0] = field;
-				else if (xyz[1] == null)
+				else if(xyz[1] == null)
 					xyz[1] = field;
-				else if (xyz[2] == null) {
+				else if(xyz[2] == null) {
 					xyz[2] = field;
 					break;
 				}
@@ -281,45 +270,43 @@ public class NametagManagerAPI {
 
 		Field[] mxyz = new Field[3];
 
-		if (inVehicleMove != null)
-			if (positionVecVehicle == null)
-				for (Field field : inVehicleMove.getDeclaredFields()) {
-					if (field.getType() != double.class)
+		if(inVehicleMove != null)
+			if(positionVecVehicle == null)
+				for(Field field : inVehicleMove.getDeclaredFields()) {
+					if(field.getType() != double.class)
 						continue;
 
-					if (mxyz[0] == null)
+					if(mxyz[0] == null)
 						mxyz[0] = field;
-					else if (mxyz[1] == null)
+					else if(mxyz[1] == null)
 						mxyz[1] = field;
-					else if (mxyz[2] == null) {
+					else if(mxyz[2] == null) {
 						mxyz[2] = field;
 						break;
 					}
 				}
-			else if (BukkitLoader.NO_OBFUSCATED_NMS_MODE) {
+			else if(BukkitLoader.NO_OBFUSCATED_NMS_MODE) {
 				mxyz[0] = Ref.field(vec3D, "x");
 				mxyz[1] = Ref.field(vec3D, "y");
 				mxyz[2] = Ref.field(vec3D, "z");
 			} else
-				for (Field field : vec3D.getDeclaredFields()) {
-					if (field.getType() != double.class)
+				for(Field field : vec3D.getDeclaredFields()) {
+					if(field.getType() != double.class)
 						continue;
 
-					if (mxyz[0] == null)
+					if(mxyz[0] == null)
 						mxyz[0] = field;
-					else if (mxyz[1] == null)
+					else if(mxyz[1] == null)
 						mxyz[1] = field;
-					else if (mxyz[2] == null) {
+					else if(mxyz[2] == null) {
 						mxyz[2] = field;
 						break;
 					}
 				}
 
-		Class<?> actionPacketClass = Ref.nms("network.protocol.game",
-				BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "ServerboundPlayerCommandPacket" : "PacketPlayInEntityAction");
+		Class<?> actionPacketClass = Ref.nms("network.protocol.game", BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "ServerboundPlayerCommandPacket" : "PacketPlayInEntityAction");
 
-		Class<?> movementPacketClass = Ref.nms("network.protocol.game",
-				BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "ServerboundMovePlayerPacket" : "PacketPlayInFlying");
+		Class<?> movementPacketClass = Ref.nms("network.protocol.game", BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "ServerboundMovePlayerPacket" : "PacketPlayInFlying");
 
 		Class<?> inputPacket = Ref.nms("network.protocol.game", "ServerboundPlayerInputPacket");
 
@@ -328,7 +315,7 @@ public class NametagManagerAPI {
 		Field shift = Ref.field(Ref.nms("world.entity.player", "Input"), "shift");
 		Field actionField;
 
-		if (BukkitLoader.NO_OBFUSCATED_NMS_MODE || Ref.isBefore(17, 0)) {
+		if(BukkitLoader.NO_OBFUSCATED_NMS_MODE || Ref.isBefore(17, 0)) {
 			changedPosition = Ref.field(movementPacketClass, "hasPos");
 			actionField = Ref.field(actionPacketClass, Ref.isBefore(17, 0) ? "animation" : "action");
 		} else {
@@ -352,27 +339,27 @@ public class NametagManagerAPI {
 			public void playOut(String name, PacketContainer packetContainer, ChannelContainer channel) {
 				Object packet = packetContainer.getPacket();
 
-				if (packet.getClass().isAssignableFrom(outVelocity)) {
+				if(packet.getClass().isAssignableFrom(outVelocity)) {
 					ClassicTabPlayer player = TabAPI.getHolder((int) Ref.get(packet, velocityEntityId));
 
-					if (player != null) {
+					if(player != null) {
 						ClassicTabPlayer receiver = TabAPI.await(name);
 
-						if (receiver == null)
+						if(receiver == null)
 							return;
 
 						Location location = player.getPlayer().getLocation();
 
-						for (ArmorStandHologram line : player.getAdditionalLines())
+						for(ArmorStandHologram line : player.getAdditionalLines())
 							line.shouldTeleport(location);
 					}
 
 					return;
 				}
 
-				if (Ref.isAtLeast(19, 3) && packet.getClass().isAssignableFrom(clientBundle)) {
+				if(Ref.isAtLeast(19, 3) && packet.getClass().isAssignableFrom(clientBundle)) {
 
-					for (Object inBundle : (Iterable<?>) Ref.get(packet, iterableField))
+					for(Object inBundle : (Iterable<?>) Ref.get(packet, iterableField))
 						processPacket(name, inBundle);
 
 					return;
@@ -382,18 +369,16 @@ public class NametagManagerAPI {
 			}
 
 			private Object findEntityType() {
-				Class<?> nmsHuman = Ref.nms("world.entity.player",
-						BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "Player" : "EntityHuman");
+				Class<?> nmsHuman = Ref.nms("world.entity.player", BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "Player" : "EntityHuman");
 
 				Class<?> holder = Ref.isAfter(25, 0) ? Ref.nms("world.entity", "EntityTypes") : entityTypes;
 
-				for (Field field : Ref.getAllFields(holder))
+				for(Field field : Ref.getAllFields(holder))
 					try {
-						if (field.getType().equals(entityTypes) && field.getGenericType() instanceof ParameterizedType
-								&& ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0]
-										.equals(nmsHuman))
+						if(field.getType().equals(entityTypes) && field.getGenericType() instanceof ParameterizedType
+						        && ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0].equals(nmsHuman))
 							return Ref.getStatic(field);
-					} catch (Exception ignored) {
+					} catch(Exception ignored) {
 					}
 
 				return null;
@@ -403,14 +388,14 @@ public class NametagManagerAPI {
 			public void playIn(String name, PacketContainer packetContainer, ChannelContainer channel) {
 				Object packet = packetContainer.getPacket();
 
-				if (movementPacketClass.isAssignableFrom(packet.getClass())) {
-					if ((boolean) Ref.get(packet, changedPosition)) {
+				if(movementPacketClass.isAssignableFrom(packet.getClass())) {
+					if((boolean) Ref.get(packet, changedPosition)) {
 						ClassicTabPlayer player = TabAPI.await(name);
 
-						if (player != null) {
+						if(player != null) {
 							Location location = player.getPlayer().getLocation();
 
-							for (ArmorStandHologram line : player.getAdditionalLines())
+							for(ArmorStandHologram line : player.getAdditionalLines())
 								line.shouldTeleport(location);
 						}
 					}
@@ -418,14 +403,14 @@ public class NametagManagerAPI {
 					return;
 				}
 
-				if (inputPacket != null && inputPacket.isAssignableFrom(packet.getClass())) {
+				if(inputPacket != null && inputPacket.isAssignableFrom(packet.getClass())) {
 					ClassicTabPlayer player = TabAPI.await(name);
 
-					if (player != null) {
+					if(player != null) {
 						Location loc = player.getPlayer().getLocation();
 						boolean shifting = (boolean) Ref.get(Ref.get(packet, input), shift);
 
-						for (ArmorStandHologram line : player.getAdditionalLines()) {
+						for(ArmorStandHologram line : player.getAdditionalLines()) {
 							line.setPosWithoutUpdate(loc);
 							line.updateHeight(shifting, false, false, false);
 						}
@@ -434,66 +419,66 @@ public class NametagManagerAPI {
 					return;
 				}
 
-				if (packet.getClass().equals(actionPacketClass)) {
+				if(packet.getClass().equals(actionPacketClass)) {
 					ClassicTabPlayer player = TabAPI.await(name);
 
-					if (player != null)
-						switch (Ref.get(packet, actionField).toString()) {
-						case "PRESS_SHIFT_KEY":
-						case "1": {
-							Location loc = player.getPlayer().getLocation();
+					if(player != null)
+						switch(Ref.get(packet, actionField).toString()) {
+							case "PRESS_SHIFT_KEY" :
+							case "1" : {
+								Location loc = player.getPlayer().getLocation();
 
-							for (ArmorStandHologram line : player.getAdditionalLines()) {
-								line.setPosWithoutUpdate(loc);
-								line.updateHeight(true, false, false, false);
+								for(ArmorStandHologram line : player.getAdditionalLines()) {
+									line.setPosWithoutUpdate(loc);
+									line.updateHeight(true, false, false, false);
+								}
+								break;
 							}
-							break;
-						}
-						case "2":
-						case "RELEASE_SHIFT_KEY": {
-							Location loc = player.getPlayer().getLocation();
+							case "2" :
+							case "RELEASE_SHIFT_KEY" : {
+								Location loc = player.getPlayer().getLocation();
 
-							for (ArmorStandHologram line : player.getAdditionalLines()) {
-								line.setPosWithoutUpdate(loc);
-								line.updateHeight(false, false, false, false);
+								for(ArmorStandHologram line : player.getAdditionalLines()) {
+									line.setPosWithoutUpdate(loc);
+									line.updateHeight(false, false, false, false);
+								}
+								break;
 							}
-							break;
-						}
-						case "START_FALL_FLYING": {
-							Location loc = player.getPlayer().getLocation();
+							case "START_FALL_FLYING" : {
+								Location loc = player.getPlayer().getLocation();
 
-							for (ArmorStandHologram line : player.getAdditionalLines()) {
-								line.setPosWithoutUpdate(loc);
-								line.updateHeight(false, false, false, false);
+								for(ArmorStandHologram line : player.getAdditionalLines()) {
+									line.setPosWithoutUpdate(loc);
+									line.updateHeight(false, false, false, false);
+								}
+								break;
 							}
-							break;
-						}
 						}
 
 					return;
 				}
 
-				if (inVehicleMove != null && packet.getClass().isAssignableFrom(inVehicleMove)) {
+				if(inVehicleMove != null && packet.getClass().isAssignableFrom(inVehicleMove)) {
 					ClassicTabPlayer spawned = TabAPI.await(name);
 
-					if (spawned == null)
+					if(spawned == null)
 						return;
 
-					if (positionVecVehicle != null) {
+					if(positionVecVehicle != null) {
 						Object pos = Ref.get(packet, positionVecVehicle);
 
 						double x = (double) Ref.get(pos, movexField);
 						double y = (double) Ref.get(pos, moveyField);
 						double z = (double) Ref.get(pos, movezField);
 
-						for (ArmorStandHologram line : spawned.getAdditionalLines())
+						for(ArmorStandHologram line : spawned.getAdditionalLines())
 							line.shouldTeleport(x, y, z);
 					} else {
 						double x = (double) Ref.get(packet, movexField);
 						double y = (double) Ref.get(packet, moveyField);
 						double z = (double) Ref.get(packet, movezField);
 
-						for (ArmorStandHologram line : spawned.getAdditionalLines())
+						for(ArmorStandHologram line : spawned.getAdditionalLines())
 							line.shouldTeleport(x, y, z);
 					}
 				}
@@ -501,44 +486,43 @@ public class NametagManagerAPI {
 
 			@SuppressWarnings("unchecked")
 			private void processPacket(String name, Object packet) {
-				if (Ref.isAtLeast(19, 2)) {
-					if (packet.getClass().isAssignableFrom(clientPlayerInfoUpdate)) {
+				if(Ref.isAtLeast(19, 2)) {
+					if(packet.getClass().isAssignableFrom(clientPlayerInfoUpdate)) {
 						boolean shouldContinue = false;
 
-						for (Object action : (EnumSet<?>) Ref.get(packet, "actions"))
-							if ("ADD_PLAYER".equals(action.toString())) {
+						for(Object action : (EnumSet<?>) Ref.get(packet, "actions"))
+							if("ADD_PLAYER".equals(action.toString())) {
 								shouldContinue = true;
 								break;
 							}
 
-						if (!shouldContinue)
+						if(!shouldContinue)
 							return;
 
 						ClassicTabPlayer receiverPlayer = TabAPI.await(name);
 
-						if (receiverPlayer == null)
+						if(receiverPlayer == null)
 							return;
 
-						for (Object entity : (List<?>) Ref.get(packet, listBField)) {
+						for(Object entity : (List<?>) Ref.get(packet, listBField)) {
 							UUID uuid = (UUID) Ref.get(entity, playerInfoUuidField);
 
-							if (uuid.equals(receiverPlayer.getPlayer().getUniqueId()))
+							if(uuid.equals(receiverPlayer.getPlayer().getUniqueId()))
 								continue;
 
 							ClassicTabPlayer spawned = TabAPI.await(uuid);
 
-							if (spawned == null)
+							if(spawned == null)
 								continue;
 
 							Player joinedPlayer = spawned.getPlayer();
 							long start = System.currentTimeMillis();
 
-							while (!joinedPlayer.isOnline() || joinedPlayer.getWorld() == null)
-								if (System.currentTimeMillis() - start >= 5)
+							while(!joinedPlayer.isOnline() || joinedPlayer.getWorld() == null)
+								if(System.currentTimeMillis() - start >= 5)
 									return;
 
-							if (spawned.getPrimaryTeam() == null
-									|| receiverPlayer.getTeams().contains(spawned.getPrimaryTeam()))
+							if(spawned.getPrimaryTeam() == null || receiverPlayer.getTeams().contains(spawned.getPrimaryTeam()))
 								continue;
 
 							receiverPlayer.createTeam(spawned.getPrimaryTeam());
@@ -547,72 +531,70 @@ public class NametagManagerAPI {
 						return;
 					}
 
-					if (packet.getClass().isAssignableFrom(clientPlayerInfoRemove)) {
+					if(packet.getClass().isAssignableFrom(clientPlayerInfoRemove)) {
 						UUID offlineUuid = API.offlineCache().lookupId(name);
 						ClassicTabPlayer receiverPlayer = TabAPI.await(offlineUuid);
 
-						if (receiverPlayer == null)
+						if(receiverPlayer == null)
 							return;
 
-						for (UUID entity : (List<UUID>) Ref.get(packet, listUuidsField)) {
-							if (entity.equals(offlineUuid))
+						for(UUID entity : (List<UUID>) Ref.get(packet, listUuidsField)) {
+							if(entity.equals(offlineUuid))
 								continue;
 
 							ClassicTabPlayer removed = TabAPI.data.get(entity);
 
-							if (removed != null && removed.getPrimaryTeam() != null)
+							if(removed != null && removed.getPrimaryTeam() != null)
 								receiverPlayer.removeTeam(removed.getPrimaryTeam().getTeam());
 						}
 
 						return;
 					}
-				} else if (packet.getClass().isAssignableFrom(clientPlayerInfoUpdate)) {
+				} else if(packet.getClass().isAssignableFrom(clientPlayerInfoUpdate)) {
 					UUID offlineUuid = API.offlineCache().lookupId(name);
 
-					if ("REMOVE_PLAYER".equals(Ref.get(packet, clientPlayerInfoLegacyAction).toString())) {
+					if("REMOVE_PLAYER".equals(Ref.get(packet, clientPlayerInfoLegacyAction).toString())) {
 						ClassicTabPlayer receiverPlayer = TabAPI.getHolder(offlineUuid);
 
-						if (receiverPlayer == null)
+						if(receiverPlayer == null)
 							return;
 
-						for (Object entity : (List<?>) Ref.get(packet, listUuidsFieldUpdate)) {
-							UUID uuid = BukkitLoader.getNmsProvider()
-									.fromGameProfile(Ref.get(entity, playerInfoUuidField)).getUUID();
+						for(Object entity : (List<?>) Ref.get(packet, listUuidsFieldUpdate)) {
+							UUID uuid = BukkitLoader.getNmsProvider().fromGameProfile(Ref.get(entity, playerInfoUuidField)).getUUID();
 
-							if (uuid.equals(offlineUuid))
+							if(uuid.equals(offlineUuid))
 								continue;
 
 							ClassicTabPlayer removed = TabAPI.data.get(uuid);
 
-							if (removed != null && removed.getPrimaryTeam() != null)
+							if(removed != null && removed.getPrimaryTeam() != null)
 								receiverPlayer.removeTeam(removed.getPrimaryTeam().getTeam());
 						}
 					} else {
 						ClassicTabPlayer receiverPlayer = TabAPI.await(offlineUuid);
 
-						if (receiverPlayer == null)
+						if(receiverPlayer == null)
 							return;
 
-						for (Object entity : (List<?>) Ref.get(packet, listBField)) {
-							UUID uuid = BukkitLoader.getNmsProvider()
-									.fromGameProfile(Ref.get(entity, playerInfoUuidField)).getUUID();
+						for(Object entity : (List<?>) Ref.get(packet, listBField)) {
+							UUID uuid = BukkitLoader.getNmsProvider().fromGameProfile(Ref.get(entity, playerInfoUuidField)).getUUID();
 
-							if (uuid.equals(offlineUuid))
+							if(uuid.equals(offlineUuid))
 								continue;
 
 							ClassicTabPlayer spawned = TabAPI.await(uuid);
 
-							if (spawned == null)
+							if(spawned == null)
 								continue;
 
 							Player joinedPlayer = spawned.getPlayer();
 							long start = System.currentTimeMillis();
 
-							while (!joinedPlayer.isOnline() || joinedPlayer.getWorld() == null)
-								if (System.currentTimeMillis() - start >= 5)
+							while(!joinedPlayer.isOnline() || joinedPlayer.getWorld() == null)
+								if(System.currentTimeMillis() - start >= 5)
 									return;
 
-							if (spawned.getPrimaryTeam() != null)
+							if(spawned.getPrimaryTeam() != null)
 								receiverPlayer.createTeam(spawned.getPrimaryTeam());
 						}
 					}
@@ -620,25 +602,25 @@ public class NametagManagerAPI {
 					return;
 				}
 
-				if (packet.getClass().isAssignableFrom(outSpawnEntity)) {
-					if (entityTypeField == null || Ref.get(packet, entityTypeField).equals(entityTypePlayer)) {
+				if(packet.getClass().isAssignableFrom(outSpawnEntity)) {
+					if(entityTypeField == null || Ref.get(packet, entityTypeField).equals(entityTypePlayer)) {
 						UUID uuid = (UUID) Ref.get(packet, uuidField);
 						UUID offlineUuid = API.offlineCache().lookupId(name);
 
-						if (uuid.equals(offlineUuid))
+						if(uuid.equals(offlineUuid))
 							return;
 
 						ClassicTabPlayer receiverPlayer = TabAPI.await(offlineUuid);
 						ClassicTabPlayer spawned = TabAPI.getHolder(uuid);
 
-						if (receiverPlayer == null || spawned == null)
+						if(receiverPlayer == null || spawned == null)
 							return;
 
 						Player joinedPlayer = spawned.getPlayer();
 						long start = System.currentTimeMillis();
 
-						while (joinedPlayer.getWorld() == null || !joinedPlayer.isOnline())
-							if (System.currentTimeMillis() - start >= 5)
+						while(joinedPlayer.getWorld() == null || !joinedPlayer.isOnline())
+							if(System.currentTimeMillis() - start >= 5)
 								return;
 
 						spawned.showLines(receiverPlayer);
@@ -647,91 +629,91 @@ public class NametagManagerAPI {
 					return;
 				}
 
-				if (packet.getClass().isAssignableFrom(outMetadata)) {
+				if(packet.getClass().isAssignableFrom(outMetadata)) {
 					ClassicTabPlayer player = TabAPI.getHolder((int) Ref.get(packet, metaEntityId));
 
-					if (player != null)
-						for (Object item : (List<?>) Ref.get(packet, metaData)) {
+					if(player != null)
+						for(Object item : (List<?>) Ref.get(packet, metaData)) {
 							Object pose = Ref.get(item, valueField);
 
-							if (pose == null)
+							if(pose == null)
 								continue;
 
-							if (Ref.isBefore(13, 0)) {
-								if (pose instanceof Byte)
-									switch ((byte) pose) {
-									case (byte) 0x02: {
-										Location loc = player.getPlayer().getLocation();
+							if(Ref.isBefore(13, 0)) {
+								if(pose instanceof Byte)
+									switch((byte) pose) {
+										case (byte) 0x02 : {
+											Location loc = player.getPlayer().getLocation();
 
-										for (ArmorStandHologram line : player.getAdditionalLines()) {
-											line.setPosWithoutUpdate(loc);
-											line.updateHeight(true, false, false, false);
+											for(ArmorStandHologram line : player.getAdditionalLines()) {
+												line.setPosWithoutUpdate(loc);
+												line.updateHeight(true, false, false, false);
+											}
+											break;
 										}
-										break;
-									}
-									case (byte) 0x80: {
-										Location loc = player.getPlayer().getLocation();
+										case (byte) 0x80 : {
+											Location loc = player.getPlayer().getLocation();
 
-										for (ArmorStandHologram line : player.getAdditionalLines()) {
-											line.setPosWithoutUpdate(loc);
-											line.updateHeight(false, true, false, false);
+											for(ArmorStandHologram line : player.getAdditionalLines()) {
+												line.setPosWithoutUpdate(loc);
+												line.updateHeight(false, true, false, false);
+											}
+											break;
 										}
-										break;
-									}
-									default: {
-										Location loc = player.getPlayer().getLocation();
+										default : {
+											Location loc = player.getPlayer().getLocation();
 
-										for (ArmorStandHologram line : player.getAdditionalLines()) {
-											line.setPosWithoutUpdate(loc);
-											line.updateHeight(false, false, false, false);
+											for(ArmorStandHologram line : player.getAdditionalLines()) {
+												line.setPosWithoutUpdate(loc);
+												line.updateHeight(false, false, false, false);
+											}
+											break;
 										}
-										break;
-									}
 									}
 
 								return;
 							}
 
-							if (pose.getClass().isAssignableFrom(entityPose))
-								switch (pose.toString()) {
-								case "CROUCHING":
-								case "SNEAKING":
-								case "FALL_FLYING":
-									break;
+							if(pose.getClass().isAssignableFrom(entityPose))
+								switch(pose.toString()) {
+									case "CROUCHING" :
+									case "SNEAKING" :
+									case "FALL_FLYING" :
+										break;
 
-								case "SLEEPING":
-								case "SWIMMING": {
-									Location loc = player.getPlayer().getLocation();
+									case "SLEEPING" :
+									case "SWIMMING" : {
+										Location loc = player.getPlayer().getLocation();
 
-									for (ArmorStandHologram line : player.getAdditionalLines()) {
-										line.setPosWithoutUpdate(loc);
-										line.updateHeight(false, true, false, false);
+										for(ArmorStandHologram line : player.getAdditionalLines()) {
+											line.setPosWithoutUpdate(loc);
+											line.updateHeight(false, true, false, false);
+										}
+										break;
 									}
-									break;
-								}
 
-								default: {
-									Location loc = player.getPlayer().getLocation();
+									default : {
+										Location loc = player.getPlayer().getLocation();
 
-									for (ArmorStandHologram line : player.getAdditionalLines()) {
-										line.setPosWithoutUpdate(loc);
-										line.updateHeight(false, false, false, false);
+										for(ArmorStandHologram line : player.getAdditionalLines()) {
+											line.setPosWithoutUpdate(loc);
+											line.updateHeight(false, false, false, false);
+										}
+										break;
 									}
-									break;
-								}
 								}
 						}
 
 					return;
 				}
 
-				if (outBed != null && packet.getClass().isAssignableFrom(outBed)) {
+				if(outBed != null && packet.getClass().isAssignableFrom(outBed)) {
 					ClassicTabPlayer player = TabAPI.getHolder((int) Ref.get(packet, bedId));
 
-					if (player != null) {
+					if(player != null) {
 						Location loc = player.getPlayer().getLocation();
 
-						for (ArmorStandHologram line : player.getAdditionalLines()) {
+						for(ArmorStandHologram line : player.getAdditionalLines()) {
 							line.setPosWithoutUpdate(loc);
 							line.updateHeight(false, true, false, false);
 						}
@@ -740,14 +722,14 @@ public class NametagManagerAPI {
 					return;
 				}
 
-				if (outAnimation != null && packet.getClass().isAssignableFrom(outAnimation)) {
-					if ((int) Ref.get(packet, animationId) == 2) {
+				if(outAnimation != null && packet.getClass().isAssignableFrom(outAnimation)) {
+					if((int) Ref.get(packet, animationId) == 2) {
 						ClassicTabPlayer player = TabAPI.getHolder((int) Ref.get(packet, animationEntityId));
 
-						if (player != null) {
+						if(player != null) {
 							Location loc = player.getPlayer().getLocation();
 
-							for (ArmorStandHologram line : player.getAdditionalLines()) {
+							for(ArmorStandHologram line : player.getAdditionalLines()) {
 								line.setPosWithoutUpdate(loc);
 								line.updateHeight(false, false, false, false);
 							}
@@ -757,52 +739,52 @@ public class NametagManagerAPI {
 					return;
 				}
 
-				if (packet.getClass().isAssignableFrom(outDestroy)) {
+				if(packet.getClass().isAssignableFrom(outDestroy)) {
 					ClassicTabPlayer receiver = TabAPI.await(name);
 
-					if (receiver == null)
+					if(receiver == null)
 						return;
 
 					Object object = Ref.get(packet, integersField);
 
-					if (object instanceof List)
-						for (int id : (List<Integer>) object) {
+					if(object instanceof List)
+						for(int id : (List<Integer>) object) {
 							ClassicTabPlayer despawning = TabAPI.getHolder(id);
 
-							if (despawning != null)
+							if(despawning != null)
 								despawning.hideLines(receiver);
 						}
 					else
-						for (int id : (int[]) object) {
+						for(int id : (int[]) object) {
 							ClassicTabPlayer despawning = TabAPI.getHolder(id);
 
-							if (despawning != null)
+							if(despawning != null)
 								despawning.hideLines(receiver);
 						}
 
 					return;
 				}
 
-				if (packet.getClass().isAssignableFrom(outMount)) {
+				if(packet.getClass().isAssignableFrom(outMount)) {
 					int id = (int) Ref.get(packet, idField);
 
-					if (Ref.isBefore(12, 0)) {
+					if(Ref.isBefore(12, 0)) {
 						boolean lead = (int) Ref.get(packet, isLeashed) == 1;
 
-						if (lead)
+						if(lead)
 							return;
 
 						int attachedMob = (int) Ref.get(packet, mobsField);
 
-						if (attachedMob == -1) {
+						if(attachedMob == -1) {
 							List<ClassicTabPlayer> ridingBefore = watchingEntityMove.get(id);
 
-							if (ridingBefore == null)
+							if(ridingBefore == null)
 								return;
 
-							synchronized (ridingBefore) {
-								for (ClassicTabPlayer player : ridingBefore)
-									for (ArmorStandHologram line : player.getAdditionalLines())
+							synchronized(ridingBefore) {
+								for(ClassicTabPlayer player : ridingBefore)
+									for(ArmorStandHologram line : player.getAdditionalLines())
 										line.updateHeight(false, false, false, false);
 
 								watchingEntityMove.remove(id);
@@ -814,18 +796,18 @@ public class NametagManagerAPI {
 						List<ClassicTabPlayer> players = Collections.synchronizedList(new ArrayList<>());
 						ClassicTabPlayer riding = TabAPI.getHolder(attachedMob);
 
-						if (riding != null && riding.getPlayer().getVehicle() != null) {
+						if(riding != null && riding.getPlayer().getVehicle() != null) {
 							players.add(riding);
 
 							Location loc = riding.getPlayer().getVehicle().getLocation();
 
-							for (ArmorStandHologram line : riding.getAdditionalLines()) {
+							for(ArmorStandHologram line : riding.getAdditionalLines()) {
 								line.setPosWithoutUpdate(loc);
 								line.updateHeight(false, false, true, false);
 							}
 						}
 
-						if (players.isEmpty())
+						if(players.isEmpty())
 							watchingEntityMove.remove(id);
 						else
 							watchingEntityMove.put(id, players);
@@ -833,24 +815,23 @@ public class NametagManagerAPI {
 					} else {
 						Object object = Ref.get(packet, mobsField);
 
-						int[] mobs = object instanceof int[] ? (int[]) object : new int[] { (int) object };
+						int[] mobs = object instanceof int[] ? (int[]) object : new int[]{(int) object};
 
 						List<ClassicTabPlayer> ridingBefore = watchingEntityMove.get(id);
 
-						if (ridingBefore == null) {
-							List<ClassicTabPlayer> players = mobs.length == 0 ? Collections.emptyList()
-									: Collections.synchronizedList(new ArrayList<>());
+						if(ridingBefore == null) {
+							List<ClassicTabPlayer> players = mobs.length == 0 ? Collections.emptyList() : Collections.synchronizedList(new ArrayList<>());
 
-							for (int mob : mobs) {
+							for(int mob : mobs) {
 								ClassicTabPlayer riding = TabAPI.getHolder(mob);
 
-								if (riding != null) {
+								if(riding != null) {
 									players.add(riding);
 
-									if (riding.getPlayer().getVehicle() != null) {
+									if(riding.getPlayer().getVehicle() != null) {
 										Location loc = riding.getPlayer().getVehicle().getLocation();
 
-										for (ArmorStandHologram line : riding.getAdditionalLines()) {
+										for(ArmorStandHologram line : riding.getAdditionalLines()) {
 											line.setPosWithoutUpdate(loc);
 											line.updateHeight(false, false, true, false);
 										}
@@ -860,19 +841,18 @@ public class NametagManagerAPI {
 
 							watchingEntityMove.put(id, players);
 						} else {
-							List<ClassicTabPlayer> players = mobs.length == 0 ? Collections.emptyList()
-									: new ArrayList<>();
+							List<ClassicTabPlayer> players = mobs.length == 0 ? Collections.emptyList() : new ArrayList<>();
 
-							for (int mob : mobs) {
+							for(int mob : mobs) {
 								ClassicTabPlayer riding = TabAPI.getHolder(mob);
 
-								if (riding != null) {
+								if(riding != null) {
 									players.add(riding);
 
-									if (riding.getPlayer().getVehicle() != null) {
+									if(riding.getPlayer().getVehicle() != null) {
 										Location loc = riding.getPlayer().getVehicle().getLocation();
 
-										for (ArmorStandHologram line : riding.getAdditionalLines()) {
+										for(ArmorStandHologram line : riding.getAdditionalLines()) {
 											line.setPosWithoutUpdate(loc);
 											line.updateHeight(false, false, true, false);
 										}
@@ -880,16 +860,16 @@ public class NametagManagerAPI {
 								}
 							}
 
-							if (players.isEmpty())
+							if(players.isEmpty())
 								watchingEntityMove.remove(id);
 							else {
 								watchingEntityMove.put(id, players);
 								ridingBefore.removeAll(players);
 
-								for (ClassicTabPlayer dismounted : ridingBefore) {
+								for(ClassicTabPlayer dismounted : ridingBefore) {
 									Location loc = dismounted.getPlayer().getLocation();
 
-									for (ArmorStandHologram line : dismounted.getAdditionalLines()) {
+									for(ArmorStandHologram line : dismounted.getAdditionalLines()) {
 										line.setPosWithoutUpdate(loc);
 										line.updateHeight(false, false, false, false);
 									}
@@ -901,33 +881,33 @@ public class NametagManagerAPI {
 					return;
 				}
 
-				if (packet.getClass().isAssignableFrom(outTeleport)) {
+				if(packet.getClass().isAssignableFrom(outTeleport)) {
 					ClassicTabPlayer player = TabAPI.getHolder((int) Ref.get(packet, entityIdField));
 
-					if (player != null)
-						if (Ref.isBefore(12, 0)) {
+					if(player != null)
+						if(Ref.isBefore(12, 0)) {
 							double x = (int) Ref.get(packet, xField) / 32.0;
 							double y = (int) Ref.get(packet, yField) / 32.0;
 							double z = (int) Ref.get(packet, zField) / 32.0;
 
-							for (ArmorStandHologram line : player.getAdditionalLines())
+							for(ArmorStandHologram line : player.getAdditionalLines())
 								line.shouldTeleport(x, y, z);
 
-						} else if (moveRot != null) {
+						} else if(moveRot != null) {
 							Object pos = Ref.get(Ref.get(packet, moveRot), positionVec);
 
 							double x = (double) Ref.get(pos, xField);
 							double y = (double) Ref.get(pos, yField);
 							double z = (double) Ref.get(pos, zField);
 
-							for (ArmorStandHologram line : player.getAdditionalLines())
+							for(ArmorStandHologram line : player.getAdditionalLines())
 								line.shouldTeleport(x, y, z);
 						} else {
 							double x = (double) Ref.get(packet, xField);
 							double y = (double) Ref.get(packet, yField);
 							double z = (double) Ref.get(packet, zField);
 
-							for (ArmorStandHologram line : player.getAdditionalLines())
+							for(ArmorStandHologram line : player.getAdditionalLines())
 								line.shouldTeleport(x, y, z);
 						}
 				}
@@ -936,18 +916,18 @@ public class NametagManagerAPI {
 
 		listener.register();
 
-		for (Player online : BukkitLoader.getOnlinePlayers())
+		for(Player online : BukkitLoader.getOnlinePlayers())
 			TabAPI.getHolder(online).afterConnection();
 
-		for (ClassicTabPlayer player : TabAPI.data.values())
-			for (ClassicTabPlayer other : TabAPI.data.values()) {
-				if (player.equals(other))
+		for(ClassicTabPlayer player : TabAPI.data.values())
+			for(ClassicTabPlayer other : TabAPI.data.values()) {
+				if(player.equals(other))
 					continue;
 
-				if (player.getPlayer().canSee(other.getPlayer()))
+				if(player.getPlayer().canSee(other.getPlayer()))
 					player.showLines(other);
 
-				if (other.getPlayer().canSee(player.getPlayer()))
+				if(other.getPlayer().canSee(player.getPlayer()))
 					other.showLines(player);
 			}
 	}

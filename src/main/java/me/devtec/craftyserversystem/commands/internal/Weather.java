@@ -15,21 +15,20 @@ public class Weather extends CssCommand {
 
 	@Override
 	public void register() {
-		if (isRegistered())
+		if(isRegistered())
 			return;
 
-		CommandStructure<CommandSender> cmd = CommandStructure
-				.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
-					msgUsage(sender, "usage");
-				}).permission(getPerm("cmd"));
+		CommandStructure<CommandSender> cmd = CommandStructure.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
+			msgUsage(sender, "usage");
+		}).permission(getPerm("cmd"));
 		cmd.argument("sun", (sender, structure, args) -> {
-			if (!(sender instanceof Player)) {
+			if(!(sender instanceof Player)) {
 				msgUsage(sender, "usage");
 				return;
 			}
 			setSun(sender, ((Player) sender).getWorld(), true);
 		}).argument("-s", (sender, structure, args) -> {
-			if (!(sender instanceof Player)) {
+			if(!(sender instanceof Player)) {
 				msgUsage(sender, "usage");
 				return;
 			}
@@ -41,13 +40,13 @@ public class Weather extends CssCommand {
 		});
 
 		cmd.argument("rain", (sender, structure, args) -> {
-			if (!(sender instanceof Player)) {
+			if(!(sender instanceof Player)) {
 				msgUsage(sender, "usage");
 				return;
 			}
 			setRain(sender, ((Player) sender).getWorld(), true);
 		}).argument("-s", (sender, structure, args) -> {
-			if (!(sender instanceof Player)) {
+			if(!(sender instanceof Player)) {
 				msgUsage(sender, "usage");
 				return;
 			}
@@ -59,13 +58,13 @@ public class Weather extends CssCommand {
 		});
 
 		cmd.argument("thunder", (sender, structure, args) -> {
-			if (!(sender instanceof Player)) {
+			if(!(sender instanceof Player)) {
 				msgUsage(sender, "usage");
 				return;
 			}
 			setThunder(sender, ((Player) sender).getWorld(), true);
 		}).argument("-s", (sender, structure, args) -> {
-			if (!(sender instanceof Player)) {
+			if(!(sender instanceof Player)) {
 				msgUsage(sender, "usage");
 				return;
 			}
@@ -77,7 +76,7 @@ public class Weather extends CssCommand {
 		});
 		// register
 		List<String> cmds = getCommands();
-		if (!cmds.isEmpty())
+		if(!cmds.isEmpty())
 			this.cmd = addBypassSettings(cmd).build().register(cmds.remove(0), cmds.toArray(new String[0]));
 	}
 
@@ -86,7 +85,7 @@ public class Weather extends CssCommand {
 		world.setThundering(false);
 		world.setWeatherDuration(36000);
 
-		if (sendMessages)
+		if(sendMessages)
 			msgOut(sender, "weather.sun", renderer(sender).placeholder("world", world.getName()));
 	}
 
@@ -95,7 +94,7 @@ public class Weather extends CssCommand {
 		world.setThundering(false);
 		world.setWeatherDuration(36000);
 
-		if (sendMessages)
+		if(sendMessages)
 			msgOut(sender, "weather.rain", renderer(sender).placeholder("world", world.getName()));
 	}
 
@@ -104,7 +103,7 @@ public class Weather extends CssCommand {
 		world.setThundering(true);
 		world.setWeatherDuration(36000);
 
-		if (sendMessages)
+		if(sendMessages)
 			msgOut(sender, "weather.thunder", renderer(sender).placeholder("world", world.getName()));
 	}
 

@@ -13,12 +13,15 @@ public class ScoreboardLP {
 	private EventSubscription<UserDataRecalculateEvent> lpListener;
 
 	public ScoreboardLP register(ScoreboardListener instance) {
-		lpListener = LuckPermsProvider.get().getEventBus().subscribe(Loader.getPlugin(), UserDataRecalculateEvent.class, e -> {
-			UserScoreboardData userData = ScoreboardListener.data.get(e.getUser().getUniqueId());
-			if (userData != null)
-				if (userData.shouldUpdateData(e.getData().getMetaData().getPrimaryGroup()))
-					ScoreboardListener.data.put(e.getUser().getUniqueId(), instance.generateData(userData.getPlayer()));
+		lpListener = LuckPermsProvider.get().getEventBus().subscribe(Loader.getPlugin(), UserDataRecalculateEvent.class, event -> {
+			UserScoreboardData userData = ScoreboardListener.data.get(event.getUser().getUniqueId());
+
+			if(userData == null)
+				return;
+
+			instance.refreshPermissionData(userData.getPlayer(), event.getData().getMetaData().getPrimaryGroup());
 		});
+
 		return this;
 	}
 

@@ -23,13 +23,12 @@ public class Economy extends CssCommand {
 
 	@Override
 	public void register() {
-		if (isRegistered())
+		if(isRegistered())
 			return;
 
-		CommandStructure<CommandSender> cmd = CommandStructure
-				.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
-					msgUsage(sender, "cmd");
-				}).permission(getPerm("cmd"));
+		CommandStructure<CommandSender> cmd = CommandStructure.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
+			msgUsage(sender, "cmd");
+		}).permission(getPerm("cmd"));
 
 		// add
 		cmd.argument("add", (sender, structure, args) -> {
@@ -40,32 +39,31 @@ public class Economy extends CssCommand {
 			Collection<? extends Player> onlinePlayers = BukkitLoader.getOnlinePlayers();
 			List<String> players = new ArrayList<>(onlinePlayers.size() + 1);
 			players.add("{offlinePlayer}");
-			for (Player player : onlinePlayers)
+			for(Player player : onlinePlayers)
 				players.add(player.getName());
 			return players;
 		}).argument(null, 1, (sender, structure, args) -> {
 			double value = multipleByMoneyFormat(ParseUtils.getDouble(args[2]), args[2]);
 			Query query = me.devtec.shared.API.offlineCache().lookupQuery(args[1]);
-			if (query != null) {
+			if(query != null) {
 				World world = null;
-				if (sender instanceof Player)
+				if(sender instanceof Player)
 					world = ((Player) sender).getWorld();
-				else if (sender instanceof BlockCommandSender)
+				else if(sender instanceof BlockCommandSender)
 					world = ((BlockCommandSender) sender).getBlock().getWorld();
 				else
 					world = Bukkit.getWorlds().get(0);
 				API.get().getEconomyHook().deposit(query.getName(), world.getName(), value);
-				msg(sender, "add", renderer().placeholder("target", query.getName()).placeholder("balance",
-						StringUtils.formatDouble(FormatType.COMPLEX, value)));
+				msg(sender, "add", renderer().placeholder("target", query.getName()).placeholder("balance", StringUtils.formatDouble(FormatType.COMPLEX, value)));
 			} else
 				msg(sender, "no-account", renderer().placeholder("target", args[1]));
 		}, (sender, structure, args) -> {
 			List<String> tabCompleter = new ArrayList<>();
-			if (args[2].isEmpty()) {
+			if(args[2].isEmpty()) {
 				tabCompleter.add("1k");
 				tabCompleter.add("100");
 			} else {
-				if (Character.isDigit(args[2].charAt(args[2].length() - 1)))
+				if(Character.isDigit(args[2].charAt(args[2].length() - 1)))
 					tabCompleter.add(args[2] + "k");
 				tabCompleter.add(args[2]);
 			}
@@ -81,32 +79,31 @@ public class Economy extends CssCommand {
 			Collection<? extends Player> onlinePlayers = BukkitLoader.getOnlinePlayers();
 			List<String> players = new ArrayList<>(onlinePlayers.size() + 1);
 			players.add("{offlinePlayer}");
-			for (Player player : onlinePlayers)
+			for(Player player : onlinePlayers)
 				players.add(player.getName());
 			return players;
 		}).argument(null, 1, (sender, structure, args) -> {
 			double value = multipleByMoneyFormat(ParseUtils.getDouble(args[2]), args[2]);
 			Query query = me.devtec.shared.API.offlineCache().lookupQuery(args[1]);
-			if (query != null) {
+			if(query != null) {
 				World world = null;
-				if (sender instanceof Player)
+				if(sender instanceof Player)
 					world = ((Player) sender).getWorld();
-				else if (sender instanceof BlockCommandSender)
+				else if(sender instanceof BlockCommandSender)
 					world = ((BlockCommandSender) sender).getBlock().getWorld();
 				else
 					world = Bukkit.getWorlds().get(0);
 				API.get().getEconomyHook().withdraw(query.getName(), world.getName(), value);
-				msg(sender, "remove", renderer().placeholder("target", query.getName()).placeholder("balance",
-						StringUtils.formatDouble(FormatType.COMPLEX, value)));
+				msg(sender, "remove", renderer().placeholder("target", query.getName()).placeholder("balance", StringUtils.formatDouble(FormatType.COMPLEX, value)));
 			} else
 				msg(sender, "no-account", renderer().placeholder("target", args[1]));
 		}, (sender, structure, args) -> {
 			List<String> tabCompleter = new ArrayList<>();
-			if (args[2].isEmpty()) {
+			if(args[2].isEmpty()) {
 				tabCompleter.add("1k");
 				tabCompleter.add("100");
 			} else {
-				if (Character.isDigit(args[2].charAt(args[2].length() - 1)))
+				if(Character.isDigit(args[2].charAt(args[2].length() - 1)))
 					tabCompleter.add(args[2] + "k");
 				tabCompleter.add(args[2]);
 			}
@@ -122,39 +119,38 @@ public class Economy extends CssCommand {
 			Collection<? extends Player> onlinePlayers = BukkitLoader.getOnlinePlayers();
 			List<String> players = new ArrayList<>(onlinePlayers.size() + 1);
 			players.add("{offlinePlayer}");
-			for (Player player : onlinePlayers)
+			for(Player player : onlinePlayers)
 				players.add(player.getName());
 			return players;
 		}).argument(null, 1, (sender, structure, args) -> {
 			double value = multipleByMoneyFormat(ParseUtils.getDouble(args[2]), args[2]);
 			Query query = me.devtec.shared.API.offlineCache().lookupQuery(args[1]);
-			if (query != null) {
+			if(query != null) {
 				World world = null;
-				if (sender instanceof Player)
+				if(sender instanceof Player)
 					world = ((Player) sender).getWorld();
-				else if (sender instanceof BlockCommandSender)
+				else if(sender instanceof BlockCommandSender)
 					world = ((BlockCommandSender) sender).getBlock().getWorld();
 				else
 					world = Bukkit.getWorlds().get(0);
 				double currentBalance = API.get().getEconomyHook().getBalance(query.getName(), world.getName());
-				if (currentBalance < 0)
+				if(currentBalance < 0)
 					currentBalance = 0;
-				if (currentBalance < value)
+				if(currentBalance < value)
 					API.get().getEconomyHook().deposit(query.getName(), world.getName(), value - currentBalance);
-				else if (currentBalance != value)
+				else if(currentBalance != value)
 					API.get().getEconomyHook().withdraw(query.getName(), world.getName(), currentBalance - value);
-				msg(sender, "set", renderer().placeholder("target", query.getName()).placeholder("balance",
-						StringUtils.formatDouble(FormatType.COMPLEX, value)));
+				msg(sender, "set", renderer().placeholder("target", query.getName()).placeholder("balance", StringUtils.formatDouble(FormatType.COMPLEX, value)));
 			} else
 				msg(sender, "no-account", renderer().placeholder("target", args[1]));
 		}, (sender, structure, args) -> {
 			List<String> tabCompleter = new ArrayList<>();
-			if (args[2].isEmpty()) {
+			if(args[2].isEmpty()) {
 				tabCompleter.add("1k");
 				tabCompleter.add("100");
 				tabCompleter.add("0");
 			} else {
-				if (Character.isDigit(args[2].charAt(args[2].length() - 1)))
+				if(Character.isDigit(args[2].charAt(args[2].length() - 1)))
 					tabCompleter.add(args[2] + "k");
 				tabCompleter.add(args[2]);
 			}
@@ -163,26 +159,26 @@ public class Economy extends CssCommand {
 
 		// register
 		List<String> cmds = getCommands();
-		if (!cmds.isEmpty())
+		if(!cmds.isEmpty())
 			this.cmd = addBypassSettings(cmd).build().register(cmds.remove(0), cmds.toArray(new String[0]));
 	}
 
 	public static double multipleByMoneyFormat(double balance, String text) {
-		switch (text.charAt(text.length() - 1)) {
-		case 'k':
-		case 'K':
-			return balance * 1000;
-		case 'm':
-		case 'M':
-			return balance * 1000000;
-		case 'b':
-		case 'B':
-			return balance * 1.0E9;
-		case 't':
-		case 'T':
-			return balance * 1.0E12;
-		default:
-			return balance;
+		switch(text.charAt(text.length() - 1)) {
+			case 'k' :
+			case 'K' :
+				return balance * 1000;
+			case 'm' :
+			case 'M' :
+				return balance * 1000000;
+			case 'b' :
+			case 'B' :
+				return balance * 1.0E9;
+			case 't' :
+			case 'T' :
+				return balance * 1.0E12;
+			default :
+				return balance;
 		}
 	}
 }

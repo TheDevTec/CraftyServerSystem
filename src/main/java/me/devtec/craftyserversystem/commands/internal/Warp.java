@@ -45,7 +45,7 @@ public class Warp extends CssCommand {
 	public static void callMenuUpdate() {
 		GuiCreator gui = GuiCreator.guis.get(GUI_NAME);
 
-		if (gui instanceof LoopGuiCreator)
+		if(gui instanceof LoopGuiCreator)
 			((LoopGuiCreator) gui).reload();
 	}
 
@@ -65,7 +65,7 @@ public class Warp extends CssCommand {
 
 	@Override
 	public void register() {
-		if (isRegistered())
+		if(isRegistered())
 			return;
 
 		WarpManager.getProvider().load();
@@ -75,22 +75,22 @@ public class Warp extends CssCommand {
 
 		GuiCreator gui = GuiCreator.guis.get(GUI_NAME);
 
-		if (gui instanceof LoopGuiCreator)
+		if(gui instanceof LoopGuiCreator)
 			((LoopGuiCreator) gui).reload();
 
 		CommandExecutor<CommandSender> main;
 		Config config = API.get().getConfigManager().getMain();
 
-		if (config.getBoolean("warp.enable-menu"))
+		if(config.getBoolean("warp.enable-menu"))
 			main = (sender, structure, args) -> {
-				if (!(sender instanceof Player)) {
+				if(!(sender instanceof Player)) {
 					msgUsage(sender, "other");
 					return;
 				}
 
 				GuiCreator creator = GuiCreator.guis.get(GUI_NAME);
 
-				if (creator == null) {
+				if(creator == null) {
 					msgUsage(sender, "cmd");
 					return;
 				}
@@ -99,7 +99,7 @@ public class Warp extends CssCommand {
 			};
 		else
 			main = (sender, structure, args) -> {
-				if (!(sender instanceof Player)) {
+				if(!(sender instanceof Player)) {
 					msgUsage(sender, "other");
 					return;
 				}
@@ -107,20 +107,18 @@ public class Warp extends CssCommand {
 				msgUsage(sender, "cmd");
 			};
 
-		CommandStructure<CommandSender> cmd = CommandStructure.create(CommandSender.class, DEFAULT_PERMS_CHECKER, main)
-				.permission(getPerm("cmd")).callableArgument((sender, structure, args) -> StringUtils
-						.copyPartialMatches(args[0], WarpManager.getProvider().getWarps()),
-						(sender, structure, args) -> {
-							if (!(sender instanceof Player)) {
-								msgUsage(sender, "other");
-								return;
-							}
+		CommandStructure<CommandSender> cmd = CommandStructure.create(CommandSender.class, DEFAULT_PERMS_CHECKER, main).permission(getPerm("cmd"))
+		        .callableArgument((sender, structure, args) -> StringUtils.copyPartialMatches(args[0], WarpManager.getProvider().getWarps()), (sender, structure, args) -> {
+			        if(!(sender instanceof Player)) {
+				        msgUsage(sender, "other");
+				        return;
+			        }
 
-							warp((Player) sender, args[0].toLowerCase(Locale.ROOT), true, false, sender);
-						});
+			        warp((Player) sender, args[0].toLowerCase(Locale.ROOT), true, false, sender);
+		        });
 
 		cmd.argument("-s", (sender, structure, args) -> {
-			if (!(sender instanceof Player)) {
+			if(!(sender instanceof Player)) {
 				msgUsage(sender, "other");
 				return;
 			}
@@ -129,7 +127,7 @@ public class Warp extends CssCommand {
 		});
 
 		cmd.argument("-i", (sender, structure, args) -> {
-			if (!(sender instanceof Player)) {
+			if(!(sender instanceof Player)) {
 				msgUsage(sender, "other");
 				return;
 			}
@@ -138,7 +136,7 @@ public class Warp extends CssCommand {
 		}).permission(getPerm("instant"));
 
 		cmd.argument("-si", (sender, structure, args) -> {
-			if (!(sender instanceof Player)) {
+			if(!(sender instanceof Player)) {
 				msgUsage(sender, "other");
 				return;
 			}
@@ -147,30 +145,29 @@ public class Warp extends CssCommand {
 		}).permission(getPerm("instant"));
 
 		cmd = cmd.selector(Selector.ENTITY_SELECTOR, (sender, structure, args) -> {
-			for (Player player : selector(sender, args[1]))
+			for(Player player : selector(sender, args[1]))
 				warp(player, args[0].toLowerCase(Locale.ROOT), true, false, sender);
 		}).permission(getPerm("other"));
 
 		cmd.argument("-s", (sender, structure, args) -> {
-			for (Player player : selector(sender, args[1]))
+			for(Player player : selector(sender, args[1]))
 				warp(player, args[0].toLowerCase(Locale.ROOT), false, false, sender);
 		});
 
 		cmd.argument("-i", (sender, structure, args) -> {
-			for (Player player : selector(sender, args[1]))
+			for(Player player : selector(sender, args[1]))
 				warp(player, args[0].toLowerCase(Locale.ROOT), true, true, sender);
 		}).permission(getPerm("other-instant"));
 
 		cmd.argument("-si", (sender, structure, args) -> {
-			for (Player player : selector(sender, args[1]))
+			for(Player player : selector(sender, args[1]))
 				warp(player, args[0].toLowerCase(Locale.ROOT), false, true, sender);
 		}).permission(getPerm("other-instant"));
 
 		List<String> commands = getCommands();
 
-		if (!commands.isEmpty())
-			this.cmd = addBypassSettings(cmd).build().register(commands.remove(0),
-					commands.toArray(new String[commands.size()]));
+		if(!commands.isEmpty())
+			this.cmd = addBypassSettings(cmd).build().register(commands.remove(0), commands.toArray(new String[commands.size()]));
 	}
 
 	private void registerLoop() {
@@ -178,17 +175,17 @@ public class Warp extends CssCommand {
 
 			List<ItemGUI> items = new ArrayList<ItemGUI>();
 
-			for (String warpName : WarpManager.getProvider().getWarps()) {
+			for(String warpName : WarpManager.getProvider().getWarps()) {
 				WarpInfo warp = WarpManager.getProvider().get(warpName);
 
-				if (warp == null || !warp.isValid())
+				if(warp == null || !warp.isValid())
 					continue;
 
 				Map<String, Object> placeholders = createWarpPlaceholders(player, warpName, warp);
 
 				ItemPackage result = findWarpItem(player, sharedData, placeholders, conditions, defaultItem);
 
-				if (result != null)
+				if(result != null)
 					items.add(createWarpItem(result, player, sharedData, placeholders));
 			}
 
@@ -212,7 +209,7 @@ public class Warp extends CssCommand {
 
 			String warpName = resolveWarpName(player, placeholders, values);
 
-			if (warpName == null)
+			if(warpName == null)
 				return;
 
 			warp(player, warpName, sendMessages, instant, player);
@@ -231,8 +228,7 @@ public class Warp extends CssCommand {
 
 		boolean hasCost = warp.getCost() > 0;
 
-		boolean hasMoney = !hasCost
-				|| API.get().getEconomyHook().has(player.getName(), player.getWorld().getName(), warp.getCost());
+		boolean hasMoney = !hasCost || API.get().getEconomyHook().has(player.getName(), player.getWorld().getName(), warp.getCost());
 
 		Material material = warp.getIcon() == null ? Material.STONE : warp.getIcon().getType();
 
@@ -270,28 +266,25 @@ public class Warp extends CssCommand {
 		return placeholders;
 	}
 
-	private static ItemPackage findWarpItem(Player player, Config sharedData, Map<String, Object> placeholders,
-			List<ConditionItem> conditions, ItemPackage defaultItem) {
+	private static ItemPackage findWarpItem(Player player, Config sharedData, Map<String, Object> placeholders, List<ConditionItem> conditions, ItemPackage defaultItem) {
 
-		if (conditions != null)
-			for (ConditionItem condition : conditions) {
+		if(conditions != null)
+			for(ConditionItem condition : conditions) {
 				ItemPackage result = condition.test(player, sharedData, placeholders);
 
-				if (result != null && result.getItem() != null)
+				if(result != null && result.getItem() != null)
 					return result;
 			}
 
-		if (defaultItem == null || defaultItem.getItem() == null)
+		if(defaultItem == null || defaultItem.getItem() == null)
 			return null;
 
 		return defaultItem;
 	}
 
-	private static ItemGUI createWarpItem(final ItemPackage result, final Player placeholderPlayer,
-			final Config sharedData, final Map<String, Object> placeholders) {
+	private static ItemGUI createWarpItem(final ItemPackage result, final Player placeholderPlayer, final Config sharedData, final Map<String, Object> placeholders) {
 
-		return new ItemGUI(Utils.applyPlaceholders(result.getTypePlaceholder(), result.getItem(), placeholders,
-				placeholderPlayer)) {
+		return new ItemGUI(Utils.applyPlaceholders(result.getTypePlaceholder(), result.getItem(), placeholders, placeholderPlayer)) {
 
 			@Override
 			public void onClick(Player player, HolderGUI gui, ClickType click) {
@@ -305,11 +298,11 @@ public class Warp extends CssCommand {
 
 		String warpName = values;
 
-		if (warpName == null || warpName.trim().isEmpty()) {
+		if(warpName == null || warpName.trim().isEmpty()) {
 
 			Object value = placeholders == null ? null : placeholders.get("warp");
 
-			if (value == null)
+			if(value == null)
 				return null;
 
 			warpName = String.valueOf(value);
@@ -317,89 +310,86 @@ public class Warp extends CssCommand {
 		} else
 			warpName = Utils.replacePlaceholders(warpName, placeholders, player.getUniqueId());
 
-		if (warpName == null)
+		if(warpName == null)
 			return null;
 
 		warpName = warpName.trim();
 
-		if (warpName.isEmpty())
+		if(warpName.isEmpty())
 			return null;
 
 		return warpName.toLowerCase(Locale.ROOT);
 	}
 
-	public WarpResult warp(Player target, String warpName, boolean sendMessages, boolean instant,
-			CommandSender sender) {
+	public WarpResult warp(Player target, String warpName, boolean sendMessages, boolean instant, CommandSender sender) {
 
 		WarpInfo warp = WarpManager.getProvider().get(warpName);
 
-		if (warp == null || !warp.isValid())
+		if(warp == null || !warp.isValid())
 			return null;
 
 		WarpResult result = warp.warp(target, instant);
 
-		if (!sendMessages || result == null)
+		if(!sendMessages || result == null)
 			return result;
 
-		if (!sender.equals(target)) {
+		if(!sender.equals(target)) {
 
 			TextRenderer targetRenderer = createWarpRenderer(target, sender, target, warpName, warp);
 
 			TextRenderer senderRenderer = createWarpRenderer(sender, sender, target, warpName, warp);
 
-			switch (result) {
-			case FAILED_NO_MONEY:
-				msg(target, "other.failed.money.target", targetRenderer);
+			switch(result) {
+				case FAILED_NO_MONEY :
+					msg(target, "other.failed.money.target", targetRenderer);
 
-				msg(sender, "other.failed.money.sender", senderRenderer);
-				break;
+					msg(sender, "other.failed.money.sender", senderRenderer);
+					break;
 
-			case FAILED_NO_PERMISSION:
-				msg(target, "other.failed.perm.target", targetRenderer);
+				case FAILED_NO_PERMISSION :
+					msg(target, "other.failed.perm.target", targetRenderer);
 
-				msg(sender, "other.failed.perm.sender", senderRenderer);
-				break;
+					msg(sender, "other.failed.perm.sender", senderRenderer);
+					break;
 
-			case SUCCESS:
-				msg(target, "other.success.target", targetRenderer);
+				case SUCCESS :
+					msg(target, "other.success.target", targetRenderer);
 
-				msg(sender, "other.success.sender", senderRenderer);
-				break;
+					msg(sender, "other.success.sender", senderRenderer);
+					break;
 
-			default:
-				break;
+				default :
+					break;
 			}
 
 		} else {
 
 			TextRenderer renderer = createWarpRenderer(target, sender, target, warpName, warp);
 
-			switch (result) {
-			case FAILED_NO_MONEY:
-				msg(target, "self.failed.money", renderer);
-				break;
+			switch(result) {
+				case FAILED_NO_MONEY :
+					msg(target, "self.failed.money", renderer);
+					break;
 
-			case FAILED_NO_PERMISSION:
-				msg(target, "self.failed.perm", renderer);
-				break;
+				case FAILED_NO_PERMISSION :
+					msg(target, "self.failed.perm", renderer);
+					break;
 
-			case SUCCESS:
-				msg(target, "self.success", renderer);
-				break;
+				case SUCCESS :
+					msg(target, "self.success", renderer);
+					break;
 
-			default:
-				break;
+				default :
+					break;
 			}
 		}
 
 		return result;
 	}
 
-	private TextRenderer createWarpRenderer(CommandSender viewer, CommandSender sender, Player target, String warpName,
-			WarpInfo warp) {
+	private TextRenderer createWarpRenderer(CommandSender viewer, CommandSender sender, Player target, String warpName, WarpInfo warp) {
 
-		return renderer(viewer).placeholder("sender", sender.getName()).placeholder("target", target.getName())
-				.placeholder("warp", warpName).placeholder("cost", warp.getCost())
-				.placeholder("permission", warp.getPermission() == null ? "" : warp.getPermission());
+		return renderer(viewer).placeholder("sender", sender.getName()).placeholder("target", target.getName()).placeholder("warp", warpName).placeholder("cost", warp.getCost())
+		        .placeholder("permission", warp.getPermission() == null ? "" : warp.getPermission());
 	}
 }

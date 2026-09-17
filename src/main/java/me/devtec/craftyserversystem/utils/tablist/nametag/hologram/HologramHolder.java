@@ -16,37 +16,28 @@ import me.devtec.theapi.bukkit.BukkitLoader;
 
 public interface HologramHolder {
 
-	AtomicInteger integer = (AtomicInteger) Ref
-			.getStatic(Ref.field(Ref.nms("world.entity", "Entity"), AtomicInteger.class));
+	AtomicInteger integer = (AtomicInteger) Ref.getStatic(Ref.field(Ref.nms("world.entity", "Entity"), AtomicInteger.class));
 	Field entityCount = Ref.field(Ref.nms("world.entity", "Entity"), "entityCount");
 	Method levelEntityCount = Ref.method(Ref.nms("world.level", "Level"), "getNextEntityId");
 
-	Class<?> metadataClass = Ref.nms("network.protocol.game",
-			BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "ClientboundSetEntityDataPacket" : "PacketPlayOutEntityMetadata");
+	Class<?> metadataClass = Ref.nms("network.protocol.game", BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "ClientboundSetEntityDataPacket" : "PacketPlayOutEntityMetadata");
 	Constructor<?> metadataConstructor = Ref.constructor(metadataClass, int.class, List.class);
-	Class<?> entityTeleport = Ref.nms("network.protocol.game",
-			BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "ClientboundTeleportEntityPacket" : "PacketPlayOutEntityTeleport");
-	Field entityId = Ref.field(entityTeleport, BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "id" : "a"),
-			posX = Ref.field(entityTeleport, BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "x" : "b"),
-			posY = Ref.field(entityTeleport, BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "y" : "c"),
-			posZ = Ref.field(entityTeleport, BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "z" : "d"),
-			onGround = Ref.field(entityTeleport, BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "onGround" : "g");
+	Class<?> entityTeleport = Ref.nms("network.protocol.game", BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "ClientboundTeleportEntityPacket" : "PacketPlayOutEntityTeleport");
+	Field entityId = Ref.field(entityTeleport, BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "id" : "a"), posX = Ref.field(entityTeleport, BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "x" : "b"),
+	        posY = Ref.field(entityTeleport, BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "y" : "c"), posZ = Ref.field(entityTeleport, BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "z" : "d"),
+	        onGround = Ref.field(entityTeleport, BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "onGround" : "g");
 	Field metadataId = Ref.isAtLeast(19, 2) ? null : Ref.field(metadataClass, int.class);
 	Field metadataList = Ref.field(metadataClass, List.class);
-	Class<?> vec3D = Ref.nms("world.phys", "Vec3") == null ? Ref.nms("world.phys", "Vec3D")
-			: Ref.nms("world.phys", "Vec3");
+	Class<?> vec3D = Ref.nms("world.phys", "Vec3") == null ? Ref.nms("world.phys", "Vec3D") : Ref.nms("world.phys", "Vec3");
 	Constructor<?> vec3DConstructor = Ref.constructor(vec3D, double.class, double.class, double.class);
 	boolean modernPaper = Ref.field(entityTeleport, "f") == null;
-	Constructor<?> modernTeleportPacket = Ref.constructor(entityTeleport, int.class,
-			Ref.nms("world.entity", "PositionMoveRotation"), Set.class, boolean.class);
-	Constructor<?> positionMoveRotation = Ref.constructor(Ref.nms("world.entity", "PositionMoveRotation"), vec3D, vec3D,
-			float.class, float.class);
+	Constructor<?> modernTeleportPacket = Ref.constructor(entityTeleport, int.class, Ref.nms("world.entity", "PositionMoveRotation"), Set.class, boolean.class);
+	Constructor<?> positionMoveRotation = Ref.constructor(Ref.nms("world.entity", "PositionMoveRotation"), vec3D, vec3D, float.class, float.class);
 
 	static Object packetMetadata(int id, List<?> list) {
 		try {
-			return Ref.isAtLeast(19, 2) ? Ref.newInstance(metadataConstructor, id, list)
-					: initMetadataPacket(Ref.newUnsafeInstance(metadataClass), id, list);
-		} catch (Exception e) {
+			return Ref.isAtLeast(19, 2) ? Ref.newInstance(metadataConstructor, id, list) : initMetadataPacket(Ref.newUnsafeInstance(metadataClass), id, list);
+		} catch(Exception e) {
 			return null;
 		}
 	}
@@ -58,14 +49,13 @@ public interface HologramHolder {
 	}
 
 	static Object packetTeleport(int id, double x, double y, double z) {
-		if (modernPaper)
-			return Ref.newInstance(modernTeleportPacket, id, Ref.newInstance(positionMoveRotation,
-					Ref.newInstance(vec3DConstructor, x, y, z), Ref.newInstance(vec3DConstructor, 0, 0, 0), 0f, 0f),
-					Collections.emptySet(), false);
+		if(modernPaper)
+			return Ref.newInstance(modernTeleportPacket, id, Ref.newInstance(positionMoveRotation, Ref.newInstance(vec3DConstructor, x, y, z), Ref.newInstance(vec3DConstructor, 0, 0, 0), 0f, 0f),
+			        Collections.emptySet(), false);
 		try {
 			Object teleportPacket = Ref.newUnsafeInstance(entityTeleport);
 			Ref.set(teleportPacket, entityId, id);
-			if (Ref.isBefore(12, 0)) {
+			if(Ref.isBefore(12, 0)) {
 				Ref.set(teleportPacket, posX, MathUtils.floor(x * 32));
 				Ref.set(teleportPacket, posY, MathUtils.floor(y * 32));
 				Ref.set(teleportPacket, posZ, MathUtils.floor(z * 32));
@@ -76,15 +66,15 @@ public interface HologramHolder {
 			}
 			Ref.set(teleportPacket, onGround, false);
 			return teleportPacket;
-		} catch (Exception e) {
+		} catch(Exception e) {
 			return null;
 		}
 	}
 
 	static int increaseAndGetId(World world) {
-		if (integer != null)
+		if(integer != null)
 			return integer.incrementAndGet();
-		if (levelEntityCount != null)
+		if(levelEntityCount != null)
 			return (int) Ref.invoke(BukkitLoader.getNmsProvider().getWorld(world), levelEntityCount);
 		int count = (int) Ref.getStatic(entityCount);
 		Ref.setStatic(entityCount, count + 1);

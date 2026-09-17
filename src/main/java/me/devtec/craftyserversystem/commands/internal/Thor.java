@@ -21,51 +21,49 @@ public class Thor extends CssCommand {
 
 	@Override
 	public void register() {
-		if (isRegistered())
+		if(isRegistered())
 			return;
 
-		CommandStructure<CommandSender> cmd = CommandStructure
-				.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
-					if (!(sender instanceof Player)) {
-						msgUsage(sender, "usage");
-						return;
-					}
-					Block block = getLookingBlock((Player) sender, 15);
-					if (block == null)
-						msgUsage(sender, "usage");
-					else
-						smite(block.getLocation(), true, true, sender);
-				}).permission(getPerm("cmd"));
-		// attack / silent
-		cmd.argument("-attack", (sender, structure, args) -> {
-			if (!(sender instanceof Player)) {
+		CommandStructure<CommandSender> cmd = CommandStructure.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
+			if(!(sender instanceof Player)) {
 				msgUsage(sender, "usage");
 				return;
 			}
 			Block block = getLookingBlock((Player) sender, 15);
-			if (block == null)
+			if(block == null)
+				msgUsage(sender, "usage");
+			else
+				smite(block.getLocation(), true, true, sender);
+		}).permission(getPerm("cmd"));
+		// attack / silent
+		cmd.argument("-attack", (sender, structure, args) -> {
+			if(!(sender instanceof Player)) {
+				msgUsage(sender, "usage");
+				return;
+			}
+			Block block = getLookingBlock((Player) sender, 15);
+			if(block == null)
 				msgUsage(sender, "usage");
 			else
 				smite(block.getLocation(), true, false, sender);
-		}, (sender, structure, args) -> sender instanceof Player ? Arrays.asList("-attack") : Collections.emptyList())
-				.argument("-s", (sender, structure, args) -> {
-					if (!(sender instanceof Player)) {
-						msgUsage(sender, "usage");
-						return;
-					}
-					Block block = getLookingBlock((Player) sender, 15);
-					if (block == null)
-						msgUsage(sender, "usage");
-					else
-						smite(block.getLocation(), false, false, sender);
-				});
-		cmd.argument("-s", (sender, structure, args) -> {
-			if (!(sender instanceof Player)) {
+		}, (sender, structure, args) -> sender instanceof Player ? Arrays.asList("-attack") : Collections.emptyList()).argument("-s", (sender, structure, args) -> {
+			if(!(sender instanceof Player)) {
 				msgUsage(sender, "usage");
 				return;
 			}
 			Block block = getLookingBlock((Player) sender, 15);
-			if (block == null)
+			if(block == null)
+				msgUsage(sender, "usage");
+			else
+				smite(block.getLocation(), false, false, sender);
+		});
+		cmd.argument("-s", (sender, structure, args) -> {
+			if(!(sender instanceof Player)) {
+				msgUsage(sender, "usage");
+				return;
+			}
+			Block block = getLookingBlock((Player) sender, 15);
+			if(block == null)
 				msgUsage(sender, "usage");
 			else
 				smite(block.getLocation(), false, true, sender);
@@ -79,11 +77,10 @@ public class Thor extends CssCommand {
 		target.argument("-attack", (sender, structure, args) -> {
 			Player player = Bukkit.getPlayer(args[0]);
 			smite(player, true, false, sender);
-		}, (sender, structure, args) -> sender instanceof Player ? Arrays.asList("-attack") : Collections.emptyList())
-				.argument("-s", (sender, structure, args) -> {
-					Player player = Bukkit.getPlayer(args[0]);
-					smite(player, false, false, sender);
-				});
+		}, (sender, structure, args) -> sender instanceof Player ? Arrays.asList("-attack") : Collections.emptyList()).argument("-s", (sender, structure, args) -> {
+			Player player = Bukkit.getPlayer(args[0]);
+			smite(player, false, false, sender);
+		});
 		target.argument("-s", (sender, structure, args) -> {
 			Player player = Bukkit.getPlayer(args[0]);
 			smite(player, false, true, sender);
@@ -91,17 +88,16 @@ public class Thor extends CssCommand {
 
 		// register
 		List<String> cmds = getCommands();
-		if (!cmds.isEmpty())
+		if(!cmds.isEmpty())
 			this.cmd = addBypassSettings(cmd).build().register(cmds.remove(0), cmds.toArray(new String[0]));
 	}
 
 	public static Block getLookingBlock(Player player, int range) {
 		BlockIterator iter = new BlockIterator(player, range);
 		Block lastBlock = iter.next();
-		while (iter.hasNext()) {
+		while(iter.hasNext()) {
 			lastBlock = iter.next();
-			if (lastBlock.getType() == Material.AIR || "CAVE_AIR".equals(lastBlock.getType().name())
-					|| lastBlock.isLiquid() || !lastBlock.getType().isSolid())
+			if(lastBlock.getType() == Material.AIR || "CAVE_AIR".equals(lastBlock.getType().name()) || lastBlock.isLiquid() || !lastBlock.getType().isSolid())
 				continue;
 			break;
 		}
@@ -109,22 +105,20 @@ public class Thor extends CssCommand {
 	}
 
 	public void smite(Player target, boolean sendMessage, boolean onlyEffect, CommandSender sender) {
-		if (onlyEffect)
+		if(onlyEffect)
 			target.getWorld().strikeLightningEffect(target.getLocation());
 		else
 			target.getWorld().strikeLightning(target.getLocation());
-		if (sendMessage)
-			if (onlyEffect) {
-				if (!sender.equals(target)) {
-					TextRenderer placeholders = renderer().placeholder("sender", sender.getName()).placeholder("target",
-							target.getName());
+		if(sendMessage)
+			if(onlyEffect) {
+				if(!sender.equals(target)) {
+					TextRenderer placeholders = renderer().placeholder("sender", sender.getName()).placeholder("target", target.getName());
 					msg(target, "other.effect.target", placeholders);
 					msg(sender, "other.effect.sender", placeholders);
 				} else
 					msg(target, "self.effect", renderer().placeholder("target", target.getName()));
-			} else if (!sender.equals(target)) {
-				TextRenderer placeholders = renderer().placeholder("sender", sender.getName()).placeholder("target",
-						target.getName());
+			} else if(!sender.equals(target)) {
+				TextRenderer placeholders = renderer().placeholder("sender", sender.getName()).placeholder("target", target.getName());
 				msg(target, "other.attack.target", placeholders);
 				msg(sender, "other.attack.sender", placeholders);
 			} else
@@ -132,17 +126,17 @@ public class Thor extends CssCommand {
 	}
 
 	public void smite(Location looking, boolean sendMessage, boolean onlyEffect, CommandSender sender) {
-		if (onlyEffect)
+		if(onlyEffect)
 			looking.getWorld().strikeLightningEffect(looking);
 		else
 			looking.getWorld().strikeLightning(looking);
-		if (sendMessage)
-			if (onlyEffect)
-				msg(sender, "block.effect", renderer().placeholder("x", looking.getX()).placeholder("y", looking.getY())
-						.placeholder("z", looking.getZ()).placeholder("world", looking.getWorld().getName()));
+		if(sendMessage)
+			if(onlyEffect)
+				msg(sender, "block.effect",
+				        renderer().placeholder("x", looking.getX()).placeholder("y", looking.getY()).placeholder("z", looking.getZ()).placeholder("world", looking.getWorld().getName()));
 			else
-				msg(sender, "block.attack", renderer().placeholder("x", looking.getX()).placeholder("y", looking.getY())
-						.placeholder("z", looking.getZ()).placeholder("world", looking.getWorld().getName()));
+				msg(sender, "block.attack",
+				        renderer().placeholder("x", looking.getX()).placeholder("y", looking.getY()).placeholder("z", looking.getZ()).placeholder("world", looking.getWorld().getName()));
 
 	}
 

@@ -17,37 +17,34 @@ public class Near extends CssCommand {
 
 	@Override
 	public void register() {
-		if (isRegistered())
+		if(isRegistered())
 			return;
 
-		CommandStructure<Player> cmd = CommandStructure
-				.create(Player.class, P_DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
-					msgUsage(sender, "usage");
-				}).permission(getPerm("cmd")).selector(Selector.NUMBER, (sender, structure, args) -> {
-					double distance = ParseUtils.getDouble(args[0]);
-					Map<String, Double> near = new HashMap<>();
-					Location loc = sender.getLocation();
-					for (Player player : sender.getWorld().getPlayers()) {
-						if (player.equals(sender))
-							continue;
-						double pDistance = player.getLocation().distance(loc);
-						if (pDistance <= distance)
-							near.put(player.getName(), pDistance);
-					}
-					if (near.isEmpty()) {
-						msg(sender, "noone", renderer().placeholder("distance", distance));
-						return;
-					}
-					msg(sender, "result",
-							renderer().placeholder("amount", near.size()).placeholder("distance", distance));
-					for (Entry<String, Double> entry : near.entrySet())
-						msg(sender, "item", renderer().placeholder("target", entry.getKey()).placeholder("distance",
-								entry.getValue()));
-				});
+		CommandStructure<Player> cmd = CommandStructure.create(Player.class, P_DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
+			msgUsage(sender, "usage");
+		}).permission(getPerm("cmd")).selector(Selector.NUMBER, (sender, structure, args) -> {
+			double distance = ParseUtils.getDouble(args[0]);
+			Map<String, Double> near = new HashMap<>();
+			Location loc = sender.getLocation();
+			for(Player player : sender.getWorld().getPlayers()) {
+				if(player.equals(sender))
+					continue;
+				double pDistance = player.getLocation().distance(loc);
+				if(pDistance <= distance)
+					near.put(player.getName(), pDistance);
+			}
+			if(near.isEmpty()) {
+				msg(sender, "noone", renderer().placeholder("distance", distance));
+				return;
+			}
+			msg(sender, "result", renderer().placeholder("amount", near.size()).placeholder("distance", distance));
+			for(Entry<String, Double> entry : near.entrySet())
+				msg(sender, "item", renderer().placeholder("target", entry.getKey()).placeholder("distance", entry.getValue()));
+		});
 
 		// register
 		List<String> cmds = getCommands();
-		if (!cmds.isEmpty())
+		if(!cmds.isEmpty())
 			this.cmd = addBypassSettings(cmd).build().register(cmds.remove(0), cmds.toArray(new String[0]));
 	}
 

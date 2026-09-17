@@ -24,6 +24,15 @@ public class UserBossBarData extends BossBarData {
 		this.bossbar = bossbar;
 	}
 
+	@Override
+	public BossBarData setText(String text) {
+		try {
+			return super.setText(text);
+		} finally {
+			markModified();
+		}
+	}
+
 	public BossBarEmulator getBossBar() {
 		return bossbar;
 	}
@@ -33,7 +42,7 @@ public class UserBossBarData extends BossBarData {
 	}
 
 	public void setHidden(boolean hide) {
-		if (hide) {
+		if(hide) {
 			hidden = true;
 			removeBossBar();
 		} else
@@ -41,47 +50,47 @@ public class UserBossBarData extends BossBarData {
 	}
 
 	public UserBossBarData process(TextRenderer renderer) {
-		if (hidden)
+		if(hidden)
 			return this;
-
-		renderer.target(player.getUniqueId()).colorize();
-
-		for (String placeholder : API.get().getConfigManager().getPlaceholders().getKeys()) {
-			String replaced = PlaceholderAPI.apply(
-					API.get().getConfigManager().getPlaceholders().getString(placeholder + ".placeholder"),
-					player.getUniqueId());
-
-			renderer.placeholder(placeholder,
-					API.get().getConfigManager().getPlaceholders()
-							.getString(placeholder + ".replace." + replaced,
-									API.get().getConfigManager().getPlaceholders()
-											.getString(placeholder + ".replace._DEFAULT", ""))
-							.replace("{placeholder}", replaced));
-		}
 
 		BossBarEmulator bar = bossbar;
 
-		if (bar == null)
-			bar = bossbar = BossBarEmulator.createInstance(player, render(getText(), renderer),
-					MathUtils.calculate(renderPlain(getProgress(), renderer)));
+		if(getText() == null || getText().isEmpty()) {
+			if(bar == null)
+				return this;
+			bar.remove();
+			bar = null;
+			return this;
+		}
+
+		renderer.target(player.getUniqueId()).colorize();
+
+		for(String placeholder : API.get().getConfigManager().getPlaceholders().getKeys()) {
+			String replaced = PlaceholderAPI.apply(API.get().getConfigManager().getPlaceholders().getString(placeholder + ".placeholder"), player.getUniqueId());
+
+			renderer.placeholder(placeholder,
+			        API.get().getConfigManager().getPlaceholders()
+			                .getString(placeholder + ".replace." + replaced, API.get().getConfigManager().getPlaceholders().getString(placeholder + ".replace._DEFAULT", ""))
+			                .replace("{placeholder}", replaced));
+		}
+
+		if(bar == null)
+			bar = bossbar = BossBarEmulator.createInstance(player, render(getText(), renderer), MathUtils.calculate(renderPlain(getProgress(), renderer)));
 		else {
-			if (!bar.canSee(player))
+			if(!bar.canSee(player))
 				bar.addPlayer(player);
-
-			if (updateTitleMode != 0) {
-				if (updateTitleMode != 2)
+			if(updateTitleMode != 0) {
+				if(updateTitleMode != 2)
 					updateTitleMode = 0;
-
-				bar.setText(render(getText(), renderer));
 			}
 
 			bar.setProgress(MathUtils.calculate(renderPlain(getProgress(), renderer)));
 		}
 
-		if (getStyle() != null)
+		if(getStyle() != null)
 			bar.setStyle(getStyle());
 
-		if (getColor() != null)
+		if(getColor() != null)
 			bar.setColor(getColor());
 
 		return this;
@@ -97,12 +106,11 @@ public class UserBossBarData extends BossBarData {
 
 	public UserBossBarData markModified() {
 		updateTitleMode = (byte) (getText().indexOf('{') != -1 || getText().indexOf('%') != -1 ? 2 : 1);
-
 		return this;
 	}
 
 	public void removeBossBar() {
-		if (bossbar != null)
+		if(bossbar != null)
 			bossbar.remove();
 	}
 

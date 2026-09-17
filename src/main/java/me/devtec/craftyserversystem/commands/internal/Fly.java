@@ -33,26 +33,26 @@ public class Fly extends CssCommand {
 
 	@Override
 	public void register() {
-		if (isRegistered())
+		if(isRegistered())
 			return;
 
-		if (API.get().getConfigManager().getMain().getBoolean("fly.anti-fall-damage-listener")) {
+		if(API.get().getConfigManager().getMain().getBoolean("fly.anti-fall-damage-listener")) {
 			fallDamageCancel = new ArrayList<>();
 			listener = new Listener() {
 
 				@EventHandler
 				public void join(PlayerJoinEvent e) {
-					if(isAllowed(e.getPlayer())){
+					if(isAllowed(e.getPlayer())) {
 						e.getPlayer().setAllowFlight(true);
-						if (e.getPlayer().getLocation().add(0, -0.5, 0).getBlock().isEmpty())
+						if(e.getPlayer().getLocation().add(0, -0.5, 0).getBlock().isEmpty())
 							e.getPlayer().setFlying(true);
 					}
 				}
 
 				@EventHandler
 				public void playerFall(EntityDamageEvent e) {
-					if (e.getCause() == DamageCause.FALL && e.getEntityType() == EntityType.PLAYER)
-						if (fallDamageCancel.remove(e.getEntity().getUniqueId()))
+					if(e.getCause() == DamageCause.FALL && e.getEntityType() == EntityType.PLAYER)
+						if(fallDamageCancel.remove(e.getEntity().getUniqueId()))
 							e.setCancelled(true);
 				}
 
@@ -68,18 +68,18 @@ public class Fly extends CssCommand {
 
 				@EventHandler
 				public void onWorldChange(PlayerChangedWorldEvent e) {
-					if (isAllowed(e.getPlayer())){
+					if(isAllowed(e.getPlayer())) {
 						e.getPlayer().setAllowFlight(true);
-						if (e.getPlayer().getLocation().add(0, -0.5, 0).getBlock().isEmpty())
+						if(e.getPlayer().getLocation().add(0, -0.5, 0).getBlock().isEmpty())
 							e.getPlayer().setFlying(true);
 					}
 				}
 
 				@EventHandler
 				public void respawn(PlayerRespawnEvent e) {
-					if (isAllowed(e.getPlayer())){
+					if(isAllowed(e.getPlayer())) {
 						me.devtec.shared.API.getUser(e.getPlayer().getUniqueId()).set("css.fly", false);
-						if (fallDamageCancel != null && listener != null && e.getPlayer().getLocation().add(0, -0.5, 0).getBlock().isEmpty())
+						if(fallDamageCancel != null && listener != null && e.getPlayer().getLocation().add(0, -0.5, 0).getBlock().isEmpty())
 							fallDamageCancel.add(e.getPlayer().getUniqueId());
 						e.getPlayer().setFlying(false);
 						e.getPlayer().setAllowFlight(false);
@@ -89,30 +89,30 @@ public class Fly extends CssCommand {
 		} else
 			listener = new Listener() {
 
-			@EventHandler
-			public void onWorldChange(PlayerChangedWorldEvent e) {
-				if (isAllowed(e.getPlayer())){
-					e.getPlayer().setAllowFlight(true);
-					if (e.getPlayer().getLocation().add(0, -0.5, 0).getBlock().isEmpty())
-						e.getPlayer().setFlying(true);
+				@EventHandler
+				public void onWorldChange(PlayerChangedWorldEvent e) {
+					if(isAllowed(e.getPlayer())) {
+						e.getPlayer().setAllowFlight(true);
+						if(e.getPlayer().getLocation().add(0, -0.5, 0).getBlock().isEmpty())
+							e.getPlayer().setFlying(true);
+					}
 				}
-			}
 
-			@EventHandler
-			public void respawn(PlayerRespawnEvent e) {
-				if (isAllowed(e.getPlayer())){
-					me.devtec.shared.API.getUser(e.getPlayer().getUniqueId()).set("css.fly", false);
-					if (fallDamageCancel != null && listener != null && e.getPlayer().getLocation().add(0, -0.5, 0).getBlock().isEmpty())
-						fallDamageCancel.add(e.getPlayer().getUniqueId());
-					e.getPlayer().setFlying(false);
-					e.getPlayer().setAllowFlight(false);
+				@EventHandler
+				public void respawn(PlayerRespawnEvent e) {
+					if(isAllowed(e.getPlayer())) {
+						me.devtec.shared.API.getUser(e.getPlayer().getUniqueId()).set("css.fly", false);
+						if(fallDamageCancel != null && listener != null && e.getPlayer().getLocation().add(0, -0.5, 0).getBlock().isEmpty())
+							fallDamageCancel.add(e.getPlayer().getUniqueId());
+						e.getPlayer().setFlying(false);
+						e.getPlayer().setAllowFlight(false);
+					}
 				}
-			}
-		};
+			};
 		Bukkit.getPluginManager().registerEvents(listener, Loader.getPlugin());
 
 		CommandStructure<CommandSender> cmd = CommandStructure.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
-			if (!(sender instanceof Player)) {
+			if(!(sender instanceof Player)) {
 				msgUsage(sender, "other");
 				return;
 			}
@@ -120,7 +120,7 @@ public class Fly extends CssCommand {
 		}).permission(getPerm("cmd"));
 		// silent
 		cmd.argument("-s", (sender, structure, args) -> {
-			if (!(sender instanceof Player)) {
+			if(!(sender instanceof Player)) {
 				msgUsage(sender, "other");
 				return;
 			}
@@ -128,41 +128,41 @@ public class Fly extends CssCommand {
 		});
 		// other
 		cmd.selector(Selector.ENTITY_SELECTOR, (sender, structure, args) -> {
-			for (Player player : selector(sender, args[0]))
+			for(Player player : selector(sender, args[0]))
 				setFly(player, !isAllowed(player), true, sender);
 		}).permission(getPerm("other"))
-		// silent
-		.argument("-s", (sender, structure, args) -> {
-			for (Player player : selector(sender, args[0]))
-				setFly(player, !isAllowed(player), false, sender);
-		});
+		        // silent
+		        .argument("-s", (sender, structure, args) -> {
+			        for(Player player : selector(sender, args[0]))
+				        setFly(player, !isAllowed(player), false, sender);
+		        });
 
 		// register
 		List<String> cmds = getCommands();
-		if (!cmds.isEmpty())
+		if(!cmds.isEmpty())
 			this.cmd = addBypassSettings(cmd).build().register(cmds.remove(0), cmds.toArray(new String[0]));
 	}
 
 	public void setFly(Player target, boolean flyStatus, boolean sendMessage, CommandSender sender) {
 		me.devtec.shared.API.getUser(target.getUniqueId()).set("css.fly", flyStatus);
-		if (flyStatus) {
+		if(flyStatus) {
 			target.setAllowFlight(true);
-			if (target.getLocation().add(0, -0.5, 0).getBlock().isEmpty())
+			if(target.getLocation().add(0, -0.5, 0).getBlock().isEmpty())
 				target.setFlying(true);
-			if (sendMessage)
-				if (!sender.equals(target)) {
+			if(sendMessage)
+				if(!sender.equals(target)) {
 					TextRenderer placeholders = renderer().placeholder("sender", sender.getName()).placeholder("target", target.getName());
 					msg(target, "other.true.target", placeholders);
 					msg(sender, "other.true.sender", placeholders);
 				} else
 					msg(target, "self.true", renderer().placeholder("target", target.getName()));
 		} else {
-			if (fallDamageCancel != null && listener != null && target.getLocation().add(0, -0.5, 0).getBlock().isEmpty())
+			if(fallDamageCancel != null && listener != null && target.getLocation().add(0, -0.5, 0).getBlock().isEmpty())
 				fallDamageCancel.add(target.getUniqueId());
 			target.setFlying(false);
 			target.setAllowFlight(false);
-			if (sendMessage)
-				if (!sender.equals(target)) {
+			if(sendMessage)
+				if(!sender.equals(target)) {
 					TextRenderer placeholders = renderer().placeholder("sender", sender.getName()).placeholder("target", target.getName());
 					msg(target, "other.false.target", placeholders);
 					msg(sender, "other.false.sender", placeholders);
@@ -178,7 +178,7 @@ public class Fly extends CssCommand {
 	@Override
 	public void unregister() {
 		super.unregister();
-		if (listener != null) {
+		if(listener != null) {
 			HandlerList.unregisterAll(listener);
 			fallDamageCancel.clear();
 			fallDamageCancel = null;

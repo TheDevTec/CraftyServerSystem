@@ -1,5 +1,6 @@
 package me.devtec.craftyserversystem.events.internal;
 
+import java.util.BitSet;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -32,15 +33,36 @@ import me.devtec.theapi.bukkit.BukkitLoader;
 
 public class TablistListener implements CssListener {
 
-	private Map<String, PerWorldTablistData> perWorld = new HashMap<>();
-	private Map<String, TablistData> perGroup = new HashMap<>();
-	private Map<String, TablistData> perPlayer = new HashMap<>();
+	private final Map<String, PerWorldTablistData> perWorld = new HashMap<>();
+	private final Map<String, TablistData> perGroup = new HashMap<>();
+	private final Map<String, TablistData> perPlayer = new HashMap<>();
+	private final List<ConditionTablistData> conditions = new LinkedList<>();
+
+	public static final Map<UUID, UserTablistData> data = new ConcurrentHashMap<>();
+
+	/*
+	 * Stav conditions z posledního vyhodnocení.
+	 *
+	 * Nový UserTablistData vytvoříme pouze tehdy,
+	 * když se některá condition skutečně změní.
+	 */
+	private final Map<UUID, BitSet> conditionStates = new ConcurrentHashMap<>();
+
+	/*
+	 * Aktuální permission group.
+	 *
+	 * Díky tomu nemusíme při každém refresh ticku
+	 * znovu sahat do Vault/LuckPerms.
+	 */
+	private final Map<UUID, String> groupStates = new ConcurrentHashMap<>();
+
 	private TablistData global;
-	public static Map<UUID, UserTablistData> data = new ConcurrentHashMap<>();
-	private List<ConditionTablistData> conditions = new LinkedList<>();
+
 	private int taskId;
 	private int refleshTaskId;
+
 	private TablistLP lpListener;
+
 	private List<String> disabledInWorlds;
 
 	@Override
@@ -55,186 +77,451 @@ public class TablistListener implements CssListener {
 
 	@Override
 	public void reload() {
+		/*
+		 * Nejdřív odstraníme existující tablist data,
+		 * aby po reloadu nezůstalo něco starého zobrazené.
+		 */
+		if(!data.isEmpty())
+			for(UserTablistData userData : data.values())
+				userData.removeTablist();
+
 		perWorld.clear();
 		perGroup.clear();
 		perPlayer.clear();
 		conditions.clear();
+
 		data.clear();
-		if (lpListener != null) {
+		conditionStates.clear();
+		groupStates.clear();
+
+		if(lpListener != null) {
 			lpListener.unregister();
 			lpListener = null;
 		}
-		if (taskId != 0)
-			Scheduler.cancelTask(taskId);
-		Scheduler.cancelTask(refleshTaskId);
-		if (NametagManagerAPI.get().isLoaded())
-			NametagManagerAPI.get().unload();
-		if (isEnabled()) {
-			TabAPI.register();
-			NametagManagerAPI.get().load();
-			disabledInWorlds = getConfig().getStringList("disabled-in-worlds");
-			for (String world : getConfig().getKeys("world")) {
-				PerWorldTablistData pw;
-				perWorld.put(world, pw = new PerWorldTablistData());
-				fill(pw, "world." + world + ".");
-				for (String player : getConfig().getKeys("world." + world + ".player")) {
-					TablistData data;
-					pw.perPlayer.put(player, data = new TablistData());
-					fill(data, "world." + world + ".player." + player + ".");
-				}
-				for (String group : getConfig().getKeys("world." + world + ".group")) {
-					TablistData data;
-					pw.perGroup.put(group, data = new TablistData());
-					fill(data, "world." + world + ".group." + group + ".");
-				}
-			}
-			for (String player : getConfig().getKeys("player")) {
-				TablistData data;
-				perPlayer.put(player, data = new TablistData());
-				fill(data, "player." + player + ".");
-			}
-			for (String group : getConfig().getKeys("group")) {
-				TablistData data;
-				perGroup.put(group, data = new TablistData());
-				fill(data, "group." + group + ".");
-			}
-			for (String id : getConfig().getKeys("conditions")) {
-				String condition = getConfig().getString("conditions." + id + ".condition", "");
-				int cond = condition.indexOf("==");
-				if (cond == -1)
-					continue;
-				ConditionTablistData data;
-				conditions.add(data = new ConditionTablistData());
-				data.setPlaceholder(condition.substring(0, cond));
-				data.setRequestValue(condition.substring(cond + 2));
-				fill(data, "conditions." + id + ".");
-			}
-			global = new TablistData();
-			fill(global, "");
 
-			if (API.get().getPermissionHook().getClass() == LuckPermsPermissionHook.class)
-				lpListener = new TablistLP().register(this);
-			else
-				taskId = new Tasker() {
+		if(taskId != 0) {
+			Scheduler.cancelTask(taskId);
+			taskId = 0;
+		}
+
+		if(refleshTaskId != 0) {
+			Scheduler.cancelTask(refleshTaskId);
+			refleshTaskId = 0;
+		}
+
+		if(NametagManagerAPI.get().isLoaded())
+			NametagManagerAPI.get().unload();
+
+		if(!isEnabled())
+			return;
+
+		TabAPI.register();
+		NametagManagerAPI.get().load();
+
+		disabledInWorlds = getConfig().getStringList("disabled-in-worlds");
+
+		for(String world : getConfig().getKeys("world")) {
+			PerWorldTablistData worldData = new PerWorldTablistData();
+
+			perWorld.put(world, worldData);
+
+			fill(worldData, "world." + world + ".");
+
+			for(String player : getConfig().getKeys("world." + world + ".player")) {
+				TablistData tablistData = new TablistData();
+
+				worldData.perPlayer.put(player, tablistData);
+
+				fill(tablistData, "world." + world + ".player." + player + ".");
+			}
+
+			for(String group : getConfig().getKeys("world." + world + ".group")) {
+				TablistData tablistData = new TablistData();
+
+				worldData.perGroup.put(group, tablistData);
+
+				fill(tablistData, "world." + world + ".group." + group + ".");
+			}
+		}
+
+		for(String player : getConfig().getKeys("player")) {
+			TablistData tablistData = new TablistData();
+
+			perPlayer.put(player, tablistData);
+
+			fill(tablistData, "player." + player + ".");
+		}
+
+		for(String group : getConfig().getKeys("group")) {
+			TablistData tablistData = new TablistData();
+
+			perGroup.put(group, tablistData);
+
+			fill(tablistData, "group." + group + ".");
+		}
+
+		for(String id : getConfig().getKeys("conditions")) {
+			String condition = getConfig().getString("conditions." + id + ".condition", "");
+
+			int separator = condition.indexOf("==");
+
+			if(separator == -1)
+				continue;
+
+			ConditionTablistData conditionData = new ConditionTablistData();
+
+			conditionData.setPlaceholder(condition.substring(0, separator));
+
+			conditionData.setRequestValue(condition.substring(separator + 2));
+
+			fill(conditionData, "conditions." + id + ".");
+
+			conditions.add(conditionData);
+		}
+
+		global = new TablistData();
+
+		fill(global, "");
+
+		if(API.get().getPermissionHook().getClass() == LuckPermsPermissionHook.class) {
+			lpListener = new TablistLP().register(this);
+		} else {
+			/*
+			 * Vault a ostatní hooky většinou nemají event.
+			 *
+			 * Pouze periodicky zjistíme group a rebuild
+			 * provedeme jen pokud se opravdu změnila.
+			 */
+			taskId = new Tasker() {
 
 				@Override
 				public void run() {
-					for (UserTablistData userData : data.values())
-						data.put(userData.getPlayer().getUniqueId(), generateData(userData.getPlayer()));
+					for(Player player : BukkitLoader.getOnlinePlayers()) {
+						if(isDisabled(player))
+							continue;
+
+						refreshPermissionData(player, API.get().getPermissionHook().getGroup(player));
+					}
 				}
 			}.runRepeating(100, 100);
-			refleshTaskId = new Tasker() {
+		}
 
-				@Override
-				public void run() {
-					for (UserTablistData userData : data.values())
-						userData.process(InternalPlaceholders.generatePlaceholders(userData.getPlayer()));
+		refleshTaskId = new Tasker() {
+
+			@Override
+			public void run() {
+				for(UserTablistData current : data.values()) {
+					Player player = current.getPlayer();
+
+					if(player == null || !player.isOnline())
+						continue;
+
+					/*
+					 * Conditiony se mohou měnit bez:
+					 *
+					 * - world change,
+					 * - permission group change,
+					 * - LuckPerms eventu.
+					 *
+					 * Proto je při datovém refreshi levně porovnáme.
+					 */
+					UserTablistData userData = refreshConditions(player);
+
+					if(userData != null)
+						userData.process(InternalPlaceholders.generatePlaceholders(player));
 				}
-			}.runRepeating(8, Math.max(1, getConfig().getLong("data-reflesh-every-ticks")));
-			for (Player player : BukkitLoader.getOnlinePlayers())
-				data.put(player.getUniqueId(),
-						generateData(player).process(InternalPlaceholders.generatePlaceholders(player)));
+			}
+		}.runRepeating(8, Math.max(1, getConfig().getLong("data-reflesh-every-ticks")));
+
+		for(Player player : BukkitLoader.getOnlinePlayers()) {
+			if(isDisabled(player))
+				continue;
+
+			UserTablistData userData = generateData(player);
+
+			userData.process(InternalPlaceholders.generatePlaceholders(player));
 		}
 	}
 
 	@Override
 	public void unregister() {
-		if (refleshTaskId != 0)
+		if(refleshTaskId != 0) {
 			Scheduler.cancelTask(refleshTaskId);
-		if (taskId != 0)
-			Scheduler.cancelTask(taskId);
-		if (NametagManagerAPI.get().isLoaded())
-			NametagManagerAPI.get().unload();
-		if (!TablistListener.data.isEmpty()) {
-			for (UserTablistData data : TablistListener.data.values())
-				data.removeTablist();
-			TablistListener.data.clear();
+			refleshTaskId = 0;
 		}
+
+		if(taskId != 0) {
+			Scheduler.cancelTask(taskId);
+			taskId = 0;
+		}
+
+		if(lpListener != null) {
+			lpListener.unregister();
+			lpListener = null;
+		}
+
+		if(NametagManagerAPI.get().isLoaded())
+			NametagManagerAPI.get().unload();
+
+		if(!data.isEmpty())
+			for(UserTablistData userData : data.values())
+				userData.removeTablist();
+
+		data.clear();
+		conditionStates.clear();
+		groupStates.clear();
 	}
 
 	private void fill(TablistData data, String path) {
 		data.setHeader(getConfig().existsKey(path + "header") ? getConfig().getStringList(path + "header") : null);
+
 		data.setFooter(getConfig().existsKey(path + "footer") ? getConfig().getStringList(path + "footer") : null);
+
 		data.setTabNameFormat(getConfig().getString(path + "tab.format"));
+
 		data.setTabPrefix(getConfig().getString(path + "tab.prefix"));
+
 		data.setTabSuffix(getConfig().getString(path + "tab.suffix"));
+
 		if(!getConfig().getStringList(path + "tag.lines").isEmpty())
 			data.setNametagLines(getConfig().getStringList(path + "tag.lines"));
+
 		data.setTagPrefix(getConfig().getString(path + "tag.prefix"));
+
 		data.setTagSuffix(getConfig().getString(path + "tag.suffix"));
+
 		data.setYellowNumberText(getConfig().getString(path + "yellowNumber.value"));
-		String yellowNumberDisplay;
-		if ((yellowNumberDisplay = getConfig().getString(path + "yellowNumber.displayAs")) != null)
+
+		String yellowNumberDisplay = getConfig().getString(path + "yellowNumber.displayAs");
+
+		if(yellowNumberDisplay != null)
 			data.setDisplayYellowNumberMode(YellowNumberDisplayMode.valueOf(yellowNumberDisplay));
 	}
 
-	public UserTablistData generateData(Player player) {
-		String vaultGroup = API.get().getPermissionHook().getGroup(player);
-		UserTablistData user = data.get(player.getUniqueId());
-		UserTablistData userData = user == null ? new UserTablistData(player) : new UserTablistData(player, user);
-		for (ConditionTablistData cond : conditions)
-			if (cond.canBeApplied(player)) {
-				userData.fillMissing(cond);
-				if (userData.isComplete())
-					return userData;
-			}
-		PerWorldTablistData pwData;
-		TablistData data;
-		if ((pwData = perWorld.get(player.getWorld().getName())) != null) {
-			if ((data = pwData.perPlayer.get(player.getName())) != null) {
-				userData.fillMissing(data);
-				if (userData.isComplete())
-					return userData;
-			}
-			if ((data = pwData.perGroup.get(vaultGroup)) != null) {
-				userData.fillMissing(data);
-				if (userData.isComplete())
-					return userData;
-			}
-			userData.fillMissing(pwData);
-			if (userData.isComplete())
+	private boolean isDisabled(Player player) {
+		return disabledInWorlds != null && disabledInWorlds.contains(player.getWorld().getName());
+	}
+
+	private String normalizeGroup(String group) {
+		return group == null ? "" : group;
+	}
+
+	private BitSet evaluateConditions(Player player) {
+		BitSet result = new BitSet(conditions.size());
+
+		for(int i = 0; i < conditions.size(); ++i)
+			if(conditions.get(i).canBeApplied(player))
+				result.set(i);
+
+		return result;
+	}
+
+	private UserTablistData createData(Player player, String group, BitSet activeConditions) {
+
+		UserTablistData previous = data.get(player.getUniqueId());
+
+		UserTablistData userData = previous == null ? new UserTablistData(player) : new UserTablistData(player, previous);
+
+		/*
+		 * Conditions mají nejvyšší prioritu.
+		 */
+		for(int index = activeConditions.nextSetBit(0); index >= 0; index = activeConditions.nextSetBit(index + 1)) {
+
+			if(index >= conditions.size())
+				break;
+
+			userData.fillMissing(conditions.get(index));
+
+			if(userData.isComplete())
 				return userData;
 		}
-		if ((data = perPlayer.get(player.getName())) != null) {
-			userData.fillMissing(data);
-			if (userData.isComplete())
+
+		PerWorldTablistData worldData;
+		TablistData tablistData;
+
+		if((worldData = perWorld.get(player.getWorld().getName())) != null) {
+			if((tablistData = worldData.perPlayer.get(player.getName())) != null) {
+				userData.fillMissing(tablistData);
+
+				if(userData.isComplete())
+					return userData;
+			}
+
+			if((tablistData = worldData.perGroup.get(group)) != null) {
+				userData.fillMissing(tablistData);
+
+				if(userData.isComplete())
+					return userData;
+			}
+
+			userData.fillMissing(worldData);
+
+			if(userData.isComplete())
 				return userData;
 		}
-		if ((data = perGroup.get(vaultGroup)) != null) {
-			userData.fillMissing(data);
-			if (userData.isComplete())
+
+		if((tablistData = perPlayer.get(player.getName())) != null) {
+			userData.fillMissing(tablistData);
+
+			if(userData.isComplete())
 				return userData;
 		}
+
+		if((tablistData = perGroup.get(group)) != null) {
+			userData.fillMissing(tablistData);
+
+			if(userData.isComplete())
+				return userData;
+		}
+
 		userData.fillMissing(global);
+
 		return userData;
 	}
 
-	@EventHandler
-	public void onJoin(PlayerJoinEvent e) {
-		Player player = e.getPlayer();
-		TabAPI.getHolder(player).afterConnection();
-		if (disabledInWorlds.contains(player.getWorld().getName()))
+	public UserTablistData generateData(Player player) {
+		String group = normalizeGroup(API.get().getPermissionHook().getGroup(player));
+
+		BitSet activeConditions = evaluateConditions(player);
+
+		UserTablistData userData = createData(player, group, activeConditions);
+
+		UUID uuid = player.getUniqueId();
+
+		groupStates.put(uuid, group);
+
+		conditionStates.put(uuid, (BitSet) activeConditions.clone());
+
+		data.put(uuid, userData);
+
+		return userData;
+	}
+
+	private UserTablistData refreshConditions(Player player) {
+		UUID uuid = player.getUniqueId();
+
+		if(isDisabled(player)) {
+			removePlayerData(player);
+			return null;
+		}
+
+		UserTablistData current = data.get(uuid);
+
+		if(current == null)
+			return generateData(player);
+
+		if(conditions.isEmpty())
+			return current;
+
+		BitSet activeConditions = evaluateConditions(player);
+
+		BitSet previousConditions = conditionStates.get(uuid);
+
+		if(previousConditions != null && previousConditions.equals(activeConditions))
+			return current;
+
+		String group = groupStates.get(uuid);
+
+		if(group == null) {
+			group = normalizeGroup(API.get().getPermissionHook().getGroup(player));
+
+			groupStates.put(uuid, group);
+		}
+
+		UserTablistData updated = createData(player, group, activeConditions);
+
+		conditionStates.put(uuid, (BitSet) activeConditions.clone());
+
+		data.put(uuid, updated);
+
+		return updated;
+	}
+
+	public void refreshPermissionData(Player player, String group) {
+
+		if(player == null || !player.isOnline())
 			return;
-		data.put(player.getUniqueId(),
-				generateData(player).process(InternalPlaceholders.generatePlaceholders(player)));
-	}
 
-	@EventHandler
-	public void onQuit(PlayerQuitEvent e) {
-		UserTablistData user;
-		if ((user = data.remove(e.getPlayer().getUniqueId())) != null)
-			user.removeTablist();
-	}
-
-	@EventHandler
-	public void onWorldChange(PlayerChangedWorldEvent e) {
-		Player player = e.getPlayer();
-		if (disabledInWorlds.contains(player.getWorld().getName())) {
-			UserTablistData user;
-			if ((user = data.remove(player.getUniqueId())) != null)
-				user.removeTablist();
+		if(isDisabled(player)) {
+			removePlayerData(player);
 			return;
 		}
-		data.put(player.getUniqueId(), generateData(player).process(InternalPlaceholders.generatePlaceholders(player)));
+
+		UUID uuid = player.getUniqueId();
+
+		String normalizedGroup = normalizeGroup(group);
+
+		UserTablistData current = data.get(uuid);
+
+		if(current == null) {
+			generateData(player);
+			return;
+		}
+
+		BitSet activeConditions = evaluateConditions(player);
+
+		BitSet previousConditions = conditionStates.get(uuid);
+
+		String previousGroup = groupStates.get(uuid);
+
+		boolean groupChanged = previousGroup == null || !previousGroup.equals(normalizedGroup);
+
+		boolean conditionsChanged = previousConditions == null || !previousConditions.equals(activeConditions);
+
+		if(!groupChanged && !conditionsChanged)
+			return;
+
+		UserTablistData updated = createData(player, normalizedGroup, activeConditions);
+
+		groupStates.put(uuid, normalizedGroup);
+
+		conditionStates.put(uuid, (BitSet) activeConditions.clone());
+
+		data.put(uuid, updated);
+	}
+
+	private void removePlayerData(Player player) {
+		UUID uuid = player.getUniqueId();
+
+		groupStates.remove(uuid);
+		conditionStates.remove(uuid);
+
+		UserTablistData userData = data.remove(uuid);
+
+		if(userData != null)
+			userData.removeTablist();
+	}
+
+	@EventHandler
+	public void onJoin(PlayerJoinEvent event) {
+		Player player = event.getPlayer();
+
+		TabAPI.getHolder(player).afterConnection();
+
+		if(isDisabled(player))
+			return;
+
+		UserTablistData userData = generateData(player);
+
+		userData.process(InternalPlaceholders.generatePlaceholders(player));
+	}
+
+	@EventHandler
+	public void onQuit(PlayerQuitEvent event) {
+		removePlayerData(event.getPlayer());
+	}
+
+	@EventHandler
+	public void onWorldChange(PlayerChangedWorldEvent event) {
+		Player player = event.getPlayer();
+
+		if(isDisabled(player)) {
+			removePlayerData(player);
+			return;
+		}
+
+		UserTablistData userData = generateData(player);
+
+		userData.process(InternalPlaceholders.generatePlaceholders(player));
 	}
 }

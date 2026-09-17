@@ -19,66 +19,57 @@ public class Speed extends CssCommand {
 	@SuppressWarnings("unchecked")
 	@Override
 	public void register() {
-		if (isRegistered())
+		if(isRegistered())
 			return;
 
-		CommandStructure<CommandSender> cmd = CommandStructure
-				.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
-					if (!(sender instanceof Player)) {
-						msgUsage(sender, "other");
-						return;
-					}
-					msgUsage(sender, "usage");
-				}).permission(getPerm("cmd"));
+		CommandStructure<CommandSender> cmd = CommandStructure.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
+			if(!(sender instanceof Player)) {
+				msgUsage(sender, "other");
+				return;
+			}
+			msgUsage(sender, "usage");
+		}).permission(getPerm("cmd"));
 
 		// other
 		cmd.selector(Selector.PLAYER, (sender, structure, args) -> {
 			msgUsage(sender, "other");
 		}).permission(getPerm("other"))
-				// Speed
-				.selector(Selector.NUMBER, (sender, structure, args) -> {
-					speed(Bukkit.getPlayer(args[0]), ParseUtils.getFloat(args[1]), true, (CommandSender) sender);
-				})
-				// silent
-				.argument("-s", (sender, structure, args) -> {
-					speed(Bukkit.getPlayer(args[0]), ParseUtils.getFloat(args[1]), false, (CommandSender) sender);
-				});
+		        // Speed
+		        .selector(Selector.NUMBER, (sender, structure, args) -> {
+			        speed(Bukkit.getPlayer(args[0]), ParseUtils.getFloat(args[1]), true, (CommandSender) sender);
+		        })
+		        // silent
+		        .argument("-s", (sender, structure, args) -> {
+			        speed(Bukkit.getPlayer(args[0]), ParseUtils.getFloat(args[1]), false, (CommandSender) sender);
+		        });
 
 		cmd.selector(Selector.NUMBER, (sender, structure, args) -> {
 			speed((Player) sender, ParseUtils.getFloat(args[0]), true, (CommandSender) sender);
-		}, (sender, structure, args) -> sender instanceof Player
-				? API.selectorUtils.build((CommandSender) sender, Selector.NUMBER)
-				: Collections.emptyList())
-				// silent
-				.argument("-s", (sender, structure, args) -> {
-					speed((Player) sender, ParseUtils.getFloat(args[1]), false, (CommandSender) sender);
-				});
+		}, (sender, structure, args) -> sender instanceof Player ? API.selectorUtils.build((CommandSender) sender, Selector.NUMBER) : Collections.emptyList())
+		        // silent
+		        .argument("-s", (sender, structure, args) -> {
+			        speed((Player) sender, ParseUtils.getFloat(args[1]), false, (CommandSender) sender);
+		        });
 
 		// register
 		List<String> cmds = getCommands();
-		if (!cmds.isEmpty())
+		if(!cmds.isEmpty())
 			this.cmd = addBypassSettings(cmd).build().register(cmds.remove(0), cmds.toArray(new String[0]));
 	}
 
 	public void speed(Player target, float speed, boolean sendMessage, CommandSender sender) {
-		if (target.isFlying())
+		if(target.isFlying())
 			target.setFlySpeed(Math.max(0, Math.min(1, speed / 10)));
 		else
 			target.setWalkSpeed(Math.max(0, Math.min(1, speed / 10)));
 
-		if (sendMessage)
-			if (!sender.equals(target)) {
-				TextRenderer placeholders = renderer()
-						.placeholder("sender", sender.getName())
-						.placeholder("target", target.getName())
-						.placeholder("value", Math.max(0, Math.min(10, speed)));
+		if(sendMessage)
+			if(!sender.equals(target)) {
+				TextRenderer placeholders = renderer().placeholder("sender", sender.getName()).placeholder("target", target.getName()).placeholder("value", Math.max(0, Math.min(10, speed)));
 
 				msgOut(target, (target.isFlying() ? "flyspeed." : "walkspeed.") + "other.target", placeholders);
 				msgOut(sender, (target.isFlying() ? "flyspeed." : "walkspeed.") + "other.sender", placeholders);
 			} else
-				msgOut(target, (target.isFlying() ? "flyspeed." : "walkspeed.") + "self",
-						renderer()
-								.placeholder("target", target.getName())
-								.placeholder("value", Math.max(0, Math.min(10, speed))));
+				msgOut(target, (target.isFlying() ? "flyspeed." : "walkspeed.") + "self", renderer().placeholder("target", target.getName()).placeholder("value", Math.max(0, Math.min(10, speed))));
 	}
 }

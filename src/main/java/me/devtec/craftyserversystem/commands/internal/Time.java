@@ -15,22 +15,21 @@ public class Time extends CssCommand {
 
 	@Override
 	public void register() {
-		if (isRegistered())
+		if(isRegistered())
 			return;
 
-		CommandStructure<CommandSender> cmd = CommandStructure
-				.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
-					msgUsage(sender, "usage");
-				}).permission(getPerm("cmd"));
+		CommandStructure<CommandSender> cmd = CommandStructure.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
+			msgUsage(sender, "usage");
+		}).permission(getPerm("cmd"));
 
 		cmd.argument("day", (sender, structure, args) -> {
-			if (!(sender instanceof Player)) {
+			if(!(sender instanceof Player)) {
 				msgUsage(sender, "usage");
 				return;
 			}
 			setDay(sender, ((Player) sender).getWorld(), true);
 		}).argument("-s", (sender, structure, args) -> {
-			if (!(sender instanceof Player)) {
+			if(!(sender instanceof Player)) {
 				msgUsage(sender, "usage");
 				return;
 			}
@@ -42,13 +41,13 @@ public class Time extends CssCommand {
 		});
 
 		cmd.argument("noon", (sender, structure, args) -> {
-			if (!(sender instanceof Player)) {
+			if(!(sender instanceof Player)) {
 				msgUsage(sender, "usage");
 				return;
 			}
 			setNoon(sender, ((Player) sender).getWorld(), true);
 		}).argument("-s", (sender, structure, args) -> {
-			if (!(sender instanceof Player)) {
+			if(!(sender instanceof Player)) {
 				msgUsage(sender, "usage");
 				return;
 			}
@@ -60,13 +59,13 @@ public class Time extends CssCommand {
 		});
 
 		cmd.argument("night", (sender, structure, args) -> {
-			if (!(sender instanceof Player)) {
+			if(!(sender instanceof Player)) {
 				msgUsage(sender, "usage");
 				return;
 			}
 			setNight(sender, ((Player) sender).getWorld(), true);
 		}).argument("-s", (sender, structure, args) -> {
-			if (!(sender instanceof Player)) {
+			if(!(sender instanceof Player)) {
 				msgUsage(sender, "usage");
 				return;
 			}
@@ -78,13 +77,13 @@ public class Time extends CssCommand {
 		});
 
 		cmd.argument("midnight", (sender, structure, args) -> {
-			if (!(sender instanceof Player)) {
+			if(!(sender instanceof Player)) {
 				msgUsage(sender, "usage");
 				return;
 			}
 			setMidnight(sender, ((Player) sender).getWorld(), true);
 		}).argument("-s", (sender, structure, args) -> {
-			if (!(sender instanceof Player)) {
+			if(!(sender instanceof Player)) {
 				msgUsage(sender, "usage");
 				return;
 			}
@@ -96,31 +95,31 @@ public class Time extends CssCommand {
 		});
 		// register
 		List<String> cmds = getCommands();
-		if (!cmds.isEmpty())
+		if(!cmds.isEmpty())
 			this.cmd = addBypassSettings(cmd).build().register(cmds.remove(0), cmds.toArray(new String[0]));
 	}
 
 	public void setDay(CommandSender sender, World target, boolean sendMessage) {
 		target.setTime(1000);
-		if (sendMessage)
+		if(sendMessage)
 			msgOut(sender, "time.day", renderer().placeholder("world", target.getName()));
 	}
 
 	public void setNoon(CommandSender sender, World target, boolean sendMessage) {
 		target.setTime(6000);
-		if (sendMessage)
+		if(sendMessage)
 			msgOut(sender, "time.noon", renderer().placeholder("world", target.getName()));
 	}
 
 	public void setNight(CommandSender sender, World target, boolean sendMessage) {
 		target.setTime(13000);
-		if (sendMessage)
+		if(sendMessage)
 			msgOut(sender, "time.night", renderer().placeholder("world", target.getName()));
 	}
 
 	public void setMidnight(CommandSender sender, World target, boolean sendMessage) {
 		target.setTime(18000);
-		if (sendMessage)
+		if(sendMessage)
 			msgOut(sender, "time.midnight", renderer().placeholder("world", target.getName()));
 	}
 

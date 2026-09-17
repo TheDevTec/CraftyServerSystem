@@ -43,7 +43,7 @@ public class NbtList implements NbtTag {
 		Map<String, Object> map = new LinkedHashMap<>();
 		List<Object> list = new ArrayList<>(values.size());
 
-		for (Object value : values)
+		for(Object value : values)
 			list.add(rawValue(value));
 
 		map.put(name, list);
@@ -61,47 +61,47 @@ public class NbtList implements NbtTag {
 	}
 
 	private static Object rawValue(Object value) {
-		if (value == null)
+		if(value == null)
 			return null;
 
-		if (value instanceof NbtValue)
-			return rawValue(((NbtValue)value).value());
+		if(value instanceof NbtValue)
+			return rawValue(((NbtValue) value).value());
 
-		if (value instanceof NbtCompound)
-			return ((NbtCompound)value).asJson();
+		if(value instanceof NbtCompound)
+			return ((NbtCompound) value).asJson();
 
-		if (value instanceof NbtList) {
-			List<Object> result = new ArrayList<>(((NbtList)value).values().size());
+		if(value instanceof NbtList) {
+			List<Object> result = new ArrayList<>(((NbtList) value).values().size());
 
-			for (Object element : ((NbtList)value).values())
+			for(Object element : ((NbtList) value).values())
 				result.add(rawValue(element));
 
 			return result;
 		}
 
-		if (value instanceof Map) {
-			Map<String, Object> result = new LinkedHashMap<>(((Map<?, ?>)value).size());
+		if(value instanceof Map) {
+			Map<String, Object> result = new LinkedHashMap<>(((Map<?, ?>) value).size());
 
-			for (Map.Entry<?, ?> entry : ((Map<?, ?>)value).entrySet())
+			for(Map.Entry<?, ?> entry : ((Map<?, ?>) value).entrySet())
 				result.put(String.valueOf(entry.getKey()), rawValue(entry.getValue()));
 
 			return result;
 		}
 
-		if (value instanceof List) {
-			List<Object> result = new ArrayList<>(((List<?>)value).size());
+		if(value instanceof List) {
+			List<Object> result = new ArrayList<>(((List<?>) value).size());
 
-			for (Object element : (List<?>)value)
+			for(Object element : (List<?>) value)
 				result.add(rawValue(element));
 
 			return result;
 		}
 
-		if (value.getClass().isArray()) {
+		if(value.getClass().isArray()) {
 			int length = Array.getLength(value);
 			List<Object> result = new ArrayList<>(length);
 
-			for (int i = 0; i < length; i++)
+			for(int i = 0; i < length; i++)
 				result.add(rawValue(Array.get(value, i)));
 
 			return result;

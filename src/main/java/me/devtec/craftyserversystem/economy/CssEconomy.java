@@ -25,15 +25,15 @@ public class CssEconomy {
 	}
 
 	public String lookupPath(String player, String world) {
-		if (perWorldEconomy)
+		if(perWorldEconomy)
 			return "css.eco-pw." + getWorldGroup(world);
 		return "css.eco";
 	}
 
 	public String getWorldGroup(String world) {
-		if (world != null)
-			for (Entry<String, List<String>> entry : groupAndWorlds.entrySet())
-				if (entry.getValue().contains(world))
+		if(world != null)
+			for(Entry<String, List<String>> entry : groupAndWorlds.entrySet())
+				if(entry.getValue().contains(world))
 					return entry.getKey();
 		return "default";
 	}
@@ -64,9 +64,10 @@ public class CssEconomy {
 
 	public boolean createPlayerAccount(String player, String world) {
 		Config data = API.getUser(player);
-		if(data==null)return false;
+		if(data == null)
+			return false;
 		String path = lookupPath(player, world);
-		if (data.existsKey(path))
+		if(data.existsKey(path))
 			return false;
 		data.set(path, defaultBalance);
 		return true;
@@ -74,15 +75,16 @@ public class CssEconomy {
 
 	public boolean deposit(String player, String world, double balance) {
 		assert player != null : "Player cannot be null";
-		if (balance <= 0)
+		if(balance <= 0)
 			return false;
 		Config data = API.getUser(player);
-		if(data==null)return false;
+		if(data == null)
+			return false;
 		String path = lookupPath(player, world);
 		double totalBalance = data.getDouble(path) + balance;
-		if (totalBalance < minimumMoney)
+		if(totalBalance < minimumMoney)
 			totalBalance = minimumMoney;
-		if (totalBalance > maximumMoney)
+		if(totalBalance > maximumMoney)
 			totalBalance = maximumMoney;
 		data.set(path, totalBalance);
 		return true;
@@ -90,15 +92,16 @@ public class CssEconomy {
 
 	public boolean withdraw(String player, String world, double balance) {
 		assert player != null : "Player cannot be null";
-		if (balance <= 0)
+		if(balance <= 0)
 			return false;
 		Config data = API.getUser(player);
-		if(data==null)return false;
+		if(data == null)
+			return false;
 		String path = lookupPath(player, world);
 		double totalBalance = data.getDouble(path) - balance;
-		if (totalBalance < minimumMoney)
+		if(totalBalance < minimumMoney)
 			totalBalance = minimumMoney;
-		if (totalBalance > maximumMoney)
+		if(totalBalance > maximumMoney)
 			totalBalance = maximumMoney;
 		data.set(path, totalBalance);
 		return true;
@@ -107,11 +110,12 @@ public class CssEconomy {
 	public double getBalance(String player, String world) {
 		assert player != null : "Player cannot be null";
 		Config data = API.getUser(player);
-		if(data==null)return 0;
+		if(data == null)
+			return 0;
 		double totalBalance = data.getDouble(lookupPath(player, world));
-		if (totalBalance < minimumMoney)
+		if(totalBalance < minimumMoney)
 			totalBalance = minimumMoney;
-		if (totalBalance > maximumMoney)
+		if(totalBalance > maximumMoney)
 			totalBalance = maximumMoney;
 		return totalBalance;
 	}
@@ -124,7 +128,8 @@ public class CssEconomy {
 	public boolean hasAccount(String player, String world) {
 		assert player != null : "Player cannot be null";
 		Config data = API.getUser(player);
-		if(data==null)return false;
+		if(data == null)
+			return false;
 		return data.existsKey(lookupPath(player, world));
 	}
 }

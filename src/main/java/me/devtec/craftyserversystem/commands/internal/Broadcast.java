@@ -17,24 +17,21 @@ public class Broadcast extends CssCommand {
 
 	@Override
 	public void register() {
-		if (isRegistered())
+		if(isRegistered())
 			return;
 
-		CommandStructure<CommandSender> cmd = CommandStructure
-				.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
-					msgUsage(sender, "cmd");
-				}).permission(getPerm("cmd"));
+		CommandStructure<CommandSender> cmd = CommandStructure.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
+			msgUsage(sender, "cmd");
+		}).permission(getPerm("cmd"));
 		cmd.argument(null, -1, (sender, structure, args) -> {
 			List<CommandSender> all = new ArrayList<>(BukkitLoader.getOnlinePlayers());
 			all.add(Bukkit.getConsoleSender());
 			API.get().getMsgManager().sendMessageFromFile(API.get().getConfigManager().getMain(), "broadcast",
-					renderer().placeholder("sender", sender.getName()).placeholder("message",
-							StringUtils.buildString(args).replace("\\n", "\n")),
-					all);
+			        renderer().placeholder("sender", sender.getName()).placeholder("message", StringUtils.buildString(args).replace("\\n", "\n")), all);
 		}, (sender, structure, args) -> Arrays.asList("{message}", "\\n"));
 		// register
 		List<String> cmds = getCommands();
-		if (!cmds.isEmpty())
+		if(!cmds.isEmpty())
 			this.cmd = addBypassSettings(cmd).build().register(cmds.remove(0), cmds.toArray(new String[0]));
 	}
 }

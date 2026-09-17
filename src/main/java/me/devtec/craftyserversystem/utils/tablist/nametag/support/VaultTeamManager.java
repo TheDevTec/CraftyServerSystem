@@ -29,26 +29,26 @@ public class VaultTeamManager implements TeamManager {
 
 			@Override
 			public void run() {
-				for (ClassicTabPlayer player : TabAPI.getPlayers()) {
+				for(ClassicTabPlayer player : TabAPI.getPlayers()) {
 					String newTeam = getTeam(player.getPlayer().getUniqueId());
-					if(player.getPrimaryTeam()==null)
-						player.changePrimaryTeam(new SimpleTeam(newTeam, null, null, null, null, 0, CollisionRule.ALWAYS, player.getAdditionalLines().isEmpty() ? Visibility.ALWAYS : Visibility.NEVER));
-					else
-						if(newTeam!=player.getPrimaryTeam().getTeam())
-							player.changePrimaryTeam(player.getPrimaryTeam().asName(newTeam));
+					if(player.getPrimaryTeam() == null)
+						player.changePrimaryTeam(
+						        new SimpleTeam(newTeam, null, null, null, null, 0, CollisionRule.ALWAYS, player.getAdditionalLines().isEmpty() ? Visibility.ALWAYS : Visibility.NEVER));
+					else if(newTeam != player.getPrimaryTeam().getTeam())
+						player.changePrimaryTeam(player.getPrimaryTeam().asName(newTeam));
 					List<SimpleTeam> teams = new ArrayList<>();
 					for(SimpleTeam t : player.getTeams()) {
 						if(t.getTeam().equals(newTeam))
 							continue;
 						if(t.getTeam().startsWith("css_"))
-							if(t.getPlayers().size()==1)
+							if(t.getPlayers().size() == 1)
 								teams.add(t);
 							else
 								teams.add(t.leavePlayer(player.getPlayer().getName()));
 					}
 					for(SimpleTeam t : teams) {
-						if(t.getPlayers().size()==1) {
-							//remove
+						if(t.getPlayers().size() == 1) {
+							// remove
 							for(ClassicTabPlayer holder : TabAPI.getPlayers())
 								holder.removeTeam(t.getTeam());
 							continue;
@@ -84,17 +84,17 @@ public class VaultTeamManager implements TeamManager {
 
 		Map<String, Integer> weights = new HashMap<>();
 		int pos = API.get().getConfigManager().getTab().getStringList("sorting.list").size();
-		for (String group : API.get().getConfigManager().getTab().getStringList("sorting.list"))
+		for(String group : API.get().getConfigManager().getTab().getStringList("sorting.list"))
 			weights.put(group, pos--);
 
 		int startAt = 'a';
-		for (ComparableObject<String, Integer> entry : SortingAPI.sortByValueArray(weights, true))
+		for(ComparableObject<String, Integer> entry : SortingAPI.sortByValueArray(weights, true))
 			groupAndTeamName.put(entry.getKey(), "_" + (char) startAt++);
 	}
 
 	private String makeItOriginal(int id, String team) {
-		String prefix = "css_"+id;
-		return prefix+team.substring(0, Math.min(16-prefix.length(),team.length()));
+		String prefix = "css_" + id;
+		return prefix + team.substring(0, Math.min(16 - prefix.length(), team.length()));
 	}
 
 }

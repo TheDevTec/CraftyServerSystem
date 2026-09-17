@@ -23,8 +23,6 @@ public class ModernBossBarEmulator implements BossBarEmulator {
 
 	@Override
 	public void setText(String text) {
-		if (bar.getTitle().equals(text))
-			return;
 		bar.setTitle(text);
 	}
 

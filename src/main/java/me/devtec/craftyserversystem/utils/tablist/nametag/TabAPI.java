@@ -49,8 +49,7 @@ public class TabAPI {
 		private Visibility nametagVisibility;
 		private Set<String> players = new ConcurrentSet<>();
 
-		public SimpleTeam(String name, Component prefix, Component suffix, Component displayName, ChatColor color,
-				int friendlyFlags, CollisionRule collisionRule, Visibility nametagVisibility) {
+		public SimpleTeam(String name, Component prefix, Component suffix, Component displayName, ChatColor color, int friendlyFlags, CollisionRule collisionRule, Visibility nametagVisibility) {
 			this.team = name;
 			this.prefix = prefix;
 			this.suffix = suffix;
@@ -88,17 +87,15 @@ public class TabAPI {
 		}
 
 		public SimpleTeam asName(String name) {
-			SimpleTeam s = new SimpleTeam(name, prefix, suffix, displayName, color, friendlyFlags, collisionRule,
-					nametagVisibility);
+			SimpleTeam s = new SimpleTeam(name, prefix, suffix, displayName, color, friendlyFlags, collisionRule, nametagVisibility);
 			s.players = new HashSet<>(players);
 			return s;
 		}
 
 		@Override
 		public String toString() {
-			return "Team[name=" + team + ",prefix=" + prefix + ",suffix=" + suffix + ",displayName=" + displayName
-					+ ",color=" + color.name() + ",friendlyFlags=" + friendlyFlags + ",collosions=" + collisionRule
-					+ ",visibility=" + nametagVisibility + "]";
+			return "Team[name=" + team + ",prefix=" + prefix + ",suffix=" + suffix + ",displayName=" + displayName + ",color=" + color.name() + ",friendlyFlags=" + friendlyFlags + ",collosions="
+			        + collisionRule + ",visibility=" + nametagVisibility + "]";
 		}
 	}
 
@@ -107,149 +104,102 @@ public class TabAPI {
 		Method getName = Ref.method(teamPacket, "getName");
 		Method getParameters = Ref.method(teamPacket, "getParameters");
 		Method getPlayers = Ref.method(teamPacket, "getPlayers");
-		Method getCollisionRule = Ref.method(
-				Ref.nms("network.protocol.game", "ClientboundSetPlayerTeamPacket$Parameters"),
-				Ref.isAtLeast(26, 0) ? "collisionRule" : "getCollisionRule");
-		Method getNametagVisibility = Ref.method(
-				Ref.nms("network.protocol.game", "ClientboundSetPlayerTeamPacket$Parameters"),
-				Ref.isAtLeast(26, 0) ? "nameTagVisibility" : "getNametagVisibility");
-		Method getPlayerPrefix = Ref.method(
-				Ref.nms("network.protocol.game", "ClientboundSetPlayerTeamPacket$Parameters"),
-				Ref.isAtLeast(26, 0) ? "playerPrefix" : "getPlayerPrefix");
-		Method getPlayerSuffix = Ref.method(
-				Ref.nms("network.protocol.game", "ClientboundSetPlayerTeamPacket$Parameters"),
-				Ref.isAtLeast(26, 0) ? "playerSuffix" : "getPlayerSuffix");
-		Method getDisplayName = Ref.method(
-				Ref.nms("network.protocol.game", "ClientboundSetPlayerTeamPacket$Parameters"),
-				Ref.isAtLeast(26, 0) ? "displayName" : "getDisplayName");
-		Method getOptions = Ref.method(Ref.nms("network.protocol.game", "ClientboundSetPlayerTeamPacket$Parameters"),
-				Ref.isAtLeast(26, 0) ? "options" : "getOptions");
-		Method getColor = Ref.method(Ref.nms("network.protocol.game", "ClientboundSetPlayerTeamPacket$Parameters"),
-				Ref.isAtLeast(26, 0) ? "color" : "getColor");
+		Method getCollisionRule = Ref.method(Ref.nms("network.protocol.game", "ClientboundSetPlayerTeamPacket$Parameters"), Ref.isAtLeast(26, 0) ? "collisionRule" : "getCollisionRule");
+		Method getNametagVisibility = Ref.method(Ref.nms("network.protocol.game", "ClientboundSetPlayerTeamPacket$Parameters"), Ref.isAtLeast(26, 0) ? "nameTagVisibility" : "getNametagVisibility");
+		Method getPlayerPrefix = Ref.method(Ref.nms("network.protocol.game", "ClientboundSetPlayerTeamPacket$Parameters"), Ref.isAtLeast(26, 0) ? "playerPrefix" : "getPlayerPrefix");
+		Method getPlayerSuffix = Ref.method(Ref.nms("network.protocol.game", "ClientboundSetPlayerTeamPacket$Parameters"), Ref.isAtLeast(26, 0) ? "playerSuffix" : "getPlayerSuffix");
+		Method getDisplayName = Ref.method(Ref.nms("network.protocol.game", "ClientboundSetPlayerTeamPacket$Parameters"), Ref.isAtLeast(26, 0) ? "displayName" : "getDisplayName");
+		Method getOptions = Ref.method(Ref.nms("network.protocol.game", "ClientboundSetPlayerTeamPacket$Parameters"), Ref.isAtLeast(26, 0) ? "options" : "getOptions");
+		Method getColor = Ref.method(Ref.nms("network.protocol.game", "ClientboundSetPlayerTeamPacket$Parameters"), Ref.isAtLeast(26, 0) ? "color" : "getColor");
 
 		new PacketListener() {
 
-			@SuppressWarnings({ "unchecked", "rawtypes" })
+			@SuppressWarnings({"unchecked", "rawtypes"})
 			@Override
 			public void playOut(String name, PacketContainer packetContainer, ChannelContainer channel) {
 				Object packet = packetContainer.getPacket();
-				if (packet.getClass().equals(teamPacket)) {
+				if(packet.getClass().equals(teamPacket)) {
 					Collection<String> players = (Collection<String>) Ref.invoke(packet, getPlayers);
 					String teamName = (String) Ref.invoke(packet, getName);
 					Optional<?> optional = (Optional<?>) Ref.invoke(packet, getParameters);
 					Object parameters = optional == null ? null : optional.orElse(null);
 					Set<SimpleTeam> teams = getHolder(name).getTeams();
 					SimpleTeam team = null;
-					switch ((int) Ref.get(packet, TeamUtils.teamMethod)) {
-					case TeamUtils.METHOD_ADD:
-						teams.add(team = new SimpleTeam(teamName,
-								parameters == null ? null
-										: BukkitLoader.getNmsProvider()
-												.fromIChatBaseComponent(Ref.invoke(parameters, getPlayerPrefix)),
-								parameters == null ? null
-										: BukkitLoader.getNmsProvider()
-												.fromIChatBaseComponent(Ref.invoke(parameters, getPlayerSuffix)),
-								parameters == null ? null
-										: BukkitLoader.getNmsProvider()
-												.fromIChatBaseComponent(Ref.invoke(parameters, getDisplayName)),
-								parameters == null ? ChatColor.WHITE
-										: ChatColor.valueOf(
-												((Enum<?>) (Ref.invoke(parameters, getColor) instanceof Optional
-														? ((Optional) Ref.invoke(parameters, getColor))
-																.orElse(TeamUtils.white)
-														: Ref.invoke(parameters, getColor))).name()),
-								((Number) Ref.invoke(parameters, getOptions)).intValue(),
-								parameters == null ? CollisionRule.ALWAYS
-										: CollisionRule.valueOf(
-												Ref.invoke(parameters, getCollisionRule).toString().toUpperCase()),
-								parameters == null ? Visibility.ALWAYS
-										: Visibility.valueOf(Ref.invoke(parameters, getNametagVisibility).toString()
-												.toUpperCase())));
-						team.getPlayers().addAll(players);
-						break;
-					case TeamUtils.METHOD_JOIN:
-						for (SimpleTeam t : getHolder(name).getTeams())
-							if (t.getTeam().equals(teamName)) {
-								team = t;
-								break;
+					switch((int) Ref.get(packet, TeamUtils.teamMethod)) {
+						case TeamUtils.METHOD_ADD :
+							teams.add(team = new SimpleTeam(teamName, parameters == null ? null : BukkitLoader.getNmsProvider().fromIChatBaseComponent(Ref.invoke(parameters, getPlayerPrefix)),
+							        parameters == null ? null : BukkitLoader.getNmsProvider().fromIChatBaseComponent(Ref.invoke(parameters, getPlayerSuffix)),
+							        parameters == null ? null : BukkitLoader.getNmsProvider().fromIChatBaseComponent(Ref.invoke(parameters, getDisplayName)),
+							        parameters == null
+							                ? ChatColor.WHITE
+							                : ChatColor.valueOf(((Enum<?>) (Ref.invoke(parameters, getColor) instanceof Optional
+							                        ? ((Optional) Ref.invoke(parameters, getColor)).orElse(TeamUtils.white)
+							                        : Ref.invoke(parameters, getColor))).name()),
+							        ((Number) Ref.invoke(parameters, getOptions)).intValue(),
+							        parameters == null ? CollisionRule.ALWAYS : CollisionRule.valueOf(Ref.invoke(parameters, getCollisionRule).toString().toUpperCase()),
+							        parameters == null ? Visibility.ALWAYS : Visibility.valueOf(Ref.invoke(parameters, getNametagVisibility).toString().toUpperCase())));
+							team.getPlayers().addAll(players);
+							break;
+						case TeamUtils.METHOD_JOIN :
+							for(SimpleTeam t : getHolder(name).getTeams())
+								if(t.getTeam().equals(teamName)) {
+									team = t;
+									break;
+								}
+							if(team == null)
+								teams.add(team = new SimpleTeam(teamName, parameters == null ? null : BukkitLoader.getNmsProvider().fromIChatBaseComponent(Ref.invoke(parameters, getPlayerPrefix)),
+								        parameters == null ? null : BukkitLoader.getNmsProvider().fromIChatBaseComponent(Ref.invoke(parameters, getPlayerSuffix)),
+								        parameters == null ? null : BukkitLoader.getNmsProvider().fromIChatBaseComponent(Ref.invoke(parameters, getDisplayName)),
+								        parameters == null
+								                ? ChatColor.WHITE
+								                : ChatColor.valueOf(((Enum<?>) (Ref.invoke(parameters, getColor) instanceof Optional
+								                        ? ((Optional) Ref.invoke(parameters, getColor)).orElse(TeamUtils.white)
+								                        : Ref.invoke(parameters, getColor))).name()),
+								        ((Number) Ref.invoke(parameters, getOptions)).intValue(),
+								        parameters == null ? CollisionRule.ALWAYS : CollisionRule.valueOf(Ref.invoke(parameters, getCollisionRule).toString().toUpperCase()),
+								        parameters == null ? Visibility.ALWAYS : Visibility.valueOf(Ref.invoke(parameters, getNametagVisibility).toString().toUpperCase())));
+							else if(parameters != null) {
+								team.setPrefix(BukkitLoader.getNmsProvider().fromIChatBaseComponent(Ref.invoke(parameters, getPlayerPrefix)));
+								team.setSuffix(BukkitLoader.getNmsProvider().fromIChatBaseComponent(Ref.invoke(parameters, getPlayerSuffix)));
+								team.setDisplayName(BukkitLoader.getNmsProvider().fromIChatBaseComponent(Ref.invoke(parameters, getDisplayName)));
+								team.setColor(ChatColor.valueOf(((Enum<?>) Ref.invoke(parameters, getColor)).name()));
+								team.setCollisionRule(CollisionRule.valueOf(Ref.invoke(parameters, getCollisionRule).toString().toUpperCase()));
+								team.setNametagVisibility(Visibility.valueOf(Ref.invoke(parameters, getNametagVisibility).toString().toUpperCase()));
 							}
-						if (team == null)
-							teams.add(team = new SimpleTeam(teamName,
-									parameters == null ? null
-											: BukkitLoader.getNmsProvider()
-													.fromIChatBaseComponent(Ref.invoke(parameters, getPlayerPrefix)),
-									parameters == null ? null
-											: BukkitLoader.getNmsProvider()
-													.fromIChatBaseComponent(Ref.invoke(parameters, getPlayerSuffix)),
-									parameters == null ? null
-											: BukkitLoader.getNmsProvider()
-													.fromIChatBaseComponent(Ref.invoke(parameters, getDisplayName)),
-									parameters == null ? ChatColor.WHITE
-											: ChatColor.valueOf(
-													((Enum<?>) (Ref.invoke(parameters, getColor) instanceof Optional
-															? ((Optional) Ref.invoke(parameters, getColor))
-																	.orElse(TeamUtils.white)
-															: Ref.invoke(parameters, getColor))).name()),
-									((Number) Ref.invoke(parameters, getOptions)).intValue(),
-									parameters == null ? CollisionRule.ALWAYS
-											: CollisionRule.valueOf(
-													Ref.invoke(parameters, getCollisionRule).toString().toUpperCase()),
-									parameters == null ? Visibility.ALWAYS
-											: Visibility.valueOf(Ref.invoke(parameters, getNametagVisibility).toString()
-													.toUpperCase())));
-						else if (parameters != null) {
-							team.setPrefix(BukkitLoader.getNmsProvider()
-									.fromIChatBaseComponent(Ref.invoke(parameters, getPlayerPrefix)));
-							team.setSuffix(BukkitLoader.getNmsProvider()
-									.fromIChatBaseComponent(Ref.invoke(parameters, getPlayerSuffix)));
-							team.setDisplayName(BukkitLoader.getNmsProvider()
-									.fromIChatBaseComponent(Ref.invoke(parameters, getDisplayName)));
-							team.setColor(ChatColor.valueOf(((Enum<?>) Ref.invoke(parameters, getColor)).name()));
-							team.setCollisionRule(CollisionRule
-									.valueOf(Ref.invoke(parameters, getCollisionRule).toString().toUpperCase()));
-							team.setNametagVisibility(Visibility
-									.valueOf(Ref.invoke(parameters, getNametagVisibility).toString().toUpperCase()));
-						}
-						team.getPlayers().addAll(players);
-						break;
-					case TeamUtils.METHOD_REMOVE:
-						Iterator<SimpleTeam> itr = teams.iterator();
-						while (itr.hasNext()) {
-							SimpleTeam t = itr.next();
-							if (t.getTeam().equals(teamName))
-								itr.remove();
-						}
-						break;
-					case TeamUtils.METHOD_CHANGE:
-						for (SimpleTeam t : getHolder(name).getTeams())
-							if (t.getTeam().equals(teamName)) {
-								team = t;
-								break;
+							team.getPlayers().addAll(players);
+							break;
+						case TeamUtils.METHOD_REMOVE :
+							Iterator<SimpleTeam> itr = teams.iterator();
+							while(itr.hasNext()) {
+								SimpleTeam t = itr.next();
+								if(t.getTeam().equals(teamName))
+									itr.remove();
 							}
-						if (team != null && parameters != null) {
-							team.setPrefix(BukkitLoader.getNmsProvider()
-									.fromIChatBaseComponent(Ref.invoke(parameters, getPlayerPrefix)));
-							team.setSuffix(BukkitLoader.getNmsProvider()
-									.fromIChatBaseComponent(Ref.invoke(parameters, getPlayerSuffix)));
-							team.setDisplayName(BukkitLoader.getNmsProvider()
-									.fromIChatBaseComponent(Ref.invoke(parameters, getDisplayName)));
-							team.setColor(
-									ChatColor.valueOf(((Enum<?>) (Ref.invoke(parameters, getColor) instanceof Optional
-											? ((Optional) Ref.invoke(parameters, getColor)).orElse(TeamUtils.white)
-											: Ref.invoke(parameters, getColor))).name()));
-							team.setCollisionRule(CollisionRule
-									.valueOf(Ref.invoke(parameters, getCollisionRule).toString().toUpperCase()));
-							team.setNametagVisibility(Visibility
-									.valueOf(Ref.invoke(parameters, getNametagVisibility).toString().toUpperCase()));
-						}
-						break;
-					case TeamUtils.METHOD_LEAVE:
-						for (SimpleTeam t : teams)
-							if (t.getTeam().equals(teamName)) {
-								t.getPlayers().removeAll(players);
-								break;
+							break;
+						case TeamUtils.METHOD_CHANGE :
+							for(SimpleTeam t : getHolder(name).getTeams())
+								if(t.getTeam().equals(teamName)) {
+									team = t;
+									break;
+								}
+							if(team != null && parameters != null) {
+								team.setPrefix(BukkitLoader.getNmsProvider().fromIChatBaseComponent(Ref.invoke(parameters, getPlayerPrefix)));
+								team.setSuffix(BukkitLoader.getNmsProvider().fromIChatBaseComponent(Ref.invoke(parameters, getPlayerSuffix)));
+								team.setDisplayName(BukkitLoader.getNmsProvider().fromIChatBaseComponent(Ref.invoke(parameters, getDisplayName)));
+								team.setColor(ChatColor.valueOf(((Enum<?>) (Ref.invoke(parameters, getColor) instanceof Optional
+								        ? ((Optional) Ref.invoke(parameters, getColor)).orElse(TeamUtils.white)
+								        : Ref.invoke(parameters, getColor))).name()));
+								team.setCollisionRule(CollisionRule.valueOf(Ref.invoke(parameters, getCollisionRule).toString().toUpperCase()));
+								team.setNametagVisibility(Visibility.valueOf(Ref.invoke(parameters, getNametagVisibility).toString().toUpperCase()));
 							}
-						break;
+							break;
+						case TeamUtils.METHOD_LEAVE :
+							for(SimpleTeam t : teams)
+								if(t.getTeam().equals(teamName)) {
+									t.getPlayers().removeAll(players);
+									break;
+								}
+							break;
 					}
 				}
 			}
@@ -264,7 +214,7 @@ public class TabAPI {
 	public static ClassicTabPlayer getHolder(Player player) {
 		return data.computeIfAbsent(player.getUniqueId(), id -> {
 			ClassicTabPlayer result = new ClassicTabPlayer(player);
-			if (player.getVehicle() != null) {
+			if(player.getVehicle() != null) {
 				List<ClassicTabPlayer> players = new ArrayList<>();
 				players.add(result);
 				NametagManagerAPI.get().watchingEntityMove.put(player.getVehicle().getEntityId(), players);
@@ -297,15 +247,14 @@ public class TabAPI {
 	@Nullable
 	public static ClassicTabPlayer await(UUID uuid) {
 		Player online;
-		while ((online = Bukkit.getPlayer(uuid)) == null)
-			;
+		while((online = Bukkit.getPlayer(uuid)) == null);
 		return getHolder(online);
 	}
 
 	@Nullable
 	public static ClassicTabPlayer getHolder(int entityId) {
-		for (Player player : BukkitLoader.getOnlinePlayers())
-			if (player.isOnline() && player.getEntityId() == entityId)
+		for(Player player : BukkitLoader.getOnlinePlayers())
+			if(player.isOnline() && player.getEntityId() == entityId)
 				return data.get(player.getUniqueId());
 		return null;
 	}
@@ -317,17 +266,17 @@ public class TabAPI {
 	@Nullable
 	public static ClassicTabPlayer removeHolder(UUID player) {
 		ClassicTabPlayer holder = data.remove(player);
-		if (holder != null)
-			for (ClassicTabPlayer active : TabAPI.getPlayers()) {
+		if(holder != null)
+			for(ClassicTabPlayer active : TabAPI.getPlayers()) {
 				active.getWhoSeeAdditionalLines().remove(holder);
-				if (holder.getPrimaryTeam() != null)
+				if(holder.getPrimaryTeam() != null)
 					active.removeTeam(holder.getPrimaryTeam().getTeam());
 			}
 		return holder;
 	}
 
 	public static void unload() {
-		for (ClassicTabPlayer player : data.values())
+		for(ClassicTabPlayer player : data.values())
 			player.onDisconnect();
 		data.clear();
 	}

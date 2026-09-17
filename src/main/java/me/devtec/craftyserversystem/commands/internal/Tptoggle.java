@@ -18,56 +18,55 @@ public class Tptoggle extends CssCommand {
 
 	@Override
 	public void register() {
-		if (isRegistered())
+		if(isRegistered())
 			return;
 
-		CommandStructure<Player> cmd = CommandStructure
-				.create(Player.class, P_DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
-					boolean globalToggle = TpaManager.getProvider().hasGlobalToggle(sender.getUniqueId());
-					if (globalToggle) {
-						TpaManager.getProvider().setGlobalToggle(sender.getUniqueId(), false);
-						msg(sender, "global.disabled");
-					} else {
-						TpaManager.getProvider().setGlobalToggle(sender.getUniqueId(), true);
-						msg(sender, "global.enabled");
-					}
-				}).permission(getPerm("cmd")).argument(null, 1, (sender, structure, args) -> {
-					Query query = API.offlineCache().lookupQuery(args[0]);
-					if (query == null) {
-						msg(sender, "never-joined", renderer().placeholder("target", args[0]));
-						return;
-					}
-					List<UUID> toggled = TpaManager.getProvider().getToggledPlayers(sender.getUniqueId());
-					if (toggled.contains(query.getUUID())) {
-						TpaManager.getProvider().removeFromToggledPlayers(sender.getUniqueId(), query.getUUID());
-						msg(sender, "user.removed", renderer().placeholder("target", query.getName()));
-					} else {
-						TpaManager.getProvider().addToToggledPlayers(sender.getUniqueId(), query.getUUID());
-						msg(sender, "user.added", renderer().placeholder("target", query.getName()));
-					}
-				}, (sender, structure, args) -> {
-					Collection<? extends Player> onlinePlayers = BukkitLoader.getOnlinePlayers();
-					List<String> players = new ArrayList<>(onlinePlayers.size() + 1);
-					players.add("{offlinePlayer}");
-					for (Player player : onlinePlayers)
-						players.add(player.getName());
-					return players;
-				}).argument("-s", (sender, structure, args) -> { // silent
-					Query query = API.offlineCache().lookupQuery(args[0]);
-					if (query == null) {
-						msg(sender, "never-joined", renderer().placeholder("target", args[0]));
-						return;
-					}
-					List<UUID> toggled = TpaManager.getProvider().getToggledPlayers(sender.getUniqueId());
-					if (toggled.contains(query.getUUID()))
-						TpaManager.getProvider().removeFromToggledPlayers(sender.getUniqueId(), query.getUUID());
-					else
-						TpaManager.getProvider().addToToggledPlayers(sender.getUniqueId(), query.getUUID());
-				});
+		CommandStructure<Player> cmd = CommandStructure.create(Player.class, P_DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
+			boolean globalToggle = TpaManager.getProvider().hasGlobalToggle(sender.getUniqueId());
+			if(globalToggle) {
+				TpaManager.getProvider().setGlobalToggle(sender.getUniqueId(), false);
+				msg(sender, "global.disabled");
+			} else {
+				TpaManager.getProvider().setGlobalToggle(sender.getUniqueId(), true);
+				msg(sender, "global.enabled");
+			}
+		}).permission(getPerm("cmd")).argument(null, 1, (sender, structure, args) -> {
+			Query query = API.offlineCache().lookupQuery(args[0]);
+			if(query == null) {
+				msg(sender, "never-joined", renderer().placeholder("target", args[0]));
+				return;
+			}
+			List<UUID> toggled = TpaManager.getProvider().getToggledPlayers(sender.getUniqueId());
+			if(toggled.contains(query.getUUID())) {
+				TpaManager.getProvider().removeFromToggledPlayers(sender.getUniqueId(), query.getUUID());
+				msg(sender, "user.removed", renderer().placeholder("target", query.getName()));
+			} else {
+				TpaManager.getProvider().addToToggledPlayers(sender.getUniqueId(), query.getUUID());
+				msg(sender, "user.added", renderer().placeholder("target", query.getName()));
+			}
+		}, (sender, structure, args) -> {
+			Collection<? extends Player> onlinePlayers = BukkitLoader.getOnlinePlayers();
+			List<String> players = new ArrayList<>(onlinePlayers.size() + 1);
+			players.add("{offlinePlayer}");
+			for(Player player : onlinePlayers)
+				players.add(player.getName());
+			return players;
+		}).argument("-s", (sender, structure, args) -> { // silent
+			Query query = API.offlineCache().lookupQuery(args[0]);
+			if(query == null) {
+				msg(sender, "never-joined", renderer().placeholder("target", args[0]));
+				return;
+			}
+			List<UUID> toggled = TpaManager.getProvider().getToggledPlayers(sender.getUniqueId());
+			if(toggled.contains(query.getUUID()))
+				TpaManager.getProvider().removeFromToggledPlayers(sender.getUniqueId(), query.getUUID());
+			else
+				TpaManager.getProvider().addToToggledPlayers(sender.getUniqueId(), query.getUUID());
+		});
 
 		// register
 		List<String> cmds = getCommands();
-		if (!cmds.isEmpty())
+		if(!cmds.isEmpty())
 			this.cmd = addBypassSettings(cmd).build().register(cmds.remove(0), cmds.toArray(new String[0]));
 	}
 

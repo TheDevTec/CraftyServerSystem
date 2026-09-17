@@ -19,7 +19,7 @@ public class HomeManager {
 	private Map<String, Integer> groups = new HashMap<>();
 
 	public static HomeManager get() {
-		if (instance == null)
+		if(instance == null)
 			instance = new HomeManager();
 		return instance;
 	}

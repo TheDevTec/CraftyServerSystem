@@ -39,8 +39,8 @@ public class NbtCompound implements NbtTag {
 	public NbtCompound getCompound(String key) {
 		Object value = values.get(key);
 
-		if (value instanceof NbtCompound)
-			return (NbtCompound)value;
+		if(value instanceof NbtCompound)
+			return (NbtCompound) value;
 
 		return null;
 	}
@@ -48,8 +48,8 @@ public class NbtCompound implements NbtTag {
 	public List<?> getListValue(String key) {
 		Object value = values.get(key);
 
-		if (value instanceof NbtList)
-			return ((NbtList)value).values();
+		if(value instanceof NbtList)
+			return ((NbtList) value).values();
 
 		return Collections.emptyList();
 	}
@@ -57,8 +57,8 @@ public class NbtCompound implements NbtTag {
 	public String getString(String key, String def) {
 		Object value = values.get(key);
 
-		if (value instanceof String)
-			return (String)value;
+		if(value instanceof String)
+			return (String) value;
 
 		return def;
 	}
@@ -66,8 +66,8 @@ public class NbtCompound implements NbtTag {
 	public byte getByte(String key, byte def) {
 		Object value = values.get(key);
 
-		if (value instanceof Number)
-			return ((Number)value).byteValue();
+		if(value instanceof Number)
+			return ((Number) value).byteValue();
 
 		return def;
 	}
@@ -75,8 +75,8 @@ public class NbtCompound implements NbtTag {
 	public short getShort(String key, short def) {
 		Object value = values.get(key);
 
-		if (value instanceof Number)
-			return ((Number)value).shortValue();
+		if(value instanceof Number)
+			return ((Number) value).shortValue();
 
 		return def;
 	}
@@ -84,8 +84,8 @@ public class NbtCompound implements NbtTag {
 	public int getInt(String key, int def) {
 		Object value = values.get(key);
 
-		if (value instanceof Number)
-			return ((Number)value).intValue();
+		if(value instanceof Number)
+			return ((Number) value).intValue();
 
 		return def;
 	}
@@ -93,8 +93,8 @@ public class NbtCompound implements NbtTag {
 	public long getLong(String key, long def) {
 		Object value = values.get(key);
 
-		if (value instanceof Number)
-			return ((Number)value).longValue();
+		if(value instanceof Number)
+			return ((Number) value).longValue();
 
 		return def;
 	}
@@ -102,8 +102,8 @@ public class NbtCompound implements NbtTag {
 	public float getFloat(String key, float def) {
 		Object value = values.get(key);
 
-		if (value instanceof Number)
-			return ((Number)value).floatValue();
+		if(value instanceof Number)
+			return ((Number) value).floatValue();
 
 		return def;
 	}
@@ -111,8 +111,8 @@ public class NbtCompound implements NbtTag {
 	public double getDouble(String key, double def) {
 		Object value = values.get(key);
 
-		if (value instanceof Number)
-			return ((Number)value).doubleValue();
+		if(value instanceof Number)
+			return ((Number) value).doubleValue();
 
 		return def;
 	}
@@ -121,7 +121,7 @@ public class NbtCompound implements NbtTag {
 	public Map<String, Object> asJson() {
 		Map<String, Object> map = new LinkedHashMap<>(values.size());
 
-		for (Map.Entry<String, ? extends Object> entry : values.entrySet())
+		for(Map.Entry<String, ? extends Object> entry : values.entrySet())
 			map.put(entry.getKey(), rawValue(entry.getValue()));
 
 		return map;
@@ -138,47 +138,47 @@ public class NbtCompound implements NbtTag {
 	}
 
 	private static Object rawValue(Object value) {
-		if (value == null)
+		if(value == null)
 			return null;
 
-		if (value instanceof NbtValue)
-			return rawValue(((NbtValue)value).value());
+		if(value instanceof NbtValue)
+			return rawValue(((NbtValue) value).value());
 
-		if (value instanceof NbtCompound)
-			return ((NbtCompound)value).asJson();
+		if(value instanceof NbtCompound)
+			return ((NbtCompound) value).asJson();
 
-		if (value instanceof NbtList) {
-			List<Object> result = new ArrayList<>(((NbtList)value).values().size());
+		if(value instanceof NbtList) {
+			List<Object> result = new ArrayList<>(((NbtList) value).values().size());
 
-			for (Object element : ((NbtList)value).values())
+			for(Object element : ((NbtList) value).values())
 				result.add(rawValue(element));
 
 			return result;
 		}
 
-		if (value instanceof Map) {
-			Map<String, Object> result = new LinkedHashMap<>(((Map<?, ?>)value).size());
+		if(value instanceof Map) {
+			Map<String, Object> result = new LinkedHashMap<>(((Map<?, ?>) value).size());
 
-			for (Map.Entry<?, ?> entry : ((Map<?, ?>)value).entrySet())
+			for(Map.Entry<?, ?> entry : ((Map<?, ?>) value).entrySet())
 				result.put(String.valueOf(entry.getKey()), rawValue(entry.getValue()));
 
 			return result;
 		}
 
-		if (value instanceof List) {
-			List<Object> result = new ArrayList<>(((List<?>)value).size());
+		if(value instanceof List) {
+			List<Object> result = new ArrayList<>(((List<?>) value).size());
 
-			for (Object element : (List<?>)value)
+			for(Object element : (List<?>) value)
 				result.add(rawValue(element));
 
 			return result;
 		}
 
-		if (value.getClass().isArray()) {
+		if(value.getClass().isArray()) {
 			int length = Array.getLength(value);
 			List<Object> result = new ArrayList<>(length);
 
-			for (int i = 0; i < length; i++)
+			for(int i = 0; i < length; i++)
 				result.add(rawValue(Array.get(value, i)));
 
 			return result;

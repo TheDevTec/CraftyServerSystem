@@ -31,7 +31,7 @@ public class UserScoreboardData extends ScoreboardData {
 	}
 
 	public void setHidden(boolean hide) {
-		if (hide) {
+		if(hide) {
 			hidden = true;
 			removeScoreboard();
 		} else
@@ -39,34 +39,30 @@ public class UserScoreboardData extends ScoreboardData {
 	}
 
 	public void process(TextRenderer renderer) {
-		if (hidden)
+		if(hidden)
 			return;
 
 		renderer.target(player.getUniqueId()).colorize();
 
-		for (String placeholder : API.get().getConfigManager().getPlaceholders().getKeys()) {
-			String replaced = PlaceholderAPI.apply(
-					API.get().getConfigManager().getPlaceholders().getString(placeholder + ".placeholder"),
-					player.getUniqueId());
+		for(String placeholder : API.get().getConfigManager().getPlaceholders().getKeys()) {
+			String replaced = PlaceholderAPI.apply(API.get().getConfigManager().getPlaceholders().getString(placeholder + ".placeholder"), player.getUniqueId());
 
 			renderer.placeholder(placeholder,
-					API.get().getConfigManager().getPlaceholders()
-							.getString(placeholder + ".replace." + replaced,
-									API.get().getConfigManager().getPlaceholders()
-											.getString(placeholder + ".replace._DEFAULT", ""))
-							.replace("{placeholder}", replaced));
+			        API.get().getConfigManager().getPlaceholders()
+			                .getString(placeholder + ".replace." + replaced, API.get().getConfigManager().getPlaceholders().getString(placeholder + ".replace._DEFAULT", ""))
+			                .replace("{placeholder}", replaced));
 		}
 
-		if (updateTitleMode != 0) {
-			if (updateTitleMode != 2)
+		if(updateTitleMode != 0) {
+			if(updateTitleMode != 2)
 				updateTitleMode = 0;
 
 			score.setTitle(render(getTitle(), renderer));
 		}
 
-		for (String line : getLines())
+		for(String line : getLines())
 			score.addLine(render(line, renderer));
-
+		SimpleScore.scores.computeIfAbsent(player.getUniqueId(), t -> new ScoreboardAPI(player, API.get().getConfigManager().getScoreboard().getInt("settings.displayNumbers", 0)));
 		score.send(player);
 	}
 
@@ -83,7 +79,7 @@ public class UserScoreboardData extends ScoreboardData {
 	public void removeScoreboard() {
 		ScoreboardAPI scoreboard = SimpleScore.scores.remove(player.getUniqueId());
 
-		if (scoreboard != null)
+		if(scoreboard != null)
 			scoreboard.destroy();
 	}
 

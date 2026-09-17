@@ -28,18 +28,18 @@ public class StaffChat extends CssCommand {
 
 	@Override
 	public void register() {
-		if (isRegistered())
+		if(isRegistered())
 			return;
 
 		canBeToggled = API.get().getConfigManager().getMain().getBoolean("staff-chat.can-be-toggled");
 
-		if (canBeToggled) {
+		if(canBeToggled) {
 			toggled = new ArrayList<>();
 			listener = new Listener() {
 
 				@EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
 				public void playerChat(AsyncPlayerChatEvent e) {
-					if (toggled.contains(e.getPlayer().getUniqueId())) {
+					if(toggled.contains(e.getPlayer().getUniqueId())) {
 						e.setCancelled(true);
 						staffChat(e.getPlayer(), e.getMessage());
 					}
@@ -53,49 +53,47 @@ public class StaffChat extends CssCommand {
 			Bukkit.getPluginManager().registerEvents(listener, Loader.getPlugin());
 		}
 
-		CommandStructure<CommandSender> cmd = CommandStructure
-				.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
-					if (canBeToggled && sender instanceof Player) {
-						if (toggled.remove(((Player) sender).getUniqueId()))
-							msg(sender, "toggle.off");
-						else {
-							toggled.add(((Player) sender).getUniqueId());
-							msg(sender, "toggle.on");
-						}
-						return;
-					}
-					msgUsage(sender, "cmd");
-				}).permission(getPerm("cmd"));
+		CommandStructure<CommandSender> cmd = CommandStructure.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
+			if(canBeToggled && sender instanceof Player) {
+				if(toggled.remove(((Player) sender).getUniqueId()))
+					msg(sender, "toggle.off");
+				else {
+					toggled.add(((Player) sender).getUniqueId());
+					msg(sender, "toggle.on");
+				}
+				return;
+			}
+			msgUsage(sender, "cmd");
+		}).permission(getPerm("cmd"));
 		cmd.argument(null, -1, (sender, structure, args) -> {
 			staffChat(sender, StringUtils.buildString(0, args));
 		});
 
 		// register
 		List<String> cmds = getCommands();
-		if (!cmds.isEmpty())
+		if(!cmds.isEmpty())
 			this.cmd = addBypassSettings(cmd).build().register(cmds.remove(0), cmds.toArray(new String[0]));
 	}
 
 	public void staffChat(CommandSender player, String message) {
 		String path = "default";
-		if (player instanceof Player) {
+		if(player instanceof Player) {
 			String group = API.get().getPermissionHook().getGroup(player);
-			if (API.get().getConfigManager().getMain().existsKey("staff-chat.formats." + group))
+			if(API.get().getConfigManager().getMain().existsKey("staff-chat.formats." + group))
 				;
 		} else
 			path = "console";
-		API.get().getMsgManager().sendMessageFromFile(API.get().getConfigManager().getMain(),
-				"staff-chat.formats." + path,
-				renderer().placeholder("sender", player.getName()).placeholder("message", message), getPerm("cmd"));
+		API.get().getMsgManager().sendMessageFromFile(API.get().getConfigManager().getMain(), "staff-chat.formats." + path,
+		        renderer().placeholder("sender", player.getName()).placeholder("message", message), getPerm("cmd"));
 	}
 
 	@Override
 	public void unregister() {
 		super.unregister();
-		if (toggled != null)
+		if(toggled != null)
 			toggled.clear();
 		toggled = null;
-		if (listener != null) {
+		if(listener != null) {
 			HandlerList.unregisterAll(listener);
 			listener = null;
 		}

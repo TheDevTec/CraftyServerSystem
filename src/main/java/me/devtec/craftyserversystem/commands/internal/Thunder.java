@@ -15,23 +15,22 @@ public class Thunder extends CssCommand {
 
 	@Override
 	public void register() {
-		if (isRegistered())
+		if(isRegistered())
 			return;
 
-		CommandStructure<CommandSender> cmd = CommandStructure
-				.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
-					if (!(sender instanceof Player)) {
-						msgUsage(sender, "usage");
-						return;
-					}
-					setThunder(sender, ((Player) sender).getWorld(), true);
-				}).permission(getPerm("cmd")).argument("-s", (sender, structure, args) -> {
-					if (!(sender instanceof Player)) {
-						msgUsage(sender, "usage");
-						return;
-					}
-					setThunder(sender, ((Player) sender).getWorld(), false);
-				}).parent();
+		CommandStructure<CommandSender> cmd = CommandStructure.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
+			if(!(sender instanceof Player)) {
+				msgUsage(sender, "usage");
+				return;
+			}
+			setThunder(sender, ((Player) sender).getWorld(), true);
+		}).permission(getPerm("cmd")).argument("-s", (sender, structure, args) -> {
+			if(!(sender instanceof Player)) {
+				msgUsage(sender, "usage");
+				return;
+			}
+			setThunder(sender, ((Player) sender).getWorld(), false);
+		}).parent();
 		cmd.selector(Selector.WORLD, (sender, structure, args) -> {
 			setThunder(sender, Bukkit.getWorld(args[0]), true);
 		}).argument("-s", (sender, structure, args) -> {
@@ -39,7 +38,7 @@ public class Thunder extends CssCommand {
 		});
 		// register
 		List<String> cmds = getCommands();
-		if (!cmds.isEmpty())
+		if(!cmds.isEmpty())
 			this.cmd = addBypassSettings(cmd).build().register(cmds.remove(0), cmds.toArray(new String[0]));
 	}
 
@@ -47,7 +46,7 @@ public class Thunder extends CssCommand {
 		world.setStorm(true);
 		world.setThundering(true);
 		world.setWeatherDuration(36000);
-		if (sendMessages)
+		if(sendMessages)
 			msgOut(sender, "weather.thunder", renderer().placeholder("world", world.getName()));
 	}
 

@@ -31,7 +31,7 @@ public class Loader extends JavaPlugin {
 	public void onLoad() {
 		plugin = this;
 
-		if (!checkOrInstallTheAPI())
+		if(!checkOrInstallTheAPI())
 			return; // Error
 
 		// Init managers
@@ -39,13 +39,12 @@ public class Loader extends JavaPlugin {
 	}
 
 	private boolean checkOrInstallTheAPI() {
-		if (Bukkit.getPluginManager().getPlugin("TheAPI") == null) {
+		if(Bukkit.getPluginManager().getPlugin("TheAPI") == null) {
 			File file = new File("plugins/TheAPI.jar");
 			try {
 				downloadFileFromUrl(new URL("https://api.spiget.org/v2/resources/72679/download"), file);
 				Bukkit.getPluginManager().loadPlugin(file);
-			} catch (UnknownDependencyException | InvalidPluginException | InvalidDescriptionException
-					| MalformedURLException e) {
+			} catch(UnknownDependencyException | InvalidPluginException | InvalidDescriptionException | MalformedURLException e) {
 				e.printStackTrace();
 				plugin.getLogger().severe("Failed to load TheAPI plugin (library)");
 				plugin.getLogger().severe("Disabling plugin...");
@@ -54,21 +53,18 @@ public class Loader extends JavaPlugin {
 			}
 		}
 		try {
-			if (isOlderThan(Bukkit.getPluginManager().getPlugin("TheAPI").getDescription().getVersion(),
-					CraftyVersionChecker.versionOfTheAPIFromSpigot())) {
+			if(isOlderThan(Bukkit.getPluginManager().getPlugin("TheAPI").getDescription().getVersion(), CraftyVersionChecker.versionOfTheAPIFromSpigot())) {
 				File file = new File("plugins/update/TheAPI.jar");
 				try {
 					downloadFileFromUrl(new URL("https://api.spiget.org/v2/resources/72679/download"), file);
-					if (isOlderThan(Bukkit.getPluginManager().getPlugin("TheAPI").getDescription().getVersion(),
-							"14.0")) {
-						plugin.getLogger()
-								.severe("Downloaded required & newest update of TheAPI plugin, please restart server.");
+					if(isOlderThan(Bukkit.getPluginManager().getPlugin("TheAPI").getDescription().getVersion(), "14.0")) {
+						plugin.getLogger().severe("Downloaded required & newest update of TheAPI plugin, please restart server.");
 						Bukkit.getPluginManager().disablePlugin(plugin);
 						return false;
 					}
 					plugin.getLogger().severe("Downloaded newest update of TheAPI plugin, please restart server.");
 					return true;
-				} catch (Exception e) {
+				} catch(Exception e) {
 					e.printStackTrace();
 					plugin.getLogger().severe("Failed to download newest update of TheAPI plugin (library)");
 					plugin.getLogger().severe("Disabling plugin...");
@@ -76,35 +72,35 @@ public class Loader extends JavaPlugin {
 					return false;
 				}
 			}
-		} catch (Exception e) {
+		} catch(Exception e) {
 		}
 		return true;
 	}
 
 	public static boolean isOlderThan(String version, String compareVersion) {
-		if (version == null || compareVersion == null)
+		if(version == null || compareVersion == null)
 			return true;
 
 		version = version.replaceAll("[^0-9.]+", "").trim();
 		compareVersion = compareVersion.replaceAll("[^0-9.]+", "").trim();
 
-		if (version.isEmpty() || compareVersion.isEmpty())
+		if(version.isEmpty() || compareVersion.isEmpty())
 			return true;
 
 		String[] primaryVersion = version.split("\\.");
 		String[] compareToVersion = compareVersion.split("\\.");
 
 		int max = Math.max(primaryVersion.length, compareToVersion.length);
-		for (int i = 0; i <= max; ++i) {
+		for(int i = 0; i <= max; ++i) {
 			String number = i >= primaryVersion.length ? "0" : "1" + primaryVersion[i];
-			if (compareToVersion.length <= i) {
-				if (compareToVersion.length == i && compareToVersion.length == max)
+			if(compareToVersion.length <= i) {
+				if(compareToVersion.length == i && compareToVersion.length == max)
 					break;
 				return false;
 			}
-			if (Integer.parseInt(number) > Integer.parseInt("1" + compareToVersion[i]))
+			if(Integer.parseInt(number) > Integer.parseInt("1" + compareToVersion[i]))
 				return false;
-			if (Integer.parseInt(number) < Integer.parseInt("1" + compareToVersion[i]))
+			if(Integer.parseInt(number) < Integer.parseInt("1" + compareToVersion[i]))
 				return true;
 		}
 		return false;
@@ -112,48 +108,48 @@ public class Loader extends JavaPlugin {
 
 	public void downloadFileFromUrl(URL url, File file) {
 		try {
-			if (file.exists() && !file.delete())
+			if(file.exists() && !file.delete())
 				return;
-			if (!file.exists()) {
-				if (file.getParentFile() != null)
+			if(!file.exists()) {
+				if(file.getParentFile() != null)
 					file.getParentFile().mkdirs();
 				file.createNewFile();
 				HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 				conn.setRequestProperty("User-Agent", "DevTec-JavaClient");
 				conn.setRequestMethod("GET");
-				try (InputStream in = conn.getInputStream()) {
+				try(InputStream in = conn.getInputStream()) {
 					byte[] buf = new byte[4096];
 					int r;
-					try (OutputStream out = new BufferedOutputStream(new FileOutputStream(file))) {
-						while ((r = in.read(buf)) != -1)
+					try(OutputStream out = new BufferedOutputStream(new FileOutputStream(file))) {
+						while((r = in.read(buf)) != -1)
 							out.write(buf, 0, r);
-					} catch (Exception e) {
+					} catch(Exception e) {
 						e.printStackTrace();
 					}
-				} catch (Exception e) {
+				} catch(Exception e) {
 					e.printStackTrace();
 				}
 			}
-		} catch (Exception e) {
+		} catch(Exception e) {
 			e.printStackTrace();
 		}
 	}
 
 	@Override
 	public void onEnable() {
-		if (API.get().getCommandManager() == null) {
+		if(API.get().getCommandManager() == null) {
 			Bukkit.getPluginManager().disablePlugin(plugin);
 			return;
 		}
 		API.get().getAnimationManager().load();
 		API.get().registerPlaceholders();
-		if (Bukkit.getPluginManager().getPlugin("Vault") != null) {
-			if (API.get().getPermissionHook().getClass() == EmptyPermissionHook.class)
+		if(Bukkit.getPluginManager().getPlugin("Vault") != null) {
+			if(API.get().getPermissionHook().getClass() == EmptyPermissionHook.class)
 				API.get().setPermissionHook(new VaultPermissionHook());
-			if (!(API.get().getEconomyHook() instanceof CssEconomyHook))
+			if(!(API.get().getEconomyHook() instanceof CssEconomyHook))
 				API.get().setEconomyHook(new VaultEconomyHook());
 		}
-		if (Bukkit.getPluginManager().getPlugin("LuckPerms") != null)
+		if(Bukkit.getPluginManager().getPlugin("LuckPerms") != null)
 			API.get().setPermissionHook(new LuckPermsPermissionHook());
 		API.get().getCommandManager().register();
 		API.get().getConfigManager().loadSpawn();
@@ -162,7 +158,7 @@ public class Loader extends JavaPlugin {
 
 	@Override
 	public void onDisable() {
-		if (API.get().getCommandManager() == null)
+		if(API.get().getCommandManager() == null)
 			return;
 		API.get().getCommandManager().unregister();
 		API.get().getListenerManager().unregister();

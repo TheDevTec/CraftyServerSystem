@@ -14,9 +14,9 @@ public class BossBarData {
 
 	@Override
 	public boolean equals(Object object) {
-		if (object instanceof BossBarData)
+		if(object instanceof BossBarData)
 			return ((BossBarData) object).text.equals(text) && ((BossBarData) object).progress.equals(progress) && Objects.equals(((BossBarData) object).color, color)
-					&& Objects.equals(((BossBarData) object).style, style);
+			        && Objects.equals(((BossBarData) object).style, style);
 		return false;
 	}
 
@@ -66,13 +66,13 @@ public class BossBarData {
 	}
 
 	public BossBarData fillMissing(BossBarData additional) {
-		if (text == null)
-			text = additional.text;
-		if (progress == null)
+		if(text == null)
+			setText(additional.text);
+		if(progress == null)
 			progress = additional.progress;
-		if (color == null)
+		if(color == null)
 			color = additional.color;
-		if (style == null)
+		if(style == null)
 			style = additional.style;
 		return this;
 	}

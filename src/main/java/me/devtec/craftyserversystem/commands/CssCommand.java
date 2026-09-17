@@ -23,11 +23,9 @@ import me.devtec.theapi.bukkit.BukkitLoader;
 
 public abstract class CssCommand {
 
-	public static final PermissionChecker<CommandSender> DEFAULT_PERMS_CHECKER = (sender, permission, tablist) -> sender
-			.hasPermission(permission);
+	public static final PermissionChecker<CommandSender> DEFAULT_PERMS_CHECKER = (sender, permission, tablist) -> sender.hasPermission(permission);
 
-	public static final PermissionChecker<Player> P_DEFAULT_PERMS_CHECKER = (sender, permission, tablist) -> sender
-			.hasPermission(permission);
+	public static final PermissionChecker<Player> P_DEFAULT_PERMS_CHECKER = (sender, permission, tablist) -> sender.hasPermission(permission);
 
 	@Nonnull
 	protected CommandHolder<? extends CommandSender> cmd;
@@ -43,7 +41,7 @@ public abstract class CssCommand {
 	}
 
 	public void unregister() {
-		if (!isRegistered())
+		if(!isRegistered())
 			return;
 
 		cmd.unregister();
@@ -63,10 +61,10 @@ public abstract class CssCommand {
 	public <T> CommandStructure<T> addBypassSettings(CommandStructure<T> cmd) {
 		String cooldownGroup = API.get().getConfigManager().getCommands().getString(section() + ".cooldown");
 
-		if (cooldownGroup != null) {
+		if(cooldownGroup != null) {
 			CooldownHolder cooldown = API.get().getCooldownManager().getOrPrepare(cooldownGroup);
 
-			if (cooldown != null)
+			if(cooldown != null)
 				cmd.first().cooldownDetection((sender, structure, args) -> !cooldown.accept((CommandSender) sender));
 		}
 
@@ -90,8 +88,7 @@ public abstract class CssCommand {
 
 	public void msg(CommandSender sender, String path, TextRenderer renderer) {
 
-		API.get().getMsgManager().sendMessageFromFile(API.get().getConfigManager().getTranslations(),
-				section() + (path.isEmpty() ? "" : "." + path), prepareRenderer(sender, renderer), sender);
+		API.get().getMsgManager().sendMessageFromFile(API.get().getConfigManager().getTranslations(), section() + (path.isEmpty() ? "" : "." + path), prepareRenderer(sender, renderer), sender);
 	}
 
 	public void msgOut(CommandSender sender, String path) {
@@ -100,13 +97,11 @@ public abstract class CssCommand {
 
 	public void msgOut(CommandSender sender, String path, TextRenderer renderer) {
 
-		API.get().getMsgManager().sendMessageFromFile(API.get().getConfigManager().getTranslations(), path,
-				prepareRenderer(sender, renderer), sender);
+		API.get().getMsgManager().sendMessageFromFile(API.get().getConfigManager().getTranslations(), path, prepareRenderer(sender, renderer), sender);
 	}
 
 	public void msgUsage(CommandSender sender, String path) {
-		API.get().getMsgManager().sendMessageFromFile(API.get().getConfigManager().getCommands(),
-				section() + ".usage." + path, renderer(sender), sender);
+		API.get().getMsgManager().sendMessageFromFile(API.get().getConfigManager().getCommands(), section() + ".usage." + path, renderer(sender), sender);
 	}
 
 	protected TextRenderer renderer() {
@@ -116,7 +111,7 @@ public abstract class CssCommand {
 	protected TextRenderer renderer(CommandSender sender) {
 		TextRenderer renderer = renderer();
 
-		if (sender instanceof Player)
+		if(sender instanceof Player)
 			renderer.target(((Player) sender).getUniqueId());
 
 		return renderer;
@@ -124,13 +119,13 @@ public abstract class CssCommand {
 
 	protected TextRenderer prepareRenderer(CommandSender sender, TextRenderer renderer) {
 
-		if (renderer == null)
+		if(renderer == null)
 			renderer = TextRenderer.create();
 
-		if (!renderer.tokens().contains("{prefix}"))
+		if(!renderer.tokens().contains("{prefix}"))
 			renderer.placeholder("prefix", API.get().getConfigManager().getPrefix());
 
-		if (renderer.target() == null && sender instanceof Player)
+		if(renderer.target() == null && sender instanceof Player)
 			renderer.target(((Player) sender).getUniqueId());
 
 		renderer.colorize();
@@ -141,49 +136,47 @@ public abstract class CssCommand {
 	@Nonnull
 	public Collection<? extends Player> selector(CommandSender sender, String selector) {
 
-		char lowerCase = selector.length() == 1 && selector.charAt(0) == '*' ? '*'
-				: selector.length() == 2 && selector.charAt(0) == '@' ? Character.toLowerCase(selector.charAt(1)) : 0;
+		char lowerCase = selector.length() == 1 && selector.charAt(0) == '*' ? '*' : selector.length() == 2 && selector.charAt(0) == '@' ? Character.toLowerCase(selector.charAt(1)) : 0;
 
-		if (lowerCase != 0)
-			switch (lowerCase) {
-			case 'a':
-			case 'e':
-			case '*':
-				return BukkitLoader.getOnlinePlayers();
+		if(lowerCase != 0)
+			switch(lowerCase) {
+				case 'a' :
+				case 'e' :
+				case '*' :
+					return BukkitLoader.getOnlinePlayers();
 
-			case 'r':
-				return Collections.singleton(StringUtils.randomFromCollection(BukkitLoader.getOnlinePlayers()));
+				case 'r' :
+					return Collections.singleton(StringUtils.randomFromCollection(BukkitLoader.getOnlinePlayers()));
 
-			case 's':
-			case 'p':
-				Location position;
+				case 's' :
+				case 'p' :
+					Location position;
 
-				if (sender instanceof Player)
-					position = ((Player) sender).getLocation();
-				else if (sender instanceof BlockCommandSender)
-					position = ((BlockCommandSender) sender).getBlock().getLocation();
-				else
-					position = new Location(Bukkit.getWorlds().get(0), 0, 0, 0);
+					if(sender instanceof Player)
+						position = ((Player) sender).getLocation();
+					else if(sender instanceof BlockCommandSender)
+						position = ((BlockCommandSender) sender).getBlock().getLocation();
+					else
+						position = new Location(Bukkit.getWorlds().get(0), 0, 0, 0);
 
-				double distance = -1;
-				Player nearestPlayer = null;
+					double distance = -1;
+					Player nearestPlayer = null;
 
-				for (Player sameWorld : position.getWorld().getPlayers()) {
-					double distanceRange = sameWorld.getLocation().distance(position);
+					for(Player sameWorld : position.getWorld().getPlayers()) {
+						double distanceRange = sameWorld.getLocation().distance(position);
 
-					if (distance == -1 || distanceRange < distance) {
-						distance = distanceRange;
-						nearestPlayer = sameWorld;
+						if(distance == -1 || distanceRange < distance) {
+							distance = distanceRange;
+							nearestPlayer = sameWorld;
+						}
 					}
-				}
 
-				Collection<? extends Player> players = BukkitLoader.getOnlinePlayers();
+					Collection<? extends Player> players = BukkitLoader.getOnlinePlayers();
 
-				return players.isEmpty() ? Collections.emptyList()
-						: Collections.singleton(nearestPlayer == null ? players.iterator().next() : nearestPlayer);
+					return players.isEmpty() ? Collections.emptyList() : Collections.singleton(nearestPlayer == null ? players.iterator().next() : nearestPlayer);
 
-			default:
-				break;
+				default :
+					break;
 			}
 
 		Player target = Bukkit.getPlayer(selector);

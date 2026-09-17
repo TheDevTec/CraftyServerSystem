@@ -67,7 +67,7 @@ public class KitEditor extends CssCommand {
 
 	@Override
 	public void register() {
-		if (isRegistered() || !API.get().getConfigManager().getCommands().getBoolean("kit.enabled", true))
+		if(isRegistered() || !API.get().getConfigManager().getCommands().getBoolean("kit.enabled", true))
 			return;
 
 		registerActions();
@@ -83,13 +83,11 @@ public class KitEditor extends CssCommand {
 		reloadLoopGui(GUI_COMMANDS);
 		reloadLoopGui(GUI_CONTENTS);
 
-		CommandStructure<Player> cmd = CommandStructure
-				.create(Player.class, P_DEFAULT_PERMS_CHECKER, (sender, structure, args) -> openMain(sender))
-				.permission(getPerm("cmd"));
+		CommandStructure<Player> cmd = CommandStructure.create(Player.class, P_DEFAULT_PERMS_CHECKER, (sender, structure, args) -> openMain(sender)).permission(getPerm("cmd"));
 
 		List<String> cmds = getCommands();
 
-		if (!cmds.isEmpty())
+		if(!cmds.isEmpty())
 			this.cmd = addBypassSettings(cmd).build().register(cmds.remove(0), cmds.toArray(new String[0]));
 	}
 
@@ -139,7 +137,7 @@ public class KitEditor extends CssCommand {
 
 			KitSample kit = findKit(kitName);
 
-			if (kit == null)
+			if(kit == null)
 				return;
 
 			syncKitData(sharedData, kit);
@@ -150,8 +148,7 @@ public class KitEditor extends CssCommand {
 		 * ============================================================
 		 */
 
-		ActionManager.register("kit_editor_create",
-				(holder, values) -> (gui, player, sharedData, placeholders) -> openKitCreator(player, sharedData));
+		ActionManager.register("kit_editor_create", (holder, values) -> (gui, player, sharedData, placeholders) -> openKitCreator(player, sharedData));
 
 		/*
 		 * ============================================================ DELETE
@@ -162,7 +159,7 @@ public class KitEditor extends CssCommand {
 
 			KitSample kit = selectedKit(sharedData);
 
-			if (kit == null)
+			if(kit == null)
 				return;
 
 			deleteKit(kit);
@@ -179,28 +176,27 @@ public class KitEditor extends CssCommand {
 
 			KitSample kit = selectedKit(sharedData);
 
-			if (kit == null)
+			if(kit == null)
 				return;
 
 			openTextInput(player,
 
-					"&fKit Cost",
+			        "&fKit Cost",
 
-					String.valueOf(kit.getCost()),
+			        String.valueOf(kit.getCost()),
 
-					XMaterial.GOLD_INGOT,
+			        XMaterial.GOLD_INGOT,
 
-					value -> {
+			        value -> {
 
-						double cost = value == null || value.trim().isEmpty() ? 0
-								: Economy.multipleByMoneyFormat(ParseUtils.getDouble(value), value);
+				        double cost = value == null || value.trim().isEmpty() ? 0 : Economy.multipleByMoneyFormat(ParseUtils.getDouble(value), value);
 
-						kit.setCost(cost);
+				        kit.setCost(cost);
 
-						saveAndSync(sharedData, kit);
-					},
+				        saveAndSync(sharedData, kit);
+			        },
 
-					GUI_SETTINGS);
+			        GUI_SETTINGS);
 		});
 
 		/*
@@ -208,202 +204,192 @@ public class KitEditor extends CssCommand {
 		 * ============================================================
 		 */
 
-		ActionManager.register("kit_editor_edit_permission",
-				(holder, values) -> (gui, player, sharedData, placeholders) -> {
+		ActionManager.register("kit_editor_edit_permission", (holder, values) -> (gui, player, sharedData, placeholders) -> {
 
-					KitSample kit = selectedKit(sharedData);
+			KitSample kit = selectedKit(sharedData);
 
-					if (kit == null)
-						return;
+			if(kit == null)
+				return;
 
-					openTextInput(player,
+			openTextInput(player,
 
-							"&fKit Permission",
+			        "&fKit Permission",
 
-							kit.getPermission() == null ? "css.kit." + kit.getName() : kit.getPermission(),
+			        kit.getPermission() == null ? "css.kit." + kit.getName() : kit.getPermission(),
 
-							XMaterial.NAME_TAG,
+			        XMaterial.NAME_TAG,
 
-							value -> {
+			        value -> {
 
-								kit.setPermission(value == null || value.trim().isEmpty() ? null : value.trim());
+				        kit.setPermission(value == null || value.trim().isEmpty() ? null : value.trim());
 
-								saveAndSync(sharedData, kit);
-							},
+				        saveAndSync(sharedData, kit);
+			        },
 
-							GUI_SETTINGS);
-				});
+			        GUI_SETTINGS);
+		});
 
 		/*
 		 * ============================================================ COOLDOWN BYPASS
 		 * PERMISSION ============================================================
 		 */
 
-		ActionManager.register("kit_editor_edit_cooldown_permission",
-				(holder, values) -> (gui, player, sharedData, placeholders) -> {
+		ActionManager.register("kit_editor_edit_cooldown_permission", (holder, values) -> (gui, player, sharedData, placeholders) -> {
 
-					KitSample kit = selectedKit(sharedData);
+			KitSample kit = selectedKit(sharedData);
 
-					if (kit == null)
-						return;
+			if(kit == null)
+				return;
 
-					openTextInput(player,
+			openTextInput(player,
 
-							"&fCooldown Bypass Permission",
+			        "&fCooldown Bypass Permission",
 
-							kit.getCooldown().getBypassPerm() == null ? "css.cooldown.kits"
-									: kit.getCooldown().getBypassPerm(),
+			        kit.getCooldown().getBypassPerm() == null ? "css.cooldown.kits" : kit.getCooldown().getBypassPerm(),
 
-							XMaterial.NAME_TAG,
+			        XMaterial.NAME_TAG,
 
-							value -> {
+			        value -> {
 
-								kit.getCooldown()
-										.setBypassPerm(value == null || value.trim().isEmpty() ? null : value.trim());
+				        kit.getCooldown().setBypassPerm(value == null || value.trim().isEmpty() ? null : value.trim());
 
-								saveAndSync(sharedData, kit);
-							},
+				        saveAndSync(sharedData, kit);
+			        },
 
-							GUI_SETTINGS);
-				});
+			        GUI_SETTINGS);
+		});
 
 		/*
 		 * ============================================================ COOLDOWN TIME
 		 * ============================================================
 		 */
 
-		ActionManager.register("kit_editor_edit_cooldown_time",
-				(holder, values) -> (gui, player, sharedData, placeholders) -> {
+		ActionManager.register("kit_editor_edit_cooldown_time", (holder, values) -> (gui, player, sharedData, placeholders) -> {
 
-					KitSample kit = selectedKit(sharedData);
+			KitSample kit = selectedKit(sharedData);
 
-					if (kit == null)
-						return;
+			if(kit == null)
+				return;
 
-					openTextInput(player,
+			openTextInput(player,
 
-							"&fCooldown Time",
+			        "&fCooldown Time",
 
-							TimeUtils.timeToString(kit.getCooldown().getTime()),
+			        TimeUtils.timeToString(kit.getCooldown().getTime()),
 
-							XMaterial.CLOCK,
+			        XMaterial.CLOCK,
 
-							value -> {
+			        value -> {
 
-								kit.getCooldown().setTime(value == null || value.trim().isEmpty() ? 0
-										: TimeUtils.timeFromString(value.trim()));
+				        kit.getCooldown().setTime(value == null || value.trim().isEmpty() ? 0 : TimeUtils.timeFromString(value.trim()));
 
-								saveAndSync(sharedData, kit);
-							},
+				        saveAndSync(sharedData, kit);
+			        },
 
-							GUI_SETTINGS);
-				});
+			        GUI_SETTINGS);
+		});
 
 		/*
 		 * ============================================================ OVERRIDE
 		 * CONTENTS ============================================================
 		 */
 
-		ActionManager.register("kit_editor_toggle_override",
-				(holder, values) -> (gui, player, sharedData, placeholders) -> {
+		ActionManager.register("kit_editor_toggle_override", (holder, values) -> (gui, player, sharedData, placeholders) -> {
 
-					KitSample kit = selectedKit(sharedData);
+			KitSample kit = selectedKit(sharedData);
 
-					if (kit == null)
-						return;
+			if(kit == null)
+				return;
 
-					kit.setOverrideContents(!kit.isOverrideContents());
+			kit.setOverrideContents(!kit.isOverrideContents());
 
-					saveAndSync(sharedData, kit);
-				});
+			saveAndSync(sharedData, kit);
+		});
 
 		/*
 		 * ============================================================ DROP ITEMS
 		 * ============================================================
 		 */
 
-		ActionManager.register("kit_editor_toggle_drop",
-				(holder, values) -> (gui, player, sharedData, placeholders) -> {
+		ActionManager.register("kit_editor_toggle_drop", (holder, values) -> (gui, player, sharedData, placeholders) -> {
 
-					KitSample kit = selectedKit(sharedData);
+			KitSample kit = selectedKit(sharedData);
 
-					if (kit == null)
-						return;
+			if(kit == null)
+				return;
 
-					kit.setDropItems(!kit.isDropItems());
+			kit.setDropItems(!kit.isDropItems());
 
-					saveAndSync(sharedData, kit);
-				});
+			saveAndSync(sharedData, kit);
+		});
 
 		/*
 		 * ============================================================ ADD MESSAGE
 		 * ============================================================
 		 */
 
-		ActionManager.register("kit_editor_add_message",
-				(holder, values) -> (gui, player, sharedData, placeholders) -> {
+		ActionManager.register("kit_editor_add_message", (holder, values) -> (gui, player, sharedData, placeholders) -> {
 
-					KitSample kit = selectedKit(sharedData);
+			KitSample kit = selectedKit(sharedData);
 
-					if (kit == null)
-						return;
+			if(kit == null)
+				return;
 
-					openTextInput(player,
+			openTextInput(player,
 
-							"&fAdd Message",
+			        "&fAdd Message",
 
-							"Message Here",
+			        "Message Here",
 
-							XMaterial.PAPER,
+			        XMaterial.PAPER,
 
-							value -> {
+			        value -> {
 
-								kit.getMessages().add(value == null ? "" : value);
+				        kit.getMessages().add(value == null ? "" : value);
 
-								saveAndSync(sharedData, kit);
-							},
+				        saveAndSync(sharedData, kit);
+			        },
 
-							GUI_MESSAGES);
-				});
+			        GUI_MESSAGES);
+		});
 
 		/*
 		 * ============================================================ ADD COMMAND
 		 * ============================================================
 		 */
 
-		ActionManager.register("kit_editor_add_command",
-				(holder, values) -> (gui, player, sharedData, placeholders) -> {
+		ActionManager.register("kit_editor_add_command", (holder, values) -> (gui, player, sharedData, placeholders) -> {
 
-					KitSample kit = selectedKit(sharedData);
+			KitSample kit = selectedKit(sharedData);
 
-					if (kit == null)
-						return;
+			if(kit == null)
+				return;
 
-					openTextInput(player,
+			openTextInput(player,
 
-							"&fAdd Command",
+			        "&fAdd Command",
 
-							"Command Here",
+			        "Command Here",
 
-							XMaterial.COMMAND_BLOCK,
+			        XMaterial.COMMAND_BLOCK,
 
-							value -> {
+			        value -> {
 
-								if (value == null || value.trim().isEmpty())
-									return;
+				        if(value == null || value.trim().isEmpty())
+					        return;
 
-								String command = value.trim();
+				        String command = value.trim();
 
-								if (command.startsWith("/"))
-									command = command.substring(1);
+				        if(command.startsWith("/"))
+					        command = command.substring(1);
 
-								kit.getCommands().add(command);
+				        kit.getCommands().add(command);
 
-								saveAndSync(sharedData, kit);
-							},
+				        saveAndSync(sharedData, kit);
+			        },
 
-							GUI_COMMANDS);
-				});
+			        GUI_COMMANDS);
+		});
 
 		/*
 		 * ============================================================ IMPORT PLAYER
@@ -417,46 +403,44 @@ public class KitEditor extends CssCommand {
 		 * ============================================================
 		 */
 
-		ActionManager.register("kit_editor_import_inventory",
-				(holder, values) -> (gui, player, sharedData, placeholders) -> {
+		ActionManager.register("kit_editor_import_inventory", (holder, values) -> (gui, player, sharedData, placeholders) -> {
 
-					KitSample kit = selectedKit(sharedData);
+			KitSample kit = selectedKit(sharedData);
 
-					if (kit == null)
-						return;
+			if(kit == null)
+				return;
 
-					kit.getContents().clear();
+			kit.getContents().clear();
 
-					for (int slot = 0; slot <= 40; ++slot) {
+			for(int slot = 0; slot <= 40; ++slot) {
 
-						ItemStack item = player.getInventory().getItem(slot);
+				ItemStack item = player.getInventory().getItem(slot);
 
-						if (isEmpty(item))
-							continue;
+				if(isEmpty(item))
+					continue;
 
-						kit.getContents().put(slot, item.clone());
-					}
+				kit.getContents().put(slot, item.clone());
+			}
 
-					saveAndSync(sharedData, kit);
-				});
+			saveAndSync(sharedData, kit);
+		});
 
 		/*
 		 * ============================================================ CLEAR CONTENTS
 		 * ============================================================
 		 */
 
-		ActionManager.register("kit_editor_clear_contents",
-				(holder, values) -> (gui, player, sharedData, placeholders) -> {
+		ActionManager.register("kit_editor_clear_contents", (holder, values) -> (gui, player, sharedData, placeholders) -> {
 
-					KitSample kit = selectedKit(sharedData);
+			KitSample kit = selectedKit(sharedData);
 
-					if (kit == null)
-						return;
+			if(kit == null)
+				return;
 
-					kit.getContents().clear();
+			kit.getContents().clear();
 
-					saveAndSync(sharedData, kit);
-				});
+			saveAndSync(sharedData, kit);
+		});
 	}
 
 	/*
@@ -483,7 +467,7 @@ public class KitEditor extends CssCommand {
 
 			List<ItemGUI> result = new ArrayList<>();
 
-			for (KitSample kit : kits().values()) {
+			for(KitSample kit : kits().values()) {
 
 				Map<String, Object> placeholders = new LinkedHashMap<>();
 
@@ -519,12 +503,12 @@ public class KitEditor extends CssCommand {
 
 			KitSample kit = selectedKit(sharedData);
 
-			if (kit == null)
+			if(kit == null)
 				return Collections.emptyList();
 
 			List<ItemGUI> result = new ArrayList<>();
 
-			for (int i = 0; i < kit.getMessages().size(); ++i) {
+			for(int i = 0; i < kit.getMessages().size(); ++i) {
 
 				String message = kit.getMessages().get(i);
 
@@ -540,22 +524,22 @@ public class KitEditor extends CssCommand {
 
 				ItemPackage itemPackage = findLoopItem(player, sharedData, placeholders, conditions, defaultItem);
 
-				if (itemPackage == null)
+				if(itemPackage == null)
 					continue;
 
 				result.add(createRemovableTextItem(itemPackage, player, sharedData, placeholders,
 
-						() -> {
+				        () -> {
 
-							if (index < 0 || index >= kit.getMessages().size())
-								return;
+					        if(index < 0 || index >= kit.getMessages().size())
+						        return;
 
-							kit.getMessages().remove(index);
+					        kit.getMessages().remove(index);
 
-							saveAndSync(sharedData, kit);
+					        saveAndSync(sharedData, kit);
 
-							openGui(player, GUI_MESSAGES);
-						}));
+					        openGui(player, GUI_MESSAGES);
+				        }));
 			}
 
 			return result;
@@ -573,12 +557,12 @@ public class KitEditor extends CssCommand {
 
 			KitSample kit = selectedKit(sharedData);
 
-			if (kit == null)
+			if(kit == null)
 				return Collections.emptyList();
 
 			List<ItemGUI> result = new ArrayList<>();
 
-			for (int i = 0; i < kit.getCommands().size(); ++i) {
+			for(int i = 0; i < kit.getCommands().size(); ++i) {
 
 				String command = kit.getCommands().get(i);
 
@@ -594,22 +578,22 @@ public class KitEditor extends CssCommand {
 
 				ItemPackage itemPackage = findLoopItem(player, sharedData, placeholders, conditions, defaultItem);
 
-				if (itemPackage == null)
+				if(itemPackage == null)
 					continue;
 
 				result.add(createRemovableTextItem(itemPackage, player, sharedData, placeholders,
 
-						() -> {
+				        () -> {
 
-							if (index < 0 || index >= kit.getCommands().size())
-								return;
+					        if(index < 0 || index >= kit.getCommands().size())
+						        return;
 
-							kit.getCommands().remove(index);
+					        kit.getCommands().remove(index);
 
-							saveAndSync(sharedData, kit);
+					        saveAndSync(sharedData, kit);
 
-							openGui(player, GUI_COMMANDS);
-						}));
+					        openGui(player, GUI_COMMANDS);
+				        }));
 			}
 
 			return result;
@@ -627,12 +611,12 @@ public class KitEditor extends CssCommand {
 
 			KitSample kit = selectedKit(sharedData);
 
-			if (kit == null)
+			if(kit == null)
 				return Collections.emptyList();
 
 			List<ItemGUI> items = new ArrayList<>(41);
 
-			for (int slot : INVENTORY_SLOT_ORDER)
+			for(int slot : INVENTORY_SLOT_ORDER)
 				items.add(createInventorySlotItem(player, sharedData, kit, slot));
 
 			return items;
@@ -663,7 +647,7 @@ public class KitEditor extends CssCommand {
 				 */
 				ItemStack cursor = player.getItemOnCursor();
 
-				if (!isEmpty(cursor)) {
+				if(!isEmpty(cursor)) {
 
 					kit.getContents().put(inventorySlot, cursor.clone());
 
@@ -676,13 +660,13 @@ public class KitEditor extends CssCommand {
 
 				ItemStack current = kit.getContents().get(inventorySlot);
 
-				if (isEmpty(current))
+				if(isEmpty(current))
 					return;
 
 				/*
 				 * SHIFT + LEFT = remove
 				 */
-				if (click.isLeftClick() && click.isShiftClick()) {
+				if(click.isLeftClick() && click.isShiftClick()) {
 
 					kit.getContents().remove(inventorySlot);
 
@@ -696,7 +680,7 @@ public class KitEditor extends CssCommand {
 				/*
 				 * RIGHT = copy do vlastního inventáře
 				 */
-				if (click.isRightClick())
+				if(click.isRightClick())
 					player.getInventory().addItem(current.clone());
 			}
 		};
@@ -704,17 +688,15 @@ public class KitEditor extends CssCommand {
 
 	private ItemStack createSlotDisplay(ItemStack stored, int slot) {
 
-		if (isEmpty(stored))
+		if(isEmpty(stored))
 			return ItemMaker.of(emptySlotMaterial(slot)).displayName("&7" + slotDisplayName(slot))
-					.lore("", "&8» &7Player inventory slot: &e" + slot, "", "&8» &7Place an item on your cursor",
-							"&8» &7and click this slot to assign it.", "")
-					.build();
+			        .lore("", "&8» &7Player inventory slot: &e" + slot, "", "&8» &7Place an item on your cursor", "&8» &7and click this slot to assign it.", "").build();
 
 		ItemMaker maker = ItemMaker.of(stored.clone());
 
 		List<String> lore = new ArrayList<>();
 
-		if (maker.getLore() != null)
+		if(maker.getLore() != null)
 			lore.addAll(maker.getLore());
 
 		lore.add("");
@@ -738,55 +720,55 @@ public class KitEditor extends CssCommand {
 
 	private static XMaterial emptySlotMaterial(int slot) {
 
-		switch (slot) {
+		switch(slot) {
 
-		case 39:
-			return XMaterial.LEATHER_HELMET;
+			case 39 :
+				return XMaterial.LEATHER_HELMET;
 
-		case 38:
-			return XMaterial.LEATHER_CHESTPLATE;
+			case 38 :
+				return XMaterial.LEATHER_CHESTPLATE;
 
-		case 37:
-			return XMaterial.LEATHER_LEGGINGS;
+			case 37 :
+				return XMaterial.LEATHER_LEGGINGS;
 
-		case 36:
-			return XMaterial.LEATHER_BOOTS;
+			case 36 :
+				return XMaterial.LEATHER_BOOTS;
 
-		case 40:
-			return XMaterial.SHIELD;
+			case 40 :
+				return XMaterial.SHIELD;
 
-		default:
-			return XMaterial.LIGHT_GRAY_STAINED_GLASS_PANE;
+			default :
+				return XMaterial.LIGHT_GRAY_STAINED_GLASS_PANE;
 		}
 	}
 
 	private static String slotDisplayName(int slot) {
 
-		switch (slot) {
+		switch(slot) {
 
-		case 39:
-			return "Helmet";
+			case 39 :
+				return "Helmet";
 
-		case 38:
-			return "Chestplate";
+			case 38 :
+				return "Chestplate";
 
-		case 37:
-			return "Leggings";
+			case 37 :
+				return "Leggings";
 
-		case 36:
-			return "Boots";
+			case 36 :
+				return "Boots";
 
-		case 40:
-			return "Offhand";
+			case 40 :
+				return "Offhand";
 
-		default: {
+			default : {
 
-			if (slot >= 0 && slot <= 8)
+				if(slot >= 0 && slot <= 8)
 
-				return "Hotbar " + (slot + 1);
+					return "Hotbar " + (slot + 1);
 
-			return "Inventory " + slot;
-		}
+				return "Inventory " + slot;
+			}
 		}
 	}
 
@@ -795,25 +777,23 @@ public class KitEditor extends CssCommand {
 	 * ============================================================
 	 */
 
-	private static void addLoopItem(List<ItemGUI> items, Player player, Config sharedData,
-			Map<String, Object> placeholders, List<ConditionItem> conditions, ItemPackage defaultItem) {
+	private static void addLoopItem(List<ItemGUI> items, Player player, Config sharedData, Map<String, Object> placeholders, List<ConditionItem> conditions, ItemPackage defaultItem) {
 
 		ItemPackage result = findLoopItem(player, sharedData, placeholders, conditions, defaultItem);
 
-		if (result == null)
+		if(result == null)
 			return;
 
 		items.add(createLoopItem(result, player, sharedData, placeholders));
 	}
 
-	private static ItemPackage findLoopItem(Player player, Config sharedData, Map<String, Object> placeholders,
-			List<ConditionItem> conditions, ItemPackage defaultItem) {
+	private static ItemPackage findLoopItem(Player player, Config sharedData, Map<String, Object> placeholders, List<ConditionItem> conditions, ItemPackage defaultItem) {
 
-		for (ConditionItem condition : conditions) {
+		for(ConditionItem condition : conditions) {
 
 			ItemPackage result = condition.test(player, sharedData, placeholders);
 
-			if (result != null && result.getItem() != null)
+			if(result != null && result.getItem() != null)
 
 				return result;
 		}
@@ -821,11 +801,9 @@ public class KitEditor extends CssCommand {
 		return defaultItem != null && defaultItem.getItem() != null ? defaultItem : null;
 	}
 
-	private static ItemGUI createLoopItem(ItemPackage itemPackage, Player player, Config sharedData,
-			Map<String, Object> placeholders) {
+	private static ItemGUI createLoopItem(ItemPackage itemPackage, Player player, Config sharedData, Map<String, Object> placeholders) {
 
-		return new ItemGUI(Utils.applyPlaceholders(itemPackage.getTypePlaceholder(), itemPackage.getItem(),
-				placeholders, player)) {
+		return new ItemGUI(Utils.applyPlaceholders(itemPackage.getTypePlaceholder(), itemPackage.getItem(), placeholders, player)) {
 
 			@Override
 			public void onClick(Player player, HolderGUI gui, ClickType click) {
@@ -839,16 +817,14 @@ public class KitEditor extends CssCommand {
 	 * Messages / Commands potřebují ClickType, proto nemůžeme remove dát pouze do
 	 * ActionManager.
 	 */
-	private static ItemGUI createRemovableTextItem(ItemPackage itemPackage, Player player, Config sharedData,
-			Map<String, Object> placeholders, Runnable remove) {
+	private static ItemGUI createRemovableTextItem(ItemPackage itemPackage, Player player, Config sharedData, Map<String, Object> placeholders, Runnable remove) {
 
-		return new ItemGUI(Utils.applyPlaceholders(itemPackage.getTypePlaceholder(), itemPackage.getItem(),
-				placeholders, player)) {
+		return new ItemGUI(Utils.applyPlaceholders(itemPackage.getTypePlaceholder(), itemPackage.getItem(), placeholders, player)) {
 
 			@Override
 			public void onClick(Player player, HolderGUI gui, ClickType click) {
 
-				if (click.isLeftClick() && click.isShiftClick())
+				if(click.isLeftClick() && click.isShiftClick())
 
 					remove.run();
 			}
@@ -865,25 +841,24 @@ public class KitEditor extends CssCommand {
 		AnvilGUI anvil = new AnvilGUI("&fType kit name") {
 
 			@Override
-			public boolean onInteractItem(Player player, ItemStack newItem, ItemStack oldItem, ClickType type, int slot,
-					boolean guiClick) {
+			public boolean onInteractItem(Player player, ItemStack newItem, ItemStack oldItem, ClickType type, int slot, boolean guiClick) {
 
-				if (!guiClick)
+				if(!guiClick)
 					return false;
 
 				String name = getRenameText();
 
-				if (name == null)
+				if(name == null)
 					return false;
 
 				name = name.replace(" ", "").trim();
 
-				if (name.isEmpty() || "kitnamehere".equalsIgnoreCase(name))
+				if(name.isEmpty() || "kitnamehere".equalsIgnoreCase(name))
 					return false;
 
 				KitSample existing = findKit(name);
 
-				if (existing != null) {
+				if(existing != null) {
 
 					syncKitData(sharedData, existing);
 
@@ -908,7 +883,7 @@ public class KitEditor extends CssCommand {
 			@Override
 			public void onClose(Player player, CloseReason reason) {
 
-				if (selectedKit(sharedData) != null)
+				if(selectedKit(sharedData) != null)
 
 					openGui(player, GUI_DETAIL);
 				else
@@ -926,16 +901,14 @@ public class KitEditor extends CssCommand {
 	 * INPUT ============================================================
 	 */
 
-	private void openTextInput(Player player, String title, String initialValue, XMaterial material,
-			Consumer<String> consumer, String returnGui) {
+	private void openTextInput(Player player, String title, String initialValue, XMaterial material, Consumer<String> consumer, String returnGui) {
 
 		AnvilGUI anvil = new AnvilGUI(title) {
 
 			@Override
-			public boolean onInteractItem(Player player, ItemStack newItem, ItemStack oldItem, ClickType type, int slot,
-					boolean guiClick) {
+			public boolean onInteractItem(Player player, ItemStack newItem, ItemStack oldItem, ClickType type, int slot, boolean guiClick) {
 
-				if (!guiClick)
+				if(!guiClick)
 					return false;
 
 				consumer.accept(getRenameText());
@@ -977,7 +950,7 @@ public class KitEditor extends CssCommand {
 
 		GuiCreator creator = GuiCreator.guis.get(id);
 
-		if (creator != null)
+		if(creator != null)
 			creator.open(player);
 	}
 
@@ -985,7 +958,7 @@ public class KitEditor extends CssCommand {
 
 		GuiCreator creator = GuiCreator.guis.get(id);
 
-		if (creator instanceof LoopGuiCreator)
+		if(creator instanceof LoopGuiCreator)
 			((LoopGuiCreator) creator).reload();
 	}
 
@@ -1020,8 +993,7 @@ public class KitEditor extends CssCommand {
 
 		data.set("kit_drop_items", kit.isDropItems());
 
-		data.set("kit_cooldown_permission",
-				kit.getCooldown().getBypassPerm() == null ? "none" : kit.getCooldown().getBypassPerm());
+		data.set("kit_cooldown_permission", kit.getCooldown().getBypassPerm() == null ? "none" : kit.getCooldown().getBypassPerm());
 
 		data.set("kit_cooldown_time", TimeUtils.timeToString(kit.getCooldown().getTime()));
 
@@ -1063,17 +1035,17 @@ public class KitEditor extends CssCommand {
 
 	private KitSample findKit(String name) {
 
-		if (name == null || name.trim().isEmpty())
+		if(name == null || name.trim().isEmpty())
 			return null;
 
 		KitSample direct = kits().get(name.toLowerCase(Locale.ROOT));
 
-		if (direct != null)
+		if(direct != null)
 			return direct;
 
-		for (KitSample kit : kits().values())
+		for(KitSample kit : kits().values())
 
-			if (kit.getName().equalsIgnoreCase(name))
+			if(kit.getName().equalsIgnoreCase(name))
 
 				return kit;
 
@@ -1122,11 +1094,11 @@ public class KitEditor extends CssCommand {
 
 		List<String> contents = new ArrayList<>();
 
-		for (Entry<Integer, ItemStack> entry : entries) {
+		for(Entry<Integer, ItemStack> entry : entries) {
 
 			ItemStack stack = entry.getValue();
 
-			if (isEmpty(stack))
+			if(isEmpty(stack))
 				continue;
 
 			@SuppressWarnings("unchecked")
@@ -1134,7 +1106,7 @@ public class KitEditor extends CssCommand {
 
 			String type = map.remove("type").toString();
 
-			if (map.isEmpty())
+			if(map.isEmpty())
 
 				contents.add(entry.getKey() + ":" + type);
 
@@ -1168,7 +1140,7 @@ public class KitEditor extends CssCommand {
 
 	private static String resolve(Player player, Map<String, Object> placeholders, String values) {
 
-		if (values == null || values.isEmpty())
+		if(values == null || values.isEmpty())
 			return "";
 
 		return Utils.replacePlaceholders(values, placeholders, player.getUniqueId());
@@ -1197,14 +1169,14 @@ public class KitEditor extends CssCommand {
 		/*
 		 * Main inventory
 		 */
-		for (int slot = 9; slot <= 35; ++slot)
+		for(int slot = 9; slot <= 35; ++slot)
 
 			slots[index++] = slot;
 
 		/*
 		 * Hotbar
 		 */
-		for (int slot = 0; slot <= 8; ++slot)
+		for(int slot = 0; slot <= 8; ++slot)
 
 			slots[index++] = slot;
 

@@ -47,17 +47,13 @@ public class UserTablistData extends TablistData {
 	public UserTablistData process(TextRenderer renderer) {
 		renderer.target(player.getUniqueId());
 
-		for (String placeholder : API.get().getConfigManager().getPlaceholders().getKeys()) {
-			String replaced = PlaceholderAPI.apply(
-					API.get().getConfigManager().getPlaceholders().getString(placeholder + ".placeholder"),
-					player.getUniqueId());
+		for(String placeholder : API.get().getConfigManager().getPlaceholders().getKeys()) {
+			String replaced = PlaceholderAPI.apply(API.get().getConfigManager().getPlaceholders().getString(placeholder + ".placeholder"), player.getUniqueId());
 
 			renderer.placeholder(placeholder,
-					API.get().getConfigManager().getPlaceholders()
-							.getString(placeholder + ".replace." + replaced,
-									API.get().getConfigManager().getPlaceholders()
-											.getString(placeholder + ".replace._DEFAULT", ""))
-							.replace("{placeholder}", replaced));
+			        API.get().getConfigManager().getPlaceholders()
+			                .getString(placeholder + ".replace." + replaced, API.get().getConfigManager().getPlaceholders().getString(placeholder + ".replace._DEFAULT", ""))
+			                .replace("{placeholder}", replaced));
 		}
 
 		ClassicTabPlayer nametag = TabAPI.getHolder(player);
@@ -65,8 +61,8 @@ public class UserTablistData extends TablistData {
 		StringContainer header = new StringContainer(64);
 		int linePos = 0;
 
-		for (String text : getHeader()) {
-			if (linePos++ != 0)
+		for(String text : getHeader()) {
+			if(linePos++ != 0)
 				header.append('\n');
 
 			header.append(render(text, renderer));
@@ -75,8 +71,8 @@ public class UserTablistData extends TablistData {
 		StringContainer footer = new StringContainer(64);
 		linePos = 0;
 
-		for (String text : getFooter()) {
-			if (linePos++ != 0)
+		for(String text : getFooter()) {
+			if(linePos++ != 0)
 				footer.append('\n');
 
 			footer.append(render(text, renderer));
@@ -102,24 +98,22 @@ public class UserTablistData extends TablistData {
 
 		List<ArmorStandHologram> lines = nametag.getAdditionalLines();
 
-		for (String line : getNametagLines()) {
-			if (line.contains("{player}"))
+		for(String line : getNametagLines()) {
+			if(line.contains("{player}"))
 				hidePlayerNickname = true;
 
-			String text = render(line.replace("{prefix}", getTagPrefix()).replace("{suffix}", getTagSuffix())
-					.replace("{player}", player.getName()), renderer);
+			String text = render(line.replace("{prefix}", getTagPrefix()).replace("{suffix}", getTagSuffix()).replace("{player}", player.getName()), renderer);
 
-			if (addingMode || lines.size() <= index) {
+			if(addingMode || lines.size() <= index) {
 				Location loc = player.getLocation();
 
 				ArmorStandHologram stand;
 
-				lines.add(stand = new ArmorStandHologram(nametag, loc.getWorld(), loc.getX(), loc.getY(), loc.getZ(),
-						0.25 * index++, text));
+				lines.add(stand = new ArmorStandHologram(nametag, loc.getWorld(), loc.getX(), loc.getY(), loc.getZ(), 0.25 * index++, text));
 
 				addingMode = true;
 
-				for (ClassicTabPlayer viewer : nametag.getWhoSeeAdditionalLines())
+				for(ClassicTabPlayer viewer : nametag.getWhoSeeAdditionalLines())
 					stand.show(viewer);
 			} else {
 				ArmorStandHologram lineAtIndex = lines.get(index++);
@@ -127,42 +121,38 @@ public class UserTablistData extends TablistData {
 			}
 		}
 
-		if (hidePlayerNickname) {
+		if(hidePlayerNickname) {
 			SimpleTeam team = nametag.getPrimaryTeam();
 
-			if (team.getNametagVisibility() != Visibility.NEVER) {
+			if(team.getNametagVisibility() != Visibility.NEVER) {
 				team.setNametagVisibility(Visibility.NEVER);
 
-				Object packet = TeamUtils.createTeamPacket(TeamUtils.METHOD_CHANGE, team.getTeam(), team.getColor(),
-						team.getPrefix(), team.getSuffix(), team.getDisplayName(), team.getNametagVisibility(),
-						team.getCollisionRule(), team.getFriendlyFlags(), team.getPlayers());
+				Object packet = TeamUtils.createTeamPacket(TeamUtils.METHOD_CHANGE, team.getTeam(), team.getColor(), team.getPrefix(), team.getSuffix(), team.getDisplayName(),
+				        team.getNametagVisibility(), team.getCollisionRule(), team.getFriendlyFlags(), team.getPlayers());
 
-				for (ClassicTabPlayer holder : TabAPI.getPlayers())
-					if (holder.getTeams().contains(team))
+				for(ClassicTabPlayer holder : TabAPI.getPlayers())
+					if(holder.getTeams().contains(team))
 						holder.sendPacket(packet);
-					else if (holder.getPlayer().equals(getPlayer()) || holder.getPlayer().canSee(getPlayer()))
+					else if(holder.getPlayer().equals(getPlayer()) || holder.getPlayer().canSee(getPlayer()))
 						holder.createTeam(team);
 			}
 		}
 
-		if (lines.size() > index && !addingMode)
-			for (int i = lines.size() - 1; i > index; --i)
+		if(lines.size() > index && !addingMode)
+			for(int i = lines.size() - 1; i > index; --i)
 				lines.remove(i).hideAll();
 
-		if (previous != null && previous != getYellowNumberDisplayMode()) {
+		if(previous != null && previous != getYellowNumberDisplayMode()) {
 
-			if (!yellowNumber.isEmpty())
-				BukkitLoader.getPacketHandler().send(yellowNumber.keySet(), BukkitLoader.getNmsProvider()
-						.packetScoreboardScore(Action.REMOVE, "yn_ping_css", player.getName(), 0));
+			if(!yellowNumber.isEmpty())
+				BukkitLoader.getPacketHandler().send(yellowNumber.keySet(), BukkitLoader.getNmsProvider().packetScoreboardScore(Action.REMOVE, "yn_ping_css", player.getName(), 0));
 
-			BukkitLoader.getPacketHandler().send(player,
-					createObjectivePacket(0, "yn_ping_css", "", previous == YellowNumberDisplayMode.INTEGER));
+			BukkitLoader.getPacketHandler().send(player, createObjectivePacket(0, "yn_ping_css", "", previous == YellowNumberDisplayMode.INTEGER));
 		}
 
-		if (previous == null && getYellowNumberDisplayMode() != YellowNumberDisplayMode.NONE) {
+		if(previous == null && getYellowNumberDisplayMode() != YellowNumberDisplayMode.NONE) {
 
-			BukkitLoader.getPacketHandler().send(player, createObjectivePacket(0, "yn_ping_css", player.getName(),
-					getYellowNumberDisplayMode() == YellowNumberDisplayMode.INTEGER));
+			BukkitLoader.getPacketHandler().send(player, createObjectivePacket(0, "yn_ping_css", player.getName(), getYellowNumberDisplayMode() == YellowNumberDisplayMode.INTEGER));
 
 			Object packet = BukkitLoader.getNmsProvider().packetScoreboardDisplayObjective(0, null);
 
@@ -171,14 +161,13 @@ public class UserTablistData extends TablistData {
 			BukkitLoader.getPacketHandler().send(player, packet);
 		}
 
-		if (getYellowNumberDisplayMode() != YellowNumberDisplayMode.NONE) {
+		if(getYellowNumberDisplayMode() != YellowNumberDisplayMode.NONE) {
 			int updateValue = (int) MathUtils.calculate(renderPlain(getYellowNumberText(), renderer));
 
 			Collection<Player> requiredUpdate = whoRequireUpdate(player, updateValue);
 
-			if (!requiredUpdate.isEmpty())
-				BukkitLoader.getPacketHandler().send(requiredUpdate, BukkitLoader.getNmsProvider()
-						.packetScoreboardScore(Action.CHANGE, "yn_ping_css", player.getName(), updateValue));
+			if(!requiredUpdate.isEmpty())
+				BukkitLoader.getPacketHandler().send(requiredUpdate, BukkitLoader.getNmsProvider().packetScoreboardScore(Action.CHANGE, "yn_ping_css", player.getName(), updateValue));
 		}
 
 		previous = getYellowNumberDisplayMode();
@@ -197,10 +186,10 @@ public class UserTablistData extends TablistData {
 	private Collection<Player> whoRequireUpdate(Player target, int value) {
 		Collection<Player> list = new ArrayList<>();
 
-		for (Player player : BukkitLoader.getOnlinePlayers()) {
+		for(Player player : BukkitLoader.getOnlinePlayers()) {
 			Integer previousValue = yellowNumber.get(player);
 
-			if (player.canSee(target) && (previousValue == null || previousValue != value)) {
+			if(player.canSee(target) && (previousValue == null || previousValue != value)) {
 
 				list.add(player);
 				yellowNumber.put(player, value);
@@ -210,25 +199,21 @@ public class UserTablistData extends TablistData {
 		return list;
 	}
 
-	private Object createObjectivePacket(int mode, String scoreboardName, String displayName,
-			boolean displayAsInteger) {
+	private Object createObjectivePacket(int mode, String scoreboardName, String displayName, boolean displayAsInteger) {
 
-		return TeamUtils.createObjectivePacket(mode, scoreboardName, Component.fromString(displayName),
-				Optional.empty(), displayAsInteger ? DisplayType.INTEGER : DisplayType.HEARTS);
+		return TeamUtils.createObjectivePacket(mode, scoreboardName, Component.fromString(displayName), Optional.empty(), displayAsInteger ? DisplayType.INTEGER : DisplayType.HEARTS);
 	}
 
 	public void removeTablist() {
-		BukkitLoader.getPacketHandler().send(yellowNumber.keySet(),
-				BukkitLoader.getNmsProvider().packetScoreboardScore(Action.REMOVE, "yn_ping_css", player.getName(), 0));
+		BukkitLoader.getPacketHandler().send(yellowNumber.keySet(), BukkitLoader.getNmsProvider().packetScoreboardScore(Action.REMOVE, "yn_ping_css", player.getName(), 0));
 
 		yellowNumber.clear();
 
-		BukkitLoader.getPacketHandler().send(player,
-				createObjectivePacket(1, "yn_ping_css", "", previous == YellowNumberDisplayMode.INTEGER));
+		BukkitLoader.getPacketHandler().send(player, createObjectivePacket(1, "yn_ping_css", "", previous == YellowNumberDisplayMode.INTEGER));
 
 		ClassicTabPlayer nametag = TabAPI.removeHolder(player.getUniqueId());
 
-		if (nametag != null)
+		if(nametag != null)
 			nametag.onDisconnect();
 	}
 

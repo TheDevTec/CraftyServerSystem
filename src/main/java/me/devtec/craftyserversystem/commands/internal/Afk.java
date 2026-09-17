@@ -15,15 +15,15 @@ public class Afk extends CssCommand {
 
 	@Override
 	public void register() {
-		if (isRegistered())
+		if(isRegistered())
 			return;
 
 		CommandStructure<CommandSender> cmd = CommandStructure.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
-			if (!(sender instanceof Player)) {
+			if(!(sender instanceof Player)) {
 				msgUsage(sender, "cmd");
 				return;
 			}
-			if (!AfkManager.getProvider().isAfk(((Player) sender).getUniqueId()))
+			if(!AfkManager.getProvider().isAfk(((Player) sender).getUniqueId()))
 				AfkManager.getProvider().startAfk(((Player) sender).getUniqueId(), true);
 			else
 				AfkManager.getProvider().stopAfk(((Player) sender).getUniqueId(), true);
@@ -31,14 +31,14 @@ public class Afk extends CssCommand {
 		// other
 		cmd.selector(Selector.PLAYER, (sender, structure, args) -> {
 			Player target = Bukkit.getPlayer(args[0]);
-			if (!AfkManager.getProvider().isAfk(target.getUniqueId()))
+			if(!AfkManager.getProvider().isAfk(target.getUniqueId()))
 				AfkManager.getProvider().startAfk(target.getUniqueId(), true);
 			else
 				AfkManager.getProvider().stopAfk(target.getUniqueId(), true);
 		}).permission(getPerm("other"));
 		// register
 		List<String> cmds = getCommands();
-		if (!cmds.isEmpty())
+		if(!cmds.isEmpty())
 			this.cmd = addBypassSettings(cmd).build().register(cmds.remove(0), cmds.toArray(new String[0]));
 	}
 }

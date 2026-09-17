@@ -26,62 +26,59 @@ public class Back extends CssCommand {
 
 	@Override
 	public void register() {
-		if (isRegistered())
+		if(isRegistered())
 			return;
 
 		listener = new Listener() {
 
 			@EventHandler(ignoreCancelled = true)
 			public void playerTeleport(PlayerTeleportEvent e) {
-				setPositionOf(e.getPlayer().getUniqueId(), TeleportDestination.TELEPORT,
-						Position.fromLocation(e.getFrom()));
+				setPositionOf(e.getPlayer().getUniqueId(), TeleportDestination.TELEPORT, Position.fromLocation(e.getFrom()));
 			}
 
 			@EventHandler
 			public void playerDeath(PlayerDeathEvent e) {
-				setPositionOf(e.getEntity().getUniqueId(), TeleportDestination.DEATH,
-						Position.fromLocation(e.getEntity().getLocation()));
+				setPositionOf(e.getEntity().getUniqueId(), TeleportDestination.DEATH, Position.fromLocation(e.getEntity().getLocation()));
 			}
 		};
 		Bukkit.getPluginManager().registerEvents(listener, Loader.getPlugin());
 
-		CommandStructure<CommandSender> cmd = CommandStructure
-				.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
-					if (!(sender instanceof Player)) {
-						msgUsage(sender, "cmd");
-						return;
-					}
-					back(TeleportDestination.LATEST, (Player) sender, true, sender);
-				}).permission(getPerm("cmd"));
+		CommandStructure<CommandSender> cmd = CommandStructure.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
+			if(!(sender instanceof Player)) {
+				msgUsage(sender, "cmd");
+				return;
+			}
+			back(TeleportDestination.LATEST, (Player) sender, true, sender);
+		}).permission(getPerm("cmd"));
 		// silent
 		cmd.argument("-s", (sender, structure, args) -> {
-			if (!(sender instanceof Player)) {
+			if(!(sender instanceof Player)) {
 				msgUsage(sender, "cmd");
 				return;
 			}
 			back(TeleportDestination.LATEST, (Player) sender, false, sender);
 		});
 		cmd.argument("death", (sender, structure, args) -> {
-			if (!(sender instanceof Player)) {
+			if(!(sender instanceof Player)) {
 				msgUsage(sender, "cmd");
 				return;
 			}
 			back(TeleportDestination.DEATH, (Player) sender, true, sender);
 		}).permission(getPerm("death")).argument("-s", (sender, structure, args) -> {
-			if (!(sender instanceof Player)) {
+			if(!(sender instanceof Player)) {
 				msgUsage(sender, "cmd");
 				return;
 			}
 			back(TeleportDestination.DEATH, (Player) sender, false, sender);
 		});
 		cmd.argument("teleport", (sender, structure, args) -> {
-			if (!(sender instanceof Player)) {
+			if(!(sender instanceof Player)) {
 				msgUsage(sender, "cmd");
 				return;
 			}
 			back(TeleportDestination.TELEPORT, (Player) sender, true, sender);
 		}).permission(getPerm("teleport")).argument("-s", (sender, structure, args) -> {
-			if (!(sender instanceof Player)) {
+			if(!(sender instanceof Player)) {
 				msgUsage(sender, "cmd");
 				return;
 			}
@@ -107,56 +104,50 @@ public class Back extends CssCommand {
 		});
 		// register
 		List<String> cmds = getCommands();
-		if (!cmds.isEmpty())
+		if(!cmds.isEmpty())
 			this.cmd = addBypassSettings(cmd).build().register(cmds.remove(0), cmds.toArray(new String[0]));
 	}
 
 	@Override
 	public void unregister() {
 		super.unregister();
-		if (listener != null) {
+		if(listener != null) {
 			HandlerList.unregisterAll(listener);
 			listener = null;
 		}
 	}
 
 	public void back(TeleportDestination location, Player target, boolean sendMessage, CommandSender sender) {
-		if (location == TeleportDestination.LATEST)
+		if(location == TeleportDestination.LATEST)
 			location = getLatestTeleportDestination(target.getUniqueId());
-		if (location == null) {
-			if (sendMessage)
-				if (!sender.equals(target)) {
-					TextRenderer placeholders = renderer().placeholder("sender", sender.getName())
-							.placeholder("target", target.getName())
-							.placeholder("destination", TeleportDestination.TELEPORT.displayName());
+		if(location == null) {
+			if(sendMessage)
+				if(!sender.equals(target)) {
+					TextRenderer placeholders = renderer().placeholder("sender", sender.getName()).placeholder("target", target.getName()).placeholder("destination",
+					        TeleportDestination.TELEPORT.displayName());
 					msg(sender, "failed.other", placeholders);
 				} else
-					msg(target, "failed.self", renderer().placeholder("target", target.getName())
-							.placeholder("destination", TeleportDestination.TELEPORT.displayName()));
+					msg(target, "failed.self", renderer().placeholder("target", target.getName()).placeholder("destination", TeleportDestination.TELEPORT.displayName()));
 			return;
 		}
 		Position previous = getPositionOf(target.getUniqueId(), location);
-		if (previous == null || previous.getWorld() == null) {
-			if (sendMessage)
-				if (!sender.equals(target)) {
-					TextRenderer placeholders = renderer().placeholder("sender", sender.getName())
-							.placeholder("target", target.getName()).placeholder("destination", location.displayName());
+		if(previous == null || previous.getWorld() == null) {
+			if(sendMessage)
+				if(!sender.equals(target)) {
+					TextRenderer placeholders = renderer().placeholder("sender", sender.getName()).placeholder("target", target.getName()).placeholder("destination", location.displayName());
 					msg(sender, "failed.other", placeholders);
 				} else
-					msg(target, "failed.self", renderer().placeholder("target", target.getName())
-							.placeholder("destination", location.displayName()));
+					msg(target, "failed.self", renderer().placeholder("target", target.getName()).placeholder("destination", location.displayName()));
 			return;
 		}
 		target.teleport(previous.toLocation());
-		if (sendMessage)
-			if (!sender.equals(target)) {
-				TextRenderer placeholders = renderer().placeholder("sender", sender.getName())
-						.placeholder("target", target.getName()).placeholder("destination", location.displayName());
+		if(sendMessage)
+			if(!sender.equals(target)) {
+				TextRenderer placeholders = renderer().placeholder("sender", sender.getName()).placeholder("target", target.getName()).placeholder("destination", location.displayName());
 				msg(target, "other.target", placeholders);
 				msg(sender, "other.sender", placeholders);
 			} else
-				msg(target, "self", renderer().placeholder("target", target.getName()).placeholder("destination",
-						location.displayName()));
+				msg(target, "self", renderer().placeholder("target", target.getName()).placeholder("destination", location.displayName()));
 	}
 
 	public static Position getPositionOf(UUID uniqueId, TeleportDestination location) {
@@ -177,8 +168,7 @@ public class Back extends CssCommand {
 		LATEST, TELEPORT, DEATH;
 
 		public String displayName() {
-			return me.devtec.craftyserversystem.api.API.get().getConfigManager().getTranslations()
-					.getString("back.destination." + name().toLowerCase(), name().toLowerCase());
+			return me.devtec.craftyserversystem.api.API.get().getConfigManager().getTranslations().getString("back.destination." + name().toLowerCase(), name().toLowerCase());
 		}
 	}
 

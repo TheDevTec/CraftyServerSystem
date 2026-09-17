@@ -23,7 +23,7 @@ public class TpaManager {
 
 	@Nonnull
 	public static TpaManager getProvider() {
-		if (instance == null)
+		if(instance == null)
 			instance = new TpaManager();
 		return instance;
 	}
@@ -35,28 +35,29 @@ public class TpaManager {
 	/**
 	 * Returns list of tpa/tpahere requests from or to this player
 	 *
-	 * @param owner Player's UUID
+	 * @param owner
+	 *            Player's UUID
 	 * @return List<TpaRequest>
 	 */
 	@Nullable
 	public List<TpaRequest> getRequests(UUID owner) {
 		List<TpaRequest> requests = cache.get(owner);
-		if (requests == null)
+		if(requests == null)
 			return null;
 		Iterator<TpaRequest> iterator = requests.iterator();
-		while (iterator.hasNext()) {
+		while(iterator.hasNext()) {
 			TpaRequest request = iterator.next();
-			if (!request.isValid()) {
+			if(!request.isValid()) {
 				iterator.remove();
 				List<TpaRequest> targetRequests = cache.get(request.getTarget());
-				if (targetRequests != null) {
+				if(targetRequests != null) {
 					targetRequests.remove(request);
-					if (targetRequests.isEmpty())
+					if(targetRequests.isEmpty())
 						cache.remove(request.getTarget());
 				}
 			}
 		}
-		if (requests.isEmpty()) {
+		if(requests.isEmpty()) {
 			cache.remove(owner);
 			return null;
 		}
@@ -69,24 +70,26 @@ public class TpaManager {
 	 * which are sent to this player. If @param fromOthers is set to false, returns
 	 * only list of requests which are sent from this player.
 	 * 
-	 * @param owner      Player's UUID
-	 * @param fromOthers Toggle status (true = Requests sent to this player, false =
-	 *                   Requests sent from this player)
+	 * @param owner
+	 *            Player's UUID
+	 * @param fromOthers
+	 *            Toggle status (true = Requests sent to this player, false =
+	 *            Requests sent from this player)
 	 * @return List<TpaRequest>
 	 */
 	@Nullable
 	public List<TpaRequest> getFilteredRequests(UUID owner, boolean fromOthers) {
 		List<TpaRequest> requests = getRequests(owner);
-		if (requests == null)
+		if(requests == null)
 			return null;
 		List<TpaRequest> filter = new ArrayList<>(requests);
 		Iterator<TpaRequest> iterator = requests.iterator();
-		while (iterator.hasNext()) {
+		while(iterator.hasNext()) {
 			TpaRequest request = iterator.next();
-			if (fromOthers ? request.getSender().equals(owner) : request.getTarget().equals(owner))
+			if(fromOthers ? request.getSender().equals(owner) : request.getTarget().equals(owner))
 				iterator.remove();
 		}
-		if (filter.isEmpty())
+		if(filter.isEmpty())
 			return null;
 		return filter;
 	}
@@ -95,12 +98,13 @@ public class TpaManager {
 	 * Get Player's toggled list of players from which player isn't accepting
 	 * teleport requests
 	 *
-	 * @param player Player's UUID
+	 * @param player
+	 *            Player's UUID
 	 * @return List<UUID>
 	 */
 	public List<UUID> getToggledPlayers(UUID owner) {
 		List<UUID> uuids = new ArrayList<>();
-		for (String uuidInString : API.getUser(owner).getStringList("css.tp-toggle.users"))
+		for(String uuidInString : API.getUser(owner).getStringList("css.tp-toggle.users"))
 			uuids.add(UUID.fromString(uuidInString));
 		return uuids;
 	}
@@ -108,8 +112,10 @@ public class TpaManager {
 	/**
 	 * Change player's global status of accepting teleport requests
 	 *
-	 * @param owner  Player's UUID
-	 * @param status Toggle status
+	 * @param owner
+	 *            Player's UUID
+	 * @param status
+	 *            Toggle status
 	 */
 	public void setGlobalToggle(UUID owner, boolean status) {
 		Config userData = API.getUser(owner);
@@ -119,7 +125,8 @@ public class TpaManager {
 	/**
 	 * Returns player's global teleport toggle
 	 *
-	 * @param owner Player's UUID
+	 * @param owner
+	 *            Player's UUID
 	 * @return boolean Toggle status
 	 */
 	public boolean hasGlobalToggle(UUID owner) {
@@ -131,8 +138,10 @@ public class TpaManager {
 	 * Add target's UUID to list of toggled players from which player (owner) isn't
 	 * accepting teleport requests
 	 *
-	 * @param owner  Player's UUID
-	 * @param target Player's UUID
+	 * @param owner
+	 *            Player's UUID
+	 * @param target
+	 *            Player's UUID
 	 */
 	public void addToToggledPlayers(UUID owner, UUID target) {
 		Config userData = API.getUser(owner);
@@ -145,8 +154,10 @@ public class TpaManager {
 	 * Remove target's UUID from list of toggled players from which player (owner)
 	 * isn't accepting teleport requests
 	 *
-	 * @param owner  Player's UUID
-	 * @param target Player's UUID
+	 * @param owner
+	 *            Player's UUID
+	 * @param target
+	 *            Player's UUID
 	 */
 	public void removeFromToggledPlayers(UUID owner, UUID target) {
 		Config userData = API.getUser(owner);
@@ -159,27 +170,28 @@ public class TpaManager {
 	 * Sends a TpaRequest to the sender and target (adds to their request lists,
 	 * this method doesn't send any messages)
 	 *
-	 * @param request TpaRequest
+	 * @param request
+	 *            TpaRequest
 	 * @return Result
 	 */
 	public Result sendRequest(TpaRequest request) {
-		if (!request.isValid())
+		if(!request.isValid())
 			return Result.INVALID;
 
 		Config targetData = API.getUser(request.getTarget());
-		if (targetData.getBoolean("css.tp-toggle.global") || getToggledPlayers(request.getTarget()).contains(request.getSender()))
+		if(targetData.getBoolean("css.tp-toggle.global") || getToggledPlayers(request.getTarget()).contains(request.getSender()))
 			return Result.DENIED_BY_TARGET;
 
 		List<TpaRequest> sender = getRequests(request.getSender());
-		if (sender == null)
+		if(sender == null)
 			cache.put(request.getSender(), sender = new ArrayList<>());
 		List<TpaRequest> target = getRequests(request.getTarget());
-		if (target == null)
+		if(target == null)
 			cache.put(request.getTarget(), target = new ArrayList<>());
 
-		if (sender.contains(request))
+		if(sender.contains(request))
 			return Result.FAILED_SENDER;
-		if (target.contains(request))
+		if(target.contains(request))
 			return Result.FAILED_TARGET;
 
 		sender.add(request);
@@ -191,14 +203,15 @@ public class TpaManager {
 	 * Removes the TpaRequest request from the sender and target (this method
 	 * doesn't send any messages)
 	 *
-	 * @param request TpaRequest
+	 * @param request
+	 *            TpaRequest
 	 */
 	public void removeRequest(TpaRequest request) {
 		List<TpaRequest> sender = cache.get(request.getSender());
-		if (sender != null)
+		if(sender != null)
 			sender.remove(request);
 		List<TpaRequest> target = getRequests(request.getTarget());
-		if (target != null)
+		if(target != null)
 			target.remove(request);
 	}
 }

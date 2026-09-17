@@ -15,85 +15,83 @@ public class PlayerWeather extends CssCommand {
 
 	@Override
 	public void register() {
-		if (isRegistered())
+		if(isRegistered())
 			return;
 
-		CommandStructure<CommandSender> cmd = CommandStructure
-				.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
-					msgUsage(sender, "usage");
-				}).permission(getPerm("cmd"));
+		CommandStructure<CommandSender> cmd = CommandStructure.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
+			msgUsage(sender, "usage");
+		}).permission(getPerm("cmd"));
 		cmd.argument("sun", (sender, structure, args) -> {
-			if (!(sender instanceof Player)) {
+			if(!(sender instanceof Player)) {
 				msgUsage(sender, "usage");
 				return;
 			}
 			setSun(sender, (Player) sender, true);
 		}).argument("-s", (sender, structure, args) -> {
-			if (!(sender instanceof Player)) {
+			if(!(sender instanceof Player)) {
 				msgUsage(sender, "usage");
 				return;
 			}
 			setSun(sender, (Player) sender, false);
 		}).parent().selector(Selector.ENTITY_SELECTOR, (sender, structure, args) -> {
-			for (Player player : selector(sender, args[1]))
+			for(Player player : selector(sender, args[1]))
 				setSun(sender, player, true);
 		}).permission(getPerm("other")).argument("-s", (sender, structure, args) -> {
-			for (Player player : selector(sender, args[1]))
+			for(Player player : selector(sender, args[1]))
 				setSun(sender, player, false);
 		});
 
 		cmd.argument("rain", (sender, structure, args) -> {
-			if (!(sender instanceof Player)) {
+			if(!(sender instanceof Player)) {
 				msgUsage(sender, "usage");
 				return;
 			}
 			setRain(sender, (Player) sender, true);
 		}).argument("-s", (sender, structure, args) -> {
-			if (!(sender instanceof Player)) {
+			if(!(sender instanceof Player)) {
 				msgUsage(sender, "usage");
 				return;
 			}
 			setRain(sender, (Player) sender, false);
 		}).parent().selector(Selector.ENTITY_SELECTOR, (sender, structure, args) -> {
-			for (Player player : selector(sender, args[1]))
+			for(Player player : selector(sender, args[1]))
 				setRain(sender, player, true);
 		}).permission(getPerm("other")).argument("-s", (sender, structure, args) -> {
-			for (Player player : selector(sender, args[1]))
+			for(Player player : selector(sender, args[1]))
 				setRain(sender, player, false);
 		});
 
 		cmd.argument("reset", (sender, structure, args) -> {
-			if (!(sender instanceof Player)) {
+			if(!(sender instanceof Player)) {
 				msgUsage(sender, "usage");
 				return;
 			}
 			reset(sender, (Player) sender, true);
 		}).argument("-s", (sender, structure, args) -> {
-			if (!(sender instanceof Player)) {
+			if(!(sender instanceof Player)) {
 				msgUsage(sender, "usage");
 				return;
 			}
 			reset(sender, (Player) sender, false);
 		}).parent().selector(Selector.ENTITY_SELECTOR, (sender, structure, args) -> {
-			for (Player player : selector(sender, args[1]))
+			for(Player player : selector(sender, args[1]))
 				reset(sender, player, true);
 		}).permission(getPerm("other")).argument("-s", (sender, structure, args) -> {
-			for (Player player : selector(sender, args[1]))
+			for(Player player : selector(sender, args[1]))
 				reset(sender, player, false);
 		});
 
 		// register
 		List<String> cmds = getCommands();
-		if (!cmds.isEmpty())
+		if(!cmds.isEmpty())
 			this.cmd = addBypassSettings(cmd).build().register(cmds.remove(0), cmds.toArray(new String[0]));
 	}
 
 	public void reset(CommandSender sender, Player target, boolean sendMessages) {
 		target.resetPlayerWeather();
-		if (sendMessages)
-			if (!sender.equals(target)) {
-				TextRenderer PLACEHOLDERS = renderer().placeholder("sender", sender.getName()).placeholder("target",
-						target.getName());
+		if(sendMessages)
+			if(!sender.equals(target)) {
+				TextRenderer PLACEHOLDERS = renderer().placeholder("sender", sender.getName()).placeholder("target", target.getName());
 				msgOut(sender, "playerweather-reset.other.sender", PLACEHOLDERS);
 				msgOut(target, "playerweather-reset.other.target", PLACEHOLDERS);
 			} else
@@ -102,10 +100,9 @@ public class PlayerWeather extends CssCommand {
 
 	public void setSun(CommandSender sender, Player target, boolean sendMessages) {
 		target.setPlayerWeather(WeatherType.CLEAR);
-		if (sendMessages)
-			if (!sender.equals(target)) {
-				TextRenderer PLACEHOLDERS = renderer().placeholder("sender", sender.getName()).placeholder("target",
-						target.getName());
+		if(sendMessages)
+			if(!sender.equals(target)) {
+				TextRenderer PLACEHOLDERS = renderer().placeholder("sender", sender.getName()).placeholder("target", target.getName());
 				msgOut(sender, "playersun.other.sender", PLACEHOLDERS);
 				msgOut(target, "playersun.other.target", PLACEHOLDERS);
 			} else
@@ -114,10 +111,9 @@ public class PlayerWeather extends CssCommand {
 
 	public void setRain(CommandSender sender, Player target, boolean sendMessages) {
 		target.setPlayerWeather(WeatherType.DOWNFALL);
-		if (sendMessages)
-			if (!sender.equals(target)) {
-				TextRenderer PLACEHOLDERS = renderer().placeholder("sender", sender.getName()).placeholder("target",
-						target.getName());
+		if(sendMessages)
+			if(!sender.equals(target)) {
+				TextRenderer PLACEHOLDERS = renderer().placeholder("sender", sender.getName()).placeholder("target", target.getName());
 				msgOut(sender, "playerrain.other.sender", PLACEHOLDERS);
 				msgOut(target, "playerrain.other.target", PLACEHOLDERS);
 			} else

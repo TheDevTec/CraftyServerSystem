@@ -31,10 +31,10 @@ public class PreCommandListener implements CssListener {
 
 	@EventHandler
 	public void onJoin(PlayerCommandPreprocessEvent e) {
-		if (e.getMessage().startsWith("/css-openinv ")) {
+		if(e.getMessage().startsWith("/css-openinv ")) {
 			e.setCancelled(true);
 			GUI gui = guis.get(e.getMessage().substring(13));
-			if (gui != null)
+			if(gui != null)
 				gui.open(e.getPlayer());
 		}
 	}

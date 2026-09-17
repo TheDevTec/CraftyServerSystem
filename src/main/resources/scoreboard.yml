@@ -123,6 +123,7 @@ lines:
 settings:
   # How red numbers in scoreboard should be displayed?
   # Options: VANILLA (0,1,2,3...) or specific number (like 0)
+  # Set to -1 if you want to disable this feature
   displayNumbers: 0
   
   # How frequently to refresh tablist data (tablist, nametag and yellow number)

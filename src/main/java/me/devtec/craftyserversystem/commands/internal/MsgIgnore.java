@@ -17,7 +17,7 @@ public class MsgIgnore extends CssCommand {
 
 	@Override
 	public void register() {
-		if (isRegistered())
+		if(isRegistered())
 			return;
 
 		CommandStructure<Player> cmd = CommandStructure.create(Player.class, P_DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
@@ -26,9 +26,9 @@ public class MsgIgnore extends CssCommand {
 		// offlinePlayer
 		cmd.argument(null, 1, (sender, structure, args) -> {
 			Query query = me.devtec.shared.API.offlineCache().lookupQuery(args[0]);
-			if (query != null) {
+			if(query != null) {
 				TextRenderer ex = renderer().placeholder("target", query.getName());
-				if (MsgManager.get().removeIgnore(sender.getName(), query.getName()))
+				if(MsgManager.get().removeIgnore(sender.getName(), query.getName()))
 					msg(sender, "accepting", ex);
 				else {
 					MsgManager.get().addIgnore(sender.getName(), query.getName());
@@ -40,15 +40,15 @@ public class MsgIgnore extends CssCommand {
 			Collection<? extends Player> onlinePlayers = BukkitLoader.getOnlinePlayers();
 			List<String> players = new ArrayList<>(onlinePlayers.size() + 1);
 			players.add("{offlinePlayer}");
-			for (Player player : onlinePlayers)
-				if (!player.equals(sender))
+			for(Player player : onlinePlayers)
+				if(!player.equals(sender))
 					players.add(player.getName());
 			players.addAll(MsgManager.get().getIgnoredPlayers(sender.getName()));
 			return players;
 		});
 		// register
 		List<String> cmds = getCommands();
-		if (!cmds.isEmpty())
+		if(!cmds.isEmpty())
 			this.cmd = addBypassSettings(cmd).build().register(cmds.remove(0), cmds.toArray(new String[0]));
 	}
 }

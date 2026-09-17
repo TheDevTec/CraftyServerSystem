@@ -27,22 +27,21 @@ public class CssUser extends CssCommand {
 
 	@Override
 	public void register() {
-		if (isRegistered())
+		if(isRegistered())
 			return;
 
-		CommandStructure<CommandSender> cmd = CommandStructure
-				.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
-					msgUsage(sender, "cmd");
-				}).permission(getPerm("cmd")).argument(null, 1, (sender, structure, args) -> {
-					msgUsage(sender, "cmd");
-				}, (sender, structure, args) -> {
-					List<String> tablist = new ArrayList<>();
-					tablist.add("{offlinePlayer}");
-					tablist.add("{uuid}");
-					for (Player player : BukkitLoader.getOnlinePlayers())
-						tablist.add(player.getName());
-					return tablist;
-				});
+		CommandStructure<CommandSender> cmd = CommandStructure.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
+			msgUsage(sender, "cmd");
+		}).permission(getPerm("cmd")).argument(null, 1, (sender, structure, args) -> {
+			msgUsage(sender, "cmd");
+		}, (sender, structure, args) -> {
+			List<String> tablist = new ArrayList<>();
+			tablist.add("{offlinePlayer}");
+			tablist.add("{uuid}");
+			for(Player player : BukkitLoader.getOnlinePlayers())
+				tablist.add(player.getName());
+			return tablist;
+		});
 		// get [path]
 		cmd.argument("get", (sender, structure, args) -> {
 			msgUsage(sender, "get");
@@ -52,38 +51,37 @@ public class CssUser extends CssCommand {
 			try {
 				UUID uuid = UUID.fromString(args[0]);
 				name = me.devtec.shared.API.offlineCache().lookupNameById(uuid);
-				if (name == null)
+				if(name == null)
 					name = "" + uuid;
 				user = me.devtec.shared.API.getUser(uuid);
-			} catch (Exception e) {
+			} catch(Exception e) {
 				name = args[0];
 				user = me.devtec.shared.API.getUser(args[0]);
 			}
-			if (!user.existsKey(args[2]))
+			if(!user.existsKey(args[2]))
 				msg(sender, "does-not-exist", renderer().placeholder("user", name).placeholder("path", args[2]));
 			else
-				msg(sender, "get", renderer().placeholder("user", name).placeholder("path", args[2])
-						.placeholder("value", "" + user.get(args[2])));
+				msg(sender, "get", renderer().placeholder("user", name).placeholder("path", args[2]).placeholder("value", "" + user.get(args[2])));
 		}, (sender, structure, args) -> {
 			Config user;
 			try {
-				if (args[0].indexOf('-') != -1)
+				if(args[0].indexOf('-') != -1)
 					user = me.devtec.shared.API.getUser(UUID.fromString(args[0]));
 				else
 					user = me.devtec.shared.API.getUser(args[0]);
-			} catch (Exception e) {
+			} catch(Exception e) {
 				user = me.devtec.shared.API.getUser(args[0]);
 			}
 			List<String> keys = new ArrayList<>();
-			if (args[2].isEmpty() || args[2].indexOf('.') == -1)
+			if(args[2].isEmpty() || args[2].indexOf('.') == -1)
 				keys.addAll(user.getKeys());
-			else if (args[2].endsWith(".")) {
+			else if(args[2].endsWith(".")) {
 				String path = args[2].substring(0, args[2].length() - 1);
-				for (String subkey : user.getKeys(path))
+				for(String subkey : user.getKeys(path))
 					keys.add(path + "." + subkey);
 			} else {
 				String path = args[2].substring(0, args[2].lastIndexOf('.'));
-				for (String subkey : user.getKeys(path))
+				for(String subkey : user.getKeys(path))
 					keys.add(path + "." + subkey);
 			}
 			return keys;
@@ -95,61 +93,59 @@ public class CssUser extends CssCommand {
 			try {
 				UUID uuid = UUID.fromString(args[0]);
 				name = me.devtec.shared.API.offlineCache().lookupNameById(uuid);
-				if (name == null)
+				if(name == null)
 					name = "" + uuid;
 				user = me.devtec.shared.API.getUser(uuid);
-			} catch (Exception e) {
+			} catch(Exception e) {
 				name = args[0];
 				user = me.devtec.shared.API.getUser(args[0]);
 			}
-			if (user.getKeys().isEmpty())
+			if(user.getKeys().isEmpty())
 				msg(sender, "keys.empty-primary", renderer().placeholder("user", name));
 			else
-				msg(sender, "keys.primary", renderer().placeholder("user", name).placeholder("keys",
-						StringUtils.join(user.getKeys(), ", ")));
+				msg(sender, "keys.primary", renderer().placeholder("user", name).placeholder("keys", StringUtils.join(user.getKeys(), ", ")));
 		}).argument(null, 1, (sender, structure, args) -> {
 			Config user;
 			String name = null;
 			try {
 				UUID uuid = UUID.fromString(args[0]);
 				name = me.devtec.shared.API.offlineCache().lookupNameById(uuid);
-				if (name == null)
+				if(name == null)
 					name = "" + uuid;
 				user = me.devtec.shared.API.getUser(uuid);
-			} catch (Exception e) {
+			} catch(Exception e) {
 				name = args[0];
 				user = me.devtec.shared.API.getUser(args[0]);
 			}
-			if (!user.exists(args[2]))
+			if(!user.exists(args[2]))
 				msg(sender, "does-not-exist", renderer().placeholder("user", name).placeholder("path", args[2]));
 			else {
 				Set<String> keys = user.getKeys(args[2]);
-				if (keys.isEmpty())
+				if(keys.isEmpty())
 					msg(sender, "keys.empty", renderer().placeholder("user", name).placeholder("path", args[2]));
 				else
-					msg(sender, "keys.sub", renderer().placeholder("user", name).placeholder("path", args[2])
-							.placeholder("keys", StringUtils.join(keys, ", ")));
+					msg(sender, "keys.sub", renderer().placeholder("user", name).placeholder("path", args[2]).placeholder("keys", StringUtils.join(keys, ", ")));
 			}
 		}, (sender, structure, args) -> {
 			Config user;
 			try {
-				if (args[0].indexOf('-') != -1)
+				if(args[0].indexOf('-') != -1)
 					user = me.devtec.shared.API.getUser(UUID.fromString(args[0]));
 				else
 					user = me.devtec.shared.API.getUser(args[0]);
-			} catch (Exception e) {
+			} catch(Exception e) {
 				user = me.devtec.shared.API.getUser(args[0]);
 			}
 			List<String> keys = new ArrayList<>();
-			if (args[2].isEmpty() || args[2].indexOf('.') == -1)
+			if(args[2].isEmpty() || args[2].indexOf('.') == -1)
 				keys.addAll(user.getKeys());
-			else if (args[2].endsWith(".")) {
+			else if(args[2].endsWith(".")) {
 				String path = args[2].substring(0, args[2].length() - 1);
-				for (String subkey : user.getKeys(path))
+				for(String subkey : user.getKeys(path))
 					keys.add(path + "." + subkey);
 			} else {
 				String path = args[2].substring(0, args[2].lastIndexOf('.'));
-				for (String subkey : user.getKeys(path))
+				for(String subkey : user.getKeys(path))
 					keys.add(path + "." + subkey);
 			}
 			return keys;
@@ -162,23 +158,23 @@ public class CssUser extends CssCommand {
 		}, (sender, structure, args) -> {
 			Config user;
 			try {
-				if (args[0].indexOf('-') != -1)
+				if(args[0].indexOf('-') != -1)
 					user = me.devtec.shared.API.getUser(UUID.fromString(args[0]));
 				else
 					user = me.devtec.shared.API.getUser(args[0]);
-			} catch (Exception e) {
+			} catch(Exception e) {
 				user = me.devtec.shared.API.getUser(args[0]);
 			}
 			List<String> keys = new ArrayList<>();
-			if (args[2].isEmpty() || args[2].indexOf('.') == -1)
+			if(args[2].isEmpty() || args[2].indexOf('.') == -1)
 				keys.addAll(user.getKeys());
-			else if (args[2].endsWith(".")) {
+			else if(args[2].endsWith(".")) {
 				String path = args[2].substring(0, args[2].length() - 1);
-				for (String subkey : user.getKeys(path))
+				for(String subkey : user.getKeys(path))
 					keys.add(path + "." + subkey);
 			} else {
 				String path = args[2].substring(0, args[2].lastIndexOf('.'));
-				for (String subkey : user.getKeys(path))
+				for(String subkey : user.getKeys(path))
 					keys.add(path + "." + subkey);
 			}
 			return keys;
@@ -189,43 +185,42 @@ public class CssUser extends CssCommand {
 			try {
 				UUID uuid = UUID.fromString(args[0]);
 				name = me.devtec.shared.API.offlineCache().lookupNameById(uuid);
-				if (name == null)
+				if(name == null)
 					name = "" + uuid;
 				user = me.devtec.shared.API.getUser(uuid);
-			} catch (Exception e) {
+			} catch(Exception e) {
 				name = args[0];
 				user = me.devtec.shared.API.getUser(args[0]);
 			}
 			Object setValue = user.get(args[2]);
 			Number finalValue = number;
-			if (setValue == null)
+			if(setValue == null)
 				user.set(args[2], number);
-			else if (setValue.getClass() == int.class || setValue.getClass() == Integer.class)
+			else if(setValue.getClass() == int.class || setValue.getClass() == Integer.class)
 				user.set(args[2], finalValue = ((Integer) setValue).intValue() + number.intValue());
-			else if (setValue.getClass() == double.class || setValue.getClass() == Double.class)
+			else if(setValue.getClass() == double.class || setValue.getClass() == Double.class)
 				user.set(args[2], finalValue = ((Double) setValue).doubleValue() + number.doubleValue());
-			else if (setValue.getClass() == float.class || setValue.getClass() == Float.class)
+			else if(setValue.getClass() == float.class || setValue.getClass() == Float.class)
 				user.set(args[2], finalValue = ((Float) setValue).floatValue() + number.floatValue());
-			else if (setValue.getClass() == long.class || setValue.getClass() == Long.class)
+			else if(setValue.getClass() == long.class || setValue.getClass() == Long.class)
 				user.set(args[2], finalValue = ((Long) setValue).longValue() + number.longValue());
-			else if (setValue.getClass() == byte.class || setValue.getClass() == Byte.class)
+			else if(setValue.getClass() == byte.class || setValue.getClass() == Byte.class)
 				user.set(args[2], finalValue = ((Byte) setValue).byteValue() + number.byteValue());
-			else if (setValue.getClass() == short.class || setValue.getClass() == Short.class)
+			else if(setValue.getClass() == short.class || setValue.getClass() == Short.class)
 				user.set(args[2], finalValue = ((Short) setValue).shortValue() + number.shortValue());
-			else if (setValue.getClass() == BigDecimal.class) {
+			else if(setValue.getClass() == BigDecimal.class) {
 				BigDecimal decimal = (BigDecimal) setValue;
 				decimal.add(BigDecimal.valueOf(number.doubleValue()));
 				user.set(args[2], decimal);
 				finalValue = decimal.doubleValue();
-			} else if (setValue.getClass() == BigInteger.class) {
+			} else if(setValue.getClass() == BigInteger.class) {
 				BigInteger decimal = (BigInteger) setValue;
 				decimal.add(BigInteger.valueOf(number.longValue()));
 				user.set(args[2], decimal);
 				finalValue = decimal.longValue();
 			} else
 				user.set(args[2], number); // uknown number format - So we override value
-			msg(sender, "addNumber", renderer().placeholder("user", name).placeholder("path", args[2])
-					.placeholder("value", finalValue + ""));
+			msg(sender, "addNumber", renderer().placeholder("user", name).placeholder("path", args[2]).placeholder("value", finalValue + ""));
 		});
 		// addToList [path] [value]
 		cmd.argument("addToList", (sender, structure, args) -> {
@@ -235,23 +230,23 @@ public class CssUser extends CssCommand {
 		}, (sender, structure, args) -> {
 			Config user;
 			try {
-				if (args[0].indexOf('-') != -1)
+				if(args[0].indexOf('-') != -1)
 					user = me.devtec.shared.API.getUser(UUID.fromString(args[0]));
 				else
 					user = me.devtec.shared.API.getUser(args[0]);
-			} catch (Exception e) {
+			} catch(Exception e) {
 				user = me.devtec.shared.API.getUser(args[0]);
 			}
 			List<String> keys = new ArrayList<>();
-			if (args[2].isEmpty() || args[2].indexOf('.') == -1)
+			if(args[2].isEmpty() || args[2].indexOf('.') == -1)
 				keys.addAll(user.getKeys());
-			else if (args[2].endsWith(".")) {
+			else if(args[2].endsWith(".")) {
 				String path = args[2].substring(0, args[2].length() - 1);
-				for (String subkey : user.getKeys(path))
+				for(String subkey : user.getKeys(path))
 					keys.add(path + "." + subkey);
 			} else {
 				String path = args[2].substring(0, args[2].lastIndexOf('.'));
-				for (String subkey : user.getKeys(path))
+				for(String subkey : user.getKeys(path))
 					keys.add(path + "." + subkey);
 			}
 			return keys;
@@ -262,28 +257,25 @@ public class CssUser extends CssCommand {
 			try {
 				UUID uuid = UUID.fromString(args[0]);
 				name = me.devtec.shared.API.offlineCache().lookupNameById(uuid);
-				if (name == null)
+				if(name == null)
 					name = "" + uuid;
 				user = me.devtec.shared.API.getUser(uuid);
-			} catch (Exception e) {
+			} catch(Exception e) {
 				name = args[0];
 				user = me.devtec.shared.API.getUser(args[0]);
 			}
 			Collection<Object> list = user.getList(args[2]);
-			if (list == null)
+			if(list == null)
 				user.set(args[2], list = new ArrayList<>());
 			boolean added = list.add(value);
-			if (added) {
+			if(added) {
 				user.set(args[2], list);
-				msg(sender, "addToList.success", renderer().placeholder("user", name).placeholder("path", args[2])
-						.placeholder("value", value + ""));
+				msg(sender, "addToList.success", renderer().placeholder("user", name).placeholder("path", args[2]).placeholder("value", value + ""));
 			} else
-				msg(sender, "addToList.failed", renderer().placeholder("user", name).placeholder("path", args[2])
-						.placeholder("value", value + ""));
+				msg(sender, "addToList.failed", renderer().placeholder("user", name).placeholder("path", args[2]).placeholder("value", value + ""));
 		}, (sender, structure, args) -> args[args.length - 1].isEmpty()
-				? Arrays.asList("\"string\"", "number", "true", "false", "null", "[0,1,2]", "{\"key\":\"value\"}")
-				: Arrays.asList(args[args.length - 1], "\"string\"", "number", "true", "false", "null", "[0,1,2]",
-						"{\"key\":\"value\"}"));
+		        ? Arrays.asList("\"string\"", "number", "true", "false", "null", "[0,1,2]", "{\"key\":\"value\"}")
+		        : Arrays.asList(args[args.length - 1], "\"string\"", "number", "true", "false", "null", "[0,1,2]", "{\"key\":\"value\"}"));
 		// showList {page}
 		cmd.argument("showList", (sender, structure, args) -> {
 			msgUsage(sender, "showList");
@@ -293,10 +285,10 @@ public class CssUser extends CssCommand {
 			try {
 				UUID uuid = UUID.fromString(args[0]);
 				name = me.devtec.shared.API.offlineCache().lookupNameById(uuid);
-				if (name == null)
+				if(name == null)
 					name = "" + uuid;
 				user = me.devtec.shared.API.getUser(uuid);
-			} catch (Exception e) {
+			} catch(Exception e) {
 				name = args[0];
 				user = me.devtec.shared.API.getUser(args[0]);
 			}
@@ -305,23 +297,23 @@ public class CssUser extends CssCommand {
 		}, (sender, structure, args) -> {
 			Config user;
 			try {
-				if (args[0].indexOf('-') != -1)
+				if(args[0].indexOf('-') != -1)
 					user = me.devtec.shared.API.getUser(UUID.fromString(args[0]));
 				else
 					user = me.devtec.shared.API.getUser(args[0]);
-			} catch (Exception e) {
+			} catch(Exception e) {
 				user = me.devtec.shared.API.getUser(args[0]);
 			}
 			List<String> keys = new ArrayList<>();
-			if (args[2].isEmpty() || args[2].indexOf('.') == -1)
+			if(args[2].isEmpty() || args[2].indexOf('.') == -1)
 				keys.addAll(user.getKeys());
-			else if (args[2].endsWith(".")) {
+			else if(args[2].endsWith(".")) {
 				String path = args[2].substring(0, args[2].length() - 1);
-				for (String subkey : user.getKeys(path))
+				for(String subkey : user.getKeys(path))
 					keys.add(path + "." + subkey);
 			} else {
 				String path = args[2].substring(0, args[2].lastIndexOf('.'));
-				for (String subkey : user.getKeys(path))
+				for(String subkey : user.getKeys(path))
 					keys.add(path + "." + subkey);
 			}
 			return keys;
@@ -331,16 +323,15 @@ public class CssUser extends CssCommand {
 			try {
 				UUID uuid = UUID.fromString(args[0]);
 				name = me.devtec.shared.API.offlineCache().lookupNameById(uuid);
-				if (name == null)
+				if(name == null)
 					name = "" + uuid;
 				user = me.devtec.shared.API.getUser(uuid);
-			} catch (Exception e) {
+			} catch(Exception e) {
 				name = args[0];
 				user = me.devtec.shared.API.getUser(args[0]);
 			}
 			Collection<Object> list = user.getList(args[2]);
-			showList(sender, renderer().placeholder("user", name).placeholder("path", args[2]), list,
-					ParseUtils.getInt(args[3]));
+			showList(sender, renderer().placeholder("user", name).placeholder("path", args[2]), list, ParseUtils.getInt(args[3]));
 		});
 		// removeFromList [path] [value/-pos:{listPos}]
 		cmd.argument("removeFromList", (sender, structure, args) -> {
@@ -351,10 +342,10 @@ public class CssUser extends CssCommand {
 			try {
 				UUID uuid = UUID.fromString(args[0]);
 				name = me.devtec.shared.API.offlineCache().lookupNameById(uuid);
-				if (name == null)
+				if(name == null)
 					name = "" + uuid;
 				user = me.devtec.shared.API.getUser(uuid);
-			} catch (Exception e) {
+			} catch(Exception e) {
 				name = args[0];
 				user = me.devtec.shared.API.getUser(args[0]);
 			}
@@ -363,23 +354,23 @@ public class CssUser extends CssCommand {
 		}, (sender, structure, args) -> {
 			Config user;
 			try {
-				if (args[0].indexOf('-') != -1)
+				if(args[0].indexOf('-') != -1)
 					user = me.devtec.shared.API.getUser(UUID.fromString(args[0]));
 				else
 					user = me.devtec.shared.API.getUser(args[0]);
-			} catch (Exception e) {
+			} catch(Exception e) {
 				user = me.devtec.shared.API.getUser(args[0]);
 			}
 			List<String> keys = new ArrayList<>();
-			if (args[2].isEmpty() || args[2].indexOf('.') == -1)
+			if(args[2].isEmpty() || args[2].indexOf('.') == -1)
 				keys.addAll(user.getKeys());
-			else if (args[2].endsWith(".")) {
+			else if(args[2].endsWith(".")) {
 				String path = args[2].substring(0, args[2].length() - 1);
-				for (String subkey : user.getKeys(path))
+				for(String subkey : user.getKeys(path))
 					keys.add(path + "." + subkey);
 			} else {
 				String path = args[2].substring(0, args[2].lastIndexOf('.'));
-				for (String subkey : user.getKeys(path))
+				for(String subkey : user.getKeys(path))
 					keys.add(path + "." + subkey);
 			}
 			return keys;
@@ -390,31 +381,30 @@ public class CssUser extends CssCommand {
 			try {
 				UUID uuid = UUID.fromString(args[0]);
 				name = me.devtec.shared.API.offlineCache().lookupNameById(uuid);
-				if (name == null)
+				if(name == null)
 					name = "" + uuid;
 				user = me.devtec.shared.API.getUser(uuid);
-			} catch (Exception e) {
+			} catch(Exception e) {
 				name = args[0];
 				user = me.devtec.shared.API.getUser(args[0]);
 			}
 			Collection<Object> list = user.getList(args[2]);
-			if (list == null) {
+			if(list == null) {
 				msg(sender, "does-not-exist", renderer().placeholder("user", name).placeholder("path", args[2]));
 				return;
 			}
 			boolean modified = false;
-			if (list != null)
-				if (value != null && value.toString().startsWith("-pos:")) {
-					int pos = Math.max(0, Math.min(ParseUtils.getInt(value.toString(), 5, value.toString().length()),
-							list.size() - 1));
-					if (list instanceof List) {
+			if(list != null)
+				if(value != null && value.toString().startsWith("-pos:")) {
+					int pos = Math.max(0, Math.min(ParseUtils.getInt(value.toString(), 5, value.toString().length()), list.size() - 1));
+					if(list instanceof List) {
 						((List<Object>) list).remove(pos);
 						modified = true;
 					} else {
 						Iterator<Object> itr = list.iterator();
-						while (itr.hasNext() && pos != -1) {
+						while(itr.hasNext() && pos != -1) {
 							itr.next();
-							if (pos-- == 0) {
+							if(pos-- == 0) {
 								itr.remove();
 								modified = true;
 								break;
@@ -423,17 +413,14 @@ public class CssUser extends CssCommand {
 					}
 				} else
 					modified = list.remove(value);
-			if (modified) {
+			if(modified) {
 				user.set(args[2], list);
-				msg(sender, "removeFromList.success", renderer().placeholder("user", name).placeholder("path", args[2])
-						.placeholder("value", value + ""));
+				msg(sender, "removeFromList.success", renderer().placeholder("user", name).placeholder("path", args[2]).placeholder("value", value + ""));
 			} else
-				msg(sender, "removeFromList.failed", renderer().placeholder("user", name).placeholder("path", args[2])
-						.placeholder("value", value + ""));
+				msg(sender, "removeFromList.failed", renderer().placeholder("user", name).placeholder("path", args[2]).placeholder("value", value + ""));
 		}, (sender, structure, args) -> args[args.length - 1].isEmpty()
-				? Arrays.asList("\"string\"", "number", "true", "false", "null", "[0,1,2]", "{\"key\":\"value\"}")
-				: Arrays.asList(args[args.length - 1], "\"string\"", "number", "true", "false", "null", "[0,1,2]",
-						"{\"key\":\"value\"}"));
+		        ? Arrays.asList("\"string\"", "number", "true", "false", "null", "[0,1,2]", "{\"key\":\"value\"}")
+		        : Arrays.asList(args[args.length - 1], "\"string\"", "number", "true", "false", "null", "[0,1,2]", "{\"key\":\"value\"}"));
 		// Set [path] [value]
 		cmd.argument("set", (sender, structure, args) -> {
 			msgUsage(sender, "set");
@@ -442,23 +429,23 @@ public class CssUser extends CssCommand {
 		}, (sender, structure, args) -> {
 			Config user;
 			try {
-				if (args[0].indexOf('-') != -1)
+				if(args[0].indexOf('-') != -1)
 					user = me.devtec.shared.API.getUser(UUID.fromString(args[0]));
 				else
 					user = me.devtec.shared.API.getUser(args[0]);
-			} catch (Exception e) {
+			} catch(Exception e) {
 				user = me.devtec.shared.API.getUser(args[0]);
 			}
 			List<String> keys = new ArrayList<>();
-			if (args[2].isEmpty() || args[2].indexOf('.') == -1)
+			if(args[2].isEmpty() || args[2].indexOf('.') == -1)
 				keys.addAll(user.getKeys());
-			else if (args[2].endsWith(".")) {
+			else if(args[2].endsWith(".")) {
 				String path = args[2].substring(0, args[2].length() - 1);
-				for (String subkey : user.getKeys(path))
+				for(String subkey : user.getKeys(path))
 					keys.add(path + "." + subkey);
 			} else {
 				String path = args[2].substring(0, args[2].lastIndexOf('.'));
-				for (String subkey : user.getKeys(path))
+				for(String subkey : user.getKeys(path))
 					keys.add(path + "." + subkey);
 			}
 			return keys;
@@ -469,71 +456,60 @@ public class CssUser extends CssCommand {
 			try {
 				UUID uuid = UUID.fromString(args[0]);
 				name = me.devtec.shared.API.offlineCache().lookupNameById(uuid);
-				if (name == null)
+				if(name == null)
 					name = "" + uuid;
 				user = me.devtec.shared.API.getUser(uuid);
-			} catch (Exception e) {
+			} catch(Exception e) {
 				name = args[0];
 				user = me.devtec.shared.API.getUser(args[0]);
 			}
 			user.set(args[2], value);
-			msg(sender, "set",
-					renderer().placeholder("user", name).placeholder("path", args[2]).placeholder("value", value + ""));
+			msg(sender, "set", renderer().placeholder("user", name).placeholder("path", args[2]).placeholder("value", value + ""));
 		}, (sender, structure, args) -> args[args.length - 1].isEmpty()
-				? Arrays.asList("\"string\"", "number", "true", "false", "null", "[0,1,2]", "{\"key\":\"value\"}")
-				: Arrays.asList(args[args.length - 1], "\"string\"", "number", "true", "false", "null", "[0,1,2]",
-						"{\"key\":\"value\"}"));
+		        ? Arrays.asList("\"string\"", "number", "true", "false", "null", "[0,1,2]", "{\"key\":\"value\"}")
+		        : Arrays.asList(args[args.length - 1], "\"string\"", "number", "true", "false", "null", "[0,1,2]", "{\"key\":\"value\"}"));
 
 		// register
 		List<String> cmds = getCommands();
-		if (!cmds.isEmpty())
+		if(!cmds.isEmpty())
 			this.cmd = addBypassSettings(cmd).build().register(cmds.remove(0), cmds.toArray(new String[0]));
 	}
 
 	private void showList(CommandSender sender, TextRenderer executor, Collection<Object> list, int page) {
-		if (list == null) {
+		if(list == null) {
 			msg(sender, "does-not-exist", executor);
 			return;
 		}
-		if (list.isEmpty()) {
+		if(list.isEmpty()) {
 			msg(sender, "showList.empty", executor);
 			return;
 		}
 		int totalPages = list.size() / 10 + (list.size() % 10 == 0 ? 0 : 1) - 1;
-		if (page >= totalPages)
+		if(page >= totalPages)
 			page = totalPages;
-		if (page < 0)
+		if(page < 0)
 			page = 0;
-		msg(sender, "showList.header",
-				executor.placeholder("nextPage", page + 1 <= totalPages ? "" + (page + 1) : page + "")
-						.placeholder("previousPage", page != 0 ? "" + (page - 1) : "" + page)
-						.placeholder("size", list.size() + "").placeholder("page", page + 1)
-						.placeholder("totalPages", totalPages + 1));
-		if (list instanceof List) {
+		msg(sender, "showList.header", executor.placeholder("nextPage", page + 1 <= totalPages ? "" + (page + 1) : page + "").placeholder("previousPage", page != 0 ? "" + (page - 1) : "" + page)
+		        .placeholder("size", list.size() + "").placeholder("page", page + 1).placeholder("totalPages", totalPages + 1));
+		if(list instanceof List) {
 			List<Object> listObj = (List<Object>) list;
 			int multiplier = (page + 1) * 10;
-			for (int i = multiplier - 10; i < multiplier && list.size() > i; ++i)
-				msg(sender, "showList.entry",
-						renderer().placeholder("user", executor.placeholderValue("user"))
-								.placeholder("path", executor.placeholderValue("path"))
-								.placeholder("value", listObj.get(i) + "").placeholder("position", i + 1)
-								.placeholder("listPosition", i + ""));
+			for(int i = multiplier - 10; i < multiplier && list.size() > i; ++i)
+				msg(sender, "showList.entry", renderer().placeholder("user", executor.placeholderValue("user")).placeholder("path", executor.placeholderValue("path"))
+				        .placeholder("value", listObj.get(i) + "").placeholder("position", i + 1).placeholder("listPosition", i + ""));
 		} else {
 			Iterator<Object> itr = list.iterator();
 			int pos = (page + 1) * 10 - 10;
-			while (itr.hasNext() && pos != -1) {
+			while(itr.hasNext() && pos != -1) {
 				itr.next();
-				if (pos-- == 0)
+				if(pos-- == 0)
 					break;
 			}
 			int multiplier = (page + 1) * 10;
-			while (itr.hasNext() && pos != 10) {
+			while(itr.hasNext() && pos != 10) {
 				Object obj = itr.next();
-				msg(sender, "showList.entry",
-						renderer().placeholder("user", executor.placeholderValue("user"))
-								.placeholder("path", executor.placeholderValue("path")).placeholder("value", obj + "")
-								.placeholder("position", (multiplier - 10 + pos + 1) * page + "")
-								.placeholder("listPosition", multiplier - 10 + pos + ""));
+				msg(sender, "showList.entry", renderer().placeholder("user", executor.placeholderValue("user")).placeholder("path", executor.placeholderValue("path")).placeholder("value", obj + "")
+				        .placeholder("position", (multiplier - 10 + pos + 1) * page + "").placeholder("listPosition", multiplier - 10 + pos + ""));
 			}
 		}
 		msg(sender, "showList.footer", executor);

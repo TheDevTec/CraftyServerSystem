@@ -63,22 +63,22 @@ public class WarpInfo {
 	}
 
 	public WarpResult warp(Player player, boolean instant) {
-		if (instant || cost <= 0 && permission == null) {
-			if (Bukkit.isPrimaryThread())
+		if(instant || cost <= 0 && permission == null) {
+			if(Bukkit.isPrimaryThread())
 				player.teleport(position.toLocation());
 			else
 				BukkitLoader.getNmsProvider().postToMainThread(() -> player.teleport(position.toLocation()));
 			return WarpResult.SUCCESS;
 		}
-		if (permission != null)
-			if (!player.hasPermission(permission))
+		if(permission != null)
+			if(!player.hasPermission(permission))
 				return WarpResult.FAILED_NO_PERMISSION;
-		if (cost > 0)
-			if (!API.get().getEconomyHook().has(player.getName(), player.getWorld().getName(), cost))
+		if(cost > 0)
+			if(!API.get().getEconomyHook().has(player.getName(), player.getWorld().getName(), cost))
 				return WarpResult.FAILED_NO_MONEY;
 			else
 				API.get().getEconomyHook().withdraw(player.getName(), player.getWorld().getName(), cost);
-		if (Bukkit.isPrimaryThread())
+		if(Bukkit.isPrimaryThread())
 			player.teleport(position.toLocation());
 		else
 			BukkitLoader.getNmsProvider().postToMainThread(() -> player.teleport(position.toLocation()));
@@ -86,6 +86,6 @@ public class WarpInfo {
 	}
 
 	public boolean isValid() {
-		return position!=null && position.getWorld() != null;
+		return position != null && position.getWorld() != null;
 	}
 }

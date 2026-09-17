@@ -15,14 +15,14 @@ public class LuckPermsPermissionHook implements PermissionHook {
 
 	@Override
 	public String getGroup(CommandSender sender) {
-		if (sender instanceof Player)
+		if(sender instanceof Player)
 			return getGroup(sender.getName());
 		return "default"; // Console or command block
 	}
 
 	@Override
 	public String getGroup(String name) {
-		if (luckPerms == null)
+		if(luckPerms == null)
 			return "default";
 		String group = luckPerms.getUserManager().getUser(name).getPrimaryGroup();
 		return group == null ? "default" : group;

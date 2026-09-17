@@ -18,8 +18,7 @@ public class Entry {
 	private final long startDate;
 	private boolean cancelled;
 
-	public Entry(int id, BanType type, String user, String reason, String admin, long duration, long startDate,
-			boolean cancelled) {
+	public Entry(int id, BanType type, String user, String reason, String admin, long duration, long startDate, boolean cancelled) {
 		this.id = id;
 		this.type = type;
 		this.user = user;
@@ -77,17 +76,14 @@ public class Entry {
 	}
 
 	public static Entry fromQuery(SqlRow result) {
-		return new Entry(ParseUtils.getInt(String.valueOf(result.get("id"))),
-				BanType.valueOf(result.getString("type").toUpperCase()), result.getString("user"),
-				result.getString("reason"), result.getString("admin"),
-				ParseUtils.getLong(String.valueOf(result.get("duration"))),
-				ParseUtils.getLong(String.valueOf(result.get("startDate"))),
-				ParseUtils.getInt(String.valueOf(result.get("cancelled"))) == 1);
+		return new Entry(ParseUtils.getInt(String.valueOf(result.get("id"))), BanType.valueOf(result.getString("type").toUpperCase()), result.getString("user"), result.getString("reason"),
+		        result.getString("admin"), ParseUtils.getLong(String.valueOf(result.get("duration"))), ParseUtils.getLong(String.valueOf(result.get("startDate"))),
+		        ParseUtils.getInt(String.valueOf(result.get("cancelled"))) == 1);
 	}
 
 	@Override
 	public boolean equals(Object obj) {
-		if (obj instanceof Entry) {
+		if(obj instanceof Entry) {
 			Entry second = (Entry) obj;
 			return second.getId() == getId() && second.getType().equals(getType());
 		}

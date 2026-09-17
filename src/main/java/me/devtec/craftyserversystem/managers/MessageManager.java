@@ -80,8 +80,7 @@ public class MessageManager {
 			this.receivers = receivers;
 		}
 
-		public Action(Config config, String path, TextRenderer renderer, CommandSender[] receivers,
-				CompletableFuture<String> result, Player owner) {
+		public Action(Config config, String path, TextRenderer renderer, CommandSender[] receivers, CompletableFuture<String> result, Player owner) {
 			this.config = config;
 			this.path = path;
 			this.renderer = prepareRenderer(renderer);
@@ -91,43 +90,39 @@ public class MessageManager {
 		}
 
 		public void process() {
-			if (path == null && messages != null) {
+			if(path == null && messages != null) {
 				List<Object> components = new ArrayList<>();
 
-				for (String value : messages)
-					if (value.startsWith("[") && value.endsWith("]") || value.startsWith("{") && value.endsWith("}")) {
+				for(String value : messages)
+					if(value.startsWith("[") && value.endsWith("]") || value.startsWith("{") && value.endsWith("}")) {
 
 						Object json = Json.reader().simpleRead(value);
 						Component component = ComponentAPI.fromJson(renderJson(json, renderer));
 
 						components.add(BukkitLoader.getNmsProvider().toIChatBaseComponent(component));
 					} else
-						components.add(BukkitLoader.getNmsProvider()
-								.toIChatBaseComponent(ComponentAPI.fromString(render(value, renderer))));
+						components.add(BukkitLoader.getNmsProvider().toIChatBaseComponent(ComponentAPI.fromString(render(value, renderer))));
 
-				if (components.isEmpty())
+				if(components.isEmpty())
 					return;
 
-				for (Object component : components) {
+				for(Object component : components) {
 					Object packet = BukkitLoader.getNmsProvider().packetChat(ChatType.SYSTEM, component);
 
-					for (CommandSender receiver : receivers)
-						if (receiver instanceof Player)
+					for(CommandSender receiver : receivers)
+						if(receiver instanceof Player)
 							BukkitLoader.getPacketHandler().send((Player) receiver, packet);
-						else if (receiver instanceof BlockCommandSender)
-							BukkitLoader.getNmsProvider().postToMainThread(() -> receiver.sendMessage(
-									BukkitLoader.getNmsProvider().fromIChatBaseComponent(component).toString()));
+						else if(receiver instanceof BlockCommandSender)
+							BukkitLoader.getNmsProvider().postToMainThread(() -> receiver.sendMessage(BukkitLoader.getNmsProvider().fromIChatBaseComponent(component).toString()));
 						else
-							receiver.sendMessage(
-									BukkitLoader.getNmsProvider().fromIChatBaseComponent(component).toString());
+							receiver.sendMessage(BukkitLoader.getNmsProvider().fromIChatBaseComponent(component).toString());
 				}
 				return;
 			}
 
-			if (result != null) {
-				if (!config.existsKey(path)) {
-					logger.severe(
-							"Missing translation path '" + path + "', please report this bug to the DevTec team.");
+			if(result != null) {
+				if(!config.existsKey(path)) {
+					logger.severe("Missing translation path '" + path + "', please report this bug to the DevTec team.");
 
 					result.complete(null);
 					return;
@@ -139,10 +134,9 @@ public class MessageManager {
 
 				Object valueAtPath = config.get(path);
 
-				if (config.isJson(path) && (valueAtPath instanceof Collection || valueAtPath instanceof Map)) {
+				if(config.isJson(path) && (valueAtPath instanceof Collection || valueAtPath instanceof Map)) {
 
-					if (valueAtPath instanceof Collection && ((Collection<?>) valueAtPath).isEmpty()
-							|| valueAtPath instanceof Map && ((Map<?, ?>) valueAtPath).isEmpty()) {
+					if(valueAtPath instanceof Collection && ((Collection<?>) valueAtPath).isEmpty() || valueAtPath instanceof Map && ((Map<?, ?>) valueAtPath).isEmpty()) {
 
 						result.complete(null);
 						return;
@@ -155,28 +149,27 @@ public class MessageManager {
 					components.add(component);
 					inString = convertToReadableStringForConsole(component);
 
-				} else if (valueAtPath instanceof Collection) {
+				} else if(valueAtPath instanceof Collection) {
 					components = new ArrayList<>();
 					StringContainer container = new StringContainer(64);
 
-					for (Object value : config.getList(path)) {
+					for(Object value : config.getList(path)) {
 						Component component;
 
-						if (value instanceof Collection || value instanceof Map)
+						if(value instanceof Collection || value instanceof Map)
 							component = ComponentAPI.fromJson(renderJson(value, renderer));
 						else
-							component = Component.fromString(renderBeforePlaceholders(value.toString(), renderer), true,
-									true);
+							component = Component.fromString(renderBeforePlaceholders(value.toString(), renderer), true, true);
 
 						components.add(component);
 
-						if (!container.isEmpty())
+						if(!container.isEmpty())
 							container.append('\n');
 
 						container.append(convertToReadableStringForConsole(component));
 					}
 
-					if (components.isEmpty()) {
+					if(components.isEmpty()) {
 						result.complete(null);
 						return;
 					}
@@ -187,7 +180,7 @@ public class MessageManager {
 				} else {
 					String value = config.getString(path);
 
-					if (value == null || value.isEmpty()) {
+					if(value == null || value.isEmpty()) {
 						result.complete(null);
 						return;
 					}
@@ -200,18 +193,16 @@ public class MessageManager {
 					inString = convertToReadableStringForConsole(component);
 				}
 
-				if (owner.hasPermission("css.chat.placeholders"))
-					replaceChatPlaceholders(API.get().getConfigManager().getChat(), components, new AtomicInteger(0),
-							API.get().getConfigManager().getChat().getInt("placeholders.limit-per-message"));
+				if(owner.hasPermission("css.chat.placeholders"))
+					replaceChatPlaceholders(API.get().getConfigManager().getChat(), components, new AtomicInteger(0), API.get().getConfigManager().getChat().getInt("placeholders.limit-per-message"));
 
-				if (!collection) {
-					Object packet = BukkitLoader.getNmsProvider().packetChat(ChatType.SYSTEM,
-							BukkitLoader.getNmsProvider().toIChatBaseComponent(components));
+				if(!collection) {
+					Object packet = BukkitLoader.getNmsProvider().packetChat(ChatType.SYSTEM, BukkitLoader.getNmsProvider().toIChatBaseComponent(components));
 
-					for (CommandSender receiver : receivers)
-						if (receiver instanceof Player)
+					for(CommandSender receiver : receivers)
+						if(receiver instanceof Player)
 							BukkitLoader.getPacketHandler().send((Player) receiver, packet);
-						else if (receiver instanceof BlockCommandSender)
+						else if(receiver instanceof BlockCommandSender)
 							BukkitLoader.getNmsProvider().postToMainThread(() -> receiver.sendMessage(inString));
 						else
 							receiver.sendMessage(inString);
@@ -220,15 +211,14 @@ public class MessageManager {
 					return;
 				}
 
-				for (Component component : components) {
+				for(Component component : components) {
 					Object packet = BukkitLoader.getNmsProvider().packetChat(ChatType.SYSTEM, component);
 
-					for (CommandSender receiver : receivers)
-						if (receiver instanceof Player)
+					for(CommandSender receiver : receivers)
+						if(receiver instanceof Player)
 							BukkitLoader.getPacketHandler().send((Player) receiver, packet);
-						else if (receiver instanceof BlockCommandSender)
-							BukkitLoader.getNmsProvider().postToMainThread(
-									() -> receiver.sendMessage(convertToReadableStringForConsole(component)));
+						else if(receiver instanceof BlockCommandSender)
+							BukkitLoader.getNmsProvider().postToMainThread(() -> receiver.sendMessage(convertToReadableStringForConsole(component)));
 						else
 							receiver.sendMessage(convertToReadableStringForConsole(component));
 				}
@@ -237,7 +227,7 @@ public class MessageManager {
 				return;
 			}
 
-			if (!config.existsKey(path)) {
+			if(!config.existsKey(path)) {
 				logger.severe("Missing translation path '" + path + "', please report this bug to the DevTec team.");
 				return;
 			}
@@ -245,29 +235,27 @@ public class MessageManager {
 			Object chatBase;
 			boolean collection = false;
 			Object valueAtPath = config.get(path);
-			if (config.isJson(path) && (valueAtPath instanceof Collection || valueAtPath instanceof Map)) {
+			if(config.isJson(path) && (valueAtPath instanceof Collection || valueAtPath instanceof Map)) {
 
-				if (valueAtPath instanceof Collection && ((Collection<?>) valueAtPath).isEmpty()
-						|| valueAtPath instanceof Map && ((Map<?, ?>) valueAtPath).isEmpty())
+				if(valueAtPath instanceof Collection && ((Collection<?>) valueAtPath).isEmpty() || valueAtPath instanceof Map && ((Map<?, ?>) valueAtPath).isEmpty())
 					return;
 
 				Component component = ComponentAPI.fromJson(renderJson(valueAtPath, renderer));
 
 				chatBase = BukkitLoader.getNmsProvider().toIChatBaseComponent(component);
 
-			} else if (valueAtPath instanceof Collection) {
+			} else if(valueAtPath instanceof Collection) {
 				List<Object> components = new ArrayList<>();
 
-				for (Object value : config.getList(path))
-					if (value instanceof Collection || value instanceof Map) {
+				for(Object value : config.getList(path))
+					if(value instanceof Collection || value instanceof Map) {
 						Component component = ComponentAPI.fromJson(renderJson(value, renderer));
 
 						components.add(BukkitLoader.getNmsProvider().toIChatBaseComponent(component));
 					} else
-						components.add(BukkitLoader.getNmsProvider()
-								.toIChatBaseComponent(ComponentAPI.fromString(render(value.toString(), renderer))));
+						components.add(BukkitLoader.getNmsProvider().toIChatBaseComponent(ComponentAPI.fromString(render(value.toString(), renderer))));
 
-				if (components.isEmpty())
+				if(components.isEmpty())
 					return;
 
 				chatBase = components;
@@ -276,43 +264,39 @@ public class MessageManager {
 			} else {
 				String value = config.getString(path);
 
-				if (value == null || value.isEmpty())
+				if(value == null || value.isEmpty())
 					return;
 
-				chatBase = BukkitLoader.getNmsProvider()
-						.toIChatBaseComponent(ComponentAPI.fromString(render(value, renderer)));
+				chatBase = BukkitLoader.getNmsProvider().toIChatBaseComponent(ComponentAPI.fromString(render(value, renderer)));
 			}
 
-			if (collection)
-				for (Object component : (List<?>) chatBase) {
+			if(collection)
+				for(Object component : (List<?>) chatBase) {
 					Object packet = BukkitLoader.getNmsProvider().packetChat(ChatType.SYSTEM, component);
 
-					for (CommandSender receiver : receivers)
-						if (receiver instanceof Player)
+					for(CommandSender receiver : receivers)
+						if(receiver instanceof Player)
 							BukkitLoader.getPacketHandler().send((Player) receiver, packet);
-						else if (receiver instanceof BlockCommandSender)
-							BukkitLoader.getNmsProvider().postToMainThread(() -> receiver.sendMessage(
-									BukkitLoader.getNmsProvider().fromIChatBaseComponent(component).toString()));
+						else if(receiver instanceof BlockCommandSender)
+							BukkitLoader.getNmsProvider().postToMainThread(() -> receiver.sendMessage(BukkitLoader.getNmsProvider().fromIChatBaseComponent(component).toString()));
 						else
-							receiver.sendMessage(
-									BukkitLoader.getNmsProvider().fromIChatBaseComponent(component).toString());
+							receiver.sendMessage(BukkitLoader.getNmsProvider().fromIChatBaseComponent(component).toString());
 				}
 			else {
 				Object packet = BukkitLoader.getNmsProvider().packetChat(ChatType.SYSTEM, chatBase);
 
-				for (CommandSender receiver : receivers)
-					if (receiver instanceof Player)
+				for(CommandSender receiver : receivers)
+					if(receiver instanceof Player)
 						BukkitLoader.getPacketHandler().send((Player) receiver, packet);
-					else if (receiver instanceof BlockCommandSender)
-						BukkitLoader.getNmsProvider().postToMainThread(() -> receiver.sendMessage(
-								BukkitLoader.getNmsProvider().fromIChatBaseComponent(chatBase).toString()));
+					else if(receiver instanceof BlockCommandSender)
+						BukkitLoader.getNmsProvider().postToMainThread(() -> receiver.sendMessage(BukkitLoader.getNmsProvider().fromIChatBaseComponent(chatBase).toString()));
 					else
 						receiver.sendMessage(BukkitLoader.getNmsProvider().fromIChatBaseComponent(chatBase).toString());
 			}
 		}
 
 		private String getNbtOf(ItemStack itemInHand) {
-			if (!itemInHand.hasItemMeta() || itemInHand.getType() == Material.AIR)
+			if(!itemInHand.hasItemMeta() || itemInHand.getType() == Material.AIR)
 				return null;
 
 			ItemStack item = itemInHand.clone();
@@ -320,12 +304,12 @@ public class MessageManager {
 
 			meta.setLore(itemInHand.getItemMeta().getLore());
 
-			for (Entry<Enchantment, Integer> enchantment : itemInHand.getEnchantments().entrySet())
+			for(Entry<Enchantment, Integer> enchantment : itemInHand.getEnchantments().entrySet())
 				meta.addEnchant(enchantment.getKey(), enchantment.getValue(), true);
 
 			meta.addItemFlags(itemInHand.getItemMeta().getItemFlags().toArray(new ItemFlag[0]));
 
-			if (itemInHand.getItemMeta().getDisplayName() != null)
+			if(itemInHand.getItemMeta().getDisplayName() != null)
 				meta.setDisplayName("§e");
 
 			item.setItemMeta(meta);
@@ -335,19 +319,18 @@ public class MessageManager {
 			return nbt == null ? null : nbt.toString();
 		}
 
-		private void replaceChatPlaceholders(Config config, List<Component> components, AtomicInteger totalPlaceholders,
-				int limitPlaceholders) {
+		private void replaceChatPlaceholders(Config config, List<Component> components, AtomicInteger totalPlaceholders, int limitPlaceholders) {
 
 			ListIterator<Component> iterator = components.listIterator();
 
-			while (iterator.hasNext()) {
+			while(iterator.hasNext()) {
 				Component component = iterator.next();
 
 				int[] find;
 				int previousPosition = 0;
 
-				while ((find = find(previousPosition, component.getText())) != null) {
-					if (totalPlaceholders.getAndIncrement() >= limitPlaceholders)
+				while((find = find(previousPosition, component.getText())) != null) {
+					if(totalPlaceholders.getAndIncrement() >= limitPlaceholders)
 						break;
 
 					String prefix = component.getText().substring(previousPosition, find[0]);
@@ -360,19 +343,17 @@ public class MessageManager {
 
 					ItemStack itemInHand = owner.getItemInHand();
 
-					if (itemInHand.getType() != Material.AIR && (find[1] == 6 || find[1] == 3)) {
+					if(itemInHand.getType() != Material.AIR && (find[1] == 6 || find[1] == 3)) {
 
-						String itemName = itemInHand.hasItemMeta() && itemInHand.getItemMeta().hasDisplayName()
-								? itemInHand.getItemMeta().getDisplayName()
-								: null;
+						String itemName = itemInHand.hasItemMeta() && itemInHand.getItemMeta().hasDisplayName() ? itemInHand.getItemMeta().getDisplayName() : null;
 
-						if (itemName == null) {
+						if(itemName == null) {
 							StringContainer container = new StringContainer(itemInHand.getType().name().length());
 
 							boolean first = true;
 
-							for (String split : itemInHand.getType().name().split("_")) {
-								if (first) {
+							for(String split : itemInHand.getType().name().split("_")) {
+								if(first) {
 									container.append(split.charAt(0)).append(split.substring(1).toLowerCase());
 
 									first = false;
@@ -381,7 +362,7 @@ public class MessageManager {
 
 								container.append(' ');
 
-								if ("OF".equals(split) || "THE".equals(split))
+								if("OF".equals(split) || "THE".equals(split))
 									container.append(split.toLowerCase());
 								else
 									container.append(split.charAt(0)).append(split.substring(1).toLowerCase());
@@ -392,56 +373,51 @@ public class MessageManager {
 
 						String id = createShortId();
 
-						GUI inventory = new GUI(TextRenderer.create().placeholder("player", owner.getName())
-								.renderPlain(config.getString("placeholders.item.inv-title")), 27);
+						GUI inventory = new GUI(TextRenderer.create().placeholder("player", owner.getName()).renderPlain(config.getString("placeholders.item.inv-title")), 27);
 
-						for (int i = 0; i < 27; ++i)
-							if (i == 13)
+						for(int i = 0; i < 27; ++i)
+							if(i == 13)
 								inventory.getInventory().setItem(i, itemInHand);
 							else
 								inventory.getInventory().setItem(i, EMPTY);
 
-						synchronized (PreCommandListener.guis) {
+						synchronized(PreCommandListener.guis) {
 							PreCommandListener.guis.put(id, inventory);
 						}
 
-						String value = TextRenderer.create().placeholder("player", owner.getName())
-								.placeholder("itemName", itemName).colorizeBeforePlaceholders()
-								.render(config.getString("placeholders.item.replace"));
+						String value = TextRenderer.create().placeholder("player", owner.getName()).placeholder("itemName", itemName).colorizeBeforePlaceholders()
+						        .render(config.getString("placeholders.item.replace"));
 
 						Component item = ComponentAPI.fromString(value);
 
 						item.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/css-openinv " + id));
 
-						item.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ITEM,
-								new ComponentItem(itemInHand.getType().name().toLowerCase(), itemInHand.getAmount())
-										.setNbt(getNbtOf(itemInHand))));
+						item.setHoverEvent(
+						        new HoverEvent(HoverEvent.Action.SHOW_ITEM, new ComponentItem(itemInHand.getType().name().toLowerCase(), itemInHand.getAmount()).setNbt(getNbtOf(itemInHand))));
 
-						if (item.getExtra() != null)
-							for (Component extra : item.getExtra()) {
+						if(item.getExtra() != null)
+							for(Component extra : item.getExtra()) {
 								extra.setClickEvent(item.getClickEvent());
 								extra.setHoverEvent(item.getHoverEvent());
 							}
 
 						iterator.add(item);
 
-					} else if (find[1] == 5) {
+					} else if(find[1] == 5) {
 						String id = createShortId();
 
-						GUI inventory = new GUI(TextRenderer.create().placeholder("player", owner.getName())
-								.renderPlain(config.getString("placeholders.inventory.inv-title")), 36);
+						GUI inventory = new GUI(TextRenderer.create().placeholder("player", owner.getName()).renderPlain(config.getString("placeholders.inventory.inv-title")), 36);
 
-						if (Ref.isAtLeast(9, 0))
+						if(Ref.isAtLeast(9, 0))
 							inventory.getInventory().setContents(owner.getInventory().getStorageContents());
 						else
 							inventory.getInventory().setContents(owner.getInventory().getContents());
 
-						synchronized (PreCommandListener.guis) {
+						synchronized(PreCommandListener.guis) {
 							PreCommandListener.guis.put(id, inventory);
 						}
 
-						String value = TextRenderer.create().placeholder("player", owner.getName()).colorize()
-								.render(config.getString("placeholders.inventory.replace"));
+						String value = TextRenderer.create().placeholder("player", owner.getName()).colorize().render(config.getString("placeholders.inventory.replace"));
 
 						Component item = ComponentAPI.fromString(value);
 
@@ -449,53 +425,44 @@ public class MessageManager {
 
 						String hover = config.getString("placeholders.inventory.hoverEvent");
 
-						if (!hover.isEmpty())
-							item.setHoverEvent(
-									new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-											ComponentAPI.fromString(TextRenderer.create()
-													.placeholder("player", owner.getName()).colorize().render(hover),
-													true, false)));
+						if(!hover.isEmpty())
+							item.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+							        ComponentAPI.fromString(TextRenderer.create().placeholder("player", owner.getName()).colorize().render(hover), true, false)));
 
-						if (item.getExtra() != null)
-							for (Component extra : item.getExtra()) {
+						if(item.getExtra() != null)
+							for(Component extra : item.getExtra()) {
 								extra.setClickEvent(item.getClickEvent());
 								extra.setHoverEvent(item.getHoverEvent());
 							}
 
 						iterator.add(item);
 
-					} else if (find[1] == 4) {
+					} else if(find[1] == 4) {
 						String id = createShortId();
 
-						GUI inventory = new GUI(
-								TextRenderer.create().placeholder("player", owner.getName())
-										.renderPlain(config.getString("placeholders.enderchest.inv-title")),
-								owner.getEnderChest().getSize());
+						GUI inventory = new GUI(TextRenderer.create().placeholder("player", owner.getName()).renderPlain(config.getString("placeholders.enderchest.inv-title")),
+						        owner.getEnderChest().getSize());
 
 						inventory.getInventory().setContents(owner.getEnderChest().getContents());
 
-						synchronized (PreCommandListener.guis) {
+						synchronized(PreCommandListener.guis) {
 							PreCommandListener.guis.put(id, inventory);
 						}
 
-						String value = TextRenderer.create().placeholder("player", owner.getName()).colorize()
-								.render(config.getString("placeholders.enderchest.replace"));
+						String value = TextRenderer.create().placeholder("player", owner.getName()).colorize().render(config.getString("placeholders.enderchest.replace"));
 
 						Component item = ComponentAPI.fromString(value);
 
 						String hover = config.getString("placeholders.enderchest.hoverEvent");
 
-						if (!hover.isEmpty())
-							item.setHoverEvent(
-									new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-											ComponentAPI.fromString(TextRenderer.create()
-													.placeholder("player", owner.getName()).colorize().render(hover),
-													true, false)));
+						if(!hover.isEmpty())
+							item.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+							        ComponentAPI.fromString(TextRenderer.create().placeholder("player", owner.getName()).colorize().render(hover), true, false)));
 
 						item.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/css-openinv " + id));
 
-						if (item.getExtra() != null)
-							for (Component extra : item.getExtra()) {
+						if(item.getExtra() != null)
+							for(Component extra : item.getExtra()) {
 								extra.setClickEvent(item.getClickEvent());
 								extra.setHoverEvent(item.getHoverEvent());
 							}
@@ -503,60 +470,55 @@ public class MessageManager {
 						iterator.add(item);
 					}
 
-					iterator.add(new Component(suffix).copyOf(component).setClickEvent(component.getClickEvent())
-							.setHoverEvent(component.getHoverEvent()).setInsertion(component.getInsertion()));
+					iterator.add(new Component(suffix).copyOf(component).setClickEvent(component.getClickEvent()).setHoverEvent(component.getHoverEvent()).setInsertion(component.getInsertion()));
 
 					iterator.previous();
 				}
 			}
 
-			for (Component component : components)
-				if (component.getExtra() != null)
+			for(Component component : components)
+				if(component.getExtra() != null)
 					replaceChatPlaceholders(config, component.getExtra(), totalPlaceholders, limitPlaceholders);
 		}
 
 		private String createShortId() {
 			final char[] chars = "0123456789abcdefghijklmnopqrstuvwxyz".toCharArray();
 
-			while (true) {
+			while(true) {
 				char[] id = new char[6];
 
-				for (int i = 0; i < id.length; ++i)
+				for(int i = 0; i < id.length; ++i)
 					id[i] = chars[StringUtils.random.nextInt(chars.length)];
 
 				String result = new String(id);
 
-				synchronized (PreCommandListener.guis) {
-					if (!PreCommandListener.guis.containsKey(result))
+				synchronized(PreCommandListener.guis) {
+					if(!PreCommandListener.guis.containsKey(result))
 						return result;
 				}
 			}
 		}
 
 		private int[] find(int startAt, String value) {
-			if (value != null)
-				for (int i = startAt; i < value.length(); ++i) {
+			if(value != null)
+				for(int i = startAt; i < value.length(); ++i) {
 					char c = value.charAt(i);
 					char endChar = c == '[' ? ']' : '%';
 
-					if (c != '[' && c != '%')
+					if(c != '[' && c != '%')
 						continue;
 
-					if (value.length() > i + 5 && value.charAt(i + 1) == 'i' && value.charAt(i + 2) == 't'
-							&& value.charAt(i + 3) == 'e' && value.charAt(i + 4) == 'm'
-							&& value.charAt(i + 5) == endChar)
-						return new int[] { i, 6 };
+					if(value.length() > i + 5 && value.charAt(i + 1) == 'i' && value.charAt(i + 2) == 't' && value.charAt(i + 3) == 'e' && value.charAt(i + 4) == 'm' && value.charAt(i + 5) == endChar)
+						return new int[]{i, 6};
 
-					if (value.length() > i + 2 && value.charAt(i + 1) == 'i' && value.charAt(i + 2) == endChar)
-						return new int[] { i, 3 };
+					if(value.length() > i + 2 && value.charAt(i + 1) == 'i' && value.charAt(i + 2) == endChar)
+						return new int[]{i, 3};
 
-					if (value.length() > i + 4 && value.charAt(i + 1) == 'i' && value.charAt(i + 2) == 'n'
-							&& value.charAt(i + 3) == 'v' && value.charAt(i + 4) == endChar)
-						return new int[] { i, 5 };
+					if(value.length() > i + 4 && value.charAt(i + 1) == 'i' && value.charAt(i + 2) == 'n' && value.charAt(i + 3) == 'v' && value.charAt(i + 4) == endChar)
+						return new int[]{i, 5};
 
-					if (value.length() > i + 3 && value.charAt(i + 1) == 'e' && value.charAt(i + 2) == 'c'
-							&& value.charAt(i + 3) == endChar)
-						return new int[] { i, 4 };
+					if(value.length() > i + 3 && value.charAt(i + 1) == 'e' && value.charAt(i + 2) == 'c' && value.charAt(i + 3) == endChar)
+						return new int[]{i, 4};
 				}
 
 			return null;
@@ -570,17 +532,17 @@ public class MessageManager {
 
 			@Override
 			public void run() {
-				while (!actions.isEmpty())
+				while(!actions.isEmpty())
 					actions.remove(0).process();
 			}
 		}.runRepeating(1, 1);
 	}
 
 	private TextRenderer prepareRenderer(TextRenderer renderer) {
-		if (renderer == null)
+		if(renderer == null)
 			renderer = TextRenderer.create();
 
-		if (!renderer.tokens().contains("{prefix}"))
+		if(!renderer.tokens().contains("{prefix}"))
 			renderer.placeholder("prefix", API.get().getConfigManager().getPrefix());
 
 		renderer.colorize();
@@ -588,14 +550,14 @@ public class MessageManager {
 	}
 
 	private String render(String text, TextRenderer renderer) {
-		if (text == null)
+		if(text == null)
 			return null;
 
 		return renderer.render(PlaceholderAPI.apply(text, renderer.target()));
 	}
 
 	private String renderBeforePlaceholders(String text, TextRenderer renderer) {
-		if (text == null)
+		if(text == null)
 			return null;
 
 		ColorMode previous = renderer.colorMode();
@@ -615,12 +577,12 @@ public class MessageManager {
 
 	@SuppressWarnings("unchecked")
 	private Object applyPlaceholderApi(Object object, UUID target) {
-		if (object instanceof Map) {
+		if(object instanceof Map) {
 			Map<String, Object> source = (Map<String, Object>) object;
 			Map<String, Object> result = new HashMap<>(source.size());
 
-			for (Entry<String, Object> entry : source.entrySet())
-				if ("color".equals(entry.getKey()))
+			for(Entry<String, Object> entry : source.entrySet())
+				if("color".equals(entry.getKey()))
 					result.put(entry.getKey(), entry.getValue());
 				else
 					result.put(entry.getKey(), applyPlaceholderApi(entry.getValue(), target));
@@ -628,17 +590,17 @@ public class MessageManager {
 			return result;
 		}
 
-		if (object instanceof Collection) {
+		if(object instanceof Collection) {
 			Collection<?> source = (Collection<?>) object;
 			List<Object> result = new ArrayList<>(source.size());
 
-			for (Object value : source)
+			for(Object value : source)
 				result.add(applyPlaceholderApi(value, target));
 
 			return result;
 		}
 
-		if (object instanceof String)
+		if(object instanceof String)
 			return PlaceholderAPI.apply((String) object, target);
 
 		return object;
@@ -649,8 +611,8 @@ public class MessageManager {
 
 		String colorBefore = null;
 
-		if (component.getColor() != null) {
-			if (component.getColor().charAt(0) == '#')
+		if(component.getColor() != null) {
+			if(component.getColor().charAt(0) == '#')
 				colorBefore = hexToReadableFormat(component.getColor());
 			else
 				colorBefore = "§" + component.colorToChar();
@@ -663,64 +625,60 @@ public class MessageManager {
 
 		builder.append(component.getText());
 
-		if (component.getExtra() != null)
-			for (Component child : component.getExtra()) {
+		if(component.getExtra() != null)
+			for(Component child : component.getExtra()) {
 				toString(child, builder, colorBefore, formatsBefore);
 
-				if (child.getColor() != null)
-					if (child.getColor().charAt(0) == '#')
+				if(child.getColor() != null)
+					if(child.getColor().charAt(0) == '#')
 						colorBefore = hexToReadableFormat(child.getColor());
 					else
 						colorBefore = "§" + child.colorToChar();
 
 				String formats = child.getFormats();
 
-				if (!formats.isEmpty())
+				if(!formats.isEmpty())
 					formatsBefore = formats;
 			}
 
 		return builder.toString();
 	}
 
-	private void toString(Component component, StringContainer builder, String parentColorBefore,
-			String parentFormatsBefore) {
+	private void toString(Component component, StringContainer builder, String parentColorBefore, String parentFormatsBefore) {
 
 		String colorBefore = parentColorBefore;
 		String formatsBefore = component.getFormats();
 
-		if (component.getColor() != null) {
-			if (component.getColor().charAt(0) == '#')
+		if(component.getColor() != null) {
+			if(component.getColor().charAt(0) == '#')
 				colorBefore = hexToReadableFormat(component.getColor());
 			else
 				colorBefore = "§" + component.colorToChar();
 
-			if (!colorBefore.equals(parentColorBefore) || !formatsBefore.equals(parentFormatsBefore))
+			if(!colorBefore.equals(parentColorBefore) || !formatsBefore.equals(parentFormatsBefore))
 				builder.append(colorBefore);
 		}
 
-		if (!formatsBefore.equals(parentFormatsBefore))
+		if(!formatsBefore.equals(parentFormatsBefore))
 			builder.append(formatsBefore);
 
 		builder.append(component.getText());
 
-		if (component.getExtra() != null)
-			for (Component child : component.getExtra())
+		if(component.getExtra() != null)
+			for(Component child : component.getExtra())
 				toString(child, builder, colorBefore, formatsBefore);
 	}
 
 	private String hexToReadableFormat(String color) {
-		return new String(new char[] { '§', 'x', '§', color.charAt(1), '§', color.charAt(2), '§', color.charAt(3), '§',
-				color.charAt(4), '§', color.charAt(5), '§', color.charAt(6) });
+		return new String(new char[]{'§', 'x', '§', color.charAt(1), '§', color.charAt(2), '§', color.charAt(3), '§', color.charAt(4), '§', color.charAt(5), '§', color.charAt(6)});
 	}
 
-	public void sendMessageFromFile(Config transFile, String pathToTranslation, TextRenderer renderer,
-			Collection<? extends CommandSender> receivers) {
+	public void sendMessageFromFile(Config transFile, String pathToTranslation, TextRenderer renderer, Collection<? extends CommandSender> receivers) {
 
 		actions.add(new Action(transFile, pathToTranslation, renderer, receivers.toArray(new CommandSender[0])));
 	}
 
-	public void sendMessageFromFile(Config transFile, String pathToTranslation, TextRenderer renderer,
-			CommandSender... receivers) {
+	public void sendMessageFromFile(Config transFile, String pathToTranslation, TextRenderer renderer, CommandSender... receivers) {
 
 		actions.add(new Action(transFile, pathToTranslation, renderer, receivers));
 	}
@@ -730,30 +688,27 @@ public class MessageManager {
 		actions.add(new Action(messages, renderer, receivers));
 	}
 
-	public String sendMessageFromFileWithResult(Config transFile, String pathToTranslation, TextRenderer renderer,
-			Collection<? extends CommandSender> receivers, Player player) {
+	public String sendMessageFromFileWithResult(Config transFile, String pathToTranslation, TextRenderer renderer, Collection<? extends CommandSender> receivers, Player player) {
 
 		CompletableFuture<String> future = new CompletableFuture<>();
 
-		actions.add(0, new Action(transFile, pathToTranslation, renderer, receivers.toArray(new CommandSender[0]),
-				future, player));
+		actions.add(0, new Action(transFile, pathToTranslation, renderer, receivers.toArray(new CommandSender[0]), future, player));
 
 		try {
 			return future.get();
-		} catch (Exception e) {
+		} catch(Exception e) {
 			return null;
 		}
 	}
 
-	public void sendMessageFromFile(Config transFile, String pathToTranslation, TextRenderer renderer,
-			String permission) {
+	public void sendMessageFromFile(Config transFile, String pathToTranslation, TextRenderer renderer, String permission) {
 
 		List<CommandSender> receivers = new ArrayList<>();
 
 		receivers.add(Bukkit.getConsoleSender());
 
-		for (Player player : BukkitLoader.getOnlinePlayers())
-			if (permission == null || player.hasPermission(permission))
+		for(Player player : BukkitLoader.getOnlinePlayers())
+			if(permission == null || player.hasPermission(permission))
 				receivers.add(player);
 
 		actions.add(new Action(transFile, pathToTranslation, renderer, receivers.toArray(new CommandSender[0])));

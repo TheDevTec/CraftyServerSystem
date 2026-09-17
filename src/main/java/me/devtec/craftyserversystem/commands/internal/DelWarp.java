@@ -14,7 +14,7 @@ public class DelWarp extends CssCommand {
 
 	@Override
 	public void register() {
-		if (isRegistered())
+		if(isRegistered())
 			return;
 
 		CommandStructure<CommandSender> cmd = CommandStructure.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
@@ -25,13 +25,13 @@ public class DelWarp extends CssCommand {
 
 		// register
 		List<String> cmds = getCommands();
-		if (!cmds.isEmpty())
+		if(!cmds.isEmpty())
 			this.cmd = addBypassSettings(cmd).build().register(cmds.remove(0), cmds.toArray(new String[0]));
 	}
 
 	public void delWarp(String warpName, boolean sendMessage, CommandSender sender) {
-		if (WarpManager.getProvider().delete(warpName)) {
-			if (sendMessage) {
+		if(WarpManager.getProvider().delete(warpName)) {
+			if(sendMessage) {
 				TextRenderer placeholders = renderer().placeholder("warp", warpName);
 				msg(sender, "deleted", placeholders);
 			}

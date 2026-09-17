@@ -43,27 +43,27 @@ public class LuckPermsTeamManager implements TeamManager {
 			@Override
 			public void run() {
 				Pair pair = updates.poll();
-				while (pair != null) {
+				while(pair != null) {
 					ClassicTabPlayer player = (ClassicTabPlayer) pair.getKey();
 					String newTeam = getTeam((String) pair.getValue());
-					if(player.getPrimaryTeam()==null)
-						player.changePrimaryTeam(new SimpleTeam(newTeam, null, null, null, null, 0, CollisionRule.ALWAYS, player.getAdditionalLines().isEmpty() ? Visibility.ALWAYS : Visibility.NEVER));
-					else
-						if(newTeam!=player.getPrimaryTeam().getTeam())
-							player.changePrimaryTeam(player.getPrimaryTeam().asName(newTeam));
+					if(player.getPrimaryTeam() == null)
+						player.changePrimaryTeam(
+						        new SimpleTeam(newTeam, null, null, null, null, 0, CollisionRule.ALWAYS, player.getAdditionalLines().isEmpty() ? Visibility.ALWAYS : Visibility.NEVER));
+					else if(newTeam != player.getPrimaryTeam().getTeam())
+						player.changePrimaryTeam(player.getPrimaryTeam().asName(newTeam));
 					List<SimpleTeam> teams = new ArrayList<>();
 					for(SimpleTeam t : player.getTeams()) {
 						if(t.getTeam().equals(newTeam))
 							continue;
 						if(t.getTeam().startsWith("css_"))
-							if(t.getPlayers().size()==1)
+							if(t.getPlayers().size() == 1)
 								teams.add(t);
 							else
 								teams.add(t.leavePlayer(player.getPlayer().getName()));
 					}
 					for(SimpleTeam t : teams) {
-						if(t.getPlayers().size()==1) {
-							//remove
+						if(t.getPlayers().size() == 1) {
+							// remove
 							for(ClassicTabPlayer holder : TabAPI.getPlayers())
 								holder.removeTeam(t.getTeam());
 							continue;
@@ -79,18 +79,18 @@ public class LuckPermsTeamManager implements TeamManager {
 		}.runRepeating(20, 20);
 		lpEventUsers = LuckPermsProvider.get().getEventBus().subscribe(Loader.getPlugin(), UserDataRecalculateEvent.class, e -> {
 			ClassicTabPlayer player = TabAPI.getNullableHolder(e.getUser().getUniqueId());
-			if (player == null)
+			if(player == null)
 				return; // Probably not loaded for uknown reasons..
 			updates.add(Pair.of(player, e.getUser().getPrimaryGroup()));
 		});
 		lpEventGroups = LuckPermsProvider.get().getEventBus().subscribe(Loader.getPlugin(), GroupDataRecalculateEvent.class, e -> {
 			reload();
-			for (Player online : BukkitLoader.getOnlinePlayers()) {
+			for(Player online : BukkitLoader.getOnlinePlayers()) {
 				String group;
-				if (!(group = LuckPermsProvider.get().getUserManager().getUser(online.getUniqueId()).getPrimaryGroup()).equals(e.getGroup().getName()))
+				if(!(group = LuckPermsProvider.get().getUserManager().getUser(online.getUniqueId()).getPrimaryGroup()).equals(e.getGroup().getName()))
 					continue;
 				ClassicTabPlayer player = TabAPI.getNullableHolder(online.getUniqueId());
-				if (player == null)
+				if(player == null)
 					continue; // Probably not loaded for uknown reasons..
 
 				updates.add(Pair.of(player, group));
@@ -116,8 +116,8 @@ public class LuckPermsTeamManager implements TeamManager {
 	}
 
 	private String makeItOriginal(int id, String team) {
-		String prefix = "css_"+id;
-		return prefix+team.substring(0, Math.min(16-prefix.length(),team.length()));
+		String prefix = "css_" + id;
+		return prefix + team.substring(0, Math.min(16 - prefix.length(), team.length()));
 	}
 
 	@Override
@@ -125,11 +125,11 @@ public class LuckPermsTeamManager implements TeamManager {
 		groupAndTeamName.clear();
 
 		Map<String, Integer> weights = new HashMap<>();
-		for (Group group : LuckPermsProvider.get().getGroupManager().getLoadedGroups())
+		for(Group group : LuckPermsProvider.get().getGroupManager().getLoadedGroups())
 			weights.put(group.getName(), group.getWeight().orElse(0));
 
 		int startAt = 'a';
-		for (ComparableObject<String, Integer> entry : SortingAPI.sortByValueArray(weights, true))
+		for(ComparableObject<String, Integer> entry : SortingAPI.sortByValueArray(weights, true))
 			groupAndTeamName.put(entry.getKey(), "_" + (char) startAt++);
 	}
 

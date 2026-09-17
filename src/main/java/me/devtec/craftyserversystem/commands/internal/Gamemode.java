@@ -29,7 +29,7 @@ public class Gamemode extends CssCommand {
 
 	@Override
 	public void register() {
-		if (isRegistered())
+		if(isRegistered())
 			return;
 
 		listener = new Listener() {
@@ -37,27 +37,26 @@ public class Gamemode extends CssCommand {
 
 			@EventHandler
 			public void onPreWorldChange(PlayerTeleportEvent e) {
-				if (!e.getFrom().getWorld().equals(e.getTo().getWorld()))
+				if(!e.getFrom().getWorld().equals(e.getTo().getWorld()))
 					tempMap.put(e.getPlayer().getUniqueId(), e.getPlayer().getGameMode());
 			}
 
 			@EventHandler
 			public void onWorldChange(PlayerChangedWorldEvent e) {
 				GameMode previous;
-				if ((previous = tempMap.remove(e.getPlayer().getUniqueId())) != null)
+				if((previous = tempMap.remove(e.getPlayer().getUniqueId())) != null)
 					e.getPlayer().setGameMode(previous);
 			}
 		};
 		Bukkit.getPluginManager().registerEvents(listener, Loader.getPlugin());
 
-		CommandStructure<CommandSender> cmd = CommandStructure
-				.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
-					msgUsage(sender, "cmd");
-				}).permission(getPerm("cmd"));
+		CommandStructure<CommandSender> cmd = CommandStructure.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
+			msgUsage(sender, "cmd");
+		}).permission(getPerm("cmd"));
 
 		// survival
 		CommandStructure<CommandSender> survival = cmd.argument("survival", (sender, structure, args) -> {
-			if (!(sender instanceof Player)) {
+			if(!(sender instanceof Player)) {
 				msgUsage(sender, "survival");
 				return;
 			}
@@ -65,7 +64,7 @@ public class Gamemode extends CssCommand {
 		}, "s", "0").permission(getPerm("survival"));
 		// silent
 		survival.argument("-s", (sender, structure, args) -> {
-			if (!(sender instanceof Player)) {
+			if(!(sender instanceof Player)) {
 				msgUsage(sender, "survival");
 				return;
 			}
@@ -73,18 +72,18 @@ public class Gamemode extends CssCommand {
 		});
 		// other
 		survival.selector(Selector.ENTITY_SELECTOR, (sender, structure, args) -> {
-			for (Player player : selector(sender, args[1]))
+			for(Player player : selector(sender, args[1]))
 				setGameMode(player, GameMode.SURVIVAL, true, sender);
 		}).permission(getPerm("other.survival"))
-				// silent
-				.argument("-s", (sender, structure, args) -> {
-					for (Player player : selector(sender, args[1]))
-						setGameMode(player, GameMode.SURVIVAL, false, sender);
-				});
+		        // silent
+		        .argument("-s", (sender, structure, args) -> {
+			        for(Player player : selector(sender, args[1]))
+				        setGameMode(player, GameMode.SURVIVAL, false, sender);
+		        });
 
 		// creative
 		CommandStructure<CommandSender> creative = cmd.argument("creative", (sender, structure, args) -> {
-			if (!(sender instanceof Player)) {
+			if(!(sender instanceof Player)) {
 				msgUsage(sender, "creative");
 				return;
 			}
@@ -92,7 +91,7 @@ public class Gamemode extends CssCommand {
 		}, "c", "1").permission(getPerm("creative"));
 		// silent
 		creative.argument("-s", (sender, structure, args) -> {
-			if (!(sender instanceof Player)) {
+			if(!(sender instanceof Player)) {
 				msgUsage(sender, "creative");
 				return;
 			}
@@ -100,18 +99,18 @@ public class Gamemode extends CssCommand {
 		});
 		// other
 		creative.selector(Selector.ENTITY_SELECTOR, (sender, structure, args) -> {
-			for (Player player : selector(sender, args[1]))
+			for(Player player : selector(sender, args[1]))
 				setGameMode(player, GameMode.CREATIVE, true, sender);
 		}).permission(getPerm("other.creative"))
-				// silent
-				.argument("-s", (sender, structure, args) -> {
-					for (Player player : selector(sender, args[1]))
-						setGameMode(player, GameMode.CREATIVE, false, sender);
-				});
+		        // silent
+		        .argument("-s", (sender, structure, args) -> {
+			        for(Player player : selector(sender, args[1]))
+				        setGameMode(player, GameMode.CREATIVE, false, sender);
+		        });
 
 		// adventure
 		CommandStructure<CommandSender> adventure = cmd.argument("adventure", (sender, structure, args) -> {
-			if (!(sender instanceof Player)) {
+			if(!(sender instanceof Player)) {
 				msgUsage(sender, "adventure");
 				return;
 			}
@@ -119,7 +118,7 @@ public class Gamemode extends CssCommand {
 		}, "a", "2").permission(getPerm("adventure"));
 		// silent
 		adventure.argument("-s", (sender, structure, args) -> {
-			if (!(sender instanceof Player)) {
+			if(!(sender instanceof Player)) {
 				msgUsage(sender, "adventure");
 				return;
 			}
@@ -127,19 +126,19 @@ public class Gamemode extends CssCommand {
 		});
 		// other
 		adventure.selector(Selector.ENTITY_SELECTOR, (sender, structure, args) -> {
-			for (Player player : selector(sender, args[1]))
+			for(Player player : selector(sender, args[1]))
 				setGameMode(player, GameMode.ADVENTURE, true, sender);
 		}).permission(getPerm("other.adventure"))
-				// silent
-				.argument("-s", (sender, structure, args) -> {
-					for (Player player : selector(sender, args[1]))
-						setGameMode(player, GameMode.ADVENTURE, false, sender);
-				});
+		        // silent
+		        .argument("-s", (sender, structure, args) -> {
+			        for(Player player : selector(sender, args[1]))
+				        setGameMode(player, GameMode.ADVENTURE, false, sender);
+		        });
 
-		if (Ref.isAtLeast(8, 0)) { // 1.8+
+		if(Ref.isAtLeast(8, 0)) { // 1.8+
 			// spectator
 			CommandStructure<CommandSender> spectator = cmd.argument("spectator", (sender, structure, args) -> {
-				if (!(sender instanceof Player)) {
+				if(!(sender instanceof Player)) {
 					msgUsage(sender, "spectator");
 					return;
 				}
@@ -147,7 +146,7 @@ public class Gamemode extends CssCommand {
 			}, "sp", "3").permission(getPerm("spectator"));
 			// silent
 			spectator.argument("-s", (sender, structure, args) -> {
-				if (!(sender instanceof Player)) {
+				if(!(sender instanceof Player)) {
 					msgUsage(sender, "spectator");
 					return;
 				}
@@ -155,45 +154,43 @@ public class Gamemode extends CssCommand {
 			});
 			// other
 			spectator.selector(Selector.ENTITY_SELECTOR, (sender, structure, args) -> {
-				for (Player player : selector(sender, args[1]))
+				for(Player player : selector(sender, args[1]))
 					setGameMode(player, GameMode.SPECTATOR, true, sender);
 			}).permission(getPerm("other.spectator"))
-					// silent
-					.argument("-s", (sender, structure, args) -> {
-						for (Player player : selector(sender, args[1]))
-							setGameMode(player, GameMode.SPECTATOR, false, sender);
-					});
+			        // silent
+			        .argument("-s", (sender, structure, args) -> {
+				        for(Player player : selector(sender, args[1]))
+					        setGameMode(player, GameMode.SPECTATOR, false, sender);
+			        });
 		}
 
 		// register
 		List<String> cmds = getCommands();
-		if (!cmds.isEmpty())
+		if(!cmds.isEmpty())
 			this.cmd = addBypassSettings(cmd).build().register(cmds.remove(0), cmds.toArray(new String[0]));
 	}
 
 	@Override
 	public void unregister() {
 		super.unregister();
-		if (listener != null) {
+		if(listener != null) {
 			HandlerList.unregisterAll(listener);
 			listener = null;
 		}
 	}
 
 	public void setGameMode(Player target, GameMode mode, boolean sendMessage, CommandSender sender) {
-		if (sendMessage)
-			if (target.equals(sender)) {
-				TextRenderer placeholders = renderer().placeholder("target", target.getName()).placeholder("gamemode",
-						mode.name().toLowerCase());
+		if(sendMessage)
+			if(target.equals(sender)) {
+				TextRenderer placeholders = renderer().placeholder("target", target.getName()).placeholder("gamemode", mode.name().toLowerCase());
 				msg(sender, "self", placeholders);
 			} else {
-				TextRenderer placeholders = renderer().placeholder("target", target.getName())
-						.placeholder("sender", sender.getName()).placeholder("gamemode", mode.name().toLowerCase());
+				TextRenderer placeholders = renderer().placeholder("target", target.getName()).placeholder("sender", sender.getName()).placeholder("gamemode", mode.name().toLowerCase());
 				msg(target, "other.target", placeholders);
 				msg(sender, "other.sender", placeholders);
 			}
 		// You can change gamemode only in primary thread
-		if (!Bukkit.isPrimaryThread())
+		if(!Bukkit.isPrimaryThread())
 			BukkitLoader.getNmsProvider().postToMainThread(() -> target.setGameMode(mode));
 		else
 			target.setGameMode(mode);

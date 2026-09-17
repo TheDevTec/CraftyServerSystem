@@ -72,32 +72,27 @@ public class ConfigurationManager {
 		merge(quit, "quit.yml");
 		merge(death, "death.yml");
 		merge(chat, "chat.yml");
-		if (!scoreboard.exists("title"))
+		if(!scoreboard.exists("title"))
 			merge(scoreboard, "scoreboard.yml");
-		if (!tab.exists("header"))
+		if(!tab.exists("header"))
 			merge(tab, "tablist.yml");
-		if (!bossbar.exists("text"))
+		if(!bossbar.exists("text"))
 			merge(bossbar, "bossbar.yml");
 		merge(kits, "kits.yml");
 		merge(economy, "economy.yml");
 		merge(placeholders, "placeholders.yml");
 		migrateGuisFolder();
-		if (!new File(FILES_PATH + "guis").exists()) {
-			Config.loadFromPlugin(Loader.getPlugin().getClass(), "guis/example.yml", FILES_PATH + "guis/example.yml")
-					.save("yaml");
-			Config.loadFromPlugin(Loader.getPlugin().getClass(), "guis/heal/main.yml",
-					FILES_PATH + "guis/heal/main.yml").save("yaml");
-			Config.loadFromPlugin(Loader.getPlugin().getClass(), "guis/shop/buy_menu.yml",
-					FILES_PATH + "guis/shop/buy_menu.yml").save("yaml");
-			Config.loadFromPlugin(Loader.getPlugin().getClass(), "guis/shop/main.yml",
-					FILES_PATH + "guis/shop/main.yml").save("yaml");
+		if(!new File(FILES_PATH + "guis").exists()) {
+			Config.loadFromPlugin(Loader.getPlugin().getClass(), "guis/example.yml", FILES_PATH + "guis/example.yml").save("yaml");
+			Config.loadFromPlugin(Loader.getPlugin().getClass(), "guis/heal/main.yml", FILES_PATH + "guis/heal/main.yml").save("yaml");
+			Config.loadFromPlugin(Loader.getPlugin().getClass(), "guis/shop/buy_menu.yml", FILES_PATH + "guis/shop/buy_menu.yml").save("yaml");
+			Config.loadFromPlugin(Loader.getPlugin().getClass(), "guis/shop/main.yml", FILES_PATH + "guis/shop/main.yml").save("yaml");
 		}
-		Config.loadFromPlugin(Loader.getPlugin().getClass(), "guis/warps/warp.yml", FILES_PATH + "guis/warps/warp.yml")
-				.save("yaml");
-		if (!serverMotd.exists("motds"))
+		Config.loadFromPlugin(Loader.getPlugin().getClass(), "guis/warps/warp.yml", FILES_PATH + "guis/warps/warp.yml").save("yaml");
+		if(!serverMotd.exists("motds"))
 			merge(serverMotd, "server-motd.yml");
 		merge(consoleFilter, "console-filter.yml");
-		if (animations.getKeys().isEmpty())
+		if(animations.getKeys().isEmpty())
 			merge(animations, "animations.yml");
 		prefix = getMain().getString("prefix", "");
 		teleportRequestTime = TimeUtils.timeFromString(getMain().getString("teleport-request-time"));
@@ -107,8 +102,7 @@ public class ConfigurationManager {
 	@SuppressWarnings("resource")
 	private void merge(Config origin, String path) {
 		ClassLoader classLoader = Loader.getPlugin().getClass().getClassLoader();
-		if (origin.merge(new Config().reload(StreamUtils.fromStream(classLoader.getResourceAsStream(path))),
-				MergeStandards.DEFAULT))
+		if(origin.merge(new Config().reload(StreamUtils.fromStream(classLoader.getResourceAsStream(path))), MergeStandards.DEFAULT))
 			origin.save("yaml");
 	}
 
@@ -116,11 +110,11 @@ public class ConfigurationManager {
 		Path source = Paths.get(FILES_PATH, "storage", "guis");
 		Path target = Paths.get(FILES_PATH, "guis");
 
-		if (!Files.isDirectory(source))
+		if(!Files.isDirectory(source))
 			return;
 
 		try {
-			if (!Files.exists(target))
+			if(!Files.exists(target))
 				Files.createDirectories(target);
 
 			Files.walkFileTree(source, new SimpleFileVisitor<Path>() {
@@ -129,7 +123,7 @@ public class ConfigurationManager {
 					Path relative = source.relativize(dir);
 					Path destination = target.resolve(relative);
 
-					if (!Files.exists(destination))
+					if(!Files.exists(destination))
 						Files.createDirectories(destination);
 
 					return FileVisitResult.CONTINUE;
@@ -146,14 +140,14 @@ public class ConfigurationManager {
 
 				@Override
 				public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
-					if (exc != null)
+					if(exc != null)
 						throw exc;
 
 					Files.deleteIfExists(dir);
 					return FileVisitResult.CONTINUE;
 				}
 			});
-		} catch (IOException e) {
+		} catch(IOException e) {
 			e.printStackTrace();
 		}
 	}
@@ -193,8 +187,7 @@ public class ConfigurationManager {
 	public void loadSpawn() {
 		@SuppressWarnings("resource")
 		Config data = new Config(FILES_PATH + "spawn.yml");
-		spawn = data.getAs("spawn", Position.class,
-				Position.fromLocation(Bukkit.getWorlds().get(0).getSpawnLocation()));
+		spawn = data.getAs("spawn", Position.class, Position.fromLocation(Bukkit.getWorlds().get(0).getSpawnLocation()));
 	}
 
 	public Config getMain() {

@@ -22,7 +22,7 @@ public class Msg extends CssCommand {
 
 	@Override
 	public void register() {
-		if (isRegistered())
+		if(isRegistered())
 			return;
 
 		CommandStructure<CommandSender> cmd = CommandStructure.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
@@ -32,17 +32,17 @@ public class Msg extends CssCommand {
 		cmd.argument("$CONSOLE", 1, (sender, structure, args) -> {
 			msgUsage(sender, "cmd");
 		}, (sender, structure, args) -> sender instanceof Player ? Arrays.asList("$CONSOLE") : Collections.emptyList()) // Create tab completer without console option, if sender isn't player
-				.argument(null, -1, (sender, structure, args) -> { // Message argument
-					sendMessage(sender, Bukkit.getConsoleSender(), StringUtils.buildString(1, args));
-				}, (sender, structure, args) -> Arrays.asList("{message}"));
+		        .argument(null, -1, (sender, structure, args) -> { // Message argument
+			        sendMessage(sender, Bukkit.getConsoleSender(), StringUtils.buildString(1, args));
+		        }, (sender, structure, args) -> Arrays.asList("{message}"));
 		// player
 		cmd.selector(Selector.PLAYER, (sender, structure, args) -> { // Player argument
 			msgUsage(sender, "cmd");
 		}, (sender, structure, args) -> { // Tab completer
 			Collection<? extends Player> onlinePlayers = BukkitLoader.getOnlinePlayers();
 			List<String> players = new ArrayList<>(onlinePlayers.size());
-			for (Player player : onlinePlayers)
-				if (!player.equals(sender))
+			for(Player player : onlinePlayers)
+				if(!player.equals(sender))
 					players.add(player.getName());
 			return players; // Create tab completer without sender's name
 		}).argument(null, -1, (sender, structure, args) -> { // Message argument
@@ -51,18 +51,18 @@ public class Msg extends CssCommand {
 
 		// register
 		List<String> cmds = getCommands();
-		if (!cmds.isEmpty())
+		if(!cmds.isEmpty())
 			this.cmd = addBypassSettings(cmd).build().register(cmds.remove(0), cmds.toArray(new String[0]));
 	}
 
 	public void sendMessage(CommandSender sender, CommandSender target, String message) {
 		String senderName = sender instanceof Player ? sender.getName() : "$CONSOLE";
 		String targetName = target instanceof Player ? target.getName() : "$CONSOLE";
-		if (senderName.equals(targetName)) {
+		if(senderName.equals(targetName)) {
 			msg(sender, "self");
 			return;
 		}
-		if (!MsgManager.get().trySendMessage(senderName, targetName)) {
+		if(!MsgManager.get().trySendMessage(senderName, targetName)) {
 			msg(sender, "not-accepting", renderer().placeholder("target", targetName));
 			return;
 		}
@@ -71,10 +71,10 @@ public class Msg extends CssCommand {
 		msg(target, "receive.target", ex);
 		MsgManager.get().setReply(sender instanceof Player ? senderName : null, target instanceof Player ? targetName : null);
 		MsgManager.get().setReply(target instanceof Player ? targetName : null, sender instanceof Player ? senderName : null);
-		for (Player player : BukkitLoader.getOnlinePlayers())
-			if (MsgManager.get().getSpy(player.getName()) && !player.equals(sender) && !player.equals(target))
+		for(Player player : BukkitLoader.getOnlinePlayers())
+			if(MsgManager.get().getSpy(player.getName()) && !player.equals(sender) && !player.equals(target))
 				msg(player, "receive.spy", ex);
-		if (!Bukkit.getConsoleSender().equals(sender) && !Bukkit.getConsoleSender().equals(target))
+		if(!Bukkit.getConsoleSender().equals(sender) && !Bukkit.getConsoleSender().equals(target))
 			msg(Bukkit.getConsoleSender(), "receive.spy", ex);
 	}
 }

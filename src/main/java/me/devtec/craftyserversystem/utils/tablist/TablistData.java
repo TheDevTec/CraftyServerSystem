@@ -20,9 +20,9 @@ public class TablistData {
 
 	@Override
 	public boolean equals(Object object) {
-		if (object instanceof TablistData)
+		if(object instanceof TablistData)
 			return ((TablistData) object).header.equals(header) && ((TablistData) object).footer.equals(footer) && ((TablistData) object).tabNameFormat.equals(tabNameFormat)
-					&& ((TablistData) object).tabPrefix.equals(tabPrefix) && ((TablistData) object).tabSuffix.equals(tabSuffix);
+			        && ((TablistData) object).tabPrefix.equals(tabPrefix) && ((TablistData) object).tabSuffix.equals(tabSuffix);
 		return false;
 	}
 
@@ -109,30 +109,30 @@ public class TablistData {
 
 	public boolean isComplete() {
 		return header != null && footer != null && tabNameFormat != null && tabPrefix != null && tabSuffix != null && yellowNumberPlaceholder != null && displayYellowNumberMode != null
-				&& tagPrefix != null && tagSuffix != null;
+		        && tagPrefix != null && tagSuffix != null;
 	}
 
 	public TablistData fillMissing(TablistData additional) {
-		if (header == null)
+		if(header == null)
 			header = additional.header;
-		if (footer == null)
+		if(footer == null)
 			footer = additional.footer;
-		if (tabNameFormat == null)
+		if(tabNameFormat == null)
 			tabNameFormat = additional.tabNameFormat;
-		if (tabPrefix == null)
+		if(tabPrefix == null)
 			tabPrefix = additional.tabPrefix;
-		if (tabSuffix == null)
+		if(tabSuffix == null)
 			tabSuffix = additional.tabSuffix;
-		if (tagPrefix == null)
+		if(tagPrefix == null)
 			tagPrefix = additional.tagPrefix;
-		if (tagSuffix == null)
+		if(tagSuffix == null)
 			tagSuffix = additional.tagSuffix;
-		if (yellowNumberPlaceholder == null)
+		if(yellowNumberPlaceholder == null)
 			yellowNumberPlaceholder = additional.yellowNumberPlaceholder;
-		if (displayYellowNumberMode == null)
+		if(displayYellowNumberMode == null)
 			displayYellowNumberMode = additional.displayYellowNumberMode;
-		if(nametagLines==null)
-			nametagLines=additional.nametagLines;
+		if(nametagLines == null)
+			nametagLines = additional.nametagLines;
 		return this;
 	}
 

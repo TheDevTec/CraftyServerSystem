@@ -41,76 +41,71 @@ public class DeathListener implements CssListener {
 		keepExp = getConfig().getBoolean("death.keep-exp");
 		priorities = new SpawnPriority[getConfig().getStringList("respawn-priority").size()];
 		int pos = 0;
-		for (String line : getConfig().getStringList("respawn-priority"))
+		for(String line : getConfig().getStringList("respawn-priority"))
 			try {
 				priorities[pos++] = SpawnPriority.valueOf(line.toUpperCase());
-			} catch (NoSuchFieldError | Exception e) {
-				Loader.getPlugin().getLogger()
-						.warning("SpawnPriority named " + line + " doesn't exist! Check your death.yml file.");
+			} catch(NoSuchFieldError | Exception e) {
+				Loader.getPlugin().getLogger().warning("SpawnPriority named " + line + " doesn't exist! Check your death.yml file.");
 			}
 	}
 
 	@EventHandler
 	public void onDeath(PlayerDeathEvent e) {
-		if (hideMessage)
+		if(hideMessage)
 			e.setDeathMessage(null);
 
-		if (keepInventory || e.getEntity().hasPermission("css.death.keep-inventory")) {
+		if(keepInventory || e.getEntity().hasPermission("css.death.keep-inventory")) {
 			e.setKeepInventory(true);
 			e.getDrops().clear();
 		}
 
-		if (keepExp || e.getEntity().hasPermission("css.death.keep-exp")) {
+		if(keepExp || e.getEntity().hasPermission("css.death.keep-exp")) {
 			e.setKeepLevel(true);
 			e.setDroppedExp(0);
 		}
 
-		TextRenderer renderer = TextRenderer.forTarget(e.getEntity().getUniqueId())
-				.placeholder("prefix", API.get().getConfigManager().getPrefix())
-				.placeholder("player", e.getEntity().getName()).colorize();
+		TextRenderer renderer = TextRenderer.forTarget(e.getEntity().getUniqueId()).placeholder("prefix", API.get().getConfigManager().getPrefix()).placeholder("player", e.getEntity().getName())
+		        .colorize();
 
-		API.get().getMsgManager().sendMessageFromFile(getConfig(), "death.broadcast", renderer,
-				BukkitLoader.getOnlinePlayers());
+		API.get().getMsgManager().sendMessageFromFile(getConfig(), "death.broadcast", renderer, BukkitLoader.getOnlinePlayers());
 
-		for (String command : getConfig().getStringList("death.commands"))
-			Bukkit.dispatchCommand(Bukkit.getConsoleSender(), renderer
-					.render(PlaceholderAPI.apply(command, e.getEntity().getUniqueId()), e.getEntity().getUniqueId()));
+		for(String command : getConfig().getStringList("death.commands"))
+			Bukkit.dispatchCommand(Bukkit.getConsoleSender(), renderer.render(PlaceholderAPI.apply(command, e.getEntity().getUniqueId()), e.getEntity().getUniqueId()));
 	}
 
 	@EventHandler
 	public void onRespawn(PlayerRespawnEvent e) {
-		if (priorities == null)
+		if(priorities == null)
 			return;
 		Location found = null;
-		for (SpawnPriority priority : priorities) {
-			if (priority != null)
-				switch (priority) {
-				case BED:
-					found = e.getPlayer().getRespawnLocation();
-					break;
-				case HOME:
-					Set<String> homes = HomeManager.get().getHomes(e.getPlayer().getName());
-					if (homes.isEmpty())
-						continue;
-					if (homes.contains("home"))
-						found = HomeManager.get().getHomePosition(e.getPlayer().getName(), "home").toLocation();
-					else
-						found = HomeManager.get().getHomePosition(e.getPlayer().getName(), homes.iterator().next())
-								.toLocation();
-					break;
-				case SPAWN:
-					Position spawn = API.get().getConfigManager().getSpawn();
-					if (spawn != null && spawn.getWorld() != null)
-						found = spawn.toLocation();
-					break;
-				case WORLD:
-					found = e.getPlayer().getWorld().getSpawnLocation();
-					break;
+		for(SpawnPriority priority : priorities) {
+			if(priority != null)
+				switch(priority) {
+					case BED :
+						found = e.getPlayer().getRespawnLocation();
+						break;
+					case HOME :
+						Set<String> homes = HomeManager.get().getHomes(e.getPlayer().getName());
+						if(homes.isEmpty())
+							continue;
+						if(homes.contains("home"))
+							found = HomeManager.get().getHomePosition(e.getPlayer().getName(), "home").toLocation();
+						else
+							found = HomeManager.get().getHomePosition(e.getPlayer().getName(), homes.iterator().next()).toLocation();
+						break;
+					case SPAWN :
+						Position spawn = API.get().getConfigManager().getSpawn();
+						if(spawn != null && spawn.getWorld() != null)
+							found = spawn.toLocation();
+						break;
+					case WORLD :
+						found = e.getPlayer().getWorld().getSpawnLocation();
+						break;
 				}
-			if (found != null)
+			if(found != null)
 				break;
 		}
-		if (found != null)
+		if(found != null)
 			e.setRespawnLocation(found);
 	}
 

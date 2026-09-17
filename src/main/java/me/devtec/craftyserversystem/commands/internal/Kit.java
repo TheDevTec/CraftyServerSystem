@@ -36,29 +36,26 @@ public class Kit extends CssCommand {
 
 	@Override
 	public void register() {
-		if (isRegistered())
+		if(isRegistered())
 			return;
 
 		reload();
-		CommandStructure<CommandSender> cmd = CommandStructure
-				.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
-					if (!(sender instanceof Player)) {
-						msgUsage(sender, "console");
-						return;
-					}
-					msgUsage(sender, "cmd");
-				}).permission(getPerm("cmd"));
+		CommandStructure<CommandSender> cmd = CommandStructure.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
+			if(!(sender instanceof Player)) {
+				msgUsage(sender, "console");
+				return;
+			}
+			msgUsage(sender, "cmd");
+		}).permission(getPerm("cmd"));
 		// kit
 		CommandStructure<CommandSender> kitCmd = cmd.callableArgument((sender, structure, args) -> {
 			List<String> value = new ArrayList<>();
-			for (KitSample sample : kits.values())
-				if ((sample.getPermission() == null
-						|| sample.getPermission() != null && sender.hasPermission(sample.getPermission()))
-						&& sample.getCooldown().tryWithoutWriting(sender))
+			for(KitSample sample : kits.values())
+				if((sample.getPermission() == null || sample.getPermission() != null && sender.hasPermission(sample.getPermission())) && sample.getCooldown().tryWithoutWriting(sender))
 					value.add(sample.getName());
 			return value;
 		}, (sender, structure, args) -> {
-			if (!(sender instanceof Player)) {
+			if(!(sender instanceof Player)) {
 				msgUsage(sender, "console");
 				return;
 			}
@@ -66,83 +63,79 @@ public class Kit extends CssCommand {
 		});
 
 		kitCmd.selector(Selector.ENTITY_SELECTOR, (sender, structure, args) -> {
-			for (Player player : selector(sender, args[1]))
+			for(Player player : selector(sender, args[1]))
 				useKit(player, kits.get(args[0].toLowerCase()), false, false, true, sender);
 		}).permission(getPerm("other")).callableArgument((sender, structure, args) -> {
-			if (args[2].isEmpty())
-				return perm(sender, "no-cost") && perm(sender, "no-cooldown") ? Arrays.asList("-c", "-w", "-s")
-						: perm(sender, "no-cost") ? Arrays.asList("-c", "-s")
-								: perm(sender, "no-cooldown") ? Arrays.asList("-w", "-s") : Arrays.asList("-s");
-			if (args[2].indexOf('-') != -1) {
+			if(args[2].isEmpty())
+				return perm(sender, "no-cost") && perm(sender, "no-cooldown")
+				        ? Arrays.asList("-c", "-w", "-s")
+				        : perm(sender, "no-cost") ? Arrays.asList("-c", "-s") : perm(sender, "no-cooldown") ? Arrays.asList("-w", "-s") : Arrays.asList("-s");
+			if(args[2].indexOf('-') != -1) {
 				List<String> result = new ArrayList<>();
 				result.add(args[2]);
-				if (args[2].indexOf('c') == -1 && perm(sender, "no-cost"))
+				if(args[2].indexOf('c') == -1 && perm(sender, "no-cost"))
 					result.add(args[2] + 'c');
-				if (args[2].indexOf('w') == -1 && perm(sender, "no-cooldown"))
+				if(args[2].indexOf('w') == -1 && perm(sender, "no-cooldown"))
 					result.add(args[2] + 'w');
-				if (args[2].indexOf('s') == -1)
+				if(args[2].indexOf('s') == -1)
 					result.add(args[2] + 's');
 				return result;
 			}
 			return Collections.emptyList();
 		}, 1, (sender, structure, args) -> {
-			for (Player player : selector(sender, args[1]))
-				useKit(player, kits.get(args[0].toLowerCase()),
-						perm(sender, "no-cost") ? args[2].indexOf('c') != -1 : false,
-						perm(sender, "no-cooldown") ? args[2].indexOf('w') != -1 : false, args[2].indexOf('s') == -1,
-						sender);
+			for(Player player : selector(sender, args[1]))
+				useKit(player, kits.get(args[0].toLowerCase()), perm(sender, "no-cost") ? args[2].indexOf('c') != -1 : false, perm(sender, "no-cooldown") ? args[2].indexOf('w') != -1 : false,
+				        args[2].indexOf('s') == -1, sender);
 		});
 
 		kitCmd.callableArgument((sender, structure, args) -> {
-			if (args[1].isEmpty())
-				return perm(sender, "no-cost") && perm(sender, "no-cooldown") ? Arrays.asList("-c", "-w", "-s")
-						: perm(sender, "no-cost") ? Arrays.asList("-c", "-s")
-								: perm(sender, "no-cooldown") ? Arrays.asList("-w", "-s") : Arrays.asList("-s");
-			if (args[1].indexOf('-') != -1) {
+			if(args[1].isEmpty())
+				return perm(sender, "no-cost") && perm(sender, "no-cooldown")
+				        ? Arrays.asList("-c", "-w", "-s")
+				        : perm(sender, "no-cost") ? Arrays.asList("-c", "-s") : perm(sender, "no-cooldown") ? Arrays.asList("-w", "-s") : Arrays.asList("-s");
+			if(args[1].indexOf('-') != -1) {
 				List<String> result = new ArrayList<>();
 				result.add(args[1]);
-				if (args[1].indexOf('c') == -1 && perm(sender, "no-cost"))
+				if(args[1].indexOf('c') == -1 && perm(sender, "no-cost"))
 					result.add(args[1] + 'c');
-				if (args[1].indexOf('w') == -1 && perm(sender, "no-cooldown"))
+				if(args[1].indexOf('w') == -1 && perm(sender, "no-cooldown"))
 					result.add(args[1] + 'w');
-				if (args[1].indexOf('s') == -1)
+				if(args[1].indexOf('s') == -1)
 					result.add(args[1] + 's');
 				return result;
 			}
 			return Collections.emptyList();
 		}, 1, (sender, structure, args) -> {
-			if (!(sender instanceof Player)) {
+			if(!(sender instanceof Player)) {
 				msgUsage(sender, "console");
 				return;
 			}
-			useKit((Player) sender, kits.get(args[0].toLowerCase()),
-					perm(sender, "no-cost") ? args[1].indexOf('c') != -1 : false,
-					perm(sender, "no-cooldown") ? args[1].indexOf('w') != -1 : false, args[1].indexOf('s') == -1,
-					sender);
+			useKit((Player) sender, kits.get(args[0].toLowerCase()), perm(sender, "no-cost") ? args[1].indexOf('c') != -1 : false, perm(sender, "no-cooldown") ? args[1].indexOf('w') != -1 : false,
+			        args[1].indexOf('s') == -1, sender);
 		});
 
 		// register
 		List<String> cmds = getCommands();
-		if (!cmds.isEmpty())
+		if(!cmds.isEmpty())
 			this.cmd = addBypassSettings(cmd).build().register(cmds.remove(0), cmds.toArray(new String[0]));
 	}
 
 	@Override
 	public void unregister() {
 		super.unregister();
-		for (KitSample sample : kits.values())
+		for(KitSample sample : kits.values())
 			API.get().getCooldownManager().unregister(sample.getCooldown().id());
 		kits.clear();
 	}
 
 	@Override
 	public void reload() {
-		for (KitSample sample : kits.values())
+		for(KitSample sample : kits.values())
 			API.get().getCooldownManager().unregister(sample.getCooldown().id());
 		kits.clear();
 
 		Config config = API.get().getConfigManager().getKits();
-		for (String key : config.getKeys()) {
+		for(String key : config.getKeys()) {
 			KitSample sample = new KitSample(key);
 			sample.setPermission(config.getString(key + ".permission"));
 			sample.setCost(config.getDouble(key + ".settings.cost"));
@@ -150,42 +143,39 @@ public class Kit extends CssCommand {
 			sample.setDropItems(config.getBoolean(key + ".settings.drop-items-when-full-inv"));
 			sample.setMessages(config.getStringList(key + ".messages"));
 			sample.setCommands(config.getStringList(key + ".commands"));
-			for (String content : config.getStringList(key + ".contents")) {
-				if (content.isEmpty())
+			for(String content : config.getStringList(key + ".contents")) {
+				if(content.isEmpty())
 					continue;
 				int slot = 0;
-				if (Character.isDigit(content.charAt(0))) { // slot!
+				if(Character.isDigit(content.charAt(0))) { // slot!
 					int index = content.indexOf(':');
 					slot = ParseUtils.getInt(content, 0, index);
 					content = content.substring(index + 1);
 				} else
-					while (true)
-						if (sample.getContents().get(slot) != null)
+					while(true)
+						if(sample.getContents().get(slot) != null)
 							++slot;
 						else
 							break;
 				int index = content.indexOf('{');
-				if (index == -1) {
+				if(index == -1) {
 					Optional<XMaterial> material = XMaterial.matchXMaterial(content.toUpperCase());
-					if (material.isPresent())
+					if(material.isPresent())
 						sample.getContents().put(slot, material.get().parseItem());
 					else {
 						Material bukkitType = Material.getMaterial(content);
-						if (bukkitType != null)
+						if(bukkitType != null)
 							sample.getContents().put(slot, new ItemStack(bukkitType));
 						else
-							Loader.getPlugin().getLogger().warning("An error occurred while building kit '" + key
-									+ "'. Material '" + content + "' is invalid. '");
+							Loader.getPlugin().getLogger().warning("An error occurred while building kit '" + key + "'. Material '" + content + "' is invalid. '");
 					}
 				} else {
 					@SuppressWarnings("unchecked")
-					Map<String, Object> json = new HashMap<>(
-							(Map<String, Object>) Json.reader().simpleRead(content.substring(index)));
+					Map<String, Object> json = new HashMap<>((Map<String, Object>) Json.reader().simpleRead(content.substring(index)));
 					json.put("type", content.substring(0, index));
 					ItemStack stack = ItemMaker.loadFromJson(json);
-					if (stack == null)
-						Loader.getPlugin().getLogger().warning("An error occurred while building kit '" + key
-								+ "'. Material '" + json.get("type") + "' is invalid. '");
+					if(stack == null)
+						Loader.getPlugin().getLogger().warning("An error occurred while building kit '" + key + "'. Material '" + json.get("type") + "' is invalid. '");
 					else
 						sample.getContents().put(slot, stack);
 				}
@@ -199,35 +189,32 @@ public class Kit extends CssCommand {
 		return kits;
 	}
 
-	public void useKit(Player target, KitSample kit, boolean ignoreCost, boolean ignoreCooldown, boolean sendMessage,
-			CommandSender sender) {
-		TextRenderer placeholders = renderer(target).placeholder("kit", kit.getName())
-				.placeholder("cost", kit.getCost()).placeholder("admin", sender.getName())
-				.placeholder("target", target.getName()).placeholder("player", target.getName());
-		if (!ignoreCooldown && !kit.getCooldown().tryWithoutWriting(target)) {
+	public void useKit(Player target, KitSample kit, boolean ignoreCost, boolean ignoreCooldown, boolean sendMessage, CommandSender sender) {
+		TextRenderer placeholders = renderer(target).placeholder("kit", kit.getName()).placeholder("cost", kit.getCost()).placeholder("admin", sender.getName()).placeholder("target", target.getName())
+		        .placeholder("player", target.getName());
+		if(!ignoreCooldown && !kit.getCooldown().tryWithoutWriting(target)) {
 			long currentTime = System.currentTimeMillis() / 1000;
 			Config file = me.devtec.shared.API.getUser(target.getName());
 			long lastUsedTime = file.getLong("css.cd." + kit.getCooldown().id());
 			long nextUsageIn = lastUsedTime - currentTime;
 			kit.getCooldown().accept(target);
 			placeholders.placeholder("time", StringUtils.formatDouble(FormatType.NORMAL, nextUsageIn));
-			if (sender.equals(target)) {
-				if (sendMessage)
+			if(sender.equals(target)) {
+				if(sendMessage)
 					msg(target, "in-cooldown.self", placeholders);
 			} else {
-				if (sendMessage)
+				if(sendMessage)
 					msg(target, "in-cooldown.target", placeholders);
 				msg(sender, "in-cooldown.sender", placeholders);
 			}
 			return;
 		}
-		if (!ignoreCost && kit.getCost() > 0
-				&& API.get().getEconomyHook().has(target.getName(), target.getWorld().getName(), kit.getCost())) {
-			if (sender.equals(target)) {
-				if (sendMessage)
+		if(!ignoreCost && kit.getCost() > 0 && API.get().getEconomyHook().has(target.getName(), target.getWorld().getName(), kit.getCost())) {
+			if(sender.equals(target)) {
+				if(sendMessage)
 					msg(target, "enough-money.self", placeholders);
 			} else {
-				if (sendMessage)
+				if(sendMessage)
 					msg(target, "enough-money.target", placeholders);
 				msg(sender, "enough-money.sender", placeholders);
 			}
@@ -235,34 +222,34 @@ public class Kit extends CssCommand {
 		}
 		API.get().getMsgManager().sendMessageFromFile(kit.getMessages(), placeholders, target);
 		BukkitLoader.getNmsProvider().postToMainThread(() -> {
-			if (kit.isOverrideContents())
-				for (int i = 0; i < 40; ++i) {
+			if(kit.isOverrideContents())
+				for(int i = 0; i < 40; ++i) {
 					ItemStack stack = kit.getContents().get(i);
-					if (stack != null)
+					if(stack != null)
 						target.getInventory().setItem(i, stack);
 				}
 			else
-				for (int i = 0; i < 40; ++i) {
+				for(int i = 0; i < 40; ++i) {
 					ItemStack stack = kit.getContents().get(i);
-					if (stack != null)
-						if (target.getInventory().getItem(i) == null)
+					if(stack != null)
+						if(target.getInventory().getItem(i) == null)
 							target.getInventory().setItem(i, stack);
-						else if (target.getInventory().firstEmpty() == -1) {
-							if (kit.isDropItems())
+						else if(target.getInventory().firstEmpty() == -1) {
+							if(kit.isDropItems())
 								target.getWorld().dropItem(target.getLocation(), stack);
 						} else
 							target.getInventory().addItem(stack);
 				}
 			placeholders.colorizeBeforePlaceholders();
-			for (String cmd : kit.getCommands())
+			for(String cmd : kit.getCommands())
 				Bukkit.dispatchCommand(Bukkit.getConsoleSender(), placeholders.render(cmd));
 			placeholders.colorize();
 		});
-		if (sender.equals(target)) {
-			if (sendMessage)
+		if(sender.equals(target)) {
+			if(sendMessage)
 				msg(target, "used.self", placeholders);
 		} else {
-			if (sendMessage)
+			if(sendMessage)
 				msg(target, "used.target", placeholders);
 			msg(sender, "used.sender", placeholders);
 		}

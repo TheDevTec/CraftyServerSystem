@@ -19,7 +19,7 @@ import me.devtec.shared.utility.TimeUtils;
 public class KitSample {
 
 	private final String name;
-	private Map<Integer,ItemStack> contents = new HashMap<>();
+	private Map<Integer, ItemStack> contents = new HashMap<>();
 	private List<String> commands = new ArrayList<>();
 	private List<String> messages = new ArrayList<>();
 	private double cost;
@@ -32,20 +32,20 @@ public class KitSample {
 		this.name = name;
 
 		String bypassPerm = API.get().getConfigManager().getKits().getString(name + ".settings.cooldown.bypass-perm");
-		if (bypassPerm == null || bypassPerm.trim().isEmpty())
+		if(bypassPerm == null || bypassPerm.trim().isEmpty())
 			bypassPerm = null;
 		cooldown = new CooldownHolder("kit." + name) {
 
 			@Override
 			public boolean accept(CommandSender sender) {
-				if (getBypassPerm() != null && sender.hasPermission(getBypassPerm()))
+				if(getBypassPerm() != null && sender.hasPermission(getBypassPerm()))
 					return true; // Skip whole cooldown checker
 
 				long currentTime = System.currentTimeMillis() / 1000;
 				Config file = me.devtec.shared.API.getUser(sender.getName());
 				long lastUsedTime = file.getLong("css.cd." + id());
 				long nextUsageIn = lastUsedTime - currentTime;
-				if (nextUsageIn <= 0) {
+				if(nextUsageIn <= 0) {
 					file.set("css.cd." + id(), currentTime + getTime());
 					return true;
 				}
@@ -59,7 +59,7 @@ public class KitSample {
 
 			@Override
 			public long remainingTime(CommandSender sender) {
-				if (getBypassPerm() != null && sender.hasPermission(getBypassPerm()))
+				if(getBypassPerm() != null && sender.hasPermission(getBypassPerm()))
 					return 0; // Skip whole cooldown checker
 
 				long currentTime = System.currentTimeMillis() / 1000;

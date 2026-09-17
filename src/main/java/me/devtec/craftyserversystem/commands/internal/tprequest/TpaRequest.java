@@ -41,7 +41,7 @@ public class TpaRequest {
 	}
 
 	public void teleport() {
-		if (teleportToTarget)
+		if(teleportToTarget)
 			Bukkit.getPlayer(sender).teleport(Bukkit.getPlayer(target));
 		else
 			Bukkit.getPlayer(target).teleport(Bukkit.getPlayer(sender));
@@ -49,7 +49,7 @@ public class TpaRequest {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (obj instanceof TpaRequest) {
+		if(obj instanceof TpaRequest) {
 			TpaRequest req = (TpaRequest) obj;
 			return req.sender.equals(sender) && req.target.equals(target) || req.sender.equals(target) && req.target.equals(sender);
 		}

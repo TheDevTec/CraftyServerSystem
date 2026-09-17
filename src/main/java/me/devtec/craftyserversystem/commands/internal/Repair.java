@@ -18,59 +18,55 @@ public class Repair extends CssCommand {
 
 	@Override
 	public void register() {
-		if (isRegistered())
+		if(isRegistered())
 			return;
 
-		CommandStructure<CommandSender> cmd = CommandStructure
-				.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
-					if (sender instanceof Player)
-						repairItemInHand(sender, (Player) sender, false);
-					else
-						msgUsage(sender, "cmd");
-				}).permission(getPerm("cmd"));
+		CommandStructure<CommandSender> cmd = CommandStructure.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
+			if(sender instanceof Player)
+				repairItemInHand(sender, (Player) sender, false);
+			else
+				msgUsage(sender, "cmd");
+		}).permission(getPerm("cmd"));
 		cmd.selector(Selector.PLAYER, (sender, structure, args) -> {
 			repairItemInHand(sender, Bukkit.getPlayer(args[0]), false);
 		}).permission(getPerm("other")).argument("-s", (sender, structure, args) -> {
 			repairItemInHand(sender, Bukkit.getPlayer(args[0]), true);
 		});
 		cmd.argument("-s", (sender, structure, args) -> {
-			if (sender instanceof Player)
+			if(sender instanceof Player)
 				repairItemInHand(sender, (Player) sender, true);
 			else
 				msgUsage(sender, "cmd");
 		});
 		// register
 		List<String> cmds = getCommands();
-		if (!cmds.isEmpty())
+		if(!cmds.isEmpty())
 			this.cmd = addBypassSettings(cmd).build().register(cmds.remove(0), cmds.toArray(new String[0]));
 	}
 
 	public void repairItemInHand(CommandSender sender, Player player, boolean silent) {
 		ItemStack item = player.getEquipment().getItemInHand();
-		if (item == null || item.getType() == Material.AIR || item.getAmount() <= 0) {
-			if (!silent)
-				if (sender.equals(player))
+		if(item == null || item.getType() == Material.AIR || item.getAmount() <= 0) {
+			if(!silent)
+				if(sender.equals(player))
 					msg(sender, "self.empty-hand");
 				else
 					msg(sender, "other.empty-hand", renderer().placeholder("target", player.getName()));
 			return;
 		}
-		if (item.getType().getMaxDurability() <= 0) {
-			if (!silent) {
-				TextRenderer ex = renderer().placeholder("sender", sender.getName())
-						.placeholder("target", player.getName())
-						.placeholder("item", XMaterial.matchXMaterial(item).getFormattedName());
-				if (sender.equals(player))
+		if(item.getType().getMaxDurability() <= 0) {
+			if(!silent) {
+				TextRenderer ex = renderer().placeholder("sender", sender.getName()).placeholder("target", player.getName()).placeholder("item", XMaterial.matchXMaterial(item).getFormattedName());
+				if(sender.equals(player))
 					msg(sender, "self.cannot-be-fixed", ex);
 				else
 					msg(sender, "other.cannot-be-fixed", ex);
 			}
 			return;
 		}
-		if (!silent) {
-			TextRenderer ex = renderer().placeholder("sender", sender.getName()).placeholder("target", player.getName())
-					.placeholder("item", XMaterial.matchXMaterial(item).getFormattedName());
-			if (sender.equals(player))
+		if(!silent) {
+			TextRenderer ex = renderer().placeholder("sender", sender.getName()).placeholder("target", player.getName()).placeholder("item", XMaterial.matchXMaterial(item).getFormattedName());
+			if(sender.equals(player))
 				msg(sender, "self.fixed", ex);
 			else {
 				msg(sender, "other.fixed.sender", ex);

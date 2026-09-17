@@ -87,45 +87,42 @@ public class Invsee extends CssCommand {
 	private final int CRAFT_2_SLOT = 14;
 	private final int CRAFT_3_SLOT = 15;
 
-	private static ItemGUI EMPTY = new EmptyItemGUI(
-			ItemMaker.of(XMaterial.BLACK_STAINED_GLASS_PANE).displayName("&7").build());
+	private static ItemGUI EMPTY = new EmptyItemGUI(ItemMaker.of(XMaterial.BLACK_STAINED_GLASS_PANE).displayName("&7").build());
 
 	@Override
 	public void register() {
-		if (isRegistered())
+		if(isRegistered())
 			return;
 
-		if (Ref.isAtLeast(10, 0) && Ref.isBefore(13, 0)) // 1.10 - 1.12
+		if(Ref.isAtLeast(10, 0) && Ref.isBefore(13, 0)) // 1.10 - 1.12
 			swapItemListener = new Listener() {
 
 				@EventHandler(ignoreCancelled = true)
 				public void onSwap(PlayerSwapHandItemsEvent e) {
 					GUI gui = guiHandler.get(e.getPlayer().getUniqueId());
-					if (gui != null) {
-						gui.setItem(18 + e.getPlayer().getInventory().getHeldItemSlot(),
-								new EmptyItemGUI(e.getMainHandItem()).setUnstealable(false));
+					if(gui != null) {
+						gui.setItem(18 + e.getPlayer().getInventory().getHeldItemSlot(), new EmptyItemGUI(e.getMainHandItem()).setUnstealable(false));
 						gui.setItem(OFFHAND_SLOT, new EmptyItemGUI(e.getOffHandItem()).setUnstealable(false));
 					}
 				}
 			};
-		else if (Ref.isAfter(13, 0)) // 1.14+
+		else if(Ref.isAfter(13, 0)) // 1.14+
 			swapItemListener = new Listener() {
 
 				@EventHandler(ignoreCancelled = true)
 				public void onSwap(PlayerSwapHandItemsEvent e) {
 					GUI gui = guiHandler.get(e.getPlayer().getUniqueId());
-					if (gui != null) {
-						gui.setItem(18 + e.getPlayer().getInventory().getHeldItemSlot(),
-								new EmptyItemGUI(e.getMainHandItem()).setUnstealable(false));
+					if(gui != null) {
+						gui.setItem(18 + e.getPlayer().getInventory().getHeldItemSlot(), new EmptyItemGUI(e.getMainHandItem()).setUnstealable(false));
 						gui.setItem(OFFHAND_SLOT, new EmptyItemGUI(e.getOffHandItem()).setUnstealable(false));
 					}
 				}
 
 				@EventHandler(ignoreCancelled = true)
 				public void onDispense(BlockDispenseArmorEvent e) {
-					if (e.getTargetEntity().getType() == EntityType.PLAYER) {
+					if(e.getTargetEntity().getType() == EntityType.PLAYER) {
 						GUI gui = guiHandler.get(e.getTargetEntity().getUniqueId());
-						if (gui != null)
+						if(gui != null)
 							new Tasker() {
 
 								@Override
@@ -142,15 +139,14 @@ public class Invsee extends CssCommand {
 			@EventHandler(ignoreCancelled = true)
 			public void onClick(InventoryDragEvent e) {
 				GUI gui = guiHandler.get(e.getWhoClicked().getUniqueId());
-				if (gui != null) {
-					for (Entry<Integer, ItemStack> items : e.getNewItems().entrySet()) {
+				if(gui != null) {
+					for(Entry<Integer, ItemStack> items : e.getNewItems().entrySet()) {
 						int slot = items.getKey() + 18;
-						if (items.getKey() >= 36)
+						if(items.getKey() >= 36)
 							slot -= 36;
 						Inventory top = e.getWhoClicked().getOpenInventory().getTopInventory();
-						if (e.getWhoClicked().getOpenInventory().getBottomInventory()
-								.equals(e.getWhoClicked().getInventory()) && top.getType() == InventoryType.CRAFTING) {
-							if (items.getKey() == 0) { // result
+						if(e.getWhoClicked().getOpenInventory().getBottomInventory().equals(e.getWhoClicked().getInventory()) && top.getType() == InventoryType.CRAFTING) {
+							if(items.getKey() == 0) { // result
 								BukkitLoader.getNmsProvider().postToMainThread(() -> {
 									gui.setItem(CRAFT_0_SLOT, new EmptyItemGUI(top.getItem(1)).setUnstealable(false));
 									gui.setItem(CRAFT_1_SLOT, new EmptyItemGUI(top.getItem(2)).setUnstealable(false));
@@ -160,29 +156,29 @@ public class Invsee extends CssCommand {
 								});
 								return;
 							}
-							if (items.getKey() == 1)
+							if(items.getKey() == 1)
 								slot = CRAFT_0_SLOT;
-							else if (items.getKey() == 2)
+							else if(items.getKey() == 2)
 								slot = CRAFT_1_SLOT;
-							else if (items.getKey() == 3)
+							else if(items.getKey() == 3)
 								slot = CRAFT_2_SLOT;
-							else if (items.getKey() == 4)
+							else if(items.getKey() == 4)
 								slot = CRAFT_3_SLOT;
 						}
 
-						if (items.getKey() == 45)
+						if(items.getKey() == 45)
 							slot = OFFHAND_SLOT;
-						if (items.getKey() == 8)
+						if(items.getKey() == 8)
 							slot = BOOTS_SLOT;
-						if (items.getKey() == 7)
+						if(items.getKey() == 7)
 							slot = LEGGINGS_SLOT;
-						if (items.getKey() == 6)
+						if(items.getKey() == 6)
 							slot = CHESTPLATE_SLOT;
-						if (items.getKey() == 5)
+						if(items.getKey() == 5)
 							slot = HEAD_SLOT;
 						gui.setItem(slot, new EmptyItemGUI(items.getValue()).setUnstealable(false));
 					}
-					if (e.getCursor() == null)
+					if(e.getCursor() == null)
 						gui.remove(CURSOR_SLOT);
 					else
 						gui.setItem(CURSOR_SLOT, new EmptyItemGUI(e.getCursor()).setUnstealable(false));
@@ -192,14 +188,12 @@ public class Invsee extends CssCommand {
 			@EventHandler(ignoreCancelled = true)
 			public void onClick(InventoryClickEvent e) {
 				GUI gui = guiHandler.get(e.getWhoClicked().getUniqueId());
-				if (gui != null) {
+				if(gui != null) {
 					int slot = e.getSlot() + 18;
 					Inventory top = e.getWhoClicked().getOpenInventory().getTopInventory();
-					if (e.getClickedInventory() != null && e.getClickedInventory().getType() == InventoryType.CRAFTING
-							&& e.getWhoClicked().getOpenInventory().getBottomInventory()
-									.equals(e.getWhoClicked().getInventory())
-							&& top.getType() == InventoryType.CRAFTING) {
-						if (e.getSlot() == 0) { // result
+					if(e.getClickedInventory() != null && e.getClickedInventory().getType() == InventoryType.CRAFTING
+					        && e.getWhoClicked().getOpenInventory().getBottomInventory().equals(e.getWhoClicked().getInventory()) && top.getType() == InventoryType.CRAFTING) {
+						if(e.getSlot() == 0) { // result
 							BukkitLoader.getNmsProvider().postToMainThread(() -> {
 								gui.setItem(CRAFT_0_SLOT, new EmptyItemGUI(top.getItem(1)).setUnstealable(false));
 								gui.setItem(CRAFT_1_SLOT, new EmptyItemGUI(top.getItem(2)).setUnstealable(false));
@@ -209,116 +203,104 @@ public class Invsee extends CssCommand {
 							});
 							return;
 						}
-						if (e.getSlot() == 1)
+						if(e.getSlot() == 1)
 							slot = CRAFT_0_SLOT;
-						else if (e.getSlot() == 2)
+						else if(e.getSlot() == 2)
 							slot = CRAFT_1_SLOT;
-						else if (e.getSlot() == 3)
+						else if(e.getSlot() == 3)
 							slot = CRAFT_2_SLOT;
-						else if (e.getSlot() == 4)
+						else if(e.getSlot() == 4)
 							slot = CRAFT_3_SLOT;
 					}
 
-					if (e.getSlot() == 40)
+					if(e.getSlot() == 40)
 						slot = OFFHAND_SLOT;
-					if (e.getSlot() == 36)
+					if(e.getSlot() == 36)
 						slot = BOOTS_SLOT;
-					if (e.getSlot() == 37)
+					if(e.getSlot() == 37)
 						slot = LEGGINGS_SLOT;
-					if (e.getSlot() == 38)
+					if(e.getSlot() == 38)
 						slot = CHESTPLATE_SLOT;
-					if (e.getSlot() == 39)
+					if(e.getSlot() == 39)
 						slot = HEAD_SLOT;
 
-					switch (e.getAction()) {
-					case COLLECT_TO_CURSOR:
-					case MOVE_TO_OTHER_INVENTORY:
-						BukkitLoader.getNmsProvider()
-								.postToMainThread(() -> updateinv(gui, (Player) e.getWhoClicked()));
-						break;
-					case SWAP_WITH_CURSOR:
-						gui.setItem(slot, new EmptyItemGUI(e.getCursor()).setUnstealable(false));
-						gui.setItem(CURSOR_SLOT, new EmptyItemGUI(e.getCurrentItem()).setUnstealable(false));
-						break;
-					case DROP_ONE_CURSOR:
-					case DROP_ONE_SLOT:
-					case PLACE_ONE: {
-						gui.setItem(slot,
-								new EmptyItemGUI(e.getCurrentItem().getType() == Material.AIR ? asOne(e.getCursor())
-										: asQuantity(e.getCurrentItem(), e.getCurrentItem().getAmount() + 1))
-										.setUnstealable(false));
-						ItemStack cursor = subtract(e.getCursor(), 1);
-						if (cursor.getAmount() == 0)
-							gui.remove(CURSOR_SLOT);
-						else
-							gui.setItem(CURSOR_SLOT, new EmptyItemGUI(cursor).setUnstealable(false));
-						break;
-					}
-					case PLACE_SOME:
-						int remaining = e.getCurrentItem().getAmount() + e.getCursor().getAmount()
-								- e.getCurrentItem().getMaxStackSize();
-						gui.setItem(slot, new EmptyItemGUI(add(e.getCurrentItem(), e.getCursor().getAmount()))
-								.setUnstealable(false));
-						gui.setItem(CURSOR_SLOT,
-								new EmptyItemGUI(asQuantity(e.getCursor(), remaining)).setUnstealable(false));
-						break;
-					case PICKUP_HALF:
-						gui.setItem(slot,
-								new EmptyItemGUI(asQuantity(e.getCurrentItem(), e.getCurrentItem().getAmount() / 2))
-										.setUnstealable(false));
-						ItemStack cursor = subtract(e.getCursor(), e.getCursor().getAmount() / 2);
-						if (cursor.getAmount() == 0)
-							gui.remove(CURSOR_SLOT);
-						else
-							gui.setItem(CURSOR_SLOT, new EmptyItemGUI(cursor).setUnstealable(false));
-						break;
-					case PICKUP_ONE:
-						gui.setItem(slot, new EmptyItemGUI(asOne(e.getCurrentItem())).setUnstealable(false));
-						gui.setItem(CURSOR_SLOT, new EmptyItemGUI(e.getCursor()).setUnstealable(false));
-						break;
-					case PICKUP_SOME:
-						gui.setItem(slot, new EmptyItemGUI(e.getCurrentItem()).setUnstealable(false));
-						gui.setItem(CURSOR_SLOT, new EmptyItemGUI(e.getCursor()).setUnstealable(false));
-						break;
-					case PICKUP_ALL:
-						gui.removeItem(slot);
-						gui.setItem(CURSOR_SLOT, new EmptyItemGUI(e.getCurrentItem()).setUnstealable(false));
-						break;
-					case DROP_ALL_CURSOR:
-						gui.removeItem(CURSOR_SLOT);
-						break;
-					case DROP_ALL_SLOT:
-						gui.setItem(slot, new EmptyItemGUI(e.getCursor()).setUnstealable(false));
-						gui.removeItem(CURSOR_SLOT);
-						break;
-					case HOTBAR_MOVE_AND_READD:
-					case HOTBAR_SWAP:
-						ItemStack currentItem = e.getClick() == ClickType.NUMBER_KEY
-								? e.getWhoClicked().getInventory().getItem(e.getHotbarButton())
-								: e.getCurrentItem();
-						if (e.getCurrentItem().getType() == Material.AIR)
-							gui.remove(e.getHotbarButton() + 18);
-						else
-							gui.setItem(e.getHotbarButton() + 18,
-									new EmptyItemGUI(e.getCurrentItem()).setUnstealable(false));
-						if (currentItem == null)
-							gui.remove(slot);
-						else
-							gui.setItem(slot, new EmptyItemGUI(currentItem).setUnstealable(false));
-						break;
-					case PLACE_ALL:
-						gui.setItem(slot, new EmptyItemGUI(e.getCursor().isSimilar(e.getCurrentItem())
-								? asQuantity(e.getCursor(),
-										Math.min(e.getCursor().getAmount() + e.getCurrentItem().getAmount(),
-												e.getCursor().getMaxStackSize()))
-								: e.getCursor()).setUnstealable(false));
-						gui.removeItem(CURSOR_SLOT);
-						break;
-					case CLONE_STACK:
-						gui.setItem(CURSOR_SLOT, new EmptyItemGUI(e.getCurrentItem()).setUnstealable(false));
-						break;
-					default:
-						break;
+					switch(e.getAction()) {
+						case COLLECT_TO_CURSOR :
+						case MOVE_TO_OTHER_INVENTORY :
+							BukkitLoader.getNmsProvider().postToMainThread(() -> updateinv(gui, (Player) e.getWhoClicked()));
+							break;
+						case SWAP_WITH_CURSOR :
+							gui.setItem(slot, new EmptyItemGUI(e.getCursor()).setUnstealable(false));
+							gui.setItem(CURSOR_SLOT, new EmptyItemGUI(e.getCurrentItem()).setUnstealable(false));
+							break;
+						case DROP_ONE_CURSOR :
+						case DROP_ONE_SLOT :
+						case PLACE_ONE : {
+							gui.setItem(slot, new EmptyItemGUI(e.getCurrentItem().getType() == Material.AIR ? asOne(e.getCursor()) : asQuantity(e.getCurrentItem(), e.getCurrentItem().getAmount() + 1))
+							        .setUnstealable(false));
+							ItemStack cursor = subtract(e.getCursor(), 1);
+							if(cursor.getAmount() == 0)
+								gui.remove(CURSOR_SLOT);
+							else
+								gui.setItem(CURSOR_SLOT, new EmptyItemGUI(cursor).setUnstealable(false));
+							break;
+						}
+						case PLACE_SOME :
+							int remaining = e.getCurrentItem().getAmount() + e.getCursor().getAmount() - e.getCurrentItem().getMaxStackSize();
+							gui.setItem(slot, new EmptyItemGUI(add(e.getCurrentItem(), e.getCursor().getAmount())).setUnstealable(false));
+							gui.setItem(CURSOR_SLOT, new EmptyItemGUI(asQuantity(e.getCursor(), remaining)).setUnstealable(false));
+							break;
+						case PICKUP_HALF :
+							gui.setItem(slot, new EmptyItemGUI(asQuantity(e.getCurrentItem(), e.getCurrentItem().getAmount() / 2)).setUnstealable(false));
+							ItemStack cursor = subtract(e.getCursor(), e.getCursor().getAmount() / 2);
+							if(cursor.getAmount() == 0)
+								gui.remove(CURSOR_SLOT);
+							else
+								gui.setItem(CURSOR_SLOT, new EmptyItemGUI(cursor).setUnstealable(false));
+							break;
+						case PICKUP_ONE :
+							gui.setItem(slot, new EmptyItemGUI(asOne(e.getCurrentItem())).setUnstealable(false));
+							gui.setItem(CURSOR_SLOT, new EmptyItemGUI(e.getCursor()).setUnstealable(false));
+							break;
+						case PICKUP_SOME :
+							gui.setItem(slot, new EmptyItemGUI(e.getCurrentItem()).setUnstealable(false));
+							gui.setItem(CURSOR_SLOT, new EmptyItemGUI(e.getCursor()).setUnstealable(false));
+							break;
+						case PICKUP_ALL :
+							gui.removeItem(slot);
+							gui.setItem(CURSOR_SLOT, new EmptyItemGUI(e.getCurrentItem()).setUnstealable(false));
+							break;
+						case DROP_ALL_CURSOR :
+							gui.removeItem(CURSOR_SLOT);
+							break;
+						case DROP_ALL_SLOT :
+							gui.setItem(slot, new EmptyItemGUI(e.getCursor()).setUnstealable(false));
+							gui.removeItem(CURSOR_SLOT);
+							break;
+						case HOTBAR_MOVE_AND_READD :
+						case HOTBAR_SWAP :
+							ItemStack currentItem = e.getClick() == ClickType.NUMBER_KEY ? e.getWhoClicked().getInventory().getItem(e.getHotbarButton()) : e.getCurrentItem();
+							if(e.getCurrentItem().getType() == Material.AIR)
+								gui.remove(e.getHotbarButton() + 18);
+							else
+								gui.setItem(e.getHotbarButton() + 18, new EmptyItemGUI(e.getCurrentItem()).setUnstealable(false));
+							if(currentItem == null)
+								gui.remove(slot);
+							else
+								gui.setItem(slot, new EmptyItemGUI(currentItem).setUnstealable(false));
+							break;
+						case PLACE_ALL :
+							gui.setItem(slot,
+							        new EmptyItemGUI(e.getCursor().isSimilar(e.getCurrentItem())
+							                ? asQuantity(e.getCursor(), Math.min(e.getCursor().getAmount() + e.getCurrentItem().getAmount(), e.getCursor().getMaxStackSize()))
+							                : e.getCursor()).setUnstealable(false));
+							gui.removeItem(CURSOR_SLOT);
+							break;
+						case CLONE_STACK :
+							gui.setItem(CURSOR_SLOT, new EmptyItemGUI(e.getCurrentItem()).setUnstealable(false));
+							break;
+						default :
+							break;
 					}
 				}
 			}
@@ -350,14 +332,14 @@ public class Invsee extends CssCommand {
 			@EventHandler(ignoreCancelled = true)
 			public void onDrop(PlayerDropItemEvent e) {
 				GUI gui = guiHandler.get(e.getPlayer().getUniqueId());
-				if (gui != null)
+				if(gui != null)
 					updateinv(gui, e.getPlayer());
 			}
 
 			@EventHandler
 			public void onClose(InventoryCloseEvent e) {
 				GUI gui = guiHandler.get(e.getPlayer().getUniqueId());
-				if (gui != null)
+				if(gui != null)
 					new Tasker() {
 
 						@Override
@@ -370,7 +352,7 @@ public class Invsee extends CssCommand {
 			@EventHandler(ignoreCancelled = true)
 			public void onPickup(PlayerPickupItemEvent e) {
 				GUI gui = guiHandler.get(e.getPlayer().getUniqueId());
-				if (gui != null)
+				if(gui != null)
 					new Tasker() {
 
 						@Override
@@ -382,10 +364,9 @@ public class Invsee extends CssCommand {
 
 			@EventHandler
 			public void onUse(PlayerInteractEvent e) {
-				if (e.hasItem()
-						&& (e.getAction() == Action.RIGHT_CLICK_AIR || e.getAction() == Action.RIGHT_CLICK_BLOCK)) {
+				if(e.hasItem() && (e.getAction() == Action.RIGHT_CLICK_AIR || e.getAction() == Action.RIGHT_CLICK_BLOCK)) {
 					GUI gui = guiHandler.get(e.getPlayer().getUniqueId());
-					if (gui != null)
+					if(gui != null)
 						new Tasker() {
 
 							@Override
@@ -399,7 +380,7 @@ public class Invsee extends CssCommand {
 			@EventHandler(ignoreCancelled = true)
 			public void onEat(PlayerItemConsumeEvent e) {
 				GUI gui = guiHandler.get(e.getPlayer().getUniqueId());
-				if (gui != null)
+				if(gui != null)
 					BukkitLoader.getNmsProvider().postToMainThread(() -> updateinv(gui, e.getPlayer()));
 			}
 
@@ -411,19 +392,19 @@ public class Invsee extends CssCommand {
 			@EventHandler
 			public void onQuit(PlayerQuitEvent e) {
 				UUID target = e.getPlayer().getUniqueId();
-				if (!guiHandler.containsKey(target))
+				if(!guiHandler.containsKey(target))
 					return;
 
 				new Tasker() {
 					@Override
 					public void run() {
-						if (Bukkit.getPlayer(target) != null || !guiHandler.containsKey(target))
+						if(Bukkit.getPlayer(target) != null || !guiHandler.containsKey(target))
 							return;
 						try {
 							OfflineInventory offline = loadOfflineInventory(target);
-							if (offline != null)
+							if(offline != null)
 								offlineInventories.put(target, offline);
-						} catch (IOException err) {
+						} catch(IOException err) {
 							err.printStackTrace();
 						}
 					}
@@ -432,32 +413,31 @@ public class Invsee extends CssCommand {
 
 		};
 		Bukkit.getPluginManager().registerEvents(listener, Loader.getPlugin());
-		if (swapItemListener != null)
+		if(swapItemListener != null)
 			Bukkit.getPluginManager().registerEvents(swapItemListener, Loader.getPlugin());
 
-		CommandStructure<Player> cmd = CommandStructure
-				.create(Player.class, P_DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
-					msgUsage(sender, "cmd");
-				}).permission(getPerm("cmd"));
+		CommandStructure<Player> cmd = CommandStructure.create(Player.class, P_DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
+			msgUsage(sender, "cmd");
+		}).permission(getPerm("cmd"));
 		cmd.callableArgument((player, structure, args) -> {
 			List<String> match = new ArrayList<>();
-			if (args[0].isEmpty()) {
-				for (Query query : API.offlineCache().getQueries())
+			if(args[0].isEmpty()) {
+				for(Query query : API.offlineCache().getQueries())
 					match.add(query.getName());
 				return match;
 			}
 			String arg = args[0].toLowerCase();
-			for (Query query : API.offlineCache().getQueries())
-				if (query.getName().toLowerCase().contains(arg))
+			for(Query query : API.offlineCache().getQueries())
+				if(query.getName().toLowerCase().contains(arg))
 					match.add(query.getName());
 			return match;
 		}, (sender, structure, args) -> {
 			UUID found = API.offlineCache().lookupId(args[0]);
-			if (found == null) {
+			if(found == null) {
 				msg(sender, "no-match");
 				return;
 			}
-			if (found.equals(sender.getUniqueId())) {
+			if(found.equals(sender.getUniqueId())) {
 				msg(sender, "self");
 				return;
 			}
@@ -466,17 +446,17 @@ public class Invsee extends CssCommand {
 
 		// register
 		List<String> cmds = getCommands();
-		if (!cmds.isEmpty())
+		if(!cmds.isEmpty())
 			this.cmd = addBypassSettings(cmd).build().register(cmds.remove(0), cmds.toArray(new String[0]));
 	}
 
 	@Override
 	public void unregister() {
 		super.unregister();
-		if (listener != null) {
+		if(listener != null) {
 			HandlerList.unregisterAll(listener);
 			listener = null;
-			if (swapItemListener != null)
+			if(swapItemListener != null)
 				HandlerList.unregisterAll(swapItemListener);
 			swapItemListener = null;
 		}
@@ -494,22 +474,22 @@ public class Invsee extends CssCommand {
 
 	public void invsee(Player sender, UUID target) {
 		Player online = Bukkit.getPlayer(target);
-		if (online != null) {
+		if(online != null) {
 			invsee(sender, online);
 			return;
 		}
 
 		String name = API.offlineCache().lookupNameById(target);
-		if (name == null)
+		if(name == null)
 			name = target.toString();
 
 		TextRenderer ex = renderer().placeholder("target", name);
 		GUI gui = guiHandler.get(target);
 
-		if (gui == null)
+		if(gui == null)
 			try {
 				OfflineInventory offline = loadOfflineInventory(target);
-				if (offline == null)
+				if(offline == null)
 					return;
 
 				Map<Integer, ItemStack> inventory = readOfflineInventory(offline.root);
@@ -518,7 +498,7 @@ public class Invsee extends CssCommand {
 				guiHandler.put(target, gui);
 				updateinv(gui, inventory);
 				gui.setInsertable(true);
-			} catch (IOException e) {
+			} catch(IOException e) {
 				e.printStackTrace();
 				return;
 			}
@@ -532,14 +512,14 @@ public class Invsee extends CssCommand {
 		TextRenderer ex = renderer().placeholder("target", target.getName());
 		GUI gui = guiHandler.get(targetId);
 
-		if (gui == null) {
+		if(gui == null) {
 			gui = createInvseeGui(targetId, target.getName());
 			guiHandler.put(targetId, gui);
 			updateinv(gui, target);
 			gui.setInsertable(true);
 		} else {
 			OfflineInventory offline = offlineInventories.remove(targetId);
-			if (offline != null)
+			if(offline != null)
 				syncGuiToPlayer(gui, target);
 			updateinv(gui, target);
 		}
@@ -556,11 +536,11 @@ public class Invsee extends CssCommand {
 				@Override
 				public void run() {
 					Player target = Bukkit.getPlayer(targetId);
-					if (target == null)
+					if(target == null)
 						return;
 
 					OfflineInventory offline = offlineInventories.remove(targetId);
-					if (offline != null)
+					if(offline != null)
 						syncGuiToPlayer(thisInstance, target);
 
 					updateinv(thisInstance, target);
@@ -569,23 +549,23 @@ public class Invsee extends CssCommand {
 
 			@Override
 			public void onClose(Player player, CloseReason reason) {
-				if (getPlayers().size() > 1)
+				if(getPlayers().size() > 1)
 					return;
 
 				guiHandler.remove(targetId);
 				Scheduler.cancelTask(task);
 
 				Player target = Bukkit.getPlayer(targetId);
-				if (target != null) {
+				if(target != null) {
 					offlineInventories.remove(targetId);
 					return;
 				}
 
 				OfflineInventory offline = offlineInventories.remove(targetId);
-				if (offline != null) {
+				if(offline != null) {
 					try {
 						saveOfflineInventory(thisInstance, offline);
-					} catch (IOException e) {
+					} catch(IOException e) {
 						e.printStackTrace();
 					}
 					return;
@@ -594,13 +574,13 @@ public class Invsee extends CssCommand {
 				new Tasker() {
 					@Override
 					public void run() {
-						if (Bukkit.getPlayer(targetId) != null)
+						if(Bukkit.getPlayer(targetId) != null)
 							return;
 						try {
 							OfflineInventory loaded = loadOfflineInventory(targetId);
-							if (loaded != null)
+							if(loaded != null)
 								saveOfflineInventory(thisInstance, loaded);
-						} catch (IOException e) {
+						} catch(IOException e) {
 							e.printStackTrace();
 						}
 					}
@@ -608,24 +588,22 @@ public class Invsee extends CssCommand {
 			}
 
 			@Override
-			public void onMultipleIteract(Player player, Map<Integer, ItemStack> guiSlots,
-					Map<Integer, ItemStack> playerSlots) {
+			public void onMultipleIteract(Player player, Map<Integer, ItemStack> guiSlots, Map<Integer, ItemStack> playerSlots) {
 				Player target = Bukkit.getPlayer(targetId);
-				if (target == null)
+				if(target == null)
 					return;
 
-				for (Entry<Integer, ItemStack> slot : guiSlots.entrySet())
+				for(Entry<Integer, ItemStack> slot : guiSlots.entrySet())
 					applyLiveSlot(target, slot.getKey(), slot.getValue());
 			}
 
 			@Override
-			public boolean onInteractItem(Player player, ItemStack newItem, ItemStack oldItem, ClickType type, int slot,
-					boolean gui) {
-				if (!gui)
+			public boolean onInteractItem(Player player, ItemStack newItem, ItemStack oldItem, ClickType type, int slot, boolean gui) {
+				if(!gui)
 					return false;
 
 				Player target = Bukkit.getPlayer(targetId);
-				if (target != null)
+				if(target != null)
 					applyLiveSlot(target, slot, newItem);
 				return false;
 			}
@@ -635,69 +613,68 @@ public class Invsee extends CssCommand {
 	private void applyLiveSlot(Player target, int slot, ItemStack item) {
 		PlayerInventory inv = target.getInventory();
 
-		switch (slot) {
-		case HEAD_SLOT:
-			inv.setHelmet(item);
-			break;
-		case CHESTPLATE_SLOT:
-			inv.setChestplate(item);
-			break;
-		case LEGGINGS_SLOT:
-			inv.setLeggings(item);
-			break;
-		case BOOTS_SLOT:
-			inv.setBoots(item);
-			break;
-		case CURSOR_SLOT:
-			target.setItemOnCursor(item);
-			break;
-		case OFFHAND_SLOT:
-			if (Ref.isAfter(8, 0))
-				inv.setItemInOffHand(item);
-			break;
-		case CRAFT_0_SLOT:
-		case CRAFT_1_SLOT:
-		case CRAFT_2_SLOT:
-		case CRAFT_3_SLOT: {
-			Inventory top = target.getOpenInventory().getTopInventory();
-			boolean crafting = target.getOpenInventory().getBottomInventory().equals(target.getInventory())
-					&& top.getType() == InventoryType.CRAFTING;
-			if (!crafting)
+		switch(slot) {
+			case HEAD_SLOT :
+				inv.setHelmet(item);
 				break;
+			case CHESTPLATE_SLOT :
+				inv.setChestplate(item);
+				break;
+			case LEGGINGS_SLOT :
+				inv.setLeggings(item);
+				break;
+			case BOOTS_SLOT :
+				inv.setBoots(item);
+				break;
+			case CURSOR_SLOT :
+				target.setItemOnCursor(item);
+				break;
+			case OFFHAND_SLOT :
+				if(Ref.isAfter(8, 0))
+					inv.setItemInOffHand(item);
+				break;
+			case CRAFT_0_SLOT :
+			case CRAFT_1_SLOT :
+			case CRAFT_2_SLOT :
+			case CRAFT_3_SLOT : {
+				Inventory top = target.getOpenInventory().getTopInventory();
+				boolean crafting = target.getOpenInventory().getBottomInventory().equals(target.getInventory()) && top.getType() == InventoryType.CRAFTING;
+				if(!crafting)
+					break;
 
-			int craftSlot;
-			switch (slot) {
-			case CRAFT_0_SLOT:
-				craftSlot = 1;
-				break;
-			case CRAFT_1_SLOT:
-				craftSlot = 2;
-				break;
-			case CRAFT_2_SLOT:
-				craftSlot = 3;
-				break;
-			default:
-				craftSlot = 4;
+				int craftSlot;
+				switch(slot) {
+					case CRAFT_0_SLOT :
+						craftSlot = 1;
+						break;
+					case CRAFT_1_SLOT :
+						craftSlot = 2;
+						break;
+					case CRAFT_2_SLOT :
+						craftSlot = 3;
+						break;
+					default :
+						craftSlot = 4;
+						break;
+				}
+				top.setItem(craftSlot, item);
 				break;
 			}
-			top.setItem(craftSlot, item);
-			break;
-		}
-		default:
-			if (slot >= 18 && slot < 54)
-				inv.setItem(slot - 18, item);
-			break;
+			default :
+				if(slot >= 18 && slot < 54)
+					inv.setItem(slot - 18, item);
+				break;
 		}
 	}
 
 	private void switchToLive(Player target) {
 		UUID targetId = target.getUniqueId();
 		GUI gui = guiHandler.get(targetId);
-		if (gui == null)
+		if(gui == null)
 			return;
 
 		OfflineInventory offline = offlineInventories.remove(targetId);
-		if (offline == null)
+		if(offline == null)
 			return;
 
 		syncGuiToPlayer(gui, target);
@@ -707,7 +684,7 @@ public class Invsee extends CssCommand {
 	private void syncGuiToPlayer(GUI gui, Player target) {
 		PlayerInventory inv = target.getInventory();
 
-		for (int i = 0; i < 36; ++i)
+		for(int i = 0; i < 36; ++i)
 			inv.setItem(i, normalize(gui.getItem(18 + i)));
 
 		inv.setHelmet(normalize(gui.getItem(HEAD_SLOT)));
@@ -715,13 +692,12 @@ public class Invsee extends CssCommand {
 		inv.setLeggings(normalize(gui.getItem(LEGGINGS_SLOT)));
 		inv.setBoots(normalize(gui.getItem(BOOTS_SLOT)));
 
-		if (Ref.isAfter(8, 0))
+		if(Ref.isAfter(8, 0))
 			inv.setItemInOffHand(normalize(gui.getItem(OFFHAND_SLOT)));
 
 		Inventory top = target.getOpenInventory().getTopInventory();
-		boolean crafting = target.getOpenInventory().getBottomInventory().equals(target.getInventory())
-				&& top.getType() == InventoryType.CRAFTING;
-		if (crafting) {
+		boolean crafting = target.getOpenInventory().getBottomInventory().equals(target.getInventory()) && top.getType() == InventoryType.CRAFTING;
+		if(crafting) {
 			top.setItem(1, normalize(gui.getItem(CRAFT_0_SLOT)));
 			top.setItem(2, normalize(gui.getItem(CRAFT_1_SLOT)));
 			top.setItem(3, normalize(gui.getItem(CRAFT_2_SLOT)));
@@ -734,12 +710,11 @@ public class Invsee extends CssCommand {
 	private void updateinv(GUI gui, Player target) {
 		PlayerInventory inv = target.getInventory();
 
-		for (int i = 0; i < 36; ++i)
+		for(int i = 0; i < 36; ++i)
 			setGuiItem(gui, 18 + i, inv.getItem(i));
 
 		Inventory top = target.getOpenInventory().getTopInventory();
-		boolean isOpenPlayerInv = target.getOpenInventory().getBottomInventory().equals(target.getInventory())
-				&& top.getType() == InventoryType.CRAFTING;
+		boolean isOpenPlayerInv = target.getOpenInventory().getBottomInventory().equals(target.getInventory()) && top.getType() == InventoryType.CRAFTING;
 
 		setGuiItem(gui, HEAD_SLOT, inv.getHelmet());
 		setGuiItem(gui, CHESTPLATE_SLOT, inv.getChestplate());
@@ -747,12 +722,12 @@ public class Invsee extends CssCommand {
 		setGuiItem(gui, BOOTS_SLOT, inv.getBoots());
 		setGuiItem(gui, CURSOR_SLOT, target.getItemOnCursor());
 
-		if (Ref.isAfter(8, 0))
+		if(Ref.isAfter(8, 0))
 			setGuiItem(gui, OFFHAND_SLOT, inv.getItemInOffHand());
 		else
 			gui.setItem(OFFHAND_SLOT, EMPTY);
 
-		if (isOpenPlayerInv) {
+		if(isOpenPlayerInv) {
 			setGuiItem(gui, CRAFT_0_SLOT, top.getItem(1));
 			setGuiItem(gui, CRAFT_1_SLOT, top.getItem(2));
 			setGuiItem(gui, CRAFT_2_SLOT, top.getItem(3));
@@ -768,7 +743,7 @@ public class Invsee extends CssCommand {
 	}
 
 	private void updateinv(GUI gui, Map<Integer, ItemStack> inventory) {
-		for (int i = 0; i < 36; ++i)
+		for(int i = 0; i < 36; ++i)
 			setGuiItem(gui, 18 + i, inventory.get(i));
 
 		setGuiItem(gui, BOOTS_SLOT, inventory.get(100));
@@ -776,7 +751,7 @@ public class Invsee extends CssCommand {
 		setGuiItem(gui, CHESTPLATE_SLOT, inventory.get(102));
 		setGuiItem(gui, HEAD_SLOT, inventory.get(103));
 
-		if (Ref.isAfter(8, 0))
+		if(Ref.isAfter(8, 0))
 			setGuiItem(gui, OFFHAND_SLOT, inventory.get(-106));
 		else
 			gui.setItem(OFFHAND_SLOT, EMPTY);
@@ -790,51 +765,50 @@ public class Invsee extends CssCommand {
 	}
 
 	private void fillUnused(GUI gui) {
-		for (int i = 0; i < 18; ++i)
-			switch (i) {
-			case HEAD_SLOT:
-			case CHESTPLATE_SLOT:
-			case LEGGINGS_SLOT:
-			case BOOTS_SLOT:
-			case CURSOR_SLOT:
-			case OFFHAND_SLOT:
-			case CRAFT_0_SLOT:
-			case CRAFT_1_SLOT:
-			case CRAFT_2_SLOT:
-			case CRAFT_3_SLOT:
-				break;
-			default:
-				gui.setItem(i, EMPTY);
-				break;
+		for(int i = 0; i < 18; ++i)
+			switch(i) {
+				case HEAD_SLOT :
+				case CHESTPLATE_SLOT :
+				case LEGGINGS_SLOT :
+				case BOOTS_SLOT :
+				case CURSOR_SLOT :
+				case OFFHAND_SLOT :
+				case CRAFT_0_SLOT :
+				case CRAFT_1_SLOT :
+				case CRAFT_2_SLOT :
+				case CRAFT_3_SLOT :
+					break;
+				default :
+					gui.setItem(i, EMPTY);
+					break;
 			}
 	}
 
 	private OfflineInventory loadOfflineInventory(UUID target) throws IOException {
 
-		Path file = (Ref.isAtLeast(26, 0) ? new File("world/players/data").toPath()
-				: Bukkit.getWorlds().get(0).getWorldFolder().toPath().resolve("playerdata")).resolve(target + ".dat");
-		if (!Files.exists(file))
+		Path file = (Ref.isAtLeast(26, 0) ? new File("world/players/data").toPath() : Bukkit.getWorlds().get(0).getWorldFolder().toPath().resolve("playerdata")).resolve(target + ".dat");
+		if(!Files.exists(file))
 			return null;
 
 		NbtTag tag = NbtReader.read(file);
-		if (!(tag instanceof NbtCompound))
+		if(!(tag instanceof NbtCompound))
 			throw new IOException("Player NBT root isn't TAG_Compound: " + target);
 		return new OfflineInventory(file, (NbtCompound) tag);
 	}
 
 	private Map<Integer, ItemStack> readOfflineInventory(NbtCompound root) {
 		Map<Integer, ItemStack> result = new HashMap<>();
-		for (Object object : root.getListValue("Inventory")) {
-			if (!(object instanceof NbtCompound))
+		for(Object object : root.getListValue("Inventory")) {
+			if(!(object instanceof NbtCompound))
 				continue;
 
 			NbtCompound item = (NbtCompound) object;
 			int slot = item.getByte("Slot", (byte) -1);
 			try {
 				ItemStack stack = deserializeOfflineItem(item);
-				if (!isEmpty(stack))
+				if(!isEmpty(stack))
 					result.put(slot, stack);
-			} catch (Throwable e) {
+			} catch(Throwable e) {
 				e.printStackTrace();
 			}
 		}
@@ -843,25 +817,24 @@ public class Invsee extends CssCommand {
 
 	private ItemStack deserializeOfflineItem(NbtCompound item) {
 		Material material = findMaterial(item.getString("id", ""));
-		if (material == null || material == Material.AIR)
+		if(material == null || material == Material.AIR)
 			return null;
 
-		ItemMaker maker = ItemMaker.of(material)
-				.amount(Math.max(1, getNumber(item.getAny("count"), getNumber(item.getAny("Count"), 1))));
+		ItemMaker maker = ItemMaker.of(material).amount(Math.max(1, getNumber(item.getAny("count"), getNumber(item.getAny("Count"), 1))));
 		NbtCompound components = item.getCompound("components");
 		NbtCompound legacyTag = item.getCompound("tag");
-		if (components != null)
+		if(components != null)
 			applyComponents(maker, components);
-		if (legacyTag != null)
+		if(legacyTag != null)
 			applyLegacyTag(maker, legacyTag);
 		return maker.build();
 	}
 
 	private void applyComponents(ItemMaker maker, NbtCompound components) {
 		Object name = components.getAny("minecraft:custom_name");
-		if (name == null)
+		if(name == null)
 			name = components.getAny("minecraft:item_name");
-		if (name != null)
+		if(name != null)
 			maker.rawDisplayName(componentText(name));
 		applyLore(maker, components.getAny("minecraft:lore"));
 		applyEnchantments(maker, components.getAny("minecraft:enchantments"));
@@ -872,8 +845,8 @@ public class Invsee extends CssCommand {
 
 	private void applyLegacyTag(ItemMaker maker, NbtCompound tag) {
 		NbtCompound display = tag.getCompound("display");
-		if (display != null) {
-			if (display.contains("Name"))
+		if(display != null) {
+			if(display.contains("Name"))
 				maker.rawDisplayName(componentText(display.getAny("Name")));
 			applyLore(maker, display.getAny("Lore"));
 		}
@@ -884,26 +857,26 @@ public class Invsee extends CssCommand {
 	}
 
 	private void applyLore(ItemMaker maker, Object value) {
-		if (!(value instanceof NbtList))
+		if(!(value instanceof NbtList))
 			return;
 		List<String> lore = new ArrayList<>();
-		for (Object line : ((NbtList) value).values())
+		for(Object line : ((NbtList) value).values())
 			lore.add(componentText(line));
 		maker.rawLore(lore);
 	}
 
 	private void applyEnchantments(ItemMaker maker, Object value) {
-		if (value instanceof NbtCompound) {
+		if(value instanceof NbtCompound) {
 			NbtCompound compound = (NbtCompound) value;
 			NbtCompound levels = compound.getCompound("levels");
-			for (Entry<String, Object> entry : (levels == null ? compound : levels).values().entrySet())
+			for(Entry<String, Object> entry : (levels == null ? compound : levels).values().entrySet())
 				applyEnchantment(maker, entry.getKey(), getNumber(entry.getValue(), 1));
 			return;
 		}
-		if (!(value instanceof NbtList))
+		if(!(value instanceof NbtList))
 			return;
-		for (Object entry : ((NbtList) value).values())
-			if (entry instanceof NbtCompound) {
+		for(Object entry : ((NbtList) value).values())
+			if(entry instanceof NbtCompound) {
 				NbtCompound enchantment = (NbtCompound) entry;
 				applyEnchantment(maker, enchantment.getString("id", ""), getNumber(enchantment.getAny("lvl"), 1));
 			}
@@ -911,25 +884,25 @@ public class Invsee extends CssCommand {
 
 	private void applyEnchantment(ItemMaker maker, String id, int level) {
 		Enchantment enchantment = findEnchantment(id);
-		if (enchantment != null)
+		if(enchantment != null)
 			maker.enchant(enchantment, level);
 	}
 
 	private Material findMaterial(String id) {
-		if (id == null || id.isEmpty())
+		if(id == null || id.isEmpty())
 			return null;
 		Material material = Material.matchMaterial(id);
-		if (material != null)
+		if(material != null)
 			return material;
 		String key = id.contains(":") ? id.substring(id.indexOf(':') + 1) : id;
 		return Material.matchMaterial(key.toUpperCase(java.util.Locale.ROOT));
 	}
 
 	private Enchantment findEnchantment(String id) {
-		if (id == null || id.isEmpty())
+		if(id == null || id.isEmpty())
 			return null;
 		NamespacedKey key = NamespacedKey.fromString(id);
-		if (key == null)
+		if(key == null)
 			key = NamespacedKey.minecraft(id);
 		return Enchantment.getByKey(key);
 	}
@@ -944,39 +917,39 @@ public class Invsee extends CssCommand {
 
 	@SuppressWarnings("unchecked")
 	private String componentText(Object component) {
-		if (component == null)
+		if(component == null)
 			return "";
-		if (component instanceof String) {
+		if(component instanceof String) {
 			String text = (String) component;
-			if ((text.startsWith("{") || text.startsWith("[")) && (text.endsWith("}") || text.endsWith("]")))
+			if((text.startsWith("{") || text.startsWith("[")) && (text.endsWith("}") || text.endsWith("]")))
 				try {
 					return componentText(Json.reader().simpleRead(text));
-				} catch (Exception ignored) {
+				} catch(Exception ignored) {
 				}
 			return text;
 		}
-		if (component instanceof NbtList) {
+		if(component instanceof NbtList) {
 			StringBuilder output = new StringBuilder();
-			for (Object entry : ((NbtList) component).values())
+			for(Object entry : ((NbtList) component).values())
 				output.append(componentText(entry));
 			return output.toString();
 		}
 		Map<String, Object> values;
-		if (component instanceof NbtCompound)
+		if(component instanceof NbtCompound)
 			values = ((NbtCompound) component).values();
-		else if (component instanceof Map)
+		else if(component instanceof Map)
 			values = (Map<String, Object>) component;
 		else
 			return String.valueOf(component);
 
 		StringBuilder output = new StringBuilder(styleCodes(values));
 		Object text = values.get("text");
-		if (text != null)
+		if(text != null)
 			output.append(text);
-		else if (values.get("translate") != null)
+		else if(values.get("translate") != null)
 			output.append(values.get("translate"));
 		Object extra = values.get("extra");
-		if (extra != null)
+		if(extra != null)
 			output.append(componentText(extra));
 		return output.toString();
 	}
@@ -984,20 +957,20 @@ public class Invsee extends CssCommand {
 	private String styleCodes(Map<String, Object> values) {
 		StringBuilder codes = new StringBuilder(ChatColor.RESET.toString());
 		Object color = values.get("color");
-		if (color != null)
+		if(color != null)
 			try {
 				codes.append(ChatColor.valueOf(String.valueOf(color).toUpperCase(java.util.Locale.ROOT)));
-			} catch (IllegalArgumentException ignored) {
+			} catch(IllegalArgumentException ignored) {
 			}
-		if (isEnabled(values.get("bold")))
+		if(isEnabled(values.get("bold")))
 			codes.append(ChatColor.BOLD);
-		if (isEnabled(values.get("italic")))
+		if(isEnabled(values.get("italic")))
 			codes.append(ChatColor.ITALIC);
-		if (isEnabled(values.get("underlined")))
+		if(isEnabled(values.get("underlined")))
 			codes.append(ChatColor.UNDERLINE);
-		if (isEnabled(values.get("strikethrough")))
+		if(isEnabled(values.get("strikethrough")))
 			codes.append(ChatColor.STRIKETHROUGH);
-		if (isEnabled(values.get("obfuscated")))
+		if(isEnabled(values.get("obfuscated")))
 			codes.append(ChatColor.MAGIC);
 		return codes.toString();
 	}
@@ -1007,7 +980,7 @@ public class Invsee extends CssCommand {
 		Path itemTemp = Files.createTempFile("css-invsee-item-", ".nbt");
 
 		try {
-			for (int i = 0; i < 36; ++i)
+			for(int i = 0; i < 36; ++i)
 				addOfflineItem(inventory, gui.getItem(18 + i), i, itemTemp);
 
 			addOfflineItem(inventory, gui.getItem(BOOTS_SLOT), 100, itemTemp);
@@ -1015,7 +988,7 @@ public class Invsee extends CssCommand {
 			addOfflineItem(inventory, gui.getItem(CHESTPLATE_SLOT), 102, itemTemp);
 			addOfflineItem(inventory, gui.getItem(HEAD_SLOT), 103, itemTemp);
 
-			if (Ref.isAfter(8, 0))
+			if(Ref.isAfter(8, 0))
 				addOfflineItem(inventory, gui.getItem(OFFHAND_SLOT), -106, itemTemp);
 		} finally {
 			Files.deleteIfExists(itemTemp);
@@ -1028,20 +1001,20 @@ public class Invsee extends CssCommand {
 
 		try {
 			Files.move(temporary, offline.file, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
-		} catch (AtomicMoveNotSupportedException e) {
+		} catch(AtomicMoveNotSupportedException e) {
 			Files.move(temporary, offline.file, StandardCopyOption.REPLACE_EXISTING);
 		}
 	}
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings({"rawtypes", "unchecked"})
 	private void addOfflineItem(List<Object> inventory, ItemStack stack, int slot, Path temp) throws IOException {
-		if (isEmpty(stack))
+		if(isEmpty(stack))
 			return;
 
 		NbtCompound compound;
 		try {
 			compound = serializeItem(stack, temp);
-		} catch (Exception e) {
+		} catch(Exception e) {
 			throw new IOException("Unable to serialize ItemStack on " + Bukkit.getBukkitVersion(), e);
 		}
 
@@ -1055,26 +1028,26 @@ public class Invsee extends CssCommand {
 		Object unsafe = Bukkit.getUnsafe();
 		Method serialize = findMethod(unsafe.getClass(), "serializeItem", ItemStack.class);
 
-		if (serialize != null) {
+		if(serialize != null) {
 			byte[] bytes = (byte[]) serialize.invoke(unsafe, stack);
 			Files.write(temp, bytes);
 			NbtTag tag = NbtReader.read(temp);
-			if (tag instanceof NbtCompound)
+			if(tag instanceof NbtCompound)
 				return (NbtCompound) tag;
 		}
 
 		Method paperSerialize = findMethod(stack.getClass(), "serializeAsBytes");
-		if (paperSerialize != null) {
+		if(paperSerialize != null) {
 			byte[] bytes = (byte[]) paperSerialize.invoke(stack);
 			Files.write(temp, bytes);
 			NbtTag tag = NbtReader.read(temp);
-			if (tag instanceof NbtCompound)
+			if(tag instanceof NbtCompound)
 				return (NbtCompound) tag;
 		}
 
 		Object compound = saveLegacyNmsItem(stack, temp);
 		NbtTag tag = NbtReader.read(temp);
-		if (!(tag instanceof NbtCompound))
+		if(!(tag instanceof NbtCompound))
 			throw new IOException("Serialized legacy ItemStack isn't TAG_Compound: " + compound);
 		return (NbtCompound) tag;
 	}
@@ -1086,24 +1059,22 @@ public class Invsee extends CssCommand {
 		Object compound = BukkitLoader.getNmsProvider().parseNBT("{}");
 		Object saved = null;
 
-		for (Method method : nmsItem.getClass().getDeclaredMethods()) {
-			if (Modifier.isStatic(method.getModifiers()) || method.getParameterTypes().length != 1
-					|| !compound.getClass().isAssignableFrom(method.getReturnType()))
+		for(Method method : nmsItem.getClass().getDeclaredMethods()) {
+			if(Modifier.isStatic(method.getModifiers()) || method.getParameterTypes().length != 1 || !compound.getClass().isAssignableFrom(method.getReturnType()))
 				continue;
-			if (!method.getParameterTypes()[0].isAssignableFrom(compound.getClass())
-					&& !compound.getClass().isAssignableFrom(method.getParameterTypes()[0]))
+			if(!method.getParameterTypes()[0].isAssignableFrom(compound.getClass()) && !compound.getClass().isAssignableFrom(method.getParameterTypes()[0]))
 				continue;
 
 			try {
 				method.setAccessible(true);
 				saved = method.invoke(nmsItem, compound);
-				if (saved != null)
+				if(saved != null)
 					break;
-			} catch (Throwable ignored) {
+			} catch(Throwable ignored) {
 			}
 		}
 
-		if (saved == null)
+		if(saved == null)
 			throw new IOException("Unable to find legacy ItemStack NBT save method on " + nmsItem.getClass().getName());
 
 		writeLegacyNbt(saved, temp);
@@ -1114,13 +1085,12 @@ public class Invsee extends CssCommand {
 		String pkg = compound.getClass().getPackage().getName();
 		Class<?> tools = Class.forName(pkg + ".NBTCompressedStreamTools");
 
-		try (DataOutputStream output = new DataOutputStream(new BufferedOutputStream(Files.newOutputStream(temp)))) {
-			for (Method method : tools.getDeclaredMethods()) {
-				if (!Modifier.isStatic(method.getModifiers()) || method.getParameterTypes().length != 2)
+		try(DataOutputStream output = new DataOutputStream(new BufferedOutputStream(Files.newOutputStream(temp)))) {
+			for(Method method : tools.getDeclaredMethods()) {
+				if(!Modifier.isStatic(method.getModifiers()) || method.getParameterTypes().length != 2)
 					continue;
 				Class<?>[] params = method.getParameterTypes();
-				if (!params[0].isAssignableFrom(compound.getClass()) && !compound.getClass().isAssignableFrom(params[0])
-						|| !java.io.DataOutput.class.isAssignableFrom(params[1]))
+				if(!params[0].isAssignableFrom(compound.getClass()) && !compound.getClass().isAssignableFrom(params[0]) || !java.io.DataOutput.class.isAssignableFrom(params[1]))
 					continue;
 
 				method.setAccessible(true);
@@ -1136,39 +1106,39 @@ public class Invsee extends CssCommand {
 		String craftPackage = Bukkit.getServer().getClass().getPackage().getName();
 		try {
 			return Class.forName(craftPackage + ".inventory.CraftItemStack");
-		} catch (ClassNotFoundException ignored) {
+		} catch(ClassNotFoundException ignored) {
 			return Class.forName("org.bukkit.craftbukkit.inventory.CraftItemStack");
 		}
 	}
 
 	private Method findMethod(Class<?> type, String name, Class<?>... params) {
 		Class<?> current = type;
-		while (current != null)
+		while(current != null)
 			try {
 				Method method = current.getDeclaredMethod(name, params);
 				method.setAccessible(true);
 				return method;
-			} catch (NoSuchMethodException ignored) {
+			} catch(NoSuchMethodException ignored) {
 				current = current.getSuperclass();
 			}
 		try {
 			Method method = type.getMethod(name, params);
 			method.setAccessible(true);
 			return method;
-		} catch (NoSuchMethodException ignored) {
+		} catch(NoSuchMethodException ignored) {
 			return null;
 		}
 	}
 
 	private void setGuiItem(GUI gui, int slot, ItemStack item) {
 		ItemStack current = gui.getItem(slot);
-		if (isEmpty(item)) {
-			if (!isEmpty(current))
+		if(isEmpty(item)) {
+			if(!isEmpty(current))
 				gui.removeItem(slot);
 			return;
 		}
 
-		if (!Objects.equals(item, current))
+		if(!Objects.equals(item, current))
 			gui.setItem(slot, new EmptyItemGUI(item.clone()).setUnstealable(false));
 	}
 

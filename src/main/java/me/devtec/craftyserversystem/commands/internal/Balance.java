@@ -22,48 +22,43 @@ public class Balance extends CssCommand {
 
 	@Override
 	public void register() {
-		if (isRegistered())
+		if(isRegistered())
 			return;
 
-		CommandStructure<CommandSender> cmd = CommandStructure
-				.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
-					if (!(sender instanceof Player)) {
-						msgUsage(sender, "cmd");
-						return;
-					}
-					msg(sender, "self",
-							renderer().placeholder("balance",
-									StringUtils.formatDouble(FormatType.COMPLEX, API.get().getEconomyHook()
-											.getBalance(sender.getName(), ((Player) sender).getWorld().getName()))));
-				}).permission(getPerm("cmd"));
+		CommandStructure<CommandSender> cmd = CommandStructure.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
+			if(!(sender instanceof Player)) {
+				msgUsage(sender, "cmd");
+				return;
+			}
+			msg(sender, "self",
+			        renderer().placeholder("balance", StringUtils.formatDouble(FormatType.COMPLEX, API.get().getEconomyHook().getBalance(sender.getName(), ((Player) sender).getWorld().getName()))));
+		}).permission(getPerm("cmd"));
 		// other
 		cmd.argument(null, 1, (sender, structure, args) -> {
 			Query query = me.devtec.shared.API.offlineCache().lookupQuery(args[0]);
-			if (query != null) {
+			if(query != null) {
 				World world = null;
-				if (sender instanceof Player)
+				if(sender instanceof Player)
 					world = ((Player) sender).getWorld();
-				else if (sender instanceof BlockCommandSender)
+				else if(sender instanceof BlockCommandSender)
 					world = ((BlockCommandSender) sender).getBlock().getWorld();
 				else
 					world = Bukkit.getWorlds().get(0);
-				msg(sender, "other",
-						renderer().placeholder("target", query.getName()).placeholder("balance",
-								StringUtils.formatDouble(FormatType.COMPLEX,
-										API.get().getEconomyHook().getBalance(query.getName(), world.getName()))));
+				msg(sender, "other", renderer().placeholder("target", query.getName()).placeholder("balance",
+				        StringUtils.formatDouble(FormatType.COMPLEX, API.get().getEconomyHook().getBalance(query.getName(), world.getName()))));
 			} else
 				msg(sender, "no-account", renderer().placeholder("target", args[0]));
 		}, (sender, structure, args) -> {
 			Collection<? extends Player> onlinePlayers = BukkitLoader.getOnlinePlayers();
 			List<String> players = new ArrayList<>(onlinePlayers.size() + 1);
 			players.add("{offlinePlayer}");
-			for (Player player : onlinePlayers)
+			for(Player player : onlinePlayers)
 				players.add(player.getName());
 			return players;
 		}).permission(getPerm("other"));
 		// register
 		List<String> cmds = getCommands();
-		if (!cmds.isEmpty())
+		if(!cmds.isEmpty())
 			this.cmd = addBypassSettings(cmd).build().register(cmds.remove(0), cmds.toArray(new String[0]));
 	}
 }

@@ -16,7 +16,7 @@ public class Kick extends CssCommand {
 
 	@Override
 	public void register() {
-		if (isRegistered())
+		if(isRegistered())
 			return;
 
 		CommandStructure<CommandSender> cmd = CommandStructure.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
@@ -27,11 +27,11 @@ public class Kick extends CssCommand {
 			API.get().getCommandsAPI().getBanAPI().kick(player, sender.getName(), reason);
 		}, (sender, structure, args) -> {
 			List<String> list = new ArrayList<>();
-			if (API.get().getConfigManager().getMain().getBoolean("bansystem.tab-completer-list-player-ips"))
-				for (Player player : BukkitLoader.getOnlinePlayers())
+			if(API.get().getConfigManager().getMain().getBoolean("bansystem.tab-completer-list-player-ips"))
+				for(Player player : BukkitLoader.getOnlinePlayers())
 					list.add(player.getAddress().getAddress().getHostAddress());
 			else
-				for (Player player : BukkitLoader.getOnlinePlayers())
+				for(Player player : BukkitLoader.getOnlinePlayers())
 					list.add(player.getName());
 			list.add("{offlinePlayer}");
 			list.add("{ip}");
@@ -43,7 +43,7 @@ public class Kick extends CssCommand {
 		}, (sender, structure, args) -> API.get().getConfigManager().getMain().getStringList("bansystem.tab-completer-reasons"));
 		// register
 		List<String> cmds = getCommands();
-		if (!cmds.isEmpty())
+		if(!cmds.isEmpty())
 			this.cmd = addBypassSettings(cmd).build().register(cmds.remove(0), cmds.toArray(new String[0]));
 	}
 

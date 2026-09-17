@@ -16,23 +16,15 @@ public class InternalPlaceholders {
 	public static TextRenderer generatePlaceholders(Player player) {
 		Location loc = player.getLocation();
 
-		TextRenderer renderer = TextRenderer.forTarget(player.getUniqueId())
-				.placeholder("prefix", API.get().getConfigManager().getPrefix()).placeholder("player", player.getName())
-				.placeholder("tps", BukkitLoader.getNmsProvider().getServerTPS()[0])
-				.placeholder("ping", BukkitLoader.getNmsProvider().getPing(player))
-				.placeholder("online", countNonVanishPlayers(player)).placeholder("max_players", Bukkit.getMaxPlayers())
-				.placeholder("balance",
-						API.get().getEconomyHook().format(
-								API.get().getEconomyHook().getBalance(player.getName(), player.getWorld().getName())))
-				.placeholder("money",
-						API.get().getEconomyHook().format(
-								API.get().getEconomyHook().getBalance(player.getName(), player.getWorld().getName())))
-				.placeholder("health", player.getHealth()).placeholder("food", player.getFoodLevel())
-				.placeholder("x", loc.getX()).placeholder("y", loc.getY()).placeholder("z", loc.getZ())
-				.placeholder("pos_x", loc.getBlockX()).placeholder("pos_y", loc.getBlockY())
-				.placeholder("pos_z", loc.getBlockZ()).placeholder("world", loc.getWorld().getName()).colorize();
+		TextRenderer renderer = TextRenderer.forTarget(player.getUniqueId()).placeholder("prefix", API.get().getConfigManager().getPrefix()).placeholder("player", player.getName())
+		        .placeholder("tps", BukkitLoader.getNmsProvider().getServerTPS()[0]).placeholder("ping", BukkitLoader.getNmsProvider().getPing(player))
+		        .placeholder("online", countNonVanishPlayers(player)).placeholder("max_players", Bukkit.getMaxPlayers())
+		        .placeholder("balance", API.get().getEconomyHook().format(API.get().getEconomyHook().getBalance(player.getName(), player.getWorld().getName())))
+		        .placeholder("money", API.get().getEconomyHook().format(API.get().getEconomyHook().getBalance(player.getName(), player.getWorld().getName()))).placeholder("health", player.getHealth())
+		        .placeholder("food", player.getFoodLevel()).placeholder("x", loc.getX()).placeholder("y", loc.getY()).placeholder("z", loc.getZ()).placeholder("pos_x", loc.getBlockX())
+		        .placeholder("pos_y", loc.getBlockY()).placeholder("pos_z", loc.getBlockZ()).placeholder("world", loc.getWorld().getName()).colorize();
 
-		for (Entry<String, Animation> entry : API.get().getAnimationManager().getRegistered().entrySet())
+		for(Entry<String, Animation> entry : API.get().getAnimationManager().getRegistered().entrySet())
 			renderer.placeholder("animation:" + entry.getKey(), entry.getValue().get());
 
 		return renderer;
@@ -40,8 +32,8 @@ public class InternalPlaceholders {
 
 	private static int countNonVanishPlayers(Player player) {
 		int count = 0;
-		for (Player online : BukkitLoader.getOnlinePlayers())
-			if (online.equals(player) || player.canSee(online))
+		for(Player online : BukkitLoader.getOnlinePlayers())
+			if(online.equals(player) || player.canSee(online))
 				++count;
 		return count;
 	}

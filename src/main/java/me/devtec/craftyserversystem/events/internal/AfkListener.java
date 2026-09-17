@@ -63,11 +63,11 @@ public class AfkListener implements CssListener {
 
 	@Override
 	public void reload() {
-		if (task != 0) {
+		if(task != 0) {
 			Scheduler.cancelTask(task);
 			task = 0;
 
-			if (packetListener != null)
+			if(packetListener != null)
 				packetListener.unregister();
 
 			packetListener = null;
@@ -82,56 +82,51 @@ public class AfkListener implements CssListener {
 
 		long afkTime = Math.max(TimeUtils.timeFromString(getConfig().getString("afk.time")), 0);
 
-		if (afkTime != 0) {
+		if(afkTime != 0) {
 			autoAfk = new ConcurrentHashMap<>();
 
 			task = new Tasker() {
 
 				@Override
 				public void run() {
-					for (Entry<UUID, Long> entry : autoAfk.entrySet()) {
-						if (entry.getValue() + afkTime - System.currentTimeMillis() / 1000 > 0)
+					for(Entry<UUID, Long> entry : autoAfk.entrySet()) {
+						if(entry.getValue() + afkTime - System.currentTimeMillis() / 1000 > 0)
 							continue;
 
 						Config user = me.devtec.shared.API.getUser(entry.getKey());
 
-						if (user.getBoolean("afk"))
+						if(user.getBoolean("afk"))
 							continue;
 
 						AfkToggleEvent event = new AfkToggleEvent(entry.getKey(), true);
 						EventManager.call(event);
 
-						if (event.isCancelled())
+						if(event.isCancelled())
 							return;
 
 						user.set("afk", true);
 
-						TextRenderer renderer = TextRenderer.forTarget(entry.getKey())
-								.placeholder("prefix", API.get().getConfigManager().getPrefix()).placeholder("player",
-										me.devtec.shared.API.offlineCache().lookupNameById(entry.getKey()))
-								.colorize();
+						TextRenderer renderer = TextRenderer.forTarget(entry.getKey()).placeholder("prefix", API.get().getConfigManager().getPrefix())
+						        .placeholder("player", me.devtec.shared.API.offlineCache().lookupNameById(entry.getKey())).colorize();
 
-						API.get().getMsgManager().sendMessageFromFile(getConfig(), "afk.start.broadcast", renderer,
-								BukkitLoader.getOnlinePlayers());
+						API.get().getMsgManager().sendMessageFromFile(getConfig(), "afk.start.broadcast", renderer, BukkitLoader.getOnlinePlayers());
 
 						BukkitLoader.getNmsProvider().postToMainThread(() -> {
-							for (String command : getConfig().getStringList("afk.start.commands"))
-								Bukkit.dispatchCommand(Bukkit.getConsoleSender(),
-										render(command, renderer, entry.getKey()));
+							for(String command : getConfig().getStringList("afk.start.commands"))
+								Bukkit.dispatchCommand(Bukkit.getConsoleSender(), render(command, renderer, entry.getKey()));
 						});
 					}
 				}
 			}.runRepeating(20, 20);
 		}
 
-		if (movementEvent) {
+		if(movementEvent) {
 			positions = new ConcurrentHashMap<>();
 
-			if (sameMovementPattern)
+			if(sameMovementPattern)
 				movementLocs = new ConcurrentHashMap<>();
 
-			Class<?> movementPacketClass = Ref.nms("network.protocol.game",
-					BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "ServerboundMovePlayerPacket" : "PacketPlayInFlying");
+			Class<?> movementPacketClass = Ref.nms("network.protocol.game", BukkitLoader.NO_OBFUSCATED_NMS_MODE ? "ServerboundMovePlayerPacket" : "PacketPlayInFlying");
 
 			Field xField;
 			Field yField;
@@ -141,7 +136,7 @@ public class AfkListener implements CssListener {
 			Field changedHead;
 			Field changedPosition;
 
-			if (BukkitLoader.NO_OBFUSCATED_NMS_MODE) {
+			if(BukkitLoader.NO_OBFUSCATED_NMS_MODE) {
 				xField = Ref.field(movementPacketClass, "x");
 				yField = Ref.field(movementPacketClass, "y");
 				zField = Ref.field(movementPacketClass, "z");
@@ -149,7 +144,7 @@ public class AfkListener implements CssListener {
 				pitchField = Ref.field(movementPacketClass, "xRot");
 				changedHead = Ref.field(movementPacketClass, "hasRot");
 				changedPosition = Ref.field(movementPacketClass, "hasPos");
-			} else if (Ref.isBefore(17, 0)) {
+			} else if(Ref.isBefore(17, 0)) {
 				xField = Ref.field(movementPacketClass, "x");
 				yField = Ref.field(movementPacketClass, "y");
 				zField = Ref.field(movementPacketClass, "z");
@@ -177,8 +172,7 @@ public class AfkListener implements CssListener {
 				public void playIn(String player, PacketContainer container, ChannelContainer channel) {
 					Object packet = container.getPacket();
 
-					if (!movementPacketClass.isAssignableFrom(packet.getClass())
-							&& !movementPacketClass.equals(packet.getClass()))
+					if(!movementPacketClass.isAssignableFrom(packet.getClass()) && !movementPacketClass.equals(packet.getClass()))
 						return;
 
 					int x = MathUtils.floor((double) Ref.get(packet, xField));
@@ -187,10 +181,10 @@ public class AfkListener implements CssListener {
 
 					UUID uuid = me.devtec.shared.API.offlineCache().lookupId(player);
 
-					if ((boolean) Ref.get(packet, changedHead) && sameMovementPattern) {
+					if((boolean) Ref.get(packet, changedHead) && sameMovementPattern) {
 						Pair pair = movementLocs.get(uuid);
 
-						if (pair != null) {
+						if(pair != null) {
 							Pair sub = (Pair) pair.getValue();
 
 							float yaw = (float) Ref.get(packet, yawField);
@@ -198,7 +192,7 @@ public class AfkListener implements CssListener {
 
 							float[] rotation = (float[]) sub.getValue();
 
-							if (rotation[0] != yaw || rotation[1] != pitch) {
+							if(rotation[0] != yaw || rotation[1] != pitch) {
 								rotation[0] = yaw;
 								rotation[1] = pitch;
 								sub.setKey(0);
@@ -206,34 +200,32 @@ public class AfkListener implements CssListener {
 						}
 					}
 
-					if ((boolean) Ref.get(packet, changedPosition)
-							&& (!sameMovementPattern || !checkIfInsideWaterFlow(uuid, x, y, z))) {
+					if((boolean) Ref.get(packet, changedPosition) && (!sameMovementPattern || !checkIfInsideWaterFlow(uuid, x, y, z))) {
 
-						int[] previous = positions.computeIfAbsent(uuid, id -> new int[] { x, z });
+						int[] previous = positions.computeIfAbsent(uuid, id -> new int[]{x, z});
 
-						if (x != previous[0] || z != previous[1]) {
-							positions.put(uuid, new int[] { x, z });
+						if(x != previous[0] || z != previous[1]) {
+							positions.put(uuid, new int[]{x, z});
 							AfkManager.getProvider().stopAfk(uuid, true);
 						}
 					}
 				}
 
 				private boolean checkIfInsideWaterFlow(UUID uuid, int x, int y, int z) {
-					Pair pair = movementLocs.computeIfAbsent(uuid,
-							id -> Pair.of(new ArrayList<>(), Pair.of(0, new float[2])));
+					Pair pair = movementLocs.computeIfAbsent(uuid, id -> Pair.of(new ArrayList<>(), Pair.of(0, new float[2])));
 
 					@SuppressWarnings("unchecked")
 					List<int[]> movements = (List<int[]>) pair.getKey();
 
-					int[] start = { x, y, z };
+					int[] start = {x, y, z};
 					Pair sub = (Pair) pair.getValue();
 
-					if (movements.size() > 1)
-						for (int[] currentMovement : movements) {
-							if (!equals(currentMovement, start))
+					if(movements.size() > 1)
+						for(int[] currentMovement : movements) {
+							if(!equals(currentMovement, start))
 								continue;
 
-							if ((int) sub.getKey() >= 2)
+							if((int) sub.getKey() >= 2)
 								return true;
 
 							sub.setKey((int) sub.getKey() + 1);
@@ -242,7 +234,7 @@ public class AfkListener implements CssListener {
 
 					movements.add(start);
 
-					if (movements.size() > 10)
+					if(movements.size() > 10)
 						movements.remove(0);
 
 					return false;
@@ -263,12 +255,12 @@ public class AfkListener implements CssListener {
 
 	@Override
 	public void unregister() {
-		if (task != 0) {
+		if(task != 0) {
 			Scheduler.cancelTask(task);
 			task = 0;
 		}
 
-		if (packetListener != null)
+		if(packetListener != null)
 			packetListener.unregister();
 
 		packetListener = null;
@@ -286,7 +278,7 @@ public class AfkListener implements CssListener {
 
 	@EventHandler
 	public void onBlockPlace(BlockPlaceEvent event) {
-		if (blockPlace)
+		if(blockPlace)
 			AfkManager.getProvider().stopAfk(event.getPlayer().getUniqueId(), true);
 	}
 
@@ -296,37 +288,37 @@ public class AfkListener implements CssListener {
 
 		AfkManager.getProvider().stopAfk(uuid, false);
 
-		if (autoAfk != null)
+		if(autoAfk != null)
 			autoAfk.remove(uuid);
 
-		if (positions != null)
+		if(positions != null)
 			positions.remove(uuid);
 
-		if (movementLocs != null)
+		if(movementLocs != null)
 			movementLocs.remove(uuid);
 	}
 
 	@EventHandler
 	public void onInvClick(InventoryClickEvent event) {
-		if (invClickEvent)
+		if(invClickEvent)
 			AfkManager.getProvider().stopAfk(event.getWhoClicked().getUniqueId(), true);
 	}
 
 	@EventHandler
 	public void onInvDrag(InventoryDragEvent event) {
-		if (invClickEvent)
+		if(invClickEvent)
 			AfkManager.getProvider().stopAfk(event.getWhoClicked().getUniqueId(), true);
 	}
 
 	@EventHandler
 	public void onCommand(PlayerCommandPreprocessEvent event) {
-		if (commandEvent && !isAfkCommand(event.getMessage().substring(1).toLowerCase().split(" ")[0]))
+		if(commandEvent && !isAfkCommand(event.getMessage().substring(1).toLowerCase().split(" ")[0]))
 			AfkManager.getProvider().stopAfk(event.getPlayer().getUniqueId(), true);
 	}
 
 	private boolean isAfkCommand(String cmd) {
-		for (String afkCommand : API.get().getConfigManager().getCommands().getStringList("afk.cmd"))
-			if (cmd.equals(afkCommand.toLowerCase()))
+		for(String afkCommand : API.get().getConfigManager().getCommands().getStringList("afk.cmd"))
+			if(cmd.equals(afkCommand.toLowerCase()))
 				return true;
 
 		return false;

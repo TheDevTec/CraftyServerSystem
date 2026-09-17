@@ -28,16 +28,16 @@ public class EconomyJoinListener implements CssListener {
 
 	@EventHandler
 	public void onJoin(PlayerJoinEvent e) {
-		if (API.get().getEconomyHook() instanceof CssEconomyHook)
-			if (!((CssEconomyHook) API.get().getEconomyHook()).economy.hasAccount(e.getPlayer().getName(), e.getPlayer().getWorld().getName()))
+		if(API.get().getEconomyHook() instanceof CssEconomyHook)
+			if(!((CssEconomyHook) API.get().getEconomyHook()).economy.hasAccount(e.getPlayer().getName(), e.getPlayer().getWorld().getName()))
 				((CssEconomyHook) API.get().getEconomyHook()).economy.createPlayerAccount(e.getPlayer().getName(), e.getPlayer().getWorld().getName());
 	}
 
 	@EventHandler
 	public void onWorldChange(PlayerChangedWorldEvent e) {
-		if (API.get().getEconomyHook() instanceof CssEconomyHook)
-			if (((CssEconomyHook) API.get().getEconomyHook()).economy.isEnabledPerWorldEconomy()
-					&& !((CssEconomyHook) API.get().getEconomyHook()).economy.hasAccount(e.getPlayer().getName(), e.getPlayer().getWorld().getName()))
+		if(API.get().getEconomyHook() instanceof CssEconomyHook)
+			if(((CssEconomyHook) API.get().getEconomyHook()).economy.isEnabledPerWorldEconomy()
+			        && !((CssEconomyHook) API.get().getEconomyHook()).economy.hasAccount(e.getPlayer().getName(), e.getPlayer().getWorld().getName()))
 				((CssEconomyHook) API.get().getEconomyHook()).economy.createPlayerAccount(e.getPlayer().getName(), e.getPlayer().getWorld().getName());
 	}
 }

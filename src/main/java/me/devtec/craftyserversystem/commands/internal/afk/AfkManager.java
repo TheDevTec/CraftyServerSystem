@@ -23,7 +23,7 @@ public class AfkManager {
 
 	@Nonnull
 	public static AfkManager getProvider() {
-		if (provider == null)
+		if(provider == null)
 			provider = new AfkManager();
 		return provider;
 	}
@@ -46,60 +46,56 @@ public class AfkManager {
 	public void startAfk(UUID uuid, boolean runActions) {
 		Config user = me.devtec.shared.API.getUser(uuid);
 
-		if (!user.getBoolean("afk")) {
+		if(!user.getBoolean("afk")) {
 			AfkToggleEvent event = new AfkToggleEvent(uuid, true);
 			EventManager.call(event);
 
-			if (event.isCancelled())
+			if(event.isCancelled())
 				return;
 
 			user.set("afk", true);
 
-			if (runActions) {
-				TextRenderer renderer = renderer().target(uuid).placeholder("player",
-						me.devtec.shared.API.offlineCache().lookupNameById(uuid));
+			if(runActions) {
+				TextRenderer renderer = renderer().target(uuid).placeholder("player", me.devtec.shared.API.offlineCache().lookupNameById(uuid));
 
-				API.get().getMsgManager().sendMessageFromFile(API.get().getConfigManager().getMain(),
-						"afk.start.broadcast", renderer, BukkitLoader.getOnlinePlayers());
+				API.get().getMsgManager().sendMessageFromFile(API.get().getConfigManager().getMain(), "afk.start.broadcast", renderer, BukkitLoader.getOnlinePlayers());
 
 				BukkitLoader.getNmsProvider().postToMainThread(() -> {
-					for (String cmd : API.get().getConfigManager().getMain().getStringList("afk.start.commands"))
+					for(String cmd : API.get().getConfigManager().getMain().getStringList("afk.start.commands"))
 						Bukkit.dispatchCommand(Bukkit.getConsoleSender(), render(renderer, cmd));
 				});
 			}
 		}
 
-		if (AfkListener.autoAfk != null)
+		if(AfkListener.autoAfk != null)
 			AfkListener.autoAfk.put(uuid, System.currentTimeMillis() / 1000);
 	}
 
 	public void stopAfk(UUID uuid, boolean runActions) {
 		Config user = me.devtec.shared.API.getUser(uuid);
 
-		if (user.getBoolean("afk")) {
+		if(user.getBoolean("afk")) {
 			AfkToggleEvent event = new AfkToggleEvent(uuid, false);
 			EventManager.call(event);
 
-			if (event.isCancelled())
+			if(event.isCancelled())
 				return;
 
 			user.set("afk", false);
 
-			if (runActions) {
-				TextRenderer renderer = renderer().target(uuid).placeholder("player",
-						me.devtec.shared.API.offlineCache().lookupNameById(uuid));
+			if(runActions) {
+				TextRenderer renderer = renderer().target(uuid).placeholder("player", me.devtec.shared.API.offlineCache().lookupNameById(uuid));
 
-				API.get().getMsgManager().sendMessageFromFile(API.get().getConfigManager().getMain(),
-						"afk.stop.broadcast", renderer, BukkitLoader.getOnlinePlayers());
+				API.get().getMsgManager().sendMessageFromFile(API.get().getConfigManager().getMain(), "afk.stop.broadcast", renderer, BukkitLoader.getOnlinePlayers());
 
 				BukkitLoader.getNmsProvider().postToMainThread(() -> {
-					for (String cmd : API.get().getConfigManager().getMain().getStringList("afk.stop.commands"))
+					for(String cmd : API.get().getConfigManager().getMain().getStringList("afk.stop.commands"))
 						Bukkit.dispatchCommand(Bukkit.getConsoleSender(), render(renderer, cmd));
 				});
 			}
 		}
 
-		if (AfkListener.autoAfk != null)
+		if(AfkListener.autoAfk != null)
 			AfkListener.autoAfk.put(uuid, System.currentTimeMillis() / 1000);
 	}
 }

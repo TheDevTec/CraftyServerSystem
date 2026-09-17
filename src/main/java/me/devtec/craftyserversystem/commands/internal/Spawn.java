@@ -17,21 +17,20 @@ public class Spawn extends CssCommand {
 
 	@Override
 	public void register() {
-		if (isRegistered())
+		if(isRegistered())
 			return;
 
-		CommandStructure<CommandSender> cmd = CommandStructure
-				.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
-					if (!(sender instanceof Player)) {
-						msgUsage(sender, "cmd");
-						return;
-					}
-					spawn((Player) sender, true, sender);
-				}).permission(getPerm("cmd"));
+		CommandStructure<CommandSender> cmd = CommandStructure.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
+			if(!(sender instanceof Player)) {
+				msgUsage(sender, "cmd");
+				return;
+			}
+			spawn((Player) sender, true, sender);
+		}).permission(getPerm("cmd"));
 
 		// silent
 		cmd.argument("-s", (sender, structure, args) -> {
-			if (!(sender instanceof Player)) {
+			if(!(sender instanceof Player)) {
 				msgUsage(sender, "cmd");
 				return;
 			}
@@ -40,35 +39,33 @@ public class Spawn extends CssCommand {
 
 		// other
 		cmd.selector(Selector.ENTITY_SELECTOR, (sender, structure, args) -> {
-			for (Player player : selector(sender, args[0]))
+			for(Player player : selector(sender, args[0]))
 				spawn(player, true, sender);
 		}).permission(getPerm("other"))
-				// silent
-				.argument("-s", (sender, structure, args) -> {
-					for (Player player : selector(sender, args[0]))
-						spawn(player, false, sender);
-				});
+		        // silent
+		        .argument("-s", (sender, structure, args) -> {
+			        for(Player player : selector(sender, args[0]))
+				        spawn(player, false, sender);
+		        });
 
 		// register
 		List<String> cmds = getCommands();
-		if (!cmds.isEmpty())
+		if(!cmds.isEmpty())
 			this.cmd = addBypassSettings(cmd).build().register(cmds.remove(0), cmds.toArray(new String[0]));
 	}
 
 	public void spawn(Player target, boolean sendMessage, CommandSender sender) {
-		if (sendMessage)
-			if (target.equals(sender))
+		if(sendMessage)
+			if(target.equals(sender))
 				msg(sender, "self", renderer().placeholder("target", target.getName()));
 			else {
-				TextRenderer placeholders = renderer().placeholder("target", target.getName()).placeholder("sender",
-						sender.getName());
+				TextRenderer placeholders = renderer().placeholder("target", target.getName()).placeholder("sender", sender.getName());
 				msg(sender, "other.target", placeholders);
 				msg(sender, "other.sender", placeholders);
 			}
 		// You can teleport entity only in primary thread
-		if (!Bukkit.isPrimaryThread())
-			BukkitLoader.getNmsProvider()
-					.postToMainThread(() -> target.teleport(API.get().getConfigManager().getSpawn().toLocation()));
+		if(!Bukkit.isPrimaryThread())
+			BukkitLoader.getNmsProvider().postToMainThread(() -> target.teleport(API.get().getConfigManager().getSpawn().toLocation()));
 		else
 			target.teleport(API.get().getConfigManager().getSpawn().toLocation());
 	}

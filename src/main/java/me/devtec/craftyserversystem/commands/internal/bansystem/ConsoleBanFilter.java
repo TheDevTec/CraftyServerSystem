@@ -21,7 +21,7 @@ public class ConsoleBanFilter {
 	private static List<Predicate<String>> predicates = new ArrayList<>();
 
 	public static void init() {
-		if (init)
+		if(init)
 			return;
 		init = true;
 		cancelledMessages = new TempList<>(100);
@@ -30,20 +30,20 @@ public class ConsoleBanFilter {
 			@Override
 			public Result filter(LogEvent event) {
 				String msg = event.getMessage().getFormattedMessage();
-				synchronized (cancelledMessages) {
-					if (!cancelledMessages.isEmpty()) {
+				synchronized(cancelledMessages) {
+					if(!cancelledMessages.isEmpty()) {
 						Iterator<String[]> itr = cancelledMessages.iterator();
-						while (itr.hasNext()) {
+						while(itr.hasNext()) {
 							String[] string = itr.next();
-							if (msg.startsWith(string[0]) && msg.endsWith(string[1])) {
+							if(msg.startsWith(string[0]) && msg.endsWith(string[1])) {
 								itr.remove();
 								return Result.DENY;
 							}
 						}
 					}
 				}
-				for (Predicate<String> predicate : predicates)
-					if (predicate.test(msg))
+				for(Predicate<String> predicate : predicates)
+					if(predicate.test(msg))
 						return Result.DENY;
 				return super.filter(event);
 			}
@@ -51,8 +51,8 @@ public class ConsoleBanFilter {
 	}
 
 	public static void addMessage(String prefix, String suffix) {
-		synchronized (cancelledMessages) {
-			cancelledMessages.add(new String[] { prefix == null ? "" : prefix, suffix == null ? "" : suffix });
+		synchronized(cancelledMessages) {
+			cancelledMessages.add(new String[]{prefix == null ? "" : prefix, suffix == null ? "" : suffix});
 		}
 	}
 

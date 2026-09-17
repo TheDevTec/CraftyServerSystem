@@ -37,21 +37,22 @@ public class ServerMotdListener implements CssListener {
 
 	@Override
 	public void reload() {
-		if (listener != null)
+		if(listener != null)
 			unregister();
 
 		List<Motd> motds = new ArrayList<>();
-		for (String key : getConfig().getKeys("motds")) {
+		for(String key : getConfig().getKeys("motds")) {
 			List<GameProfileHandler> list = null;
-			if (getConfig().getBoolean("motds." + key + ".slots.modified-list")) {
+			if(getConfig().getBoolean("motds." + key + ".slots.modified-list")) {
 				list = new ArrayList<>();
-				for (String value : getConfig().getStringList("motds." + key + ".slots.list"))
+				for(String value : getConfig().getStringList("motds." + key + ".slots.list"))
 					list.add(GameProfileHandler.of(value, UUID.randomUUID()));
 			}
 			Motd motd = new Motd(getConfig().getString("motds." + key + ".slots.online"), getConfig().getString("motds." + key + ".slots.max-online"), list,
-					getConfig().getString("motds." + key + ".motd").replace("\\n", "\n"), getConfig().getString("motds." + key + ".icon"),
-					getConfig().getString("motds." + key + ".version") == null || getConfig().getString("motds." + key + ".version").isEmpty() ? null
-							: getConfig().getString("motds." + key + ".version"));
+			        getConfig().getString("motds." + key + ".motd").replace("\\n", "\n"), getConfig().getString("motds." + key + ".icon"),
+			        getConfig().getString("motds." + key + ".version") == null || getConfig().getString("motds." + key + ".version").isEmpty()
+			                ? null
+			                : getConfig().getString("motds." + key + ".version"));
 			motds.add(motd);
 		}
 		listener = new EventListener() {
@@ -60,13 +61,13 @@ public class ServerMotdListener implements CssListener {
 			public void listen(Event event) {
 				ServerListPingEvent e = (ServerListPingEvent) event;
 				Motd motd = StringUtils.randomFromList(motds);
-				if (motd.hasFavicon())
+				if(motd.hasFavicon())
 					e.setFavicon(motd.getFavicon());
-				if (motd.hasMotd())
+				if(motd.hasMotd())
 					e.setMotd(motd.getMotd());
-				if (motd.hasSlots())
+				if(motd.hasSlots())
 					e.setPlayersText(motd.getSlots());
-				if (motd.hasVersion()) {
+				if(motd.hasVersion()) {
 					e.setProtocol(-1);
 					e.setVersion(motd.getVersion());
 				}
@@ -100,14 +101,16 @@ public class ServerMotdListener implements CssListener {
 		}
 
 		public int getOnlinePlayers() {
-			return online == null ? BukkitLoader.getOnlinePlayers().size()
-					: (int) MathUtils
-							.calculate(PlaceholderAPI.apply(online.replace("{online}", BukkitLoader.getOnlinePlayers().size() + "").replace("{max-players}", Bukkit.getMaxPlayers() + ""), null));
+			return online == null
+			        ? BukkitLoader.getOnlinePlayers().size()
+			        : (int) MathUtils
+			                .calculate(PlaceholderAPI.apply(online.replace("{online}", BukkitLoader.getOnlinePlayers().size() + "").replace("{max-players}", Bukkit.getMaxPlayers() + ""), null));
 		}
 
 		public int getMaxPlayers() {
-			return max == null ? Bukkit.getMaxPlayers()
-					: (int) MathUtils.calculate(PlaceholderAPI.apply(max.replace("{online}", BukkitLoader.getOnlinePlayers().size() + "").replace("{max-players}", Bukkit.getMaxPlayers() + ""), null));
+			return max == null
+			        ? Bukkit.getMaxPlayers()
+			        : (int) MathUtils.calculate(PlaceholderAPI.apply(max.replace("{online}", BukkitLoader.getOnlinePlayers().size() + "").replace("{max-players}", Bukkit.getMaxPlayers() + ""), null));
 		}
 
 		public boolean hasMotd() {
@@ -116,8 +119,9 @@ public class ServerMotdListener implements CssListener {
 
 		@Nullable
 		public String getMotd() {
-			return motd == null ? null
-					: PlaceholderAPI.apply(ColorUtils.colorize(motd).replace("{online}", BukkitLoader.getOnlinePlayers().size() + "").replace("{max-players}", Bukkit.getMaxPlayers() + ""), null);
+			return motd == null
+			        ? null
+			        : PlaceholderAPI.apply(ColorUtils.colorize(motd).replace("{online}", BukkitLoader.getOnlinePlayers().size() + "").replace("{max-players}", Bukkit.getMaxPlayers() + ""), null);
 		}
 
 		public boolean hasFavicon() {
@@ -135,8 +139,9 @@ public class ServerMotdListener implements CssListener {
 
 		@Nullable
 		public String getVersion() {
-			return version == null ? null
-					: PlaceholderAPI.apply(ColorUtils.colorize(version).replace("{online}", BukkitLoader.getOnlinePlayers().size() + "").replace("{max-players}", Bukkit.getMaxPlayers() + ""), null);
+			return version == null
+			        ? null
+			        : PlaceholderAPI.apply(ColorUtils.colorize(version).replace("{online}", BukkitLoader.getOnlinePlayers().size() + "").replace("{max-players}", Bukkit.getMaxPlayers() + ""), null);
 		}
 
 		public boolean hasSlots() {
@@ -145,13 +150,13 @@ public class ServerMotdListener implements CssListener {
 
 		@Nullable
 		public List<GameProfileHandler> getSlots() {
-			if (playersText == null)
+			if(playersText == null)
 				return null;
 			List<GameProfileHandler> slots = new ArrayList<>(playersText.size());
-			for (GameProfileHandler handler : playersText)
+			for(GameProfileHandler handler : playersText)
 				slots.add(GameProfileHandler.of(PlaceholderAPI
-						.apply(ColorUtils.colorize(handler.getUsername()).replace("{online}", BukkitLoader.getOnlinePlayers().size() + "").replace("{max-players}", Bukkit.getMaxPlayers() + ""), null),
-						handler.getUUID()));
+				        .apply(ColorUtils.colorize(handler.getUsername()).replace("{online}", BukkitLoader.getOnlinePlayers().size() + "").replace("{max-players}", Bukkit.getMaxPlayers() + ""), null),
+				        handler.getUUID()));
 			return slots;
 		}
 	}

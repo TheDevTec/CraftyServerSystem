@@ -18,49 +18,46 @@ public class Reply extends CssCommand {
 
 	@Override
 	public void register() {
-		if (isRegistered())
+		if(isRegistered())
 			return;
 
-		CommandStructure<CommandSender> cmd = CommandStructure
-				.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
-					msgUsage(sender, "cmd");
-				}).permission(getPerm("cmd"));
+		CommandStructure<CommandSender> cmd = CommandStructure.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
+			msgUsage(sender, "cmd");
+		}).permission(getPerm("cmd"));
 		cmd.argument(null, -1, (sender, structure, args) -> {
 			String replyTo = MsgManager.get().getReply(sender instanceof Player ? sender.getName() : null);
 			sendMessage(sender, replyTo, StringUtils.buildString(args));
 		}, (sender, structure, args) -> Arrays.asList("{message}"));
 		// register
 		List<String> cmds = getCommands();
-		if (!cmds.isEmpty())
+		if(!cmds.isEmpty())
 			this.cmd = addBypassSettings(cmd).build().register(cmds.remove(0), cmds.toArray(new String[0]));
 	}
 
 	public void sendMessage(CommandSender sender, String replyTo, String message) {
-		if (replyTo == null) {
+		if(replyTo == null) {
 			msg(sender, "noone");
 			return;
 		}
 		CommandSender target = "$CONSOLE".equals(replyTo) ? Bukkit.getConsoleSender() : Bukkit.getPlayerExact(replyTo);
-		if (target == null) {
+		if(target == null) {
 			msg(sender, "not-online", renderer().placeholder("target", replyTo));
 			return;
 		}
 		String senderName = sender instanceof Player ? sender.getName() : "$CONSOLE";
 		String targetName = replyTo;
-		if (!MsgManager.get().trySendMessage(senderName, targetName)) {
+		if(!MsgManager.get().trySendMessage(senderName, targetName)) {
 			msgOut(sender, "msg.not-accepting", renderer().placeholder("target", targetName));
 			return;
 		}
-		TextRenderer ex = renderer().placeholder("sender", senderName).placeholder("target", targetName)
-				.placeholder("message", message);
+		TextRenderer ex = renderer().placeholder("sender", senderName).placeholder("target", targetName).placeholder("message", message);
 		msgOut(sender, "msg.receive.sender", ex);
 		msgOut(target, "msg.receive.target", ex);
-		MsgManager.get().setReply(target instanceof Player ? targetName : null,
-				sender instanceof Player ? senderName : null);
-		for (Player player : BukkitLoader.getOnlinePlayers())
-			if (MsgManager.get().getSpy(player.getName()) && !player.equals(sender) && !player.equals(target))
+		MsgManager.get().setReply(target instanceof Player ? targetName : null, sender instanceof Player ? senderName : null);
+		for(Player player : BukkitLoader.getOnlinePlayers())
+			if(MsgManager.get().getSpy(player.getName()) && !player.equals(sender) && !player.equals(target))
 				msgOut(player, "msg.receive.spy", ex);
-		if (!Bukkit.getConsoleSender().equals(sender) && !Bukkit.getConsoleSender().equals(target))
+		if(!Bukkit.getConsoleSender().equals(sender) && !Bukkit.getConsoleSender().equals(target))
 			msgOut(Bukkit.getConsoleSender(), "msg.receive.spy", ex);
 	}
 }

@@ -24,7 +24,7 @@ public class AnimationManager {
 	public void load() {
 		Config config = API.get().getConfigManager().getAnimations();
 		List<Integer> speedSteps = new ArrayList<>();
-		for (String key : config.getKeys()) {
+		for(String key : config.getKeys()) {
 			int step = Math.max(1, config.getInt(key + ".speed"));
 			registered.put(key, new Animation(config.getStringList(key + ".lines"), step));
 			speedSteps.add(step);
@@ -34,7 +34,7 @@ public class AnimationManager {
 
 			@Override
 			public void run() {
-				for (Animation animation : registered.values())
+				for(Animation animation : registered.values())
 					animation.next();
 			}
 		}.runRepeating(minSpeed + 1, minSpeed);
@@ -52,7 +52,7 @@ public class AnimationManager {
 	private int findStep(Integer[] numbers) {
 		Arrays.sort(numbers);
 		int gcd = 0;
-		for (int i = 1; i < numbers.length; i++) {
+		for(int i = 1; i < numbers.length; i++) {
 			int diff = numbers[i] - numbers[i - 1];
 			gcd = gcd == 0 ? diff : gcd(gcd, diff);
 		}
@@ -60,7 +60,7 @@ public class AnimationManager {
 	}
 
 	private int gcd(int a, int b) {
-		while (b != 0) {
+		while(b != 0) {
 			int temp = b;
 			b = a % b;
 			a = temp;

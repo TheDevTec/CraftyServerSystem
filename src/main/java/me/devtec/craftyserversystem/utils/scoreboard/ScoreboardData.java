@@ -9,7 +9,7 @@ public class ScoreboardData {
 
 	@Override
 	public boolean equals(Object object) {
-		if (object instanceof ScoreboardData)
+		if(object instanceof ScoreboardData)
 			return ((ScoreboardData) object).title.equals(title) && ((ScoreboardData) object).lines.equals(lines);
 		return false;
 	}
@@ -42,9 +42,9 @@ public class ScoreboardData {
 	}
 
 	public ScoreboardData fillMissing(ScoreboardData additional) {
-		if (title == null)
+		if(title == null)
 			title = additional.title;
-		if (lines == null)
+		if(lines == null)
 			lines = additional.lines;
 		return this;
 	}

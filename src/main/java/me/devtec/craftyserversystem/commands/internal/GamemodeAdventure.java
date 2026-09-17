@@ -17,11 +17,11 @@ public class GamemodeAdventure extends CssCommand {
 
 	@Override
 	public void register() {
-		if (isRegistered())
+		if(isRegistered())
 			return;
 
 		CommandStructure<CommandSender> cmd = CommandStructure.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
-			if (!(sender instanceof Player)) {
+			if(!(sender instanceof Player)) {
 				msgUsage(sender, "cmd");
 				return;
 			}
@@ -29,7 +29,7 @@ public class GamemodeAdventure extends CssCommand {
 		}).permission(getPerm("cmd"));
 		// silent
 		cmd.argument("-s", (sender, structure, args) -> {
-			if (!(sender instanceof Player)) {
+			if(!(sender instanceof Player)) {
 				msgUsage(sender, "cmd");
 				return;
 			}
@@ -37,24 +37,24 @@ public class GamemodeAdventure extends CssCommand {
 		});
 		// other
 		cmd.selector(Selector.ENTITY_SELECTOR, (sender, structure, args) -> {
-			for (Player player : selector(sender, args[0]))
+			for(Player player : selector(sender, args[0]))
 				changeGameMode(player, true, sender);
 		}).permission(getPerm("other"))
-				// silent
-				.argument("-s", (sender, structure, args) -> {
-					for (Player player : selector(sender, args[00]))
-						changeGameMode(player, false, sender);
-				});
+		        // silent
+		        .argument("-s", (sender, structure, args) -> {
+			        for(Player player : selector(sender, args[00]))
+				        changeGameMode(player, false, sender);
+		        });
 
 		// register
 		List<String> cmds = getCommands();
-		if (!cmds.isEmpty())
+		if(!cmds.isEmpty())
 			this.cmd = addBypassSettings(cmd).build().register(cmds.remove(0), cmds.toArray(new String[0]));
 	}
 
 	public void changeGameMode(Player target, boolean sendMessage, CommandSender sender) {
-		if (sendMessage)
-			if (target.equals(sender)) {
+		if(sendMessage)
+			if(target.equals(sender)) {
 				TextRenderer placeholders = renderer().placeholder("target", target.getName()).placeholder("gamemode", "adventure");
 				msg(sender, "self", placeholders);
 			} else {
@@ -63,7 +63,7 @@ public class GamemodeAdventure extends CssCommand {
 				msg(sender, "other.sender", placeholders);
 			}
 		// You can change gamemode only in primary thread
-		if (!Bukkit.isPrimaryThread())
+		if(!Bukkit.isPrimaryThread())
 			BukkitLoader.getNmsProvider().postToMainThread(() -> target.setGameMode(GameMode.ADVENTURE));
 		else
 			target.setGameMode(GameMode.ADVENTURE);

@@ -16,13 +16,12 @@ public class Sudo extends CssCommand {
 
 	@Override
 	public void register() {
-		if (isRegistered())
+		if(isRegistered())
 			return;
 
-		CommandStructure<CommandSender> cmd = CommandStructure
-				.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
-					msgUsage(sender, "cmd");
-				}).permission(getPerm("cmd"));
+		CommandStructure<CommandSender> cmd = CommandStructure.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
+			msgUsage(sender, "cmd");
+		}).permission(getPerm("cmd"));
 		cmd.selector(Selector.PLAYER, (sender, structure, args) -> {
 			msgUsage(sender, "cmd");
 		}).argument(null, -1, (sender, structure, args) -> {
@@ -30,27 +29,27 @@ public class Sudo extends CssCommand {
 			String value = StringUtils.buildString(1, args);
 			boolean silent = value.endsWith("-s");
 			boolean command = value.charAt(0) == '/';
-			if (silent)
+			if(silent)
 				value = value.substring(command ? 1 : 0, value.length() - 2).trim();
-			else if (command)
+			else if(command)
 				value = value.substring(1);
 
 			final String finalValue = value;
 
 			// It's async!!
 			BukkitLoader.getNmsProvider().postToMainThread(() -> {
-				if (command)
+				if(command)
 					Bukkit.dispatchCommand(target, finalValue);
 				else
 					target.chat(finalValue);
 			});
-			if (!silent)
+			if(!silent)
 				msg(sender, "", renderer().placeholder("target", target.getName()).placeholder("value", value));
 		});
 
 		// register
 		List<String> cmds = getCommands();
-		if (!cmds.isEmpty())
+		if(!cmds.isEmpty())
 			this.cmd = addBypassSettings(cmd).build().register(cmds.remove(0), cmds.toArray(new String[0]));
 	}
 

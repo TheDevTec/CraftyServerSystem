@@ -22,20 +22,19 @@ public class Loom extends CssCommand {
 
 	@Override
 	public void register() {
-		if (isRegistered() || Ref.isAtMost(13, 0))
+		if(isRegistered() || Ref.isAtMost(13, 0))
 			return;
 
-		CommandStructure<CommandSender> cmd = CommandStructure
-				.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
-					if (!(sender instanceof Player)) {
-						msgUsage(sender, "cmd");
-						return;
-					}
-					openInv(sender, (Player) sender, true);
-				}).permission(getPerm("cmd"));
+		CommandStructure<CommandSender> cmd = CommandStructure.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
+			if(!(sender instanceof Player)) {
+				msgUsage(sender, "cmd");
+				return;
+			}
+			openInv(sender, (Player) sender, true);
+		}).permission(getPerm("cmd"));
 		// silent
 		cmd.argument("-s", (sender, structure, args) -> {
-			if (!(sender instanceof Player)) {
+			if(!(sender instanceof Player)) {
 				msgUsage(sender, "cmd");
 				return;
 			}
@@ -43,29 +42,28 @@ public class Loom extends CssCommand {
 		});
 		// other
 		cmd.selector(Selector.ENTITY_SELECTOR, (sender, structure, args) -> {
-			for (Player player : selector(sender, args[0]))
+			for(Player player : selector(sender, args[0]))
 				openInv(sender, player, true);
 		}).permission(getPerm("other"))
-				// silent
-				.argument("-s", (sender, structure, args) -> {
-					for (Player player : selector(sender, args[0]))
-						openInv(sender, player, false);
-				});
+		        // silent
+		        .argument("-s", (sender, structure, args) -> {
+			        for(Player player : selector(sender, args[0]))
+				        openInv(sender, player, false);
+		        });
 
 		// register
 		List<String> cmds = getCommands();
-		if (!cmds.isEmpty())
+		if(!cmds.isEmpty())
 			this.cmd = addBypassSettings(cmd).build().register(cmds.remove(0), cmds.toArray(new String[0]));
 	}
 
 	private void openInv(CommandSender sender, Player target, boolean sendMessages) {
 		target.openInventory(Bukkit.createInventory(null, InventoryType.LOOM));
-		if (sendMessages)
-			if (sender.equals(target))
+		if(sendMessages)
+			if(sender.equals(target))
 				msg(sender, "self");
 			else {
-				TextRenderer ex = renderer().placeholder("sender", sender.getName()).placeholder("target",
-						target.getName());
+				TextRenderer ex = renderer().placeholder("sender", sender.getName()).placeholder("target", target.getName());
 				msg(sender, "other.sender", ex);
 				msg(target, "other.target", ex);
 			}

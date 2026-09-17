@@ -16,7 +16,7 @@ public class VaultPermissionHook implements PermissionHook {
 		new Tasker() {
 			@Override
 			public void run() {
-				if (!API.get().getPermissionHook().equals(VaultPermissionHook.this) || getVault())
+				if(!API.get().getPermissionHook().equals(VaultPermissionHook.this) || getVault())
 					cancel();
 			}
 		}.runRepeatingTimes(5, 5, 480);
@@ -25,24 +25,24 @@ public class VaultPermissionHook implements PermissionHook {
 	public boolean getVault() {
 		try {
 			RegisteredServiceProvider<Permission> provider = Bukkit.getServicesManager().getRegistration(Permission.class);
-			if (provider != null)
+			if(provider != null)
 				perm = provider.getProvider();
 			return perm != null;
-		} catch (Exception e) {
+		} catch(Exception e) {
 			return false;
 		}
 	}
 
 	@Override
 	public String getGroup(CommandSender sender) {
-		if (sender instanceof Player)
+		if(sender instanceof Player)
 			return getGroup(sender.getName());
 		return "default"; // Console or command block
 	}
 
 	@Override
 	public String getGroup(String name) {
-		if (perm == null || !perm.hasGroupSupport())
+		if(perm == null || !perm.hasGroupSupport())
 			return "default";
 		String group = perm.getPrimaryGroup(Bukkit.getWorlds().get(0).getName(), Bukkit.getOfflinePlayer(name));
 		return group == null ? "default" : group;

@@ -16,41 +16,39 @@ public class Hat extends CssCommand {
 
 	@Override
 	public void register() {
-		if (isRegistered())
+		if(isRegistered())
 			return;
 
-		CommandStructure<Player> cmd = CommandStructure
-				.create(Player.class, P_DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
-					ItemStack inHand = sender.getItemInHand();
-					if (inHand.getType() == Material.AIR) {
-						msg(sender, "empty-hand");
-						return;
-					}
-					ItemStack helmet = sender.getEquipment().getHelmet();
-					sender.getEquipment().setHelmet(inHand);
-					sender.setItemInHand(helmet);
-					msg(sender, "set.self");
-				}).permission(getPerm("cmd"));
+		CommandStructure<Player> cmd = CommandStructure.create(Player.class, P_DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
+			ItemStack inHand = sender.getItemInHand();
+			if(inHand.getType() == Material.AIR) {
+				msg(sender, "empty-hand");
+				return;
+			}
+			ItemStack helmet = sender.getEquipment().getHelmet();
+			sender.getEquipment().setHelmet(inHand);
+			sender.setItemInHand(helmet);
+			msg(sender, "set.self");
+		}).permission(getPerm("cmd"));
 		// other
 		cmd.selector(Selector.PLAYER, (sender, structure, args) -> {
 			Player target = Bukkit.getPlayer(args[0]);
 			ItemStack inHand = sender.getItemInHand();
-			if (inHand.getType() == Material.AIR) {
+			if(inHand.getType() == Material.AIR) {
 				msg(sender, "empty-hand");
 				return;
 			}
 			ItemStack helmet = target.getEquipment().getHelmet();
 			target.getEquipment().setHelmet(inHand);
 			sender.setItemInHand(helmet);
-			TextRenderer placeholders = renderer().placeholder("sender", sender.getName()).placeholder("target",
-					target.getName());
+			TextRenderer placeholders = renderer().placeholder("sender", sender.getName()).placeholder("target", target.getName());
 			msg(sender, "set.other.sender", placeholders);
 			msg(target, "set.other.targer", placeholders);
 		}).permission(getPerm("other"));
 
 		// register
 		List<String> cmds = getCommands();
-		if (!cmds.isEmpty())
+		if(!cmds.isEmpty())
 			this.cmd = addBypassSettings(cmd).build().register(cmds.remove(0), cmds.toArray(new String[0]));
 	}
 

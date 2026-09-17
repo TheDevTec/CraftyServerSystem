@@ -46,12 +46,12 @@ public class NbtWriter {
 	public static void write(Path path, NbtTag tag, boolean gzip) throws IOException {
 		Path parent = path.getParent();
 
-		if (parent != null)
+		if(parent != null)
 			Files.createDirectories(parent);
 
-		try (OutputStream file = new FileOutputStream(path.toFile());
-				OutputStream output = gzip ? new GZIPOutputStream(file) : file;
-				DataOutputStream out = new DataOutputStream(new BufferedOutputStream(output))) {
+		try(OutputStream file = new FileOutputStream(path.toFile());
+		        OutputStream output = gzip ? new GZIPOutputStream(file) : file;
+		        DataOutputStream out = new DataOutputStream(new BufferedOutputStream(output))) {
 
 			writeRoot(out, tag);
 		}
@@ -62,7 +62,7 @@ public class NbtWriter {
 
 		out.writeByte(type);
 
-		if (type == TAG_END)
+		if(type == TAG_END)
 			return;
 
 		out.writeUTF(tag.name() == null ? "" : tag.name());
@@ -70,82 +70,82 @@ public class NbtWriter {
 	}
 
 	private static void writePayload(DataOutputStream out, int type, Object value) throws IOException {
-		if (value instanceof NbtValue)
-			value = ((NbtValue)value).value();
+		if(value instanceof NbtValue)
+			value = ((NbtValue) value).value();
 
-		switch (type) {
-		case TAG_END:
-			return;
+		switch(type) {
+			case TAG_END :
+				return;
 
-		case TAG_BYTE:
-			if (value instanceof Boolean)
-				out.writeByte((Boolean)value ? 1 : 0);
-			else
-				out.writeByte(((Number) value).byteValue());
-			return;
+			case TAG_BYTE :
+				if(value instanceof Boolean)
+					out.writeByte((Boolean) value ? 1 : 0);
+				else
+					out.writeByte(((Number) value).byteValue());
+				return;
 
-		case TAG_SHORT:
-			out.writeShort(((Number) value).shortValue());
-			return;
+			case TAG_SHORT :
+				out.writeShort(((Number) value).shortValue());
+				return;
 
-		case TAG_INT:
-			out.writeInt(((Number) value).intValue());
-			return;
+			case TAG_INT :
+				out.writeInt(((Number) value).intValue());
+				return;
 
-		case TAG_LONG:
-			out.writeLong(((Number) value).longValue());
-			return;
+			case TAG_LONG :
+				out.writeLong(((Number) value).longValue());
+				return;
 
-		case TAG_FLOAT:
-			out.writeFloat(((Number) value).floatValue());
-			return;
+			case TAG_FLOAT :
+				out.writeFloat(((Number) value).floatValue());
+				return;
 
-		case TAG_DOUBLE:
-			out.writeDouble(((Number) value).doubleValue());
-			return;
+			case TAG_DOUBLE :
+				out.writeDouble(((Number) value).doubleValue());
+				return;
 
-		case TAG_BYTE_ARRAY:
-			writeByteArray(out, value);
-			return;
+			case TAG_BYTE_ARRAY :
+				writeByteArray(out, value);
+				return;
 
-		case TAG_STRING:
-			out.writeUTF(String.valueOf(value));
-			return;
+			case TAG_STRING :
+				out.writeUTF(String.valueOf(value));
+				return;
 
-		case TAG_LIST:
-			writeList(out, (NbtList) value);
-			return;
+			case TAG_LIST :
+				writeList(out, (NbtList) value);
+				return;
 
-		case TAG_COMPOUND:
-			writeCompound(out, (NbtCompound) value);
-			return;
+			case TAG_COMPOUND :
+				writeCompound(out, (NbtCompound) value);
+				return;
 
-		case TAG_INT_ARRAY:
-			writeIntArray(out, value);
-			return;
+			case TAG_INT_ARRAY :
+				writeIntArray(out, value);
+				return;
 
-		case TAG_LONG_ARRAY:
-			writeLongArray(out, value);
-			return;
+			case TAG_LONG_ARRAY :
+				writeLongArray(out, value);
+				return;
 
-		default:
-			throw new IOException("Unknown NBT tag type: " + type);
+			default :
+				throw new IOException("Unknown NBT tag type: " + type);
 		}
 	}
 
 	private static void writeCompound(DataOutputStream out, NbtCompound compound) throws IOException {
 		Map<?, ?> values = compound.values();
 
-		for (Map.Entry<?, ?> entry : values.entrySet()) {
+		for(Map.Entry<?, ?> entry : values.entrySet()) {
 			String name = String.valueOf(entry.getKey());
 			Object value = entry.getValue();
 
-			if (value == null || value instanceof NbtEnd)
+			if(value == null || value instanceof NbtEnd)
 				continue;
 
 			int type = typeOf(value);
 
-			if (type == TAG_END)
+			if(type == TAG_END)
 				continue;
 
 			out.writeByte(type);
@@ -163,21 +163,21 @@ public class NbtWriter {
 		out.writeByte(childType);
 		out.writeInt(values.size());
 
-		for (Object value : values)
+		for(Object value : values)
 			writePayload(out, childType, value);
 	}
 
 	private static void writeByteArray(DataOutputStream out, Object value) throws IOException {
-		if (value instanceof byte[]) {
-			out.writeInt(((byte[])value).length);
-			out.write((byte[])value);
+		if(value instanceof byte[]) {
+			out.writeInt(((byte[]) value).length);
+			out.write((byte[]) value);
 			return;
 		}
 
-		if (value instanceof List) {
-			out.writeInt(((List<?>)value).size());
+		if(value instanceof List) {
+			out.writeInt(((List<?>) value).size());
 
-			for (Object element : (List<?>)value)
+			for(Object element : (List<?>) value)
 				out.writeByte(((Number) element).byteValue());
 
 			return;
@@ -187,20 +187,19 @@ public class NbtWriter {
 	}
 
 	private static void writeIntArray(DataOutputStream out, Object value) throws IOException {
-		if (value instanceof int[]) {
-			out.writeInt(((int[])value).length);
+		if(value instanceof int[]) {
+			out.writeInt(((int[]) value).length);
 
-			for (int element : (int[])value)
+			for(int element : (int[]) value)
 				out.writeInt(element);
 
 			return;
 		}
 
-		if (value instanceof List) {
-			out.writeInt(((List<?>)value).size());
+		if(value instanceof List) {
+			out.writeInt(((List<?>) value).size());
 
-
-			for (Object element : (List<?>)value)
+			for(Object element : (List<?>) value)
 				out.writeInt(((Number) element).intValue());
 
 			return;
@@ -210,19 +209,19 @@ public class NbtWriter {
 	}
 
 	private static void writeLongArray(DataOutputStream out, Object value) throws IOException {
-		if (value instanceof long[]) {
-			out.writeInt(((long[])value).length);
+		if(value instanceof long[]) {
+			out.writeInt(((long[]) value).length);
 
-			for (long element : (long[])value)
+			for(long element : (long[]) value)
 				out.writeLong(element);
 
 			return;
 		}
 
-		if (value instanceof List) {
-			out.writeInt(((List<?>)value).size());
+		if(value instanceof List) {
+			out.writeInt(((List<?>) value).size());
 
-			for (Object element : (List<?>)value)
+			for(Object element : (List<?>) value)
 				out.writeLong(((Number) element).longValue());
 
 			return;
@@ -232,49 +231,48 @@ public class NbtWriter {
 	}
 
 	private static int typeOf(Object value) throws IOException {
-		if (value instanceof NbtEnd)
+		if(value instanceof NbtEnd)
 			return TAG_END;
 
-		if (value instanceof NbtValue)
-			return ((NbtValue)value).type();
+		if(value instanceof NbtValue)
+			return ((NbtValue) value).type();
 
-		if (value instanceof NbtList)
+		if(value instanceof NbtList)
 			return TAG_LIST;
 
-		if (value instanceof NbtCompound)
+		if(value instanceof NbtCompound)
 			return TAG_COMPOUND;
 
-		if (value instanceof Byte || value instanceof Boolean)
+		if(value instanceof Byte || value instanceof Boolean)
 			return TAG_BYTE;
 
-		if (value instanceof Short)
+		if(value instanceof Short)
 			return TAG_SHORT;
 
-		if (value instanceof Integer)
+		if(value instanceof Integer)
 			return TAG_INT;
 
-		if (value instanceof Long)
+		if(value instanceof Long)
 			return TAG_LONG;
 
-		if (value instanceof Float)
+		if(value instanceof Float)
 			return TAG_FLOAT;
 
-		if (value instanceof Double)
+		if(value instanceof Double)
 			return TAG_DOUBLE;
 
-		if (value instanceof byte[])
+		if(value instanceof byte[])
 			return TAG_BYTE_ARRAY;
 
-		if (value instanceof String || value instanceof Character)
+		if(value instanceof String || value instanceof Character)
 			return TAG_STRING;
 
-		if (value instanceof int[])
+		if(value instanceof int[])
 			return TAG_INT_ARRAY;
 
-		if (value instanceof long[])
+		if(value instanceof long[])
 			return TAG_LONG_ARRAY;
 
-		throw new IOException("Unsupported NBT value: "
-				+ (value == null ? "null" : value.getClass().getName()));
+		throw new IOException("Unsupported NBT value: " + (value == null ? "null" : value.getClass().getName()));
 	}
 }

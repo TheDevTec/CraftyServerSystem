@@ -37,7 +37,7 @@ public class BanAPI {
 	}
 
 	public static BanAPI get() {
-		if (instance == null)
+		if(instance == null)
 			instance = new BanAPI();
 
 		return instance;
@@ -64,24 +64,22 @@ public class BanAPI {
 	}
 
 	private Sql.Select selectEntries() {
-		return Sql.select("id", "type", "user", "reason", "admin", "duration", "startDate", "cancelled")
-				.from("css_banlist");
+		return Sql.select("id", "type", "user", "reason", "admin", "duration", "startDate", "cancelled").from("css_banlist");
 	}
 
 	public void init() {
-		if (management != null)
+		if(management != null)
 			return;
 
 		format = new SimpleDateFormat(API.get().getConfigManager().getMain().getString("bansystem.timeFormat"));
 
-		if (API.get().getSqlConnection() != null) {
+		if(API.get().getSqlConnection() != null) {
 			try {
-				API.get().getSqlConnection().createTable("css_banlist", new Row[] {
-						new Row("id", SqlFieldType.INT, 255), new Row("type", SqlFieldType.VARCHAR, 255),
-						new Row("user", SqlFieldType.VARCHAR, 255), new Row("reason", SqlFieldType.VARCHAR, 255, true),
-						new Row("admin", SqlFieldType.VARCHAR, 255, true), new Row("duration", SqlFieldType.LONG),
-						new Row("startDate", SqlFieldType.LONG), new Row("cancelled", SqlFieldType.TINYINT, 1) });
-			} catch (SQLException exception) {
+				API.get().getSqlConnection().createTable("css_banlist",
+				        new Row[]{new Row("id", SqlFieldType.INT, 255), new Row("type", SqlFieldType.VARCHAR, 255), new Row("user", SqlFieldType.VARCHAR, 255),
+				                new Row("reason", SqlFieldType.VARCHAR, 255, true), new Row("admin", SqlFieldType.VARCHAR, 255, true), new Row("duration", SqlFieldType.LONG),
+				                new Row("startDate", SqlFieldType.LONG), new Row("cancelled", SqlFieldType.TINYINT, 1)});
+			} catch(SQLException exception) {
 				exception.printStackTrace();
 			}
 
@@ -90,22 +88,14 @@ public class BanAPI {
 				@Override
 				public void saveEntry(Entry entry) {
 					try {
-						if (API.get().getSqlConnection()
-								.exists(Sql.select("id").from("css_banlist").where("id", entry.getId()).limit(1)))
+						if(API.get().getSqlConnection().exists(Sql.select("id").from("css_banlist").where("id", entry.getId()).limit(1)))
 							API.get().getSqlConnection()
-									.update(Sql.update("css_banlist").set("type", entry.getType().name())
-											.set("user", entry.getUser()).set("reason", entry.getReason())
-											.set("admin", entry.getAdmin()).set("duration", entry.getDuration())
-											.set("startDate", entry.getStartDate())
-											.set("cancelled", entry.isCancelled() ? 1 : 0).where("id", entry.getId()));
+							        .update(Sql.update("css_banlist").set("type", entry.getType().name()).set("user", entry.getUser()).set("reason", entry.getReason()).set("admin", entry.getAdmin())
+							                .set("duration", entry.getDuration()).set("startDate", entry.getStartDate()).set("cancelled", entry.isCancelled() ? 1 : 0).where("id", entry.getId()));
 						else
-							API.get().getSqlConnection()
-									.update(Sql.insertInto("css_banlist", "id", "type", "user", "reason", "admin",
-											"duration", "startDate", "cancelled").values(entry.getId(),
-													entry.getType().name(), entry.getUser(), entry.getReason(),
-													entry.getAdmin(), entry.getDuration(), entry.getStartDate(),
-													entry.isCancelled() ? 1 : 0));
-					} catch (SQLException exception) {
+							API.get().getSqlConnection().update(Sql.insertInto("css_banlist", "id", "type", "user", "reason", "admin", "duration", "startDate", "cancelled").values(entry.getId(),
+							        entry.getType().name(), entry.getUser(), entry.getReason(), entry.getAdmin(), entry.getDuration(), entry.getStartDate(), entry.isCancelled() ? 1 : 0));
+					} catch(SQLException exception) {
 						exception.printStackTrace();
 					}
 				}
@@ -117,12 +107,12 @@ public class BanAPI {
 					try {
 						Sql.Select query = selectEntries();
 
-						if (limit > 0)
+						if(limit > 0)
 							query.limit(limit);
 
-						for (SqlRow row : API.get().getSqlConnection().query(query))
+						for(SqlRow row : API.get().getSqlConnection().query(query))
 							history.add(Entry.fromQuery(row));
-					} catch (SQLException exception) {
+					} catch(SQLException exception) {
 						exception.printStackTrace();
 					}
 
@@ -136,19 +126,19 @@ public class BanAPI {
 					try {
 						Sql.Select query = selectEntries();
 
-						if (userName == null || userIp == null) {
+						if(userName == null || userIp == null) {
 							String onlyOneName = userIp == null ? userName : userIp;
 
 							query.where("user", onlyOneName);
 						} else
 							query.where(Sql.column("user").eq(userName).or(Sql.column("user").eq(userIp)));
 
-						if (limit > 0)
+						if(limit > 0)
 							query.limit(limit);
 
-						for (SqlRow row : API.get().getSqlConnection().query(query))
+						for(SqlRow row : API.get().getSqlConnection().query(query))
 							history.add(Entry.fromQuery(row));
-					} catch (SQLException exception) {
+					} catch(SQLException exception) {
 						exception.printStackTrace();
 					}
 
@@ -162,19 +152,18 @@ public class BanAPI {
 				@Override
 				public int generateId() {
 					try {
-						List<SqlRow> result = API.get().getSqlConnection()
-								.query(Sql.select("id").from("css_banlist").orderBy(Sql.column("id").desc()).limit(1));
+						List<SqlRow> result = API.get().getSqlConnection().query(Sql.select("id").from("css_banlist").orderBy(Sql.column("id").desc()).limit(1));
 
-						if (result.isEmpty())
+						if(result.isEmpty())
 							return 0;
 
 						Object id = result.get(0).get("id");
 
-						if (id instanceof Number)
+						if(id instanceof Number)
 							return ((Number) id).intValue() + 1;
 
 						return ParseUtils.getInt(String.valueOf(id)) + 1;
-					} catch (SQLException exception) {
+					} catch(SQLException exception) {
 						exception.printStackTrace();
 					}
 
@@ -188,21 +177,20 @@ public class BanAPI {
 					try {
 						Sql.Select query = selectEntries();
 
-						if (userName == null || userIp == null) {
+						if(userName == null || userIp == null) {
 							String onlyOneName = userIp == null ? userName : userIp;
 
 							query.where("user", onlyOneName).where("cancelled", 0);
 						} else
-							query.where(Sql.column("user").eq(userName).and(Sql.column("cancelled").eq(0))
-									.or(Sql.column("user").eq(userIp).and(Sql.column("cancelled").eq(0))));
+							query.where(Sql.column("user").eq(userName).and(Sql.column("cancelled").eq(0)).or(Sql.column("user").eq(userIp).and(Sql.column("cancelled").eq(0))));
 
-						for (SqlRow row : API.get().getSqlConnection().query(query)) {
+						for(SqlRow row : API.get().getSqlConnection().query(query)) {
 							Entry entry = Entry.fromQuery(row);
 
-							if ((entry.getType() == BanType.BAN || entry.getType() == BanType.MUTE) && isActive(entry))
+							if((entry.getType() == BanType.BAN || entry.getType() == BanType.MUTE) && isActive(entry))
 								history.add(entry);
 						}
-					} catch (SQLException exception) {
+					} catch(SQLException exception) {
 						exception.printStackTrace();
 					}
 
@@ -217,23 +205,21 @@ public class BanAPI {
 					try {
 						Sql.Select query = selectEntries();
 
-						if (userName == null || userIp == null) {
+						if(userName == null || userIp == null) {
 							String onlyOneName = userIp == null ? userName : userIp;
 
 							query.where("user", onlyOneName).where("type", type.name()).where("cancelled", 0);
 						} else
-							query.where(Sql.column("user").eq(userName).and(Sql.column("type").eq(type.name()))
-									.and(Sql.column("cancelled").eq(0))
-									.or(Sql.column("user").eq(userIp).and(Sql.column("type").eq(type.name()))
-											.and(Sql.column("cancelled").eq(0))));
+							query.where(Sql.column("user").eq(userName).and(Sql.column("type").eq(type.name())).and(Sql.column("cancelled").eq(0))
+							        .or(Sql.column("user").eq(userIp).and(Sql.column("type").eq(type.name())).and(Sql.column("cancelled").eq(0))));
 
-						for (SqlRow row : API.get().getSqlConnection().query(query)) {
+						for(SqlRow row : API.get().getSqlConnection().query(query)) {
 							Entry entry = Entry.fromQuery(row);
 
-							if (isActive(entry))
+							if(isActive(entry))
 								history.add(entry);
 						}
-					} catch (SQLException exception) {
+					} catch(SQLException exception) {
 						exception.printStackTrace();
 					}
 
@@ -245,14 +231,14 @@ public class BanAPI {
 					List<Entry> history = new ArrayList<>();
 
 					try {
-						for (SqlRow row : API.get().getSqlConnection().query(selectEntries().where("cancelled", 0))) {
+						for(SqlRow row : API.get().getSqlConnection().query(selectEntries().where("cancelled", 0))) {
 
 							Entry entry = Entry.fromQuery(row);
 
-							if ((entry.getType() == BanType.BAN || entry.getType() == BanType.MUTE) && isActive(entry))
+							if((entry.getType() == BanType.BAN || entry.getType() == BanType.MUTE) && isActive(entry))
 								history.add(entry);
 						}
-					} catch (SQLException exception) {
+					} catch(SQLException exception) {
 						exception.printStackTrace();
 					}
 
@@ -264,15 +250,14 @@ public class BanAPI {
 					List<Entry> history = new ArrayList<>();
 
 					try {
-						for (SqlRow row : API.get().getSqlConnection()
-								.query(selectEntries().where("cancelled", 0).where("type", type.name()))) {
+						for(SqlRow row : API.get().getSqlConnection().query(selectEntries().where("cancelled", 0).where("type", type.name()))) {
 
 							Entry entry = Entry.fromQuery(row);
 
-							if (isActive(entry))
+							if(isActive(entry))
 								history.add(entry);
 						}
-					} catch (SQLException exception) {
+					} catch(SQLException exception) {
 						exception.printStackTrace();
 					}
 
@@ -283,21 +268,19 @@ public class BanAPI {
 			List<Entry> history = new ArrayList<>();
 			Config config = API.get().getConfigManager().getBansStorage();
 
-			for (String key : config.getKeys()) {
-				if ("id".equals(key))
+			for(String key : config.getKeys()) {
+				if("id".equals(key))
 					continue;
 
-				history.add(new Entry(ParseUtils.getInt(key), BanType.valueOf(config.getString(key + ".type")),
-						config.getString(key + ".user"), config.getString(key + ".reason"),
-						config.getString(key + ".admin"), config.getLong(key + ".duration"),
-						config.getLong(key + ".startDate"), config.getBoolean(key + ".cancelled")));
+				history.add(new Entry(ParseUtils.getInt(key), BanType.valueOf(config.getString(key + ".type")), config.getString(key + ".user"), config.getString(key + ".reason"),
+				        config.getString(key + ".admin"), config.getLong(key + ".duration"), config.getLong(key + ".startDate"), config.getBoolean(key + ".cancelled")));
 			}
 
 			management = new BanManagement() {
 
 				@Override
 				public void saveEntry(Entry entry) {
-					if (!history.contains(entry))
+					if(!history.contains(entry))
 						history.add(entry);
 
 					config.set(entry.getId() + ".type", entry.getType().name());
@@ -305,7 +288,7 @@ public class BanAPI {
 					config.set(entry.getId() + ".admin", entry.getAdmin());
 					config.set(entry.getId() + ".reason", entry.getReason());
 
-					if (entry.getDuration() != 0)
+					if(entry.getDuration() != 0)
 						config.set(entry.getId() + ".duration", entry.getDuration());
 					else
 						config.remove(entry.getId() + ".duration");
@@ -316,14 +299,14 @@ public class BanAPI {
 
 				@Override
 				public List<Entry> retrieveHistory(int limit) {
-					if (limit == 0)
+					if(limit == 0)
 						return new ArrayList<>(history);
 
 					int i = 0;
 					List<Entry> result = new ArrayList<>();
 
-					for (Entry key : history) {
-						if (i++ == limit)
+					for(Entry key : history) {
+						if(i++ == limit)
 							break;
 
 						result.add(key);
@@ -334,21 +317,21 @@ public class BanAPI {
 
 				@Override
 				public List<Entry> retrieveHistory(String userName, String userIp, int limit) {
-					if (limit == 0) {
+					if(limit == 0) {
 						List<Entry> result = new ArrayList<>();
 
-						if (userName == null || userIp == null) {
+						if(userName == null || userIp == null) {
 							String onlyOneName = userIp == null ? userName : userIp;
 
-							for (Entry key : history) {
-								if (!key.getUser().equals(onlyOneName))
+							for(Entry key : history) {
+								if(!key.getUser().equals(onlyOneName))
 									continue;
 
 								result.add(key);
 							}
 						} else
-							for (Entry key : history) {
-								if (!key.getUser().equals(userName) && !key.getUser().equals(userIp))
+							for(Entry key : history) {
+								if(!key.getUser().equals(userName) && !key.getUser().equals(userIp))
 									continue;
 
 								result.add(key);
@@ -360,24 +343,24 @@ public class BanAPI {
 					int i = 0;
 					List<Entry> result = new ArrayList<>();
 
-					if (userName == null || userIp == null) {
+					if(userName == null || userIp == null) {
 						String onlyOneName = userIp == null ? userName : userIp;
 
-						for (Entry key : history) {
-							if (!key.getUser().equals(onlyOneName))
+						for(Entry key : history) {
+							if(!key.getUser().equals(onlyOneName))
 								continue;
 
-							if (i++ == limit)
+							if(i++ == limit)
 								break;
 
 							result.add(key);
 						}
 					} else
-						for (Entry key : history) {
-							if (!key.getUser().equals(userName) && !key.getUser().equals(userIp))
+						for(Entry key : history) {
+							if(!key.getUser().equals(userName) && !key.getUser().equals(userIp))
 								continue;
 
-							if (i++ == limit)
+							if(i++ == limit)
 								break;
 
 							result.add(key);
@@ -404,20 +387,18 @@ public class BanAPI {
 				public List<Entry> retrieveActivePunishments(String userName, String userIp) {
 					List<Entry> result = new ArrayList<>();
 
-					if (userName == null || userIp == null) {
+					if(userName == null || userIp == null) {
 						String onlyOneName = userIp == null ? userName : userIp;
 
-						for (Entry key : history) {
-							if (!key.getUser().equals(onlyOneName) || key.isCancelled()
-									|| key.getType() != BanType.BAN && key.getType() != BanType.MUTE || !isActive(key))
+						for(Entry key : history) {
+							if(!key.getUser().equals(onlyOneName) || key.isCancelled() || key.getType() != BanType.BAN && key.getType() != BanType.MUTE || !isActive(key))
 								continue;
 
 							result.add(key);
 						}
 					} else
-						for (Entry key : history) {
-							if (!key.getUser().equals(userName) && !key.getUser().equals(userIp) || key.isCancelled()
-									|| key.getType() != BanType.BAN && key.getType() != BanType.MUTE || !isActive(key))
+						for(Entry key : history) {
+							if(!key.getUser().equals(userName) && !key.getUser().equals(userIp) || key.isCancelled() || key.getType() != BanType.BAN && key.getType() != BanType.MUTE || !isActive(key))
 								continue;
 
 							result.add(key);
@@ -431,20 +412,18 @@ public class BanAPI {
 
 					List<Entry> result = new ArrayList<>();
 
-					if (userName == null || userIp == null) {
+					if(userName == null || userIp == null) {
 						String onlyOneName = userIp == null ? userName : userIp;
 
-						for (Entry key : history) {
-							if (!key.getUser().equals(onlyOneName) || key.isCancelled() || key.getType() != type
-									|| !isActive(key))
+						for(Entry key : history) {
+							if(!key.getUser().equals(onlyOneName) || key.isCancelled() || key.getType() != type || !isActive(key))
 								continue;
 
 							result.add(key);
 						}
 					} else
-						for (Entry key : history) {
-							if (!key.getUser().equals(userName) && !key.getUser().equals(userIp) || key.isCancelled()
-									|| key.getType() != type || !isActive(key))
+						for(Entry key : history) {
+							if(!key.getUser().equals(userName) && !key.getUser().equals(userIp) || key.isCancelled() || key.getType() != type || !isActive(key))
 								continue;
 
 							result.add(key);
@@ -457,9 +436,8 @@ public class BanAPI {
 				public List<Entry> retrieveActivePunishments() {
 					List<Entry> result = new ArrayList<>();
 
-					for (Entry key : history) {
-						if (key.isCancelled() || key.getType() != BanType.BAN && key.getType() != BanType.MUTE
-								|| !isActive(key))
+					for(Entry key : history) {
+						if(key.isCancelled() || key.getType() != BanType.BAN && key.getType() != BanType.MUTE || !isActive(key))
 							continue;
 
 						result.add(key);
@@ -472,8 +450,8 @@ public class BanAPI {
 				public List<Entry> retrieveActivePunishments(BanType type) {
 					List<Entry> result = new ArrayList<>();
 
-					for (Entry key : history) {
-						if (key.isCancelled() || key.getType() != type || !isActive(key))
+					for(Entry key : history) {
+						if(key.isCancelled() || key.getType() != type || !isActive(key))
 							continue;
 
 						result.add(key);
@@ -486,12 +464,11 @@ public class BanAPI {
 	}
 
 	private static boolean isActive(Entry entry) {
-		return entry.getDuration() == 0
-				|| entry.getStartDate() + entry.getDuration() - System.currentTimeMillis() / 1000 > 0;
+		return entry.getDuration() == 0 || entry.getStartDate() + entry.getDuration() - System.currentTimeMillis() / 1000 > 0;
 	}
 
 	public void shutdown() {
-		if (management == null)
+		if(management == null)
 			return;
 
 		management.save();
@@ -507,36 +484,30 @@ public class BanAPI {
 		management.saveEntry(entry);
 
 		TextRenderer renderer = renderer().placeholder("user", entry.getUser())
-				.placeholder("reason",
-						entry.getReason() == null
-								? API.get().getConfigManager().getMain().getString("bansystem.not-specified-reason")
-								: entry.getReason())
-				.placeholder("admin", entry.getAdmin() == null ? "Console" : entry.getAdmin())
-				.placeholder("id", entry.getId())
-				.placeholder("startDate", format.format(Date.from(Instant.ofEpochSecond(entry.getStartDate()))));
+		        .placeholder("reason", entry.getReason() == null ? API.get().getConfigManager().getMain().getString("bansystem.not-specified-reason") : entry.getReason())
+		        .placeholder("admin", entry.getAdmin() == null ? "Console" : entry.getAdmin()).placeholder("id", entry.getId())
+		        .placeholder("startDate", format.format(Date.from(Instant.ofEpochSecond(entry.getStartDate()))));
 
 		List<CommandSender> admins = new ArrayList<>();
 
 		admins.add(Bukkit.getConsoleSender());
 
-		for (Player player : BukkitLoader.getOnlinePlayers())
-			if (player.hasPermission(API.get().getConfigManager().getCommands().getString("ban.perms.broadcast")))
+		for(Player player : BukkitLoader.getOnlinePlayers())
+			if(player.hasPermission(API.get().getConfigManager().getCommands().getString("ban.perms.broadcast")))
 				admins.add(player);
 
-		API.get().getMsgManager().sendMessageFromFile(API.get().getConfigManager().getTranslations(),
-				"bansystem.banned.perm", renderer, admins);
+		API.get().getMsgManager().sendMessageFromFile(API.get().getConfigManager().getTranslations(), "bansystem.banned.perm", renderer, admins);
 
-		String kickMessage = renderer.render(
-				StringUtils.join(API.get().getConfigManager().getMain().getStringList("bansystem.banned"), "\n"));
+		String kickMessage = renderer.render(StringUtils.join(API.get().getConfigManager().getMain().getStringList("bansystem.banned"), "\n"));
 
-		if (isIPv4(user) || isIPv6(user)) {
-			for (Player player : BukkitLoader.getOnlinePlayers())
-				if (player.getAddress().getAddress().getHostAddress().equals(user))
+		if(isIPv4(user) || isIPv6(user)) {
+			for(Player player : BukkitLoader.getOnlinePlayers())
+				if(player.getAddress().getAddress().getHostAddress().equals(user))
 					player.kickPlayer(kickMessage);
 		} else {
 			Player target = Bukkit.getPlayer(user);
 
-			if (target != null)
+			if(target != null)
 				target.kickPlayer(kickMessage);
 		}
 
@@ -544,7 +515,7 @@ public class BanAPI {
 	}
 
 	public Entry tempBan(String user, String administrator, long time, String reason) {
-		if (time < 0)
+		if(time < 0)
 			time = 0;
 
 		BanManagement management = getManagement();
@@ -554,38 +525,31 @@ public class BanAPI {
 		management.saveEntry(entry);
 
 		TextRenderer renderer = renderer().placeholder("user", entry.getUser())
-				.placeholder("reason",
-						entry.getReason() == null
-								? API.get().getConfigManager().getMain().getString("bansystem.not-specified-reason")
-								: entry.getReason())
-				.placeholder("admin", entry.getAdmin() == null ? "Console" : entry.getAdmin())
-				.placeholder("id", entry.getId())
-				.placeholder("startDate", format.format(Date.from(Instant.ofEpochSecond(entry.getStartDate()))))
-				.placeholder("expireAfter", TimeUtils.timeToString(entry.getDuration())).placeholder("expireDate",
-						format.format(Date.from(Instant.ofEpochSecond(entry.getStartDate() + time))));
+		        .placeholder("reason", entry.getReason() == null ? API.get().getConfigManager().getMain().getString("bansystem.not-specified-reason") : entry.getReason())
+		        .placeholder("admin", entry.getAdmin() == null ? "Console" : entry.getAdmin()).placeholder("id", entry.getId())
+		        .placeholder("startDate", format.format(Date.from(Instant.ofEpochSecond(entry.getStartDate())))).placeholder("expireAfter", TimeUtils.timeToString(entry.getDuration()))
+		        .placeholder("expireDate", format.format(Date.from(Instant.ofEpochSecond(entry.getStartDate() + time))));
 
 		List<CommandSender> admins = new ArrayList<>();
 
 		admins.add(Bukkit.getConsoleSender());
 
-		for (Player player : BukkitLoader.getOnlinePlayers())
-			if (player.hasPermission(API.get().getConfigManager().getCommands().getString("tempban.perms.broadcast")))
+		for(Player player : BukkitLoader.getOnlinePlayers())
+			if(player.hasPermission(API.get().getConfigManager().getCommands().getString("tempban.perms.broadcast")))
 				admins.add(player);
 
-		API.get().getMsgManager().sendMessageFromFile(API.get().getConfigManager().getTranslations(),
-				"bansystem.banned.temp", renderer, admins);
+		API.get().getMsgManager().sendMessageFromFile(API.get().getConfigManager().getTranslations(), "bansystem.banned.temp", renderer, admins);
 
-		String kickMessage = renderer.render(
-				StringUtils.join(API.get().getConfigManager().getMain().getStringList("bansystem.temp-banned"), "\n"));
+		String kickMessage = renderer.render(StringUtils.join(API.get().getConfigManager().getMain().getStringList("bansystem.temp-banned"), "\n"));
 
-		if (isIPv4(user) || isIPv6(user)) {
-			for (Player player : BukkitLoader.getOnlinePlayers())
-				if (player.getAddress().getAddress().getHostAddress().equals(user))
+		if(isIPv4(user) || isIPv6(user)) {
+			for(Player player : BukkitLoader.getOnlinePlayers())
+				if(player.getAddress().getAddress().getHostAddress().equals(user))
 					player.kickPlayer(kickMessage);
 		} else {
 			Player target = Bukkit.getPlayer(user);
 
-			if (target != null)
+			if(target != null)
 				target.kickPlayer(kickMessage);
 		}
 
@@ -600,48 +564,41 @@ public class BanAPI {
 		management.saveEntry(entry);
 
 		TextRenderer renderer = renderer().placeholder("user", entry.getUser())
-				.placeholder("reason",
-						entry.getReason() == null
-								? API.get().getConfigManager().getMain().getString("bansystem.not-specified-reason")
-								: entry.getReason())
-				.placeholder("admin", entry.getAdmin() == null ? "Console" : entry.getAdmin())
-				.placeholder("id", entry.getId())
-				.placeholder("startDate", format.format(Date.from(Instant.ofEpochSecond(entry.getStartDate()))));
+		        .placeholder("reason", entry.getReason() == null ? API.get().getConfigManager().getMain().getString("bansystem.not-specified-reason") : entry.getReason())
+		        .placeholder("admin", entry.getAdmin() == null ? "Console" : entry.getAdmin()).placeholder("id", entry.getId())
+		        .placeholder("startDate", format.format(Date.from(Instant.ofEpochSecond(entry.getStartDate()))));
 
 		List<CommandSender> admins = new ArrayList<>();
 
 		admins.add(Bukkit.getConsoleSender());
 
-		for (Player player : BukkitLoader.getOnlinePlayers())
-			if (player.hasPermission(API.get().getConfigManager().getCommands().getString("mute.perms.broadcast")))
+		for(Player player : BukkitLoader.getOnlinePlayers())
+			if(player.hasPermission(API.get().getConfigManager().getCommands().getString("mute.perms.broadcast")))
 				admins.add(player);
 
-		API.get().getMsgManager().sendMessageFromFile(API.get().getConfigManager().getTranslations(),
-				"bansystem.muted.perm", renderer, admins);
+		API.get().getMsgManager().sendMessageFromFile(API.get().getConfigManager().getTranslations(), "bansystem.muted.perm", renderer, admins);
 
-		if (isIPv4(user) || isIPv6(user)) {
+		if(isIPv4(user) || isIPv6(user)) {
 			List<Player> players = new ArrayList<>();
 
-			for (Player player : BukkitLoader.getOnlinePlayers())
-				if (player.getAddress().getAddress().getHostAddress().equals(user))
+			for(Player player : BukkitLoader.getOnlinePlayers())
+				if(player.getAddress().getAddress().getHostAddress().equals(user))
 					players.add(player);
 
-			if (!players.isEmpty())
-				API.get().getMsgManager().sendMessageFromFile(API.get().getConfigManager().getMain(), "bansystem.muted",
-						renderer, players);
+			if(!players.isEmpty())
+				API.get().getMsgManager().sendMessageFromFile(API.get().getConfigManager().getMain(), "bansystem.muted", renderer, players);
 		} else {
 			Player target = Bukkit.getPlayer(user);
 
-			if (target != null)
-				API.get().getMsgManager().sendMessageFromFile(API.get().getConfigManager().getMain(), "bansystem.muted",
-						renderer, target);
+			if(target != null)
+				API.get().getMsgManager().sendMessageFromFile(API.get().getConfigManager().getMain(), "bansystem.muted", renderer, target);
 		}
 
 		return entry;
 	}
 
 	public Entry tempMute(String user, String administrator, long time, String reason) {
-		if (time < 0)
+		if(time < 0)
 			time = 0;
 
 		BanManagement management = getManagement();
@@ -651,43 +608,35 @@ public class BanAPI {
 		management.saveEntry(entry);
 
 		TextRenderer renderer = renderer().placeholder("user", entry.getUser())
-				.placeholder("reason",
-						entry.getReason() == null
-								? API.get().getConfigManager().getMain().getString("bansystem.not-specified-reason")
-								: entry.getReason())
-				.placeholder("admin", entry.getAdmin() == null ? "Console" : entry.getAdmin())
-				.placeholder("id", entry.getId())
-				.placeholder("startDate", format.format(Date.from(Instant.ofEpochSecond(entry.getStartDate()))))
-				.placeholder("expireAfter", TimeUtils.timeToString(entry.getDuration())).placeholder("expireDate",
-						format.format(Date.from(Instant.ofEpochSecond(entry.getStartDate() + time))));
+		        .placeholder("reason", entry.getReason() == null ? API.get().getConfigManager().getMain().getString("bansystem.not-specified-reason") : entry.getReason())
+		        .placeholder("admin", entry.getAdmin() == null ? "Console" : entry.getAdmin()).placeholder("id", entry.getId())
+		        .placeholder("startDate", format.format(Date.from(Instant.ofEpochSecond(entry.getStartDate())))).placeholder("expireAfter", TimeUtils.timeToString(entry.getDuration()))
+		        .placeholder("expireDate", format.format(Date.from(Instant.ofEpochSecond(entry.getStartDate() + time))));
 
 		List<CommandSender> admins = new ArrayList<>();
 
 		admins.add(Bukkit.getConsoleSender());
 
-		for (Player player : BukkitLoader.getOnlinePlayers())
-			if (player.hasPermission(API.get().getConfigManager().getCommands().getString("tempmute.perms.broadcast")))
+		for(Player player : BukkitLoader.getOnlinePlayers())
+			if(player.hasPermission(API.get().getConfigManager().getCommands().getString("tempmute.perms.broadcast")))
 				admins.add(player);
 
-		API.get().getMsgManager().sendMessageFromFile(API.get().getConfigManager().getTranslations(),
-				"bansystem.muted.temp", renderer, admins);
+		API.get().getMsgManager().sendMessageFromFile(API.get().getConfigManager().getTranslations(), "bansystem.muted.temp", renderer, admins);
 
-		if (isIPv4(user) || isIPv6(user)) {
+		if(isIPv4(user) || isIPv6(user)) {
 			List<Player> players = new ArrayList<>();
 
-			for (Player player : BukkitLoader.getOnlinePlayers())
-				if (player.getAddress().getAddress().getHostAddress().equals(user))
+			for(Player player : BukkitLoader.getOnlinePlayers())
+				if(player.getAddress().getAddress().getHostAddress().equals(user))
 					players.add(player);
 
-			if (!players.isEmpty())
-				API.get().getMsgManager().sendMessageFromFile(API.get().getConfigManager().getMain(),
-						"bansystem.temp-muted", renderer, players);
+			if(!players.isEmpty())
+				API.get().getMsgManager().sendMessageFromFile(API.get().getConfigManager().getMain(), "bansystem.temp-muted", renderer, players);
 		} else {
 			Player target = Bukkit.getPlayer(user);
 
-			if (target != null)
-				API.get().getMsgManager().sendMessageFromFile(API.get().getConfigManager().getMain(),
-						"bansystem.temp-muted", renderer, target);
+			if(target != null)
+				API.get().getMsgManager().sendMessageFromFile(API.get().getConfigManager().getMain(), "bansystem.temp-muted", renderer, target);
 		}
 
 		return entry;
@@ -701,36 +650,30 @@ public class BanAPI {
 		management.saveEntry(entry);
 
 		TextRenderer renderer = renderer().placeholder("user", entry.getUser())
-				.placeholder("reason",
-						entry.getReason() == null
-								? API.get().getConfigManager().getMain().getString("bansystem.not-specified-reason")
-								: entry.getReason())
-				.placeholder("admin", entry.getAdmin() == null ? "Console" : entry.getAdmin())
-				.placeholder("id", entry.getId())
-				.placeholder("startDate", format.format(Date.from(Instant.ofEpochSecond(entry.getStartDate()))));
+		        .placeholder("reason", entry.getReason() == null ? API.get().getConfigManager().getMain().getString("bansystem.not-specified-reason") : entry.getReason())
+		        .placeholder("admin", entry.getAdmin() == null ? "Console" : entry.getAdmin()).placeholder("id", entry.getId())
+		        .placeholder("startDate", format.format(Date.from(Instant.ofEpochSecond(entry.getStartDate()))));
 
 		List<CommandSender> admins = new ArrayList<>();
 
 		admins.add(Bukkit.getConsoleSender());
 
-		for (Player player : BukkitLoader.getOnlinePlayers())
-			if (player.hasPermission(API.get().getConfigManager().getCommands().getString("kick.perms.broadcast")))
+		for(Player player : BukkitLoader.getOnlinePlayers())
+			if(player.hasPermission(API.get().getConfigManager().getCommands().getString("kick.perms.broadcast")))
 				admins.add(player);
 
-		API.get().getMsgManager().sendMessageFromFile(API.get().getConfigManager().getTranslations(),
-				"bansystem.kicked", renderer, admins);
+		API.get().getMsgManager().sendMessageFromFile(API.get().getConfigManager().getTranslations(), "bansystem.kicked", renderer, admins);
 
-		String kickMessage = renderer.render(
-				StringUtils.join(API.get().getConfigManager().getMain().getStringList("bansystem.kicked"), "\n"));
+		String kickMessage = renderer.render(StringUtils.join(API.get().getConfigManager().getMain().getStringList("bansystem.kicked"), "\n"));
 
-		if (isIPv4(user) || isIPv6(user)) {
-			for (Player player : BukkitLoader.getOnlinePlayers())
-				if (player.getAddress().getAddress().getHostAddress().equals(user))
+		if(isIPv4(user) || isIPv6(user)) {
+			for(Player player : BukkitLoader.getOnlinePlayers())
+				if(player.getAddress().getAddress().getHostAddress().equals(user))
 					player.kickPlayer(kickMessage);
 		} else {
 			Player target = Bukkit.getPlayer(user);
 
-			if (target != null)
+			if(target != null)
 				target.kickPlayer(kickMessage);
 		}
 
@@ -745,41 +688,34 @@ public class BanAPI {
 		management.saveEntry(entry);
 
 		TextRenderer renderer = renderer().placeholder("user", entry.getUser())
-				.placeholder("reason",
-						entry.getReason() == null
-								? API.get().getConfigManager().getMain().getString("bansystem.not-specified-reason")
-								: entry.getReason())
-				.placeholder("admin", entry.getAdmin() == null ? "Console" : entry.getAdmin())
-				.placeholder("id", entry.getId())
-				.placeholder("startDate", format.format(Date.from(Instant.ofEpochSecond(entry.getStartDate()))));
+		        .placeholder("reason", entry.getReason() == null ? API.get().getConfigManager().getMain().getString("bansystem.not-specified-reason") : entry.getReason())
+		        .placeholder("admin", entry.getAdmin() == null ? "Console" : entry.getAdmin()).placeholder("id", entry.getId())
+		        .placeholder("startDate", format.format(Date.from(Instant.ofEpochSecond(entry.getStartDate()))));
 
 		List<CommandSender> admins = new ArrayList<>();
 
 		admins.add(Bukkit.getConsoleSender());
 
-		for (Player player : BukkitLoader.getOnlinePlayers())
-			if (player.hasPermission(API.get().getConfigManager().getCommands().getString("warn.perms.broadcast")))
+		for(Player player : BukkitLoader.getOnlinePlayers())
+			if(player.hasPermission(API.get().getConfigManager().getCommands().getString("warn.perms.broadcast")))
 				admins.add(player);
 
-		API.get().getMsgManager().sendMessageFromFile(API.get().getConfigManager().getTranslations(),
-				"bansystem.warned", renderer, admins);
+		API.get().getMsgManager().sendMessageFromFile(API.get().getConfigManager().getTranslations(), "bansystem.warned", renderer, admins);
 
-		if (isIPv4(user) || isIPv6(user)) {
+		if(isIPv4(user) || isIPv6(user)) {
 			List<Player> players = new ArrayList<>();
 
-			for (Player player : BukkitLoader.getOnlinePlayers())
-				if (player.getAddress().getAddress().getHostAddress().equals(user))
+			for(Player player : BukkitLoader.getOnlinePlayers())
+				if(player.getAddress().getAddress().getHostAddress().equals(user))
 					players.add(player);
 
-			if (!players.isEmpty())
-				API.get().getMsgManager().sendMessageFromFile(API.get().getConfigManager().getMain(),
-						"bansystem.warned", renderer, players);
+			if(!players.isEmpty())
+				API.get().getMsgManager().sendMessageFromFile(API.get().getConfigManager().getMain(), "bansystem.warned", renderer, players);
 		} else {
 			Player target = Bukkit.getPlayer(user);
 
-			if (target != null)
-				API.get().getMsgManager().sendMessageFromFile(API.get().getConfigManager().getMain(),
-						"bansystem.warned", renderer, target);
+			if(target != null)
+				API.get().getMsgManager().sendMessageFromFile(API.get().getConfigManager().getMain(), "bansystem.warned", renderer, target);
 		}
 
 		return entry;
@@ -818,55 +754,55 @@ public class BanAPI {
 		int count = 0;
 		int groups = 0;
 
-		for (int i = 0; i < user.length(); ++i) {
+		for(int i = 0; i < user.length(); ++i) {
 			char c = user.charAt(i);
 
-			switch (mode) {
-			case 0:
-				if (c >= '0' && c <= '9' || c >= 'a' && c <= 'f' || c >= 'A' && c <= 'F') {
+			switch(mode) {
+				case 0 :
+					if(c >= '0' && c <= '9' || c >= 'a' && c <= 'f' || c >= 'A' && c <= 'F') {
 
-					++count;
-					mode = 1;
-					continue;
-				}
+						++count;
+						mode = 1;
+						continue;
+					}
 
-				return false;
+					return false;
 
-			case 1:
-				if (c >= '0' && c <= '9' || c >= 'a' && c <= 'f' || c >= 'A' && c <= 'F') {
+				case 1 :
+					if(c >= '0' && c <= '9' || c >= 'a' && c <= 'f' || c >= 'A' && c <= 'F') {
 
-					if (++count > 4)
-						return false;
+						if(++count > 4)
+							return false;
 
-					continue;
-				}
+						continue;
+					}
 
-				if (c == ':') {
-					count = 0;
+					if(c == ':') {
+						count = 0;
 
-					if (++groups == 7)
-						mode = 2;
-					else
-						mode = 0;
+						if(++groups == 7)
+							mode = 2;
+						else
+							mode = 0;
 
-					continue;
-				}
+						continue;
+					}
 
-				return false;
+					return false;
 
-			case 2:
-				if (c >= '0' && c <= '9' || c >= 'a' && c <= 'f' || c >= 'A' && c <= 'F') {
+				case 2 :
+					if(c >= '0' && c <= '9' || c >= 'a' && c <= 'f' || c >= 'A' && c <= 'F') {
 
-					if (++count > 4)
-						return false;
+						if(++count > 4)
+							return false;
 
-					continue;
-				}
+						continue;
+					}
 
-				if (c == ':' && user.length() - 1 == i)
-					return true;
+					if(c == ':' && user.length() - 1 == i)
+						return true;
 
-				return false;
+					return false;
 			}
 		}
 
@@ -874,7 +810,7 @@ public class BanAPI {
 	}
 
 	public static boolean isIPv4(String input) {
-		if (input.length() < 7)
+		if(input.length() < 7)
 			return false;
 
 		byte mode = 0;
@@ -885,77 +821,76 @@ public class BanAPI {
 		char second = 0;
 		char third = 0;
 
-		for (int i = 0; i < input.length(); ++i) {
+		for(int i = 0; i < input.length(); ++i) {
 			char c = input.charAt(i);
 
-			switch (mode) {
-			case 0:
-				if (c >= '0' && c <= '9') {
-					switch (++count) {
-					case 1:
-						first = c;
-						break;
+			switch(mode) {
+				case 0 :
+					if(c >= '0' && c <= '9') {
+						switch(++count) {
+							case 1 :
+								first = c;
+								break;
 
-					case 2:
-						second = c;
-						break;
+							case 2 :
+								second = c;
+								break;
 
-					case 3:
-						third = c;
-						break;
+							case 3 :
+								third = c;
+								break;
 
-					default:
-						return false;
+							default :
+								return false;
+						}
+
+						mode = 1;
+						continue;
 					}
 
-					mode = 1;
-					continue;
-				}
+					return false;
 
-				return false;
+				case 1 :
+					if(c == '.') {
+						if(count == 0)
+							return false;
 
-			case 1:
-				if (c == '.') {
-					if (count == 0)
-						return false;
+						++group;
 
-					++group;
+						count = 0;
+						first = 0;
+						second = 0;
+						third = 0;
+						mode = 0;
 
-					count = 0;
-					first = 0;
-					second = 0;
-					third = 0;
-					mode = 0;
-
-					continue;
-				}
-
-				if (c >= '0' && c <= '9') {
-					switch (++count) {
-					case 1:
-						first = c;
-						break;
-
-					case 2:
-						second = c;
-						break;
-
-					case 3:
-						third = c;
-						break;
-
-					default:
-						return false;
+						continue;
 					}
 
-					if (count == 3 && (first > '2' || first == '2' && second > '5'
-							|| first == '2' && second == '5' && third > '5'))
-						return false;
+					if(c >= '0' && c <= '9') {
+						switch(++count) {
+							case 1 :
+								first = c;
+								break;
 
-					continue;
-				}
+							case 2 :
+								second = c;
+								break;
 
-				return false;
+							case 3 :
+								third = c;
+								break;
+
+							default :
+								return false;
+						}
+
+						if(count == 3 && (first > '2' || first == '2' && second > '5' || first == '2' && second == '5' && third > '5'))
+							return false;
+
+						continue;
+					}
+
+					return false;
 			}
 		}
 

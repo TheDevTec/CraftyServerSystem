@@ -11,7 +11,7 @@ public class CraftyVersionChecker {
 	public static String versionOfTheAPIFromSpigot() {
 		try {
 			return StreamUtils.fromStream(new URL("https://api.spigotmc.org/legacy/update.php?resource=72679").openStream(), 64);
-		} catch (Exception e) {
+		} catch(Exception e) {
 			return Bukkit.getPluginManager().getPlugin("TheAPI").getDescription().getVersion();
 		}
 	}

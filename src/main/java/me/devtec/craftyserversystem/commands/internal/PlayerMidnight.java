@@ -14,38 +14,38 @@ public class PlayerMidnight extends CssCommand {
 
 	@Override
 	public void register() {
-		if (isRegistered())
+		if(isRegistered())
 			return;
 
 		CommandStructure<CommandSender> cmd = CommandStructure.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
-			if (!(sender instanceof Player)) {
+			if(!(sender instanceof Player)) {
 				msgUsage(sender, "usage");
 				return;
 			}
 			setMidnight(sender, (Player) sender, true);
 		}).permission(getPerm("cmd")).argument("-s", (sender, structure, args) -> {
-			if (!(sender instanceof Player)) {
+			if(!(sender instanceof Player)) {
 				msgUsage(sender, "usage");
 				return;
 			}
 			setMidnight(sender, (Player) sender, false);
 		}).parent().selector(Selector.ENTITY_SELECTOR, (sender, structure, args) -> {
-			for (Player player : selector(sender, args[0]))
+			for(Player player : selector(sender, args[0]))
 				setMidnight(sender, player, true);
 		}).permission(getPerm("other")).argument("-s", (sender, structure, args) -> {
-			for (Player player : selector(sender, args[0]))
+			for(Player player : selector(sender, args[0]))
 				setMidnight(sender, player, false);
 		});
 		// register
 		List<String> cmds = getCommands();
-		if (!cmds.isEmpty())
+		if(!cmds.isEmpty())
 			this.cmd = addBypassSettings(cmd).build().register(cmds.remove(0), cmds.toArray(new String[0]));
 	}
 
 	public void setMidnight(CommandSender sender, Player target, boolean sendMessages) {
 		target.setPlayerTime(18000, false);
-		if (sendMessages)
-			if (!sender.equals(target)) {
+		if(sendMessages)
+			if(!sender.equals(target)) {
 				TextRenderer PLACEHOLDERS = renderer().placeholder("sender", sender.getName()).placeholder("target", target.getName());
 				msg(sender, "other.sender", PLACEHOLDERS);
 				msg(target, "other.target", PLACEHOLDERS);

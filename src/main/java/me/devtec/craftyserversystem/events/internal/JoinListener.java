@@ -36,8 +36,7 @@ public class JoinListener implements CssListener {
 
 	@EventHandler(priority = EventPriority.MONITOR)
 	public void onJoin(PlayerSpawnLocationEvent e) {
-		if (getConfig().getBoolean("force-spawn-location")
-				|| me.devtec.shared.API.offlineCache().lookupQuery(e.getPlayer().getUniqueId()) == null)
+		if(getConfig().getBoolean("force-spawn-location") || me.devtec.shared.API.offlineCache().lookupQuery(e.getPlayer().getUniqueId()) == null)
 			e.setSpawnLocation(API.get().getConfigManager().getSpawn().toLocation());
 	}
 
@@ -46,23 +45,20 @@ public class JoinListener implements CssListener {
 		String time = e.getPlayer().hasPlayedBefore() ? "normal" : "first";
 		e.setJoinMessage(null);
 
-		TextRenderer renderer = TextRenderer.forTarget(e.getPlayer().getUniqueId())
-				.placeholder("prefix", API.get().getConfigManager().getPrefix())
-				.placeholder("player", e.getPlayer().getName()).colorize();
+		TextRenderer renderer = TextRenderer.forTarget(e.getPlayer().getUniqueId()).placeholder("prefix", API.get().getConfigManager().getPrefix()).placeholder("player", e.getPlayer().getName())
+		        .colorize();
 
 		List<Player> players = new ArrayList<>();
 
-		for (Player online : BukkitLoader.getOnlinePlayers())
-			if (online.equals(e.getPlayer()) || online.canSee(e.getPlayer()))
+		for(Player online : BukkitLoader.getOnlinePlayers())
+			if(online.equals(e.getPlayer()) || online.canSee(e.getPlayer()))
 				players.add(online);
 
 		API.get().getMsgManager().sendMessageFromFile(getConfig(), "join." + time + ".text", renderer, players);
 
-		API.get().getMsgManager().sendMessageFromFile(getConfig(), "join." + time + ".messages", renderer,
-				e.getPlayer());
+		API.get().getMsgManager().sendMessageFromFile(getConfig(), "join." + time + ".messages", renderer, e.getPlayer());
 
-		for (String command : getConfig().getStringList("join." + time + ".commands"))
-			Bukkit.dispatchCommand(Bukkit.getConsoleSender(), renderer
-					.render(PlaceholderAPI.apply(command, e.getPlayer().getUniqueId()), e.getPlayer().getUniqueId()));
+		for(String command : getConfig().getStringList("join." + time + ".commands"))
+			Bukkit.dispatchCommand(Bukkit.getConsoleSender(), renderer.render(PlaceholderAPI.apply(command, e.getPlayer().getUniqueId()), e.getPlayer().getUniqueId()));
 	}
 }

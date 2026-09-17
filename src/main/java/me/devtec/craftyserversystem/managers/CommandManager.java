@@ -30,22 +30,22 @@ public class CommandManager {
 			Map<String, CssCommand> lookup = lookupForCssCommands();
 			Config commandsFile = cfgManager.getCommands();
 			BukkitLoader.getNmsProvider().postToMainThread(() -> {
-				for (String commandKey : commandsFile.getKeys())
-					if (commandsFile.getBoolean(commandKey + ".enabled", true)) {
+				for(String commandKey : commandsFile.getKeys())
+					if(commandsFile.getBoolean(commandKey + ".enabled", true)) {
 						CssCommand cmd = lookup.get(commandKey);
-						if (cmd == null)
+						if(cmd == null)
 							continue;
 						cmd.register();
 						registered.put(cmd.section(), cmd);
 					}
 				await.complete(true);
 			});
-		} catch (Exception e) {
+		} catch(Exception e) {
 			e.printStackTrace();
 		}
 		try {
 			await.get();
-		} catch (Exception e) {
+		} catch(Exception e) {
 		}
 	}
 
@@ -56,17 +56,14 @@ public class CommandManager {
 	 */
 	public Map<String, CssCommand> lookupForCssCommands() throws Exception {
 		Map<String, CssCommand> lookup = new HashMap<>();
-		try (JarFile file = new JarFile(
-				new File(Loader.getPlugin().getClass().getProtectionDomain().getCodeSource().getLocation().toURI()))) {
+		try(JarFile file = new JarFile(new File(Loader.getPlugin().getClass().getProtectionDomain().getCodeSource().getLocation().toURI()))) {
 			Enumeration<JarEntry> entries = file.entries();
-			while (entries.hasMoreElements()) {
+			while(entries.hasMoreElements()) {
 				JarEntry entry = entries.nextElement();
-				if (entry.getName().endsWith(".class")
-						&& entry.getName().startsWith("me/devtec/craftyserversystem/commands/internal/")
-						&& entry.getName().indexOf('$') == -1) {
+				if(entry.getName().endsWith(".class") && entry.getName().startsWith("me/devtec/craftyserversystem/commands/internal/") && entry.getName().indexOf('$') == -1) {
 					String className = entry.getName().substring(0, entry.getName().length() - 6).replace('/', '.');
 					Class<?> clazz = Class.forName(className);
-					if (clazz.getAnnotation(IgnoredClass.class) != null)
+					if(clazz.getAnnotation(IgnoredClass.class) != null)
 						continue;
 					CssCommand css = (CssCommand) clazz.newInstance();
 					lookup.put(css.section(), css);
@@ -79,14 +76,14 @@ public class CommandManager {
 	public void unregister() {
 		CompletableFuture<Boolean> await = new CompletableFuture<>();
 		BukkitLoader.getNmsProvider().postToMainThread(() -> {
-			for (CssCommand register : registered.values())
+			for(CssCommand register : registered.values())
 				register.unregister();
 			registered.clear();
 			await.complete(true);
 		});
 		try {
 			await.get();
-		} catch (Exception e) {
+		} catch(Exception e) {
 		}
 	}
 

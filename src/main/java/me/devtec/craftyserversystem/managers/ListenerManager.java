@@ -26,12 +26,12 @@ public class ListenerManager {
 	public void register() {
 		try {
 			List<CssListener> lookup = lookupForCssListeners();
-			for (CssListener listener : lookup) {
-				if (!listener.isEnabled())
+			for(CssListener listener : lookup) {
+				if(!listener.isEnabled())
 					continue;
 				register(listener);
 			}
-		} catch (Exception e) {
+		} catch(Exception e) {
 			e.printStackTrace();
 		}
 	}
@@ -43,14 +43,14 @@ public class ListenerManager {
 	 */
 	public List<CssListener> lookupForCssListeners() throws Exception {
 		List<CssListener> lookup = new ArrayList<>();
-		try (JarFile file = new JarFile(new File(Loader.getPlugin().getClass().getProtectionDomain().getCodeSource().getLocation().toURI()))) {
+		try(JarFile file = new JarFile(new File(Loader.getPlugin().getClass().getProtectionDomain().getCodeSource().getLocation().toURI()))) {
 			Enumeration<JarEntry> entries = file.entries();
-			while (entries.hasMoreElements()) {
+			while(entries.hasMoreElements()) {
 				JarEntry entry = entries.nextElement();
-				if (entry.getName().endsWith(".class") && entry.getName().startsWith("me/devtec/craftyserversystem/events/internal/") && entry.getName().indexOf('$') == -1) {
+				if(entry.getName().endsWith(".class") && entry.getName().startsWith("me/devtec/craftyserversystem/events/internal/") && entry.getName().indexOf('$') == -1) {
 					String className = entry.getName().substring(0, entry.getName().length() - 6).replace('/', '.');
 					Class<?> clazz = Class.forName(className);
-					if (clazz.getAnnotation(IgnoredClass.class) != null)
+					if(clazz.getAnnotation(IgnoredClass.class) != null)
 						continue;
 					lookup.add((CssListener) clazz.newInstance());
 				}
@@ -61,15 +61,15 @@ public class ListenerManager {
 
 	public void reloadAll() {
 		Iterator<CssListener> itr = registered.iterator();
-		while (itr.hasNext()) {
+		while(itr.hasNext()) {
 			CssListener listener = itr.next();
-			if (!listener.isEnabled()) {
+			if(!listener.isEnabled()) {
 				itr.remove();
 				HandlerList.unregisterAll(listener);
 				continue;
 			}
 			listener.reload();
-			if (!listener.isEnabled()) { // This is probably not our listener
+			if(!listener.isEnabled()) { // This is probably not our listener
 				itr.remove();
 				HandlerList.unregisterAll(listener);
 			}
@@ -89,7 +89,7 @@ public class ListenerManager {
 	}
 
 	public void unregister() {
-		for (CssListener listener : registered) {
+		for(CssListener listener : registered) {
 			HandlerList.unregisterAll(listener);
 			listener.unregister();
 		}

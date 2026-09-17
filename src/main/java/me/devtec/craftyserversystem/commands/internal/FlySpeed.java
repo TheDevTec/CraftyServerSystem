@@ -19,11 +19,11 @@ public class FlySpeed extends CssCommand {
 	@SuppressWarnings("unchecked")
 	@Override
 	public void register() {
-		if (isRegistered())
+		if(isRegistered())
 			return;
 
 		CommandStructure<CommandSender> cmd = CommandStructure.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
-			if (!(sender instanceof Player)) {
+			if(!(sender instanceof Player)) {
 				msgUsage(sender, "other");
 				return;
 			}
@@ -33,32 +33,32 @@ public class FlySpeed extends CssCommand {
 		cmd.selector(Selector.PLAYER, (sender, structure, args) -> {
 			msgUsage(sender, "other");
 		}).permission(getPerm("other"))
-				// Speed
-				.selector(Selector.NUMBER, (sender, structure, args) -> {
-					speed(Bukkit.getPlayer(args[0]), ParseUtils.getFloat(args[1]), true, sender);
-				})
-				// silent
-				.argument("-s", (sender, structure, args) -> {
-					speed(Bukkit.getPlayer(args[0]), ParseUtils.getFloat(args[1]), false, sender);
-				});
+		        // Speed
+		        .selector(Selector.NUMBER, (sender, structure, args) -> {
+			        speed(Bukkit.getPlayer(args[0]), ParseUtils.getFloat(args[1]), true, sender);
+		        })
+		        // silent
+		        .argument("-s", (sender, structure, args) -> {
+			        speed(Bukkit.getPlayer(args[0]), ParseUtils.getFloat(args[1]), false, sender);
+		        });
 		cmd.selector(Selector.NUMBER, (sender, structure, args) -> {
 			speed((Player) sender, ParseUtils.getFloat(args[0]), true, sender);
 		}, (sender, structure, args) -> sender instanceof Player ? API.selectorUtils.build(sender, Selector.NUMBER) : Collections.emptyList())
-				// silent
-				.argument("-s", (sender, structure, args) -> {
-					speed((Player) sender, ParseUtils.getFloat(args[1]), false, (CommandSender)sender);
-				});
+		        // silent
+		        .argument("-s", (sender, structure, args) -> {
+			        speed((Player) sender, ParseUtils.getFloat(args[1]), false, (CommandSender) sender);
+		        });
 
 		// register
 		List<String> cmds = getCommands();
-		if (!cmds.isEmpty())
+		if(!cmds.isEmpty())
 			this.cmd = addBypassSettings(cmd).build().register(cmds.remove(0), cmds.toArray(new String[0]));
 	}
 
 	public void speed(Player target, float speed, boolean sendMessage, CommandSender sender) {
 		target.setFlySpeed(Math.max(0, Math.min(1, speed / 10)));
-		if (sendMessage)
-			if (!sender.equals(target)) {
+		if(sendMessage)
+			if(!sender.equals(target)) {
 				TextRenderer placeholders = renderer().placeholder("sender", sender.getName()).placeholder("target", target.getName()).placeholder("value", Math.max(0, Math.min(10, speed)));
 				msg(target, "other.target", placeholders);
 				msg(sender, "other.sender", placeholders);

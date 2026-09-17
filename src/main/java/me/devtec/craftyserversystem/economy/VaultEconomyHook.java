@@ -18,7 +18,7 @@ public class VaultEconomyHook implements EconomyHook {
 		new Tasker() {
 			@Override
 			public void run() {
-				if (!API.get().getEconomyHook().equals(VaultEconomyHook.this) || getVault())
+				if(!API.get().getEconomyHook().equals(VaultEconomyHook.this) || getVault())
 					cancel();
 			}
 		}.runRepeatingTimes(5, 5, 480);
@@ -27,10 +27,10 @@ public class VaultEconomyHook implements EconomyHook {
 	public boolean getVault() {
 		try {
 			RegisteredServiceProvider<Economy> provider = Bukkit.getServicesManager().getRegistration(Economy.class);
-			if (provider != null)
+			if(provider != null)
 				economy = provider.getProvider();
 			return economy != null;
-		} catch (Exception e) {
+		} catch(Exception e) {
 			return false;
 		}
 	}
@@ -47,26 +47,26 @@ public class VaultEconomyHook implements EconomyHook {
 
 	@Override
 	public double getBalance(String name, String world) {
-		if (economy == null)
+		if(economy == null)
 			return 0;
 		return economy.getBalance(name, world);
 	}
 
 	@Override
 	public void deposit(String name, String world, double balance) {
-		if (economy != null)
+		if(economy != null)
 			economy.depositPlayer(name, world, balance);
 	}
 
 	@Override
 	public void withdraw(String name, String world, double balance) {
-		if (economy != null)
+		if(economy != null)
 			economy.withdrawPlayer(name, world, balance);
 	}
 
 	@Override
 	public String format(Double value) {
-		if (economy != null)
+		if(economy != null)
 			return economy.format(value);
 		return StringUtils.formatDouble(FormatType.NORMAL, value);
 	}

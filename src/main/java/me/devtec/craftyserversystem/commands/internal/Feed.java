@@ -14,11 +14,11 @@ public class Feed extends CssCommand {
 
 	@Override
 	public void register() {
-		if (isRegistered())
+		if(isRegistered())
 			return;
 
 		CommandStructure<CommandSender> cmd = CommandStructure.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
-			if (!(sender instanceof Player)) {
+			if(!(sender instanceof Player)) {
 				msgUsage(sender, "other");
 				return;
 			}
@@ -26,7 +26,7 @@ public class Feed extends CssCommand {
 		}).permission(getPerm("cmd"));
 		// silent
 		cmd.argument("-s", (sender, structure, args) -> {
-			if (!(sender instanceof Player)) {
+			if(!(sender instanceof Player)) {
 				msgUsage(sender, "other");
 				return;
 			}
@@ -34,18 +34,18 @@ public class Feed extends CssCommand {
 		});
 		// other
 		cmd.selector(Selector.ENTITY_SELECTOR, (sender, structure, args) -> {
-			for (Player player : selector(sender, args[0]))
+			for(Player player : selector(sender, args[0]))
 				feed(player, true, sender);
 		}).permission(getPerm("other"))
-				// silent
-				.argument("-s", (sender, structure, args) -> {
-					for (Player player : selector(sender, args[0]))
-						feed(player, false, sender);
-				});
+		        // silent
+		        .argument("-s", (sender, structure, args) -> {
+			        for(Player player : selector(sender, args[0]))
+				        feed(player, false, sender);
+		        });
 
 		// register
 		List<String> cmds = getCommands();
-		if (!cmds.isEmpty())
+		if(!cmds.isEmpty())
 			this.cmd = addBypassSettings(cmd).build().register(cmds.remove(0), cmds.toArray(new String[0]));
 	}
 
@@ -53,8 +53,8 @@ public class Feed extends CssCommand {
 		target.setFoodLevel(20);
 		target.setSaturation(10);
 		target.setExhaustion(0);
-		if (sendMessage)
-			if (!sender.equals(target)) {
+		if(sendMessage)
+			if(!sender.equals(target)) {
 				TextRenderer placeholders = renderer().placeholder("sender", sender.getName()).placeholder("target", target.getName());
 				msg(target, "other.target", placeholders);
 				msg(sender, "other.sender", placeholders);
