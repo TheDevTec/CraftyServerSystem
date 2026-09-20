@@ -9,7 +9,13 @@ import java.util.List;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.HandlerList;
+import org.bukkit.event.Listener;
+import org.bukkit.event.server.PluginEnableEvent;
+import org.bukkit.plugin.Plugin;
 
+import me.devtec.craftyserversystem.Loader;
 import me.devtec.craftyserversystem.commands.CssCommand;
 import me.devtec.shared.commands.selectors.Selector;
 import me.devtec.shared.commands.structures.CommandStructure;
@@ -22,7 +28,34 @@ import me.devtec.theapi.bukkit.gui.expansion.guis.LoopGuiCreator;
 
 public class CssGui extends CssCommand {
 
+	private Listener listener;
 	public static List<String> guisByCss = new ArrayList<>();
+
+	public static List<GuiStructure> loadGuisAfterPlugin = new ArrayList<>();
+
+	public class GuiStructure {
+		private Config config;
+		private String name;
+		private List<String> after;
+
+		public GuiStructure(Config config, String name, List<String> after) {
+			this.config = config;
+			this.name = name;
+			this.after = after;
+		}
+
+		public Config getConfig() {
+			return config;
+		}
+
+		public String getName() {
+			return name;
+		}
+
+		public List<String> getAfter() {
+			return after;
+		}
+	}
 
 	@Override
 	public void reload() {
@@ -38,6 +71,21 @@ public class CssGui extends CssCommand {
 			return;
 
 		loadGuis(new File("plugins/CraftyServerSystem/guis"), "");
+		listener = new Listener() {
+			@EventHandler
+			public void onEnable(PluginEnableEvent e) {
+				for(GuiStructure gui : new ArrayList<>(loadGuisAfterPlugin)) {
+					if(gui.getAfter().contains(e.getPlugin().getName())) {
+						gui.getAfter().remove(e.getPlugin().getName());
+						if(gui.getAfter().isEmpty()) {
+							loadGui(gui.getName(), gui.getConfig());
+							loadGuisAfterPlugin.remove(gui);
+						}
+					}
+				}
+			}
+		};
+		Bukkit.getPluginManager().registerEvents(listener, Loader.getPlugin());
 
 		CommandStructure<CommandSender> cmd = CommandStructure.create(CommandSender.class, DEFAULT_PERMS_CHECKER, (sender, structure, args) -> {
 			msgUsage(sender, "cmd");
@@ -79,6 +127,12 @@ public class CssGui extends CssCommand {
 			this.cmd = addBypassSettings(cmd).build().register(cmds.remove(0), cmds.toArray(new String[0]));
 	}
 
+	@Override
+	public void unregister() {
+		HandlerList.unregisterAll(listener);
+		super.unregister();
+	}
+
 	public void loadGuis(File folder, String prefix) {
 		if(folder.exists())
 			for(File file : folder.listFiles())
@@ -86,34 +140,54 @@ public class CssGui extends CssCommand {
 					loadGuis(file, prefix.isEmpty() ? file.getName() : prefix + "/" + file.getName());
 				else if(file.getName().endsWith(".yml")) {
 					Config config = new Config(file);
+					List<String> after = config.getStringList("loadAfter");
 					String fileName = file.getName().substring(0, file.getName().length() - 4);
 					String name = prefix.isEmpty() ? fileName : prefix + "/" + fileName;
-					guisByCss.add(name);
-					GuiCreator c = "anvil".equalsIgnoreCase(config.getString("type", "NORMAL"))
-					        ? new AnvilGuiCreator(name, config)
-					        : config.exists("loop") ? new LoopGuiCreator(name, config) : new ClassicGuiCreator(name, config);
-					c.register();
-					if(config.existsKey("command.args")) {
-						List<String> cmds = config.get("command.args") instanceof Collection ? config.getStringList("command.args") : new ArrayList<>(Arrays.asList(config.getString("command.args")));
-						CommandStructure.create(CommandSender.class, (sender, perm, tab) -> sender.hasPermission(perm), (s, str, args) -> {
-							if(s instanceof Player)
-								openMenu(s, (Player) s, c, true);
-							else
-								msgUsage(s, "cmd");
-						}).permission(config.getString("command.perm")).argument("-s", (s, str, args) -> {
-							if(s instanceof Player)
-								openMenu(s, (Player) s, c, false);
-							else
-								msgUsage(s, "cmd");
-						}).parent().selector(Selector.PLAYER, (s, str, args) -> {
-							Player player = Bukkit.getPlayer(args[0]);
-							openMenu(s, player, c, true);
-						}).permission(getPerm("other")).argument("-s", (s, str, args) -> {
-							Player player = Bukkit.getPlayer(args[0]);
-							openMenu(s, player, c, false);
-						}).build().register(cmds.remove(0), cmds.toArray(new String[0]));
+					if(!after.isEmpty()) {
+						after = new ArrayList<>(after);
+						for(Plugin plugin : Bukkit.getPluginManager().getPlugins())
+							if(after.contains(plugin.getName()) && plugin.isEnabled())
+								after.remove(plugin.getName());
+						for(String plugin : after)
+							if(Bukkit.getPluginManager().getPlugin(plugin) == null) {
+								// gui cannot be loaded!
+								Loader.getPlugin().getLogger().warning("[GUI] Gui " + name + " cannot be loaded, because missing plugin " + plugin + ", skipping.");
+								continue;
+							}
+						if(!after.isEmpty()) {
+							loadGuisAfterPlugin.add(new GuiStructure(config, name, after));
+							continue;
+						}
 					}
+					loadGui(name, config);
 				}
+	}
+
+	public void loadGui(String name, Config config) {
+		if(guisByCss.contains(name))return;
+		guisByCss.add(name);
+		GuiCreator c = "anvil".equalsIgnoreCase(config.getString("type", "NORMAL")) ? new AnvilGuiCreator(name, config)
+				: config.exists("loop") ? new LoopGuiCreator(name, config) : new ClassicGuiCreator(name, config);
+		c.register();
+		if(config.existsKey("command.args")) {
+			List<String> cmds = config.get("command.args") instanceof Collection ? config.getStringList("command.args") : new ArrayList<>(Arrays.asList(config.getString("command.args")));
+			CommandStructure.create(CommandSender.class, (sender, perm, tab) -> sender.hasPermission(perm), (s, str, args) -> {
+				if(s instanceof Player)
+					openMenu(s, (Player) s, c, true);
+				else
+					msgUsage(s, "cmd");
+			}).permission(config.getString("command.perm")).argument("-s", (s, str, args) -> {
+				if(s instanceof Player)
+					openMenu(s, (Player) s, c, false);
+				else
+					msgUsage(s, "cmd");
+			}).parent().selector(Selector.PLAYER, (s, str, args) -> {
+				Player player = Bukkit.getPlayer(args[0]);
+				openMenu(s, player, c, true);
+			}).permission(getPerm("other")).argument("-s", (s, str, args) -> {
+				Player player = Bukkit.getPlayer(args[0]);
+				openMenu(s, player, c, false);
+			}).build().register(cmds.remove(0), cmds.toArray(new String[0]));
 	}
 
 	public void openMenu(CommandSender sender, Player target, String id, boolean sendMessage) {
