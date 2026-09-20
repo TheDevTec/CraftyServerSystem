@@ -164,10 +164,11 @@ public class CssGui extends CssCommand {
 	}
 
 	public void loadGui(String name, Config config) {
-		if(guisByCss.contains(name))return;
+		if(guisByCss.contains(name))
+			return;
 		guisByCss.add(name);
 		GuiCreator c = "anvil".equalsIgnoreCase(config.getString("type", "NORMAL")) ? new AnvilGuiCreator(name, config)
-				: config.exists("loop") ? new LoopGuiCreator(name, config) : new ClassicGuiCreator(name, config);
+		        : config.exists("loop") ? new LoopGuiCreator(name, config) : new ClassicGuiCreator(name, config);
 		c.register();
 		if(config.existsKey("command.args")) {
 			List<String> cmds = config.get("command.args") instanceof Collection ? config.getStringList("command.args") : new ArrayList<>(Arrays.asList(config.getString("command.args")));
@@ -188,6 +189,7 @@ public class CssGui extends CssCommand {
 				Player player = Bukkit.getPlayer(args[0]);
 				openMenu(s, player, c, false);
 			}).build().register(cmds.remove(0), cmds.toArray(new String[0]));
+		}
 	}
 
 	public void openMenu(CommandSender sender, Player target, String id, boolean sendMessage) {
