@@ -80,6 +80,7 @@ public class UserBossBarData extends BossBarData {
 			if(!bar.canSee(player))
 				bar.addPlayer(player);
 			if(updateTitleMode != 0) {
+				bar.setText(render(getText(), renderer));
 				if(updateTitleMode != 2)
 					updateTitleMode = 0;
 			}
