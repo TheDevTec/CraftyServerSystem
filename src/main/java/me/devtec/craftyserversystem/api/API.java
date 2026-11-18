@@ -5,6 +5,7 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
@@ -45,7 +46,6 @@ import me.devtec.shared.database.SqlFieldType;
 import me.devtec.shared.dataholder.Config;
 import me.devtec.shared.mcmetrics.Metrics;
 import me.devtec.shared.placeholders.PlaceholderExpansion;
-import me.devtec.shared.sorting.SortingAPI.ComparableObject;
 import me.devtec.shared.utility.ParseUtils;
 import me.devtec.shared.utility.StringUtils;
 import me.devtec.shared.utility.StringUtils.FormatType;
@@ -216,7 +216,7 @@ public class API {
 				sqlDatabase = DatabaseAPI.openConnection(databaseType, sqlSettings);
 				// Create tables
 				if(config.getBoolean("vanish.store-in-sql"))
-					sqlDatabase.createTable("css_vanish", new Row[]{new Row("id", SqlFieldType.VARCHAR, 48)});
+					sqlDatabase.createTable("css_vanish", new Row[] { new Row("id", SqlFieldType.VARCHAR, 48) });
 			} catch(SQLException e) {
 				e.printStackTrace();
 			}
@@ -274,7 +274,7 @@ public class API {
 								if(player != null && Bukkit.getPlayer(player) != null)
 									worldGroup = css.economy.getWorldGroup(Bukkit.getPlayer(player).getWorld().getName());
 						}
-						ComparableObject<String, Double>[] comp = BalanceTop.balanceTop.get(worldGroup);
+						Entry<String, Double>[] comp = BalanceTop.balanceTop.get(worldGroup);
 						return comp != null && comp.length > pos ? comp[pos].getKey() : "-";
 					}
 					if(text.startsWith("baltop_balance_")) {
@@ -286,7 +286,7 @@ public class API {
 								if(player != null && Bukkit.getPlayer(player) != null)
 									worldGroup = css.economy.getWorldGroup(Bukkit.getPlayer(player).getWorld().getName());
 						}
-						ComparableObject<String, Double>[] comp = BalanceTop.balanceTop.get(worldGroup);
+						Entry<String, Double>[] comp = BalanceTop.balanceTop.get(worldGroup);
 						return comp != null && comp.length > pos ? hook.format(comp[pos].getValue()) : "-";
 					}
 					if("baltop_rank".equalsIgnoreCase(text) && player != null) {
@@ -298,10 +298,10 @@ public class API {
 								if(player != null && Bukkit.getPlayer(player) != null)
 									worldGroup = css.economy.getWorldGroup(Bukkit.getPlayer(player).getWorld().getName());
 						}
-						ComparableObject<String, Double>[] comp = BalanceTop.balanceTop.get(worldGroup);
+						Entry<String, Double>[] comp = BalanceTop.balanceTop.get(worldGroup);
 						if(comp != null) {
 							int pos = 1;
-							for(ComparableObject<String, Double> line : comp)
+							for(Entry<String, Double> line : comp)
 								if(line.getKey().equalsIgnoreCase(name))
 									break;
 								else
@@ -316,37 +316,37 @@ public class API {
 						return me.devtec.shared.API.getUser(player).get(text.substring(5)) + "";
 					if(text != null)
 						switch(text) {
-							case "balance" : {
+							case "balance": {
 								Player online = Bukkit.getPlayer(player);
 								return "" + API.get().getEconomyHook().getBalance(online == null ? me.devtec.shared.API.offlineCache().lookupNameById(player) : online.getName(),
 								        online == null ? null : online.getWorld().getName());
 							}
-							case "formatted_balance" : {
+							case "formatted_balance": {
 								Player online = Bukkit.getPlayer(player);
 								return API.get().getEconomyHook().format(API.get().getEconomyHook().getBalance(
 								        online == null ? me.devtec.shared.API.offlineCache().lookupNameById(player) : online.getName(), online == null ? null : online.getWorld().getName()));
 							}
-							case "vanish" : {
+							case "vanish": {
 								Player online = Bukkit.getPlayer(player);
 								return online != null ? "" + Vanish.getVanish(online) : null;
 							}
-							case "ping" : {
+							case "ping": {
 								Player online = Bukkit.getPlayer(player);
 								return online != null ? "" + BukkitLoader.getNmsProvider().getPing(online) : null;
 							}
-							case "scoreboard" : {
+							case "scoreboard": {
 								UserScoreboardData online = ScoreboardListener.data.get(player);
 								return online != null ? "" + online.isHidden() : null;
 							}
-							case "bossbar" : {
+							case "bossbar": {
 								UserBossBarData online = BossBarListener.data.get(player);
 								return online != null ? "" + online.isHidden() : null;
 							}
-							case "afk" :
+							case "afk":
 								return me.devtec.shared.API.getUser(player).getBoolean("afk") + "";
-							case "chatignore" :
+							case "chatignore":
 								return me.devtec.shared.API.getUser(player).getBoolean("css.chatignore") + "";
-							default :
+							default:
 								break;
 						}
 					return null;
@@ -365,37 +365,37 @@ public class API {
 						return me.devtec.shared.API.getUser(player).get(text.substring(5)) + "";
 					if(text != null)
 						switch(text) {
-							case "balance" : {
+							case "balance": {
 								Player online = Bukkit.getPlayer(player);
 								return "" + API.get().getEconomyHook().getBalance(online == null ? me.devtec.shared.API.offlineCache().lookupNameById(player) : online.getName(),
 								        online == null ? null : online.getWorld().getName());
 							}
-							case "formatted_balance" : {
+							case "formatted_balance": {
 								Player online = Bukkit.getPlayer(player);
 								return API.get().getEconomyHook().format(API.get().getEconomyHook().getBalance(
 								        online == null ? me.devtec.shared.API.offlineCache().lookupNameById(player) : online.getName(), online == null ? null : online.getWorld().getName()));
 							}
-							case "vanish" : {
+							case "vanish": {
 								Player online = Bukkit.getPlayer(player);
 								return online != null ? "" + Vanish.getVanish(online) : null;
 							}
-							case "ping" : {
+							case "ping": {
 								Player online = Bukkit.getPlayer(player);
 								return online != null ? "" + BukkitLoader.getNmsProvider().getPing(online) : null;
 							}
-							case "scoreboard" : {
+							case "scoreboard": {
 								UserScoreboardData online = ScoreboardListener.data.get(player);
 								return online != null ? "" + online.isHidden() : null;
 							}
-							case "bossbar" : {
+							case "bossbar": {
 								UserBossBarData online = BossBarListener.data.get(player);
 								return online != null ? "" + online.isHidden() : null;
 							}
-							case "afk" :
+							case "afk":
 								return me.devtec.shared.API.getUser(player).getBoolean("afk") + "";
-							case "chatignore" :
+							case "chatignore":
 								return me.devtec.shared.API.getUser(player).getBoolean("css.chatignore") + "";
-							default :
+							default:
 								break;
 						}
 					return null;
@@ -451,7 +451,7 @@ public class API {
 				sqlDatabase = DatabaseAPI.openConnection(databaseType, sqlSettings);
 				// Create tables
 				if(config.getBoolean("vanish.store-in-sql"))
-					sqlDatabase.createTable("css_vanish", new Row[]{new Row("id", SqlFieldType.VARCHAR, 48)});
+					sqlDatabase.createTable("css_vanish", new Row[] { new Row("id", SqlFieldType.VARCHAR, 48) });
 			} catch(SQLException e) {
 				e.printStackTrace();
 			}

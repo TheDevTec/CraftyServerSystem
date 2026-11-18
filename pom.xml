@@ -8,7 +8,7 @@
 
     <groupId>me.devtec</groupId>
     <artifactId>CraftyServerSystem</artifactId>
-    <version>1.2</version>
+    <version>1.3</version>
     <packaging>jar</packaging>
 
     <name>CraftyServerSystem</name>
@@ -62,7 +62,7 @@
         <dependency>
             <groupId>com.github.TheDevTec.TheAPI</groupId>
             <artifactId>TheAPI</artifactId>
-            <version>14.0</version>
+            <version>14.2</version>
             <scope>provided</scope>
         </dependency>
 

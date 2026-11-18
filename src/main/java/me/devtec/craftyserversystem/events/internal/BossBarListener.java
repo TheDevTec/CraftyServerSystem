@@ -38,10 +38,6 @@ public class BossBarListener implements CssListener {
 
 	public static final Map<UUID, UserBossBarData> data = new ConcurrentHashMap<>();
 
-	/*
-	 * BossBar nemá conditions, takže nám pro strukturální rebuild
-	 * stačí sledovat permission group.
-	 */
 	private final Map<UUID, String> groupStates = new ConcurrentHashMap<>();
 
 	private BossBarData global;
@@ -148,15 +144,6 @@ public class BossBarListener implements CssListener {
 		if(API.get().getPermissionHook().getClass() == LuckPermsPermissionHook.class) {
 			lpListener = new BossBarLP().register(this);
 		} else {
-			/*
-			 * Vault nemá event pro změnu group.
-			 *
-			 * Periodicky group zjistíme, ale rebuild
-			 * provedeme pouze pokud se změnila.
-			 *
-			 * Iterujeme online hráče, nikoli data.values(),
-			 * protože hráč momentálně nemusí mít žádný bossbar.
-			 */
 			taskId = new Tasker() {
 
 				@Override
@@ -171,11 +158,6 @@ public class BossBarListener implements CssListener {
 			}.runRepeating(100, 100);
 		}
 
-		/*
-		 * Běžný refresh už NEREGENERUJE strukturu.
-		 *
-		 * Pouze přepočítává placeholders text/progressu.
-		 */
 		refleshTaskId = new Tasker() {
 
 			@Override
@@ -261,20 +243,6 @@ public class BossBarListener implements CssListener {
 		return group == null ? "" : group;
 	}
 
-	/*
-	 * Zásadní pravidlo:
-	 *
-	 * BossBarData bez textu není částečná konfigurace.
-	 * Je kompletně ignorován.
-	 *
-	 * Takže například:
-	 *
-	 * group:
-	 * vip:
-	 * color: RED
-	 *
-	 * bez textu NEOVLIVNÍ globální bossbar.
-	 */
 	private boolean canUse(BossBarData bossBarData) {
 		if(bossBarData == null)
 			return false;
@@ -316,11 +284,6 @@ public class BossBarListener implements CssListener {
 					return userData;
 			}
 
-			/*
-			 * PerWorldBossBarData samotný je také BossBarData.
-			 *
-			 * Pokud nemá text, ignorujeme ho úplně.
-			 */
 			if(canUse(worldData)) {
 				hasBossBar = true;
 
@@ -357,11 +320,6 @@ public class BossBarListener implements CssListener {
 			userData.fillMissing(global);
 		}
 
-		/*
-		 * Nikde nebyl žádný BossBarData s neprázdným textem.
-		 *
-		 * Hráč tedy nemá mít žádný bossbar.
-		 */
 		return hasBossBar ? userData : null;
 	}
 
@@ -395,14 +353,6 @@ public class BossBarListener implements CssListener {
 
 		String previousGroup = groupStates.get(uuid);
 
-		/*
-		 * Group se nezměnila.
-		 *
-		 * Prefix/meta/placeholdery se mohou změnit,
-		 * ale ty řeší běžný process(placeholders).
-		 *
-		 * Není potřeba přestavovat BossBarData.
-		 */
 		if(previousGroup != null && previousGroup.equals(normalizedGroup))
 			return;
 
@@ -423,11 +373,6 @@ public class BossBarListener implements CssListener {
 			return;
 		}
 
-		/*
-		 * Nová konfigurace neobsahuje žádný použitelný bossbar.
-		 *
-		 * Starý tedy musíme fyzicky odstranit.
-		 */
 		UserBossBarData previous = data.remove(uuid);
 
 		if(previous != null)

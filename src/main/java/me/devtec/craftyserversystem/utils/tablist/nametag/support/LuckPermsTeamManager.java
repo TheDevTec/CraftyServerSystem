@@ -19,7 +19,6 @@ import me.devtec.shared.Pair;
 import me.devtec.shared.scheduler.Scheduler;
 import me.devtec.shared.scheduler.Tasker;
 import me.devtec.shared.sorting.SortingAPI;
-import me.devtec.shared.sorting.SortingAPI.ComparableObject;
 import me.devtec.theapi.bukkit.BukkitLoader;
 import me.devtec.theapi.bukkit.nms.utils.TeamUtils.CollisionRule;
 import me.devtec.theapi.bukkit.nms.utils.TeamUtils.Visibility;
@@ -129,8 +128,8 @@ public class LuckPermsTeamManager implements TeamManager {
 			weights.put(group.getName(), group.getWeight().orElse(0));
 
 		int startAt = 'a';
-		for(ComparableObject<String, Integer> entry : SortingAPI.sortByValueArray(weights, true))
-			groupAndTeamName.put(entry.getKey(), "_" + (char) startAt++);
+		for(String entry : SortingAPI.sortByValue(weights, true).keySet())
+			groupAndTeamName.put(entry, "_" + (char) startAt++);
 	}
 
 }

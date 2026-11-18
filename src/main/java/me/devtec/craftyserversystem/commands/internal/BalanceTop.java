@@ -19,7 +19,6 @@ import me.devtec.shared.commands.structures.CommandStructure;
 import me.devtec.shared.scheduler.Scheduler;
 import me.devtec.shared.scheduler.Tasker;
 import me.devtec.shared.sorting.SortingAPI;
-import me.devtec.shared.sorting.SortingAPI.ComparableObject;
 import me.devtec.shared.text.TextRenderer;
 import me.devtec.shared.utility.OfflineCache.Query;
 import me.devtec.shared.utility.ParseUtils;
@@ -27,7 +26,7 @@ import me.devtec.shared.utility.TimeUtils;
 
 public class BalanceTop extends CssCommand {
 
-	public static Map<String, ComparableObject<String, Double>[]> balanceTop = new HashMap<>();
+	public static Map<String, Entry<String, Double>[]> balanceTop = new HashMap<>();
 
 	public int task;
 	private double minimumBalanceToShow;
@@ -61,7 +60,7 @@ public class BalanceTop extends CssCommand {
 			this.cmd = addBypassSettings(cmd).build().register(cmds.remove(0), cmds.toArray(new String[0]));
 	}
 
-	public void listBalanceTop(CommandSender sender, ComparableObject<String, Double>[] comparableObjects, int page, int maxEntries) {
+	public void listBalanceTop(CommandSender sender, Entry<String, Double>[] comparableObjects, int page, int maxEntries) {
 		if(comparableObjects == null) {
 			msg(sender, "loading");
 			return;
@@ -76,7 +75,7 @@ public class BalanceTop extends CssCommand {
 		        Math.min(totalPages, page + 1));
 		msg(sender, "header", placeholders);
 		for(int i = page * maxEntries - maxEntries; i < page * maxEntries && i < comparableObjects.length; ++i) {
-			ComparableObject<String, Double> comp = comparableObjects[i];
+			Entry<String, Double> comp = comparableObjects[i];
 			msg(sender, "key", renderer().placeholder("position", i + 1).placeholder("target", comp.getKey()).placeholder("balance", hook.format(comp.getValue())));
 		}
 		msg(sender, "footer", placeholders);
@@ -129,8 +128,9 @@ public class BalanceTop extends CssCommand {
 						if(balance >= minimumBalanceToShow)
 							bal.get(entry.getKey()).put(query.getName(), balance);
 					}
+
 				for(Entry<String, Map<String, Double>> entry : bal.entrySet())
-					balanceTop.put(entry.getKey(), SortingAPI.sortByValueArray(entry.getValue(), true));
+					balanceTop.put(entry.getKey(), SortingAPI.sortByValue(entry.getValue(), true).entrySet().toArray(new Entry[0]));
 				return;
 			}
 		}
@@ -140,6 +140,6 @@ public class BalanceTop extends CssCommand {
 			if(balance >= minimumBalanceToShow)
 				bal.put(query.getName(), balance);
 		}
-		balanceTop.put("default", SortingAPI.sortByValueArray(bal, true));
+		balanceTop.put("default", SortingAPI.sortByValue(bal, true).entrySet().toArray(new Entry[0]));
 	}
 }
